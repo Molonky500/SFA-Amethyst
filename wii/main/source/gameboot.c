@@ -1,0 +1,107 @@
+#include "main.h"
+
+void bootGame() {
+    exiPrintf("game thread SP=%08X\n", get_r1());
+
+    //register interrupt handlers
+    static OSContext ctxDspAi;
+    static OSContext ctxDspAram;
+    static OSContext ctxDsp;
+    static OSContext ctxAi;
+    static OSContext ctxPiCp;
+    static OSContext ctxPiPeToken;
+    static OSContext ctxPiPeFinish;
+    static OSContext ctxPiSi;
+    static OSContext ctxPiDi;
+    static OSContext ctxPiVi;
+
+    IRQ_Request(IRQ_DSP_AI,     gameIrqHandler, &ctxDspAi);
+    IRQ_Request(IRQ_DSP_ARAM,   gameIrqHandler, &ctxDspAram);
+    IRQ_Request(IRQ_DSP_DSP,    gameIrqHandler, &ctxDsp);
+    IRQ_Request(IRQ_AI,         gameIrqHandler, &ctxAi);
+    IRQ_Request(IRQ_PI_CP,      gameIrqHandler, &ctxPiCp);
+    IRQ_Request(IRQ_PI_PETOKEN, gameIrqHandler, &ctxPiPeToken);
+    IRQ_Request(IRQ_PI_PEFINISH,gameIrqHandler, &ctxPiPeFinish);
+    IRQ_Request(IRQ_PI_SI,      gameIrqHandler, &ctxPiSi);
+    IRQ_Request(IRQ_PI_DI,      gameIrqHandler, &ctxPiDi);
+    IRQ_Request(IRQ_PI_VI,      gameIrqHandler, &ctxPiVi);
+    //_gameUnmaskInterrupts(
+    __UnmaskIrq(
+        IRQMASK(IRQ_DSP_AI) |
+        IRQMASK(IRQ_DSP_ARAM) |
+        IRQMASK(IRQ_DSP_DSP) |
+        IRQMASK(IRQ_AI) |
+        IRQMASK(IRQ_PI_CP) |
+        IRQMASK(IRQ_PI_PETOKEN) |
+        IRQMASK(IRQ_PI_PEFINISH) |
+        IRQMASK(IRQ_PI_SI) |
+        IRQMASK(IRQ_PI_DI) |
+        IRQMASK(IRQ_PI_VI));
+
+    //call the game's init methods
+    /*static const u32 initFuncs[] = {
+        0x8024C478, //video init
+        0x80049b6c, //more video init + OS arenas
+        0x8004a3d4, //setDisplayCopyFilter
+        0x80115d54, //initLoadingScreenTextures
+        0x80023f9c, //initHeaps
+        0
+    };
+
+    char msg[256];
+    strcpy(msg, "game init ........\n");
+    for(int i=0; initFuncs[i]; i++) {
+        putHex(&msg[10], i);
+        exiPuts(msg);
+        void (*game_init)(void) = (void(*)(void))initFuncs[i];
+        switchToGame();
+        game_init();
+        switchToOgc();
+    }
+    int (*setOnlyUseHeap3)(int) = (int(*)(int))0x80022d3c; */
+
+    (*(u8*)0x803dca49) = 0; //isInitialized = false
+    (*(u8*)0x803dca3d) = 0; //gameState = GAME_STATE_INIT
+    //SYS_SetArena1Lo((void*)0x803fa480);
+    //SYS_SetArena1Hi((void*)0x817ea240);
+    (*(u32*)0x80000030) = 0x803fa480;
+    (*(u32*)0x80000034) = 0x817ea240;
+
+    void (*game_init_hw)(void) = (void (*)())0x80003354;
+    exiPuts("game init hw\n");
+    switchToGame();
+    game_init_hw();
+    switchToOgc();
+
+    void (*game_init_user)(void) = (void (*)())0x80246cd4;
+    exiPuts("game init user\n");
+    switchToGame();
+    game_init_user();
+    switchToOgc();
+
+    //set_msr(get_msr() | 0x4000);
+    //int (*gameInit)(int, char**) = (int(*)(int, char**))0x80020d8c;
+    int (*gameMain)(int, char**) = (int(*)(int, char**))0x8002133c;
+    exiPuts("game main\n");
+    //u32 irq = IRQ_Disable();
+    switchToGame();
+    gameMain(0, NULL);
+    while(1);
+    /*switchToOgc();
+
+    //(*(u8*)0x803dca49) = 1; //isInitialized = true
+    //(*(u8*)0x803dca3d) = 1; //gameState = GAME_STATE_RUN
+
+    //call the game's main loop
+    exiPuts("game main\n");
+    void (*game_loop)(void) = (void (*)())0x80020c2c;
+    switchToGame();
+    while(1) {
+        game_loop();
+        //switchToOgc();
+        //exiPrintf("[%d] MSR = %08X\n", __LINE__, get_msr());
+    }*/
+
+    //tell the compiler we're not coming back from this one.
+    __builtin_unreachable();
+}

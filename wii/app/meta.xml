@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+  <name>Star Fox Adventures</name>
+  <coder>Rena Kunisaki</coder>
+  <version>1.0</version>
+  <release_date>31/12/1999</release_date>
+  <short_description>Run SFA in Wii mode.</short_description>
+  <long_description>A loader that runs Star Fox Adventures in Wii mode to take advantage of the hardware.</long_description>
+  <ahb_access/>
+</app>
