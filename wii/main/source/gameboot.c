@@ -38,28 +38,6 @@ void bootGame() {
         IRQMASK(IRQ_PI_DI) |
         IRQMASK(IRQ_PI_VI));
 
-    //call the game's init methods
-    /*static const u32 initFuncs[] = {
-        0x8024C478, //video init
-        0x80049b6c, //more video init + OS arenas
-        0x8004a3d4, //setDisplayCopyFilter
-        0x80115d54, //initLoadingScreenTextures
-        0x80023f9c, //initHeaps
-        0
-    };
-
-    char msg[256];
-    strcpy(msg, "game init ........\n");
-    for(int i=0; initFuncs[i]; i++) {
-        putHex(&msg[10], i);
-        exiPuts(msg);
-        void (*game_init)(void) = (void(*)(void))initFuncs[i];
-        switchToGame();
-        game_init();
-        switchToOgc();
-    }
-    int (*setOnlyUseHeap3)(int) = (int(*)(int))0x80022d3c; */
-
     (*(u8*)0x803dca49) = 0; //isInitialized = false
     (*(u8*)0x803dca3d) = 0; //gameState = GAME_STATE_INIT
     //SYS_SetArena1Lo((void*)0x803fa480);
@@ -87,20 +65,6 @@ void bootGame() {
     switchToGame();
     gameMain(0, NULL);
     while(1);
-    /*switchToOgc();
-
-    //(*(u8*)0x803dca49) = 1; //isInitialized = true
-    //(*(u8*)0x803dca3d) = 1; //gameState = GAME_STATE_RUN
-
-    //call the game's main loop
-    exiPuts("game main\n");
-    void (*game_loop)(void) = (void (*)())0x80020c2c;
-    switchToGame();
-    while(1) {
-        game_loop();
-        //switchToOgc();
-        //exiPrintf("[%d] MSR = %08X\n", __LINE__, get_msr());
-    }*/
 
     //tell the compiler we're not coming back from this one.
     __builtin_unreachable();

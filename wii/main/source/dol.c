@@ -1,32 +1,33 @@
 #include "main.h"
 
 void printDolHeader(DolHeader *header) {
-    printf("Sect## Offset Address  EndAddr  Size\n");
+    exiPrintf("Sect## Offset Address  EndAddr  Size\n");
     for(int i=0; i<DOL_NUM_TEXT_SECTIONS; i++) {
-        printf("text%2d %06X %08X %08X %08X\n", i,
+        exiPrintf("text%2d %06X %08X %08X %08X\n", i,
             header->textOffset[i], header->textAddr[i],
             header->textAddr[i] + header->textSize[i],
             header->textSize[i]);
     }
     for(int i=0; i<DOL_NUM_DATA_SECTIONS; i++) {
-        printf("data%2d %06X %08X %08X %08X\n", i,
+        exiPrintf("data%2d %06X %08X %08X %08X\n", i,
             header->dataOffset[i], header->dataAddr[i],
             header->dataAddr[i] + header->dataSize[i],
             header->dataSize[i]);
     }
-    printf("bss    ------ %08X %08X %08X\n", header->bssAddr,
+    exiPrintf("bss    ------ %08X %08X %08X\n", header->bssAddr,
         header->bssAddr + header->bssSize,
         header->bssSize);
-    printf("Entry  ------ %08X -------- --------\n",
+    exiPrintf("Entry  ------ %08X -------- --------\n",
         header->entryPoint);
 }
 
 void loadDol(FILE *dol, DolHeader *header) {
-    //printf("Init bss...\n");
+    printDolHeader(header);
+    exiPrintf("Init bss...\n");
     memset((void*)header->bssAddr, 0, header->bssSize);
     for(int i=0; i<DOL_NUM_TEXT_SECTIONS; i++) {
         if(header->textSize[i] > 0) {
-            //printf("Loading text%d...\n", i);
+            exiPrintf("Loading text%d...\n", i);
             if(header->textAddr[i] < 0x800031A0) {
                 //do not clobber OS globals.
                 //this chops off some of the game's boot code
