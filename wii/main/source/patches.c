@@ -214,6 +214,15 @@ void doPatches(DolHeader *header) {
         //0x80118018, 0x4E800020, //attractModeDoAudioDma
         //0x8024f784, 0x4E800020, //AIStartDMA
 
+        //memcpyToCache: don't use LC
+        //0x80022960, 0x380000FF,
+        //0x80022a04, 0x380000FF,
+        //0x80241c68, 0x4E800020,
+        //0x80241c8c, 0x4E800020,
+        //0x80241cb0, 0x4E800020,
+        //0x80241d5c, 0x4E800020,
+        //0x80241c08, 0x4E800020, //kill LCEnable
+
         //disable some thread stuff
         0x80137d28, 0x4E800020, //installBsodHandlers
         0x802406b0, 0x60000000, //OSExceptionInit
@@ -268,6 +277,10 @@ void doPatches(DolHeader *header) {
         //0x80284224, 0x4E800020, //waits for AR DMA
         //0x80284048, 0x4E800020, //waits for AR DMA
         //0x802843f0, 0x60000000, //don't wait for AR DMA
+        //0x8024fcd4, 0x4E800020, //irq_DSP
+        //0x802501a0, 0x4E800020, //__ARHandler
+        //0x8025111c, 0x4E800020, //__DSPHandler
+        //0x8024fc58, 0x4E800020, //__AISHandler
 
         //these do nothing lmao
         //0x80020c68, 0x60000000, //mainLoopAudioUpdate

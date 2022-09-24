@@ -9,15 +9,15 @@ extern void _cpu_context_restore_fp(void *);
 extern vu32 _context_switch_want;
 extern vu32 _thread_dispatch_disable_level;
 
+frame_context sctx[32];
 void gameIrqHandler(u32 irq, void *ctx) {
     //irq is the IRQ number
     //ctx is the OSContext we passed to set up this IRQ
     //switchToOgc();
     //u32 prev = IRQ_Disable();
 
-    //frame_context sctx;
-    //_cpu_context_save(&sctx);
-    //_cpu_context_save_fp(&sctx);
+    //_cpu_context_save(&sctx[irq]);
+    //_cpu_context_save_fp(&sctx[irq]);
 
     // *(vu32*)0x803dde88 = 1;
     //vu32 oldC = _context_switch_want;
@@ -46,7 +46,7 @@ void gameIrqHandler(u32 irq, void *ctx) {
     switchToOgc();
     //_context_switch_want = oldC;
     //_thread_dispatch_disable_level = oldD;
-    //_cpu_context_restore_fp(&sctx);
-    //_cpu_context_restore(&sctx);
+    //_cpu_context_restore_fp(&sctx[irq]);
+    //_cpu_context_restore(&sctx[irq]);
     //LWP_YieldThread();
 }

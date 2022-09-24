@@ -200,8 +200,8 @@ void initThreads() {
     LWP_SetThreadPriority(LWP_GetSelf(), 64);
 
     //set check-thread to low priority
-    //LWP_CreateThread(
-    //    &checkThread, checkThreadMain, NULL, NULL, 0, 1);
+    LWP_CreateThread(
+        &checkThread, checkThreadMain, NULL, NULL, 0, 1);
     exiPrintf("threads init (self=%08X)\n", (u32)LWP_GetSelf());
 }
 
@@ -276,10 +276,12 @@ void *stack2, u32 stackSize, OSPriority priority, u16 attr) {
     //LWP does also write this at the top/bottom of the stack,
     //but we don't know what the stack address will be to give
     //to the check-thread.
-
-    stack2 -= stackSize;
-    u32 *stack = (u32*)stack2;
-    stack[-stackSize/4] = 0xDEADBABE;
+    if(stack2) {
+        stack2 -= stackSize;
+        memset(stack2, 0xAAAAAAAA, stackSize);
+        u32 *stack = (u32*)stack2;
+        stack[-stackSize/4] = 0xDEADBABE;
+    }
 
     //LWP priority has higher number = higher priority
     //Dolphin has the other way around lol

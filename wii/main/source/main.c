@@ -18,13 +18,12 @@ void* loadGame(void *param) {
         char msg[1024];
         snprintf(msg, sizeof(msg), "[stage2] Error opening main.dol: %d\n", errno);
         exiPuts(msg);
-        return 1;
+        return NULL;
     }
     exiPuts("loading DOL...\n");
 
     DolHeader header;
     fread(&header, sizeof(DolHeader), 1, dol);
-    printDolHeader(&header);
     loadDol(dol, &header);
     fclose(dol);
 
@@ -58,10 +57,11 @@ int main(int argc, char **argv) {
         SYS_GetArena2Lo(), SYS_GetArena2Hi());
 
     lwp_t mainThread;
-    //u32 mainStackSize = 8192; //no idea what it should be
-    u32 mainStackSize = 65536;
+    u32 mainStackSize = 8192; //no idea what it should be
+    //u32 mainStackSize = 65536;
+    memset(0x803f8478 - mainStackSize, 0xAAAAAAAA, mainStackSize);
     LWP_CreateThread(&mainThread, loadGame, NULL,
-        NULL, //0x803f8478 - mainStackSize,
+        0x803f8478 - mainStackSize,
         mainStackSize, 8);
     void *result;
     LWP_JoinThread(mainThread, &result);

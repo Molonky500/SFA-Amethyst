@@ -2,6 +2,8 @@
 
 int _dvdDoRead(DVDFileInfo *file, void *addr, uint size);
 
+vu32 canary1 = 0xFACEB007;
+static vu32 canary3 = 0xB000B1E5;
 mutex_t dvdMsgMutex;
 lwpq_t dvdThreadQueue;
 volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
@@ -13,6 +15,8 @@ volatile HackDvdMsg msgsIn[DVD_MAX_MSGS], msgsOut[DVD_MAX_MSGS];
 int msgsInHead=0, msgsInTail=0, msgsOutHead=0, msgsOutTail=0;
 syswd_t dvdThreadAlarm;
 static u32 dvdCmdId=0;
+vu32 canary2 = 0xABADBABE;
+static vu32 canary4 = 0x2D0661E5;
 
 HackDvdOpenFile* getFileByInfo(DVDFileInfo *info) {
     for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
@@ -67,7 +71,7 @@ int sendFromDvdThread(HackDvdMsg *msg) {
     }
     //exiPrintf("sendFromDvdThread h=%d t=%d msg=%08X\n",
     //    msgsOutHead, msgsOutTail, &msgsOut[msgsOutHead]);
-    void *buf = (void*)&msgsOut[msgsInHead];
+    void *buf = (void*)&msgsOut[msgsOutHead];
     //void *buf = malloc(sizeof(HackDvdMsg));
     memcpy(buf, msg, sizeof(HackDvdMsg));
     bool r = MQ_Send(hackDvdThreadMailOut, (mqmsg_t)buf, MQ_MSG_NOBLOCK);
@@ -166,6 +170,16 @@ void dvdThreadAlarmCb(syswd_t alarm, void *arg) {
     //#if DVD_DEBUG
     //    exiPrintf("DVD alarm CB, q=%08X\n", dvdThreadQueue);
     //#endif
+    static vu32 canary5 = 0xA55FACE5;
+    if(canary1 != 0xFACEB007 || canary2 != 0xABADBABE) {
+        exiPrintf("CANARY FAIL %08X %08X\n", canary1, canary2);
+    }
+    if(canary3 != 0xB000B1E5 || canary4 != 0x2D0661E5) {
+        exiPrintf("S-CANARY FAIL %08X %08X\n", canary3, canary4);
+    }
+    if(canary5 != 0xA55FACE5) {
+        exiPrintf("L-CANARY FAIL %08X\n", canary5);
+    }
     LWP_ThreadSignal(dvdThreadQueue);
 }
 
@@ -182,12 +196,14 @@ void* hackDvdThreadMain(void *param) {
             #if DVD_DEBUG
                 exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
+            LWP_YieldThread();
             LWP_ThreadSleep(dvdThreadQueue);
             err = recvToDvdThread(&msg, MQ_MSG_NOBLOCK);
             if(!err) break;
             #if DVD_DEBUG
                 exiPuts("DVD thread awake\n");
             #endif
+            LWP_YieldThread();
         }
 
         if(err) {
@@ -227,6 +243,7 @@ void* hackDvdThreadMain(void *param) {
                     exiPrintf("DVD thread res=%d callback %08X\n",
                         r, callback);
                 #endif
+                LWP_YieldThread();
 
                 if(!msg->read.async) {
                     HackDvdMsg mRead;
@@ -314,14 +331,15 @@ void initDvdHack() {
     //wake the DVD thread up periodically
     struct timespec tStart, tPeriod;
     tStart .tv_sec  = 0;
-    tStart .tv_nsec = 10000000;
+    tStart .tv_nsec = 200000;
     tPeriod.tv_sec  = 0;
-    tPeriod.tv_nsec = 10000000;
+    tPeriod.tv_nsec = 200000;
     SYS_SetPeriodicAlarm(dvdThreadAlarm,
         &tStart, &tPeriod, dvdThreadAlarmCb, NULL);
 
     LWP_YieldThread();
-    exiPrintf("DVD thread setup OK, %08X\n", hackDvdThread);
+    exiPrintf("DVD thread setup OK, %08X, alarm=%08X\n",
+        hackDvdThread, &dvdThreadAlarm);
 }
 
 
@@ -441,6 +459,7 @@ int offset, DVDCallback callback, int prio, bool async) {
     #if DVD_DEBUG
         exiPrintf("_sendReadToDvdThread: sending...\n");
     #endif
+    LWP_YieldThread();
     //do {
         r = sendToDvdThread(&msg);
     //    LWP_YieldThread();

@@ -1,16 +1,23 @@
 #include "main.h"
-#define AUDIO_DEBUG 0
+#define AUDIO_DEBUG 1
 
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
     switchToOgc();
+    static int nDma = 0;
+    //if(nDma >= 4400) {
+    //    switchToGame();
+    //    return;
+    //}
+    nDma++;
+
     u32 count = (cntH << 16) | cntL;
     u32 mmEnd = (u32)mmaddr + count;
     u32 arEnd = (u32)araddr + count;
     bool dir  = (cntH & 0x8000); //true: ARAM -> MRAM
 
     #if AUDIO_DEBUG
-        exiPrintf("AR DMA: [%08X, %08X] %s [%08X, %08X] (len=%d)\n",
-            mmaddr, mmEnd, dir ? "<-" : "->", araddr, arEnd, count);
+        exiPrintf("AR DMA[%8d]: [%08X, %08X] %s [%08X, %08X] (len=%d)\n",
+            nDma, mmaddr, mmEnd, dir ? "<-" : "->", araddr, arEnd, count);
     #endif
 
     if(mmEnd > 0x81800000 || arEnd > 0x01000000
@@ -19,7 +26,13 @@ void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
         switchToGame();
         return;
     }
-    checkAddrInheap(mmaddr, count);
+    if(!checkAddrInheap(mmaddr, count)) {
+        exiPrintf(" for AR DMA: [%08X, %08X] %s [%08X, %08X] (len=%d) @%08X\n",
+            mmaddr, mmEnd, dir ? "<-" : "->", araddr, arEnd, count,
+            __builtin_extract_return_addr(__builtin_return_address(0)));
+        switchToGame();
+        return;
+    }
 
     u32 level = IRQ_Disable();
     AR_DMA_MMADDR_H = (AR_DMA_MMADDR_H & 0xfc00) | ((uint)mmaddr >> 0x10);
@@ -55,8 +68,10 @@ void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
 
 void AIInitDMA_hook(u32 start, uint length) {
     switchToOgc();
+    static int nDma = 0;
+    nDma++;
     #if AUDIO_DEBUG
-        exiPrintf("AI DMA %08X %08X\n", start, length);
+        exiPrintf("AI DMA[%8d] %08X %08X\n", nDma, start, length);
     #endif
     u32 level = IRQ_Disable();
     AI_DMA_START_HI = (AI_DMA_START_HI & 0xfc00) | ((ushort)((uint)start >> 0x10) & 0x03FF);
