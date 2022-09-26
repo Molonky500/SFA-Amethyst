@@ -8,5 +8,6 @@ void* mapLoadDataFileHook(MapDirIdx32 map, DataFileEnum file) {
 }
 
 void initMapHacks() {
+    if(IS_WII) return;
     hookBranch(0x80042ec4, mapLoadDataFileHook, 1);
 }

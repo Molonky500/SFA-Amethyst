@@ -328,14 +328,15 @@ class ELF:
 def main():
     args = list(sys.argv[1:])
     if len(args) < 2:
-        print("Usage: elf2bin.py buildDir outPath")
+        print("Usage: elf2patch.py elfPath binPath outPath")
         sys.exit(1)
 
-    inPath  = args.pop(0)
+    elfPath = args.pop(0)
+    binPath = args.pop(0)
     outPath = args.pop(0)
-    outBin  = open(os.path.join(outPath, 'boot.bin'),     'wb')
-    inBin   = open(os.path.join(inPath,  'bootstrap.bin'),'rb')
-    inElf   = open(os.path.join(inPath,  'src.elf'),      'rb')
+    outBin  = open(outPath, 'wb')
+    inBin   = open(binPath, 'rb')
+    inElf   = open(elfPath, 'rb')
     elf     = ELF(inElf)
 
     # copy bootstrap
@@ -388,7 +389,8 @@ def main():
     printf('[*] Entry point: 0x%08X\n', entryPoint)
 
     # write header (GOT offset, GOT size/4, entry point, bootstrap size)
-    outBin.seek(4)
+    # but skip past the first 8 words (jump, argv)
+    outBin.seek(8*4)
     outBin.write(struct.pack('>IIII',
         gotOffs+outOffs-8, # -4 for lwzu, -4 for ???
         gotSize, entryPoint+outOffs, outOffs))
@@ -408,6 +410,13 @@ def main():
 
         # align
         while outBin.tell() & 0xF: outBin.write(b'\0')
+
+    # update header to reflect actual file size
+    fileSize = outBin.tell()
+    outBin.seek(8*4)
+    outBin.write(struct.pack('>IIII',
+        gotOffs+outOffs-8, # -4 for lwzu, -4 for ???
+        gotSize, entryPoint+outOffs, fileSize))
 
     # write end of tab
     #outTab.write(struct.pack('>I', 0xFFFFFFFF))

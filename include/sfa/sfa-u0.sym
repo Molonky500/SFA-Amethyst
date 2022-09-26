@@ -88,8 +88,6 @@ _restfpr_31 = 0x802860a0; */
 /* rest are game symbols */
 activeTimerFlags = 0x803dc8f8;
 ClearArena = 0x80240400;
-DVDOpen = 0x80248b9c;
-DVDReadAsyncPrio = 0x80248eac;
 GXSetTevAlphaIn = 0x8025bff0;
 OSDisableInterrupts = 0x8024377c;
 OSPanic = 0x802428c8;
@@ -191,6 +189,18 @@ drawHudBox = 0x8012c6ac;
 drawPartialTexture = 0x80075fc8;
 drawScaledTexture = 0x8007681c;
 drawTexture = 0x8007719c;
+DVDClose = 0x80248c64;
+DVDInit = 0x802491f4;
+DVDOpen = 0x80248b9c;
+DVDRead = 0x80015850;
+DVDReadAsyncPrio = 0x80248eac;
+/* copies so that declaring them with GLOBALFN
+ * doesn't conflict with the SDK declaring them.
+ */
+_DVDClose = 0x80248c64;
+_DVDInit = 0x802491f4;
+_DVDOpen = 0x80248b9c;
+_DVDRead = 0x80015850;
 enableDebugText = 0x803dda28;
 enableRumble = 0x803dc909;
 endObjSequence = 0x80080c18;

@@ -5,7 +5,7 @@ mutex_t exiMutex;
 void exiPuts(const char *str) {
     /** Send a string to the EXI UART.
      */
-    LWP_MutexLock(exiMutex);
+    //LWP_MutexLock(exiMutex);
     u32 irq = IRQ_Disable();
 
     __attribute__ ((aligned (32))) static u8 dmaBuf[4096];
@@ -63,11 +63,11 @@ void exiPuts(const char *str) {
         len -= copyLen;
     }
     IRQ_Restore(irq);
-    LWP_MutexUnlock(exiMutex);
+    //LWP_MutexUnlock(exiMutex);
 }
 
 void exiPrintf(const char *fmt, ...) {
-    char buf[4096];
+    char buf[1024];
     va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);

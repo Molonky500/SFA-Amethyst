@@ -7,18 +7,22 @@ static vu32 game_r13 = 0x803E31E0;
 
 void switchToGame() {
     u32 irq = IRQ_Disable();
-    ogc_r2 = get_r2();
-    set_r2(game_r2);
-    ogc_r13 = get_r13();
-    set_r13(game_r13);
+    if(get_r2() != game_r2) {
+        ogc_r2 = get_r2();
+        set_r2(game_r2);
+        ogc_r13 = get_r13();
+        set_r13(game_r13);
+    }
     //set_msr(0x00009032);
     IRQ_Restore(irq);
 }
 void switchToOgc() {
     u32 irq = IRQ_Disable();
     //game ones never change, no need to save
-    set_r2(ogc_r2);
-    set_r13(ogc_r13);
+    if(get_r2() == game_r2) {
+        set_r2(ogc_r2);
+        set_r13(ogc_r13);
+    }
     //set_msr(0x0000B036);
     IRQ_Restore(irq);
 }

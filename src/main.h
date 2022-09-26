@@ -30,6 +30,12 @@
     ({ __typeof__ (n) _n = (n); \
         _n < 0 ? -_n : _n; })
 
+//if we're on Wii, MEM2 physical size isn't zero.
+//we do >= because Dolphin (and devkits, if someone were
+//insane enough to run this on one) can have more MEM2
+//than retail consoles.
+#define IS_WII (*((u32*)0x80003118) >= 0x04000000)
+
 #include "alloc.h"
 #include "args.h"
 #include "camera.h"
@@ -258,6 +264,9 @@ void textHookInit();
 //title.c
 void Amethyst_loadSaveFile(int slot);
 void titleHooksInit();
+
+//tweaks.c
+void tweaks_init();
 
 //ui.c
 bool motionBlurHook();

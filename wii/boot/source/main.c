@@ -158,7 +158,7 @@ void initGameFiles() {
      */
 
     //temp override
-    strcpy(gameRootDir, "//apps/SFA");
+    strcpy(gameRootDir, "sd:/apps/SFA");
     return;
 
     //printf("Looking for game files... (START to exit)\n");
@@ -209,6 +209,42 @@ void loadDol(FILE *dol, DolHeader *header) {
     memset((void*)header->bssAddr, 0, header->bssSize);
 }
 
+void loadGame() {
+    //load the game program itself at a fixed address.
+    //the second-stage loader can then copy it to the
+    //appropriate memory and boot it without needing
+    //to init libfat.
+    char path[4096];
+    snprintf(path, sizeof(path), "%s/sys/main.dol", gameRootDir);
+    FILE *file = fopen(path, "rb");
+    if(!file) {
+        initVideo();
+        printf("[stage1] Error opening %s: %d\n", path, errno);
+        quit(NULL);
+    }
+    fseek(file, 0, SEEK_END);
+    u32 size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    //this address will later be used by the game as ARAM.
+    //that means the loader isn't using it at all and it
+    //won't go to waste storing a copy of the DOL.
+    //ARAM is 16MB and the DOL is < 4MB so this works out.
+    void *dest = (void*)0x90000000;
+    int r = 0;
+    u32 offset = 0;
+    while(offset < size) {
+        r = fread(dest, 1, size-offset, file);
+        if(r < 0) {
+            initVideo();
+            printf("[stage1] Error reading %s: %d\n", path, errno);
+            quit(NULL);
+        }
+        offset += r;
+        dest += r;
+    }
+}
+
 __attribute__((noreturn)) void loadAppDol() {
     /** Load the second stage bootloader DOL.
      */
@@ -217,7 +253,7 @@ __attribute__((noreturn)) void loadAppDol() {
     FILE *dol = fopen(path, "rb");
     if(!dol) {
         initVideo();
-        printf("[stage1] Error opening main.dol: %d\n", errno);
+        printf("[stage1] Error opening %s: %d\n", path, errno);
         quit(NULL);
     }
 
@@ -241,6 +277,13 @@ __attribute__((noreturn)) void loadAppDol() {
             }
         }
     }
+
+    loadGame();
+    fatUnmount("sd");
+    //delay to let SD tidy itself up
+    u64 then = SYS_Time() + 10000000;
+    while(SYS_Time() < then);
+    __IOS_ShutdownSubsystems();
 
     //for(int i=0; i<120; i++) VIDEO_WaitVSync();
     exiPrintf("Exec...\n");

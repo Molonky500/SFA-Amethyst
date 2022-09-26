@@ -1,52 +1,49 @@
 #include "main.h"
 
-extern void _cpu_context_switch(void *,void *);
-extern void _cpu_context_switch_ex(void *,void *);
-extern void _cpu_context_save(void *);
-extern void _cpu_context_restore(void *);
-extern void _cpu_context_save_fp(void *);
-extern void _cpu_context_restore_fp(void *);
-extern vu32 _context_switch_want;
-extern vu32 _thread_dispatch_disable_level;
+u32 (*__OSSetExceptionHandler)(u32 exception, void *handler) = 0x80240bc4;
 
-frame_context sctx[32];
-void gameIrqHandler(u32 irq, void *ctx) {
-    //irq is the IRQ number
-    //ctx is the OSContext we passed to set up this IRQ
-    //switchToOgc();
-    //u32 prev = IRQ_Disable();
+void OSExceptionInit_hook() {
+    //we repurpose the memory for some unused handlers
+    //to store our trampolines and such, so we disable
+    //the game's original method and install them ourselves.
+    exiPrintf("%s\n", __FUNCTION__);
 
-    //_cpu_context_save(&sctx[irq]);
-    //_cpu_context_save_fp(&sctx[irq]);
+    static const void *excAddrs[] = {
+        (void*)0xFFFFFFFF, //(void*)0x80000100, //reset (not connected)
+        (void*)0xFFFFFFFF, //(void*)0x80000200, //machine check
+        (void*)0x80000300, //DSI
+        (void*)0x80000400, //ISI
+        (void*)0x80000500, //External interrupt
+        (void*)0xFFFFFFFF, //(void*)0x80000600, //alignment
+        (void*)0xFFFFFFFF, //(void*)0x80000700, //program
+        (void*)0x80000800, //FPU Unavailable
+        (void*)0x80000900, //decrementer
+        (void*)0x80000C00, //syscall
+        (void*)0xFFFFFFFF, //(void*)0x80000D00, //trace
+        (void*)0x80000F00, //perfmon
+        (void*)0x80001300, //IABR
+        (void*)0xFFFFFFFF, //(void*)0x80001400, //reserved
+        (void*)0x80001700, //thermal
+        (void*)0
+    };
+    for(int i=0; excAddrs[i]; i++) {
+        if(excAddrs[i] == (void*)0xFFFFFFFF) continue;
+        memcpy(excAddrs[i], 0x80240bf4, 0x98);
+        //patch in exception code.
+        //this is actually how the game does this.
+        u32 *patch = (u32*)excAddrs[i];
+        patch[0x1A] = 0x38600000 | i;
+        //patch out debugger hook
+        patch[0x16] = 0x60000000;
+    }
 
-    // *(vu32*)0x803dde88 = 1;
-    //vu32 oldC = _context_switch_want;
-    //_context_switch_want = 0;
-    //vu32 oldD = _thread_dispatch_disable_level;
-    //_thread_dispatch_disable_level = 1;
-    static u32 *handlers = (u32*)0x80003040;
-    void (*handler)(int, OSContext*) =
-    (void (*)(int, OSContext*))handlers[irq];
+    for(int exception = 0; exception < 0xf; exception = exception + 1) {
+        //80240c90 = OSDefaultExceptionHandler
+        __OSSetExceptionHandler(exception,(void*)0x80240c90);
+    }
 
-    //if(irq == 17) { //GX CP
-    /*if(irq != 24) { //VI
-        char msg[1024];
-        strcpy(msg, "game irq ........ => ........ th ........\n");
-        putHex(&msg[ 9], irq);
-        putHex(&msg[21], (u32)handler);
-        putHex(&msg[33], (u32)LWP_GetSelf());
-        exiPuts(msg);
-    }*/
+    DCInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
+    ICInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
 
-    //call game's original handler
-    switchToGame();
-    //IRQ_Restore(prev);
-    if(handler) handler(irq, (OSContext*)ctx);
-
-    switchToOgc();
-    //_context_switch_want = oldC;
-    //_thread_dispatch_disable_level = oldD;
-    //_cpu_context_restore_fp(&sctx[irq]);
-    //_cpu_context_restore(&sctx[irq]);
-    //LWP_YieldThread();
+    exiPrintf("%s done\n", __FUNCTION__);
 }

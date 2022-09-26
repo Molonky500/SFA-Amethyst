@@ -10,8 +10,8 @@ int titleSaveLoadHook(int slot);
 void Amethyst_loadSaveFile(int slot) {
     //free some memory. XXX does this actually do any good?
     //mapUnload(0x3D, 0x2000);
-    mapUnload(0, 0x80000000); //unload all
-    waitNextFrame();
+    //mapUnload(0, 0x80000000); //unload all
+    //waitNextFrame();
 
     //ensure text is loaded properly
     gameTextLoadDir(GAMETEXT_DIR_Link);

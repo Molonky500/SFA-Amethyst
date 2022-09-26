@@ -2,324 +2,698 @@
 elf2dol /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.dol
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/irq.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c -o irq.o 
-powerpc-eabi-gcc  alloc.o audio.o dol.o dvd.o exception.o exi.o gameboot.o init.o irq.o main.o patches.o thread.o common.o exceptionRaw.o -L../lib -g -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -Wl,-Map,main.elf.map -Wl,--section-start,.stub=0x91000000 -Wl,--section-start,.sbss=0x91400000 -Wl,--section-start,.init=0x91800000 -Wl,--section-start,.data=0x91C00000 -L/opt/devkitpro/libogc/lib/wii  -lfatx -logcx -o /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.elf
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/alloc.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c -o alloc.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/audio.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audio.c -o audio.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audio.c: In function 'ARStartDMA_hook':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audio.c:39:52: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+   39 |     AR_DMA_MMADDR_L = (AR_DMA_MMADDR_L & 0x001f) | (ushort)mmaddr;
+      |                                                    ^
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/debugprint.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/debugprint.c -o debugprint.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dol.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dol.c -o dol.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dvd.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvd.c -o dvd.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvd.c: In function 'initDvdHack':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvd.c:7:9: warning: unused variable 'r' [-Wunused-variable]
+    7 |     int r;
+      |         ^
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dvdhook.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c -o dvdhook.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c: In function 'DVDReadAsyncPrio_hook':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c:139:25: warning: assignment to 'DVDCBCallback' {aka 'void (*)(int,  DVDCommandBlock *)'} from incompatible pointer type 'DVDCallback' {aka 'void (*)(int,  void *)'} [-Wincompatible-pointer-types]
+  139 |     (info->cb).callback = callback;
+      |                         ^
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dvdio.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdio.c -o dvdio.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dvdthread.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdthread.c -o dvdthread.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/exception.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/exception.c -o exception.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/exi.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/exi.c -o exi.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/gameboot.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gameboot.c -o gameboot.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gameboot.c: In function 'bootGame':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gameboot.c:70:9: warning: unused variable 'irq' [-Wunused-variable]
+   70 |     u32 irq = IRQ_Disable();
+      |         ^~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/init.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/init.c -o init.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/irq.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c -o irq.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c:3:64: warning: initialization of 'u32 (*)(u32,  void *)' {aka 'unsigned int (*)(unsigned int,  void *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    3 | u32 (*__OSSetExceptionHandler)(u32 exception, void *handler) = 0x80240bc4;
+      |                                                                ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c: In function 'OSExceptionInit_hook':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c:31:24: warning: passing argument 1 of 'memcpy' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   31 |         memcpy(excAddrs[i], 0x80240bf4, 0x98);
+      |                ~~~~~~~~^~~
+In file included from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/main.h:5,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c:1:
+/opt/devkitpro/devkitPPC/powerpc-eabi/include/string.h:31:18: note: expected 'void * restrict' but argument is of type 'const void *'
+   31 | void *   memcpy (void *__restrict, const void *__restrict, size_t);
+      |                  ^
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c:31:29: warning: passing argument 2 of 'memcpy' makes pointer from integer without a cast [-Wint-conversion]
+   31 |         memcpy(excAddrs[i], 0x80240bf4, 0x98);
+      |                             ^~~~~~~~~~
+      |                             |
+      |                             unsigned int
+/opt/devkitpro/devkitPPC/powerpc-eabi/include/string.h:31:36: note: expected 'const void * restrict' but argument is of type 'unsigned int'
+   31 | void *   memcpy (void *__restrict, const void *__restrict, size_t);
+      |                                    ^
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/main.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/main.c -o main.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/osalarm.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/osalarm.c -o osalarm.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/osalarm.c:3:41: warning: initialization of 'void (*)(OSAlarm *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    3 | void (*OSCreateAlarm)(OSAlarm *alarm) = 0x80240d80;
+      |                                         ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/osalarm.c:6:43: warning: initialization of 'void (*)(OSAlarm *, OSTime,  void (*)(OSAlarm *, OSContext *))' {aka 'void (*)(OSAlarm *, long long int,  void (*)(OSAlarm *, OSContext *))'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    6 |                 OSAlarmHandler handler) = 0x80240fdc;
+      |                                           ^~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/osfont.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/osfont.c -o osfont.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/patches.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/patches.c -o patches.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/thread.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c -o thread.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:11:29: warning: initialization of 'BOOL (*)(OSThread *, void * (*)(void *), void *, void *, u32,  OSPriority,  u16)' {aka 'unsigned int (*)(OSThread *, void * (*)(void *), void *, void *, unsigned int,  int,  short unsigned int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   11 |     u16        attribute) = 0x802462a8;
+      |                             ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:12:43: warning: initialization of 's32 (*)(OSThread *)' {aka 'int (*)(OSThread *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   12 | s32 (*OSResumeThread)(OSThread* thread) = 0x80246668;
+      |                                           ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:13:44: warning: initialization of 's32 (*)(OSThread *)' {aka 'int (*)(OSThread *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   13 | s32 (*OSSuspendThread)(OSThread* thread) = 0x802468f0;
+      |                                            ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:14:41: warning: initialization of 'OSThread * (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   14 | OSThread* (*OSGetCurrentThread)(void) = 0x80245d88;
+      |                                         ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:15:70: warning: initialization of 'BOOL (*)(OSThread *, OSPriority)' {aka 'unsigned int (*)(OSThread *, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   15 | BOOL (*OSSetThreadPriority)(OSThread* thread, OSPriority priority) = 0x80245eb8;
+      |                                                                      ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:16:30: warning: initialization of 'void (*)(BOOL)' {aka 'void (*)(unsigned int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   16 | void (*SelectThread)(BOOL) = 0x80246078;
+      |                              ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:17:31: warning: initialization of 'void (*)(int)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   17 | void (*__OSReschedule)(int) = 0x80246278;
+      |                               ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:18:47: warning: initialization of 'void (*)(OSThreadQueue *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   18 | void (*OSSleepThread)(OSThreadQueue* queue) = 0x80246a60;
+      |                                               ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:19:48: warning: initialization of 'void (*)(OSThreadQueue *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   19 | void (*OSWakeupThread)(OSThreadQueue* queue) = 0x80246b4c;
+      |                                                ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:20:51: warning: initialization of 'void (*)(OSThreadQueue *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   20 | void (*OSInitThreadQueue)(OSThreadQueue* queue) = 0x80245d78;
+      |                                                   ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:21:36: warning: initialization of 'int (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   21 | int (*OSDisableInterrupts)(void) = 0x8024377c;
+      |                                    ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:22:35: warning: initialization of 'int (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   22 | int (*OSEnableInterrupts)(void) = 0x80243790;
+      |                                   ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c:23:35: warning: initialization of 'int (*)(int)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   23 | int (*OSRestoreInterrupts)(int) = 0x802437a4;
+      |                                   ^~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/threadmsg.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/threadmsg.c -o threadmsg.o
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/threadmsg.c:6:33: warning: initialization of 'void (*)(OSMessageQueue *, void **, s32)' {aka 'void (*)(OSMessageQueue *, void **, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    6 |     s32             msgCount) = 0x80244000;
+      |                                 ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/threadmsg.c:10:30: warning: initialization of 'BOOL (*)(OSMessageQueue *, void *, s32)' {aka 'unsigned int (*)(OSMessageQueue *, void *, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   10 |     s32             flags) = 0x80244060;
+      |                              ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/threadmsg.c:18:30: warning: initialization of 'BOOL (*)(OSMessageQueue *, void **, s32)' {aka 'unsigned int (*)(OSMessageQueue *, void **, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   18 |     s32             flags) = 0x80244128;
+      |                              ^~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/common.d -x assembler-with-cpp  -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/common.s -o common.o
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/exceptionRaw.d -x assembler-with-cpp  -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/exceptionRaw.s -o exceptionRaw.o
+powerpc-eabi-gcc  alloc.o audio.o debugprint.o dol.o dvd.o dvdhook.o dvdio.o dvdthread.o exception.o exi.o gameboot.o init.o irq.o main.o osalarm.o osfont.o patches.o thread.o threadmsg.o common.o exceptionRaw.o -L../lib -g -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -Wl,-Map,main.elf.map -Wl,--section-start,.stub=0x91000000 -Wl,--section-start,.sbss=0x91400000 -Wl,--section-start,.init=0x91800000 -Wl,--section-start,.data=0x91C00000 -L/opt/devkitpro/libogc/lib/wii  -lfatx -logcx -o /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.elf
 elf2dol /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.elf /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.dol
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.056: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.739: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.057: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.740: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.057: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.740: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.057: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.740: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.058: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.741: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.058: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.741: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.059: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.742: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.059: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.742: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.059: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.742: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.059: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.743: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.062: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.746: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.062: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.746: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.062: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.746: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.062: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.746: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.063: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.746: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.063: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.746: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.063: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.747: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.064: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.747: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.064: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.747: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:22231): Gtk-WARNING **: 22:49:06.064: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:3350): Gtk-WARNING **: 11:35:47.747: Unable to locate theme engine in module_path: "murrine",
 QApplication: invalid style override 'gtk' passed, ignoring it.
 	Available styles: bb10dark, bb10bright, cleanlooks, gtk2, cde, motif, plastique, Windows, Fusion
-49:06:091 Common/FileUtil.cpp:923 I[COMMON]: CreateSysDirectoryPath: Setting to /usr/local/share/dolphin-emu/sys/
-49:06:097 DolphinQt/Translation.cpp:152 W[COMMON]: Error reading MO file '/usr/local/share/dolphin-emu//../locale/en_CA/LC_MESSAGES/dolphin-emu.mo'
-49:06:124 InputCommon/ControllerInterface/evdev/evdev.cpp:294 N[CI]: evdev hotplug thread started
-49:06:156 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
-49:06:163 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
-49:06:272 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
-49:06:349 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
-49:06:751 Core/ConfigManager.cpp:178 N[CORE]: Active title: 
-49:06:753 Core/Core.cpp:1027 N[COMMON]: Want determinism <- false
-49:06:755 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
-49:06:757 Core/Core.cpp:237 I[BOOT]: Starting core = Wii mode
-49:06:757 Core/Core.cpp:238 I[BOOT]: CPU Thread separate = No
-49:08:071 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
-49:08:078 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
-49:08:155 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELS01.png: server replied with code 404
-49:08:195 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
-49:08:239 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
-49:08:290 Common/FatFsUtil.cpp:417 I[COMMON]: Starting SD card conversion from folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/ to file /home/rena/.local/share/dolphin-emu/Wii/sd.raw
-49:08:723 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELSAB.png: server replied with code 404
-49:09:317 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELS01.png: server replied with code 404
-49:09:682 Common/FatFsUtil.cpp:510 I[COMMON]: Successfully packed folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/ to SD image at /home/rena/.local/share/dolphin-emu/Wii/sd.raw
-49:09:699 AudioCommon/Mixer.cpp:41 I[AI]: Mixer is initialized
-49:09:699 AudioCommon/PulseAudioStream.cpp:26 N[Audio]: PulseAudio backend using 2 channels
-49:09:701 AudioCommon/PulseAudioStream.cpp:131 I[Audio]: Pulse successfully initialized
-49:09:706 Core/HW/GCMemcard/GCMemcardRaw.cpp:51 I[EXI]: Reading memory card /home/rena/.local/share/dolphin-emu/GC/MemoryCardA.USA.raw
-49:09:715 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 0 to type 1 (notify software: true)
-49:09:715 Core/HW/GCMemcard/GCIFile.cpp:22 I[EXI]: Reading header from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
-49:09:715 Core/HW/GCMemcard/GCIFile.cpp:43 I[EXI]: Reading savedata from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
-49:09:715 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 1, device 0 to type 8 (notify software: true)
-49:09:716 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Shift JIS font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
-49:09:716 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Windows-1252 font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
-49:09:716 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 1 to type 2 (notify software: true)
-49:09:717 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 2 to type 5 (notify software: true)
-49:09:717 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 2, device 0 to type 3 (notify software: true)
-49:09:760 Core/HW/Memmap.cpp:320 I[MI]: Memory system initialized. RAM at 0x7f51078bb000
-49:09:921 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/JA/PCSJ01.png: server replied with code 404
-49:10:484 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELSAB.png: server replied with code 404
-49:10:597 Core/Boot/Boot.cpp:538 N[BOOT]: Booting from executable: ./app/boot.dol
-49:10:603 Core/Boot/Boot_BS2Emu.cpp:394 I[BOOT]: Using serial number: 216174744
-49:10:603 Core/Boot/Boot_BS2Emu.cpp:418 I[BOOT]: Setup Wii Memory...
-49:10:629 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 83900000 82000000
-49:10:633 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 80001fff 0
-49:10:634 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 80001fff 0
-49:10:637 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 c0001fff 0
-49:10:639 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 90001fff 0
-49:10:640 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 90001fff 0
-49:10:641 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 d0001fff 0
-49:10:643 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 0 80001fff
-49:10:644 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 0 80001fff
-49:10:645 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 0 90001fff
-49:10:647 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 0 90001fff
-49:10:648 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 0 c0001fff
-49:10:651 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 0 d0001fff
-49:10:657 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 82000000 83900000
-49:10:787 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
-
-49:10:946 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  Size
-
-49:10:961 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 0 000100 91800000 0003AA80
-
-49:10:962 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 1 000000 00000000 00000000
-
-49:10:962 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 2 000000 00000000 00000000
-
-49:10:963 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 3 000000 00000000 00000000
-
-49:10:963 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 4 000000 00000000 00000000
-
-49:10:963 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 5 000000 00000000 00000000
-
-49:10:963 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 6 000000 00000000 00000000
-
-49:10:963 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 0 03AB80 9183AA80 003D2A60
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 1 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 2 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 3 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 4 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 5 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 6 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 7 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 8 000000 00000000 00000000
-
-49:10:964 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 9 000000 00000000 00000000
-
-49:10:967 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data10 000000 00000000 00000000
-
-49:10:967 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: bss    ------ 91400000 000295C0
-
-49:10:968 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Entry  ------ 91800000 ------
-
-49:10:969 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
-
-49:10:988 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data0...
-
-49:11:001 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
-
-49:11:121 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Exec...
-
-49:11:126 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 83900000 82000000
-49:11:130 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 80001fff 0
-49:11:132 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 80001fff 0
-49:11:134 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 c0001fff 0
-49:11:136 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 90001fff 0
-49:11:137 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 90001fff 0
-49:11:138 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 d0001fff 0
-49:11:139 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 0 80001fff
-49:11:140 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 0 80001fff
-49:11:141 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 0 90001fff
-49:11:142 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 0 90001fff
-49:11:143 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 0 c0001fff
-49:11:145 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 0 d0001fff
-49:11:152 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 82000000 83900000
-49:11:286 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
-
-49:11:396 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: game loader start; arenas = 92100000 - 92100000, 921528C0 - 92FFB7E0
-
-49:11:400 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Main thread running
-
-49:11:403 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: addDolphinThread(803AD848, 00010002) q=00000000
-
-49:11:409 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: addDolphinThread(803AD848, 00010002) OK (0)
-
-49:11:413 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: threads init (self=00010002)
-
-49:11:431 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Check-thread online
-
-49:11:460 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loading DOL...
-
-49:11:474 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  EndAddr  Size
-
-49:11:478 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 0 000100 80003100 80005620 00002520
-
-49:11:479 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 1 002620 800066E0 802C1880 002BB1A0
-
-49:11:479 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 2 000000 00000000 00000000 00000000
-
-49:11:479 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 3 000000 00000000 00000000 00000000
-
-49:11:480 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 4 000000 00000000 00000000 00000000
-
-49:11:480 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 5 000000 00000000 00000000 00000000
-
-49:11:480 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 6 000000 00000000 00000000 00000000
-
-49:11:480 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 0 2BD7C0 80005620 80005CC0 000006A0
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 1 2BDE60 80005CC0 800066E0 00000A20
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 2 2BE880 802C1880 802C18A0 00000020
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 3 2BE8A0 802C18A0 802C18C0 00000020
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 4 2BE8C0 802C18C0 802C2D60 000014A0
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 5 2BFD60 802C2D60 80335840 00072AE0
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 6 332840 803DB1E0 803DC7A0 000015C0
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 7 333E00 803DE500 803E8440 00009F40
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 8 000000 00000000 00000000 00000000
-
-49:11:481 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 9 000000 00000000 00000000 00000000
-
-49:11:484 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data10 000000 00000000 00000000 00000000
-
-49:11:484 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: bss    ------ 80335840 803E8478 000B2C38
-
-49:11:485 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Entry  ------ 80003140 -------- --------
-
-49:11:486 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
-
-49:11:487 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
-
-49:11:503 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text1...
-
-49:11:527 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: apply patches
-
-49:11:529 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8007D6DC (bl=0)
-
-49:11:530 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802510CC (bl=0)
-
-49:11:530 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80246A60 (bl=0)
-
-49:11:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 801175E4 -> 80000200 op 4812ECC5 -> 4BEE8C1D (bl=1)
-
-49:11:532 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80117614 -> 80000210 op 4812EC95 -> 4BEE8BFD (bl=1)
-
-49:11:532 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 801196C0 -> 80000220 op 4812CBE9 -> 4BEE6B61 (bl=1)
-
-49:11:532 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80119B98 -> 80000230 op 4812C711 -> 4BEE6699 (bl=1)
-
-49:11:533 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80119BC8 -> 80000240 op 4812C6E1 -> 4BEE6679 (bl=1)
-
-49:11:533 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80137DE0 -> 80000250 op 4810E4C9 -> 4BEC8471 (bl=1)
-
-49:11:534 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802464AC (bl=0)
-
-49:11:534 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80246668 (bl=0)
-
-49:11:535 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802468F0 (bl=0)
-
-49:11:535 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80246B4C (bl=0)
-
-49:11:536 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80245D88 (bl=0)
-
-49:11:536 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80246078 (bl=0)
-
-49:11:537 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80245D78 (bl=0)
-
-49:11:537 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80244000 (bl=0)
-
-49:11:538 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80244060 (bl=0)
-
-49:11:538 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80244128 (bl=0)
-
-49:11:538 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243B44 (bl=0)
-
-49:11:539 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243BCC (bl=0)
-
-49:11:539 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248B9C (bl=0)
-
-49:11:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80015850 (bl=0)
-
-49:11:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248F9C (bl=0)
-
-49:11:541 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248C64 (bl=0)
-
-49:11:541 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248EAC (bl=0)
-
-49:11:542 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802490D8 (bl=0)
-
-49:11:542 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024AFD8 (bl=0)
-
-49:11:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80242F20 (bl=0)
-
-49:11:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024363C (bl=0)
-
-49:11:544 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243338 (bl=0)
-
-49:11:544 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024FFE4 (bl=0)
-
-49:11:544 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024F6FC (bl=0)
-
-49:11:545 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: init DVD
-
-49:11:555 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: hackDvdThread=91400020 hackDvdThreadMailIn=9140001C hackDvdThreadMailOut=91400018 msgsIn=9140D0CC msgsOut=914040CC msgsInHead=91400014DVD thread setup OK, 00010004, alarm=91400004
-
-49:11:555 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: call init
-
-49:11:556 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: game thread SP=803F7C28
-
-49:13:990 Core/Core.cpp:282 I[CONSOLE]: Stop [Main Thread]		---- Shutting down ----
-49:13:990 Core/Core.cpp:285 I[CONSOLE]: Stop [Main Thread 0]	Stop CPU
-49:13:990 Core/Core.cpp:643 I[CONSOLE]: Stop [Main Thread 0]	Stopping GDB ...
-49:13:990 Core/Core.cpp:645 I[CONSOLE]: Stop [Main Thread 0]	GDB stopped.
-49:14:029 Core/Core.cpp:519 I[CONSOLE]: Stop [Video Thread 0]	Shutting down HW
-49:14:108 Core/HW/Memmap.cpp:485 I[MI]: Memory system shut down.
-49:14:113 Core/HW/GCMemcard/GCMemcardDirectory.cpp:676 I[EXI]: Flushing savedata to disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
-49:14:114 Core/Core.cpp:521 I[CONSOLE]: Stop [Video Thread 0]	HW shutdown
-49:14:122 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
-49:14:151 AudioCommon/AudioCommon.cpp:88 I[Audio]: Shutting down sound stream
-49:14:154 AudioCommon/AudioCommon.cpp:96 I[Audio]: Done shutting down sound stream
-49:14:155 Common/FatFsUtil.cpp:676 I[COMMON]: Starting SD card conversion from file /home/rena/.local/share/dolphin-emu/Wii/sd.raw to folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/
-49:15:104 Common/FatFsUtil.cpp:740 I[COMMON]: Successfully unpacked SD image /home/rena/.local/share/dolphin-emu/Wii/sd.raw to /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/
-49:15:104 Core/Core.cpp:462 I[CONSOLE]: Stop		---- Shutdown complete ----
-49:15:345 InputCommon/ControllerInterface/evdev/evdev.cpp:356 N[CI]: evdev hotplug thread stopped
+35:47:774 Common/FileUtil.cpp:923 I[COMMON]: CreateSysDirectoryPath: Setting to /usr/local/share/dolphin-emu/sys/
+35:47:780 DolphinQt/Translation.cpp:152 W[COMMON]: Error reading MO file '/usr/local/share/dolphin-emu//../locale/en_CA/LC_MESSAGES/dolphin-emu.mo'
+35:47:807 InputCommon/ControllerInterface/evdev/evdev.cpp:294 N[CI]: evdev hotplug thread started
+35:47:840 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+35:47:846 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
+35:47:985 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
+35:48:063 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+35:48:214 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:48:423 Core/ConfigManager.cpp:178 N[CORE]: Active title:
+35:48:424 Core/Core.cpp:1027 N[COMMON]: Want determinism <- false
+35:48:424 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:48:426 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+35:48:427 Core/Core.cpp:237 I[BOOT]: Starting core = Wii mode
+35:48:427 Core/Core.cpp:238 I[BOOT]: CPU Thread separate = No
+35:49:678 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+35:49:684 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
+35:49:752 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELS01.png: server replied with code 404
+35:49:835 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
+35:49:896 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+35:49:954 Common/FatFsUtil.cpp:417 I[COMMON]: Starting SD card conversion from folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/ to file /home/rena/.local/share/dolphin-emu/Wii/sd.raw
+35:50:330 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELSAB.png: server replied with code 404
+35:50:903 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELS01.png: server replied with code 404
+35:51:308 Common/FatFsUtil.cpp:510 I[COMMON]: Successfully packed folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/ to SD image at /home/rena/.local/share/dolphin-emu/Wii/sd.raw
+35:51:326 AudioCommon/Mixer.cpp:41 I[AI]: Mixer is initialized
+35:51:326 AudioCommon/PulseAudioStream.cpp:26 N[Audio]: PulseAudio backend using 2 channels
+35:51:327 AudioCommon/PulseAudioStream.cpp:131 I[Audio]: Pulse successfully initialized
+35:51:334 Core/HW/GCMemcard/GCMemcardRaw.cpp:51 I[EXI]: Reading memory card /home/rena/.local/share/dolphin-emu/GC/MemoryCardA.USA.raw
+35:51:344 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 0 to type 1 (notify software: true)
+35:51:344 Core/HW/GCMemcard/GCIFile.cpp:22 I[EXI]: Reading header from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+35:51:344 Core/HW/GCMemcard/GCIFile.cpp:43 I[EXI]: Reading savedata from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+35:51:345 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 1, device 0 to type 8 (notify software: true)
+35:51:346 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Shift JIS font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+35:51:346 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Windows-1252 font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+35:51:346 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 1 to type 2 (notify software: true)
+35:51:346 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 2 to type 5 (notify software: true)
+35:51:346 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 2, device 0 to type 3 (notify software: true)
+35:51:395 Core/HW/Memmap.cpp:320 I[MI]: Memory system initialized. RAM at 0x7f3560bfe000
+35:51:403 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:51:403 Core/IOS/IOS.cpp:296 I[IOS]: Starting IOS 0000000100000050
+35:51:525 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/JA/PCSJ01.png: server replied with code 404
+35:52:094 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELSAB.png: server replied with code 404
+35:52:234 Core/Boot/Boot.cpp:538 N[BOOT]: Booting from executable: ./app/boot.dol
+35:52:240 Core/Boot/Boot_BS2Emu.cpp:394 I[BOOT]: Using serial number: 216174744
+35:52:240 Core/Boot/Boot_BS2Emu.cpp:418 I[BOOT]: Setup Wii Memory...
+35:52:240 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:52:240 Core/IOS/IOS.cpp:296 I[IOS]: Starting IOS 000000010000003a
+35:52:266 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 83900000 82000000
+35:52:270 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 80001fff 0
+35:52:271 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 80001fff 0
+35:52:274 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 c0001fff 0
+35:52:276 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 90001fff 0
+35:52:277 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 90001fff 0
+35:52:279 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 d0001fff 0
+35:52:280 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 0 80001fff
+35:52:281 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 0 80001fff
+35:52:283 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 0 90001fff
+35:52:285 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 0 90001fff
+35:52:287 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 0 c0001fff
+35:52:289 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 0 d0001fff
+35:52:295 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 82000000 83900000
+35:52:400 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/es (mode 0, fd 0)
+35:52:401 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/stm/immediate (mode 0, fd 1)
+35:52:402 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/stm/eventhook (mode 0, fd 2)
+35:52:405 Core/IOS/IOS.cpp:606 I[IOS]: Opening /shared2/sys/SYSCONF (mode 1, fd 3)
+35:52:411 Core/IOS/IOS.cpp:606 I[IOS]: Opening /title/00000001/00000002/data/setting.txt (mode 1, fd 3)
+35:52:420 Core/IOS/IOS.cpp:606 I[IOS]: Opening /title/00000001/00000002/data/state.dat (mode 1, fd 3)
+35:52:421 Core/IOS/IOS.cpp:606 I[IOS]: Opening /shared2/sys/NANDBOOTINFO (mode 1, fd 3)
+35:52:429 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
+
+35:52:432 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/sdio/slot0 (mode 1, fd 3)
+35:52:434 Core/IOS/SDIO/SDIOSlot0.cpp:407 I[IOS_SD]: IOCTL_RESETCARD
+35:52:435 Core/IOS/SDIO/SDIOSlot0.cpp:474 I[IOS_SD]: IOCTL_GETSTATUS. Replying that SDHC card is inserted and initialized
+35:52:435 Core/IOS/SDIO/SDIOSlot0.cpp:398 I[IOS_SD]: IOCTL_READHCR 0x00000028 - 0x00000000
+35:52:436 Core/IOS/SDIO/SDIOSlot0.cpp:360 I[IOS_SD]: IOCTL_WRITEHCR 0x00000028 - 0x00000002
+35:52:436 Core/IOS/SDIO/SDIOSlot0.cpp:417 I[IOS_SD]: IOCTL_SETCLK
+35:52:444 Core/IOS/SDIO/SDIOSlot0.cpp:474 I[IOS_SD]: IOCTL_GETSTATUS. Replying that SDHC card is inserted and initialized
+35:52:457 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 1 Block(s) from 0x00000000 bsize 512 into 0x8018a820!
+35:52:459 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 1 Block(s) from 0x00000000 bsize 512 into 0x8018a820!
+35:52:462 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 1 Block(s) from 0x0000003f bsize 512 into 0x8018a820!
+35:52:462 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 1 Block(s) from 0x0000003f bsize 512 into 0x8018a820!
+35:52:469 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 1 Block(s) from 0x00000040 bsize 512 into 0x801ab9c0!
+35:52:475 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/usb/ven (mode 0, fd 4)
+35:52:480 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/usb/hid (mode 0, fd 5)
+35:52:548 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000280 bsize 512 into 0x8018b940!
+35:52:562 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000002c0 bsize 512 into 0x80193960!
+35:52:570 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000500 bsize 512 into 0x8019b980!
+35:52:585 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd700 bsize 512 into 0x801a39a0!
+35:52:591 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  Size
+exiPrintftext 0 000100 91800000 000398A0
+exiPrintftext 1 000000 00000000 00000000
+exiPrintftext 2 000000 00000000 00000000
+exiPrintftext 3 000000 00000000 00000000
+exiPrintftext 4 000000 00000000 00000000
+exiPrintftext 5 000000 00000000 00000000
+exiPrintftext 6 000000 00000000 00000000
+exiPrintfdata 0 0399C0 918398A0 003D38A0
+exiPrintfdata 1 000000 00000000 00000000
+exiPrintfdata 2 000000 00000000 00000000
+exiPrintfdata 3 000000 00000000 00000000
+exiPrintfdata 4 000000 00000000 00000000
+exiPrintfdata 5 000000 00000000 00000000
+exiPrintfdata 6 000000 00000000 00000000
+exiPrintfdata 7 000000 00000000 00000000
+exiPrintfdata 8 000000 00000000 00000000
+exiPrintfdata 9 000000 00000000 00000000
+exiPrintfdata10 000000 00000000 00000000
+exiPrintfbss    ------ 91400000 00030FE0
+exiPrintfEntry  ------ 91800000 ------
+exiPrintfLoading text0...
+
+35:52:621 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000100 bsize 512 into 0x8018b940!
+35:52:626 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd740 bsize 512 into 0x80193960!
+35:52:630 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd780 bsize 512 into 0x8019b980!
+35:52:631 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd7c0 bsize 512 into 0x801a39a0!
+35:52:631 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd800 bsize 512 into 0x8018b940!
+35:52:631 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd840 bsize 512 into 0x80193960!
+35:52:631 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd880 bsize 512 into 0x8019b980!
+35:52:631 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd8c0 bsize 512 into 0x801a39a0!exiPrintfLoading data0...
+
+35:52:635 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000100 bsize 512 into 0x8018b940!
+35:52:636 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd900 bsize 512 into 0x80193960!
+35:52:636 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd940 bsize 512 into 0x8019b980!
+35:52:636 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd980 bsize 512 into 0x801a39a0!
+35:52:636 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bd9c0 bsize 512 into 0x8018b940!
+35:52:636 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bda00 bsize 512 into 0x80193960!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bda40 bsize 512 into 0x8019b980!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bda80 bsize 512 into 0x801a39a0!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdac0 bsize 512 into 0x8018b940!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdb00 bsize 512 into 0x80193960!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdb40 bsize 512 into 0x8019b980!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdb80 bsize 512 into 0x801a39a0!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdbc0 bsize 512 into 0x8018b940!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdc00 bsize 512 into 0x80193960!
+35:52:637 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdc40 bsize 512 into 0x8019b980!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdc80 bsize 512 into 0x801a39a0!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdcc0 bsize 512 into 0x8018b940!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdd00 bsize 512 into 0x80193960!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdd40 bsize 512 into 0x8019b980!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdd80 bsize 512 into 0x801a39a0!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bddc0 bsize 512 into 0x8018b940!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bde00 bsize 512 into 0x80193960!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bde40 bsize 512 into 0x8019b980!
+35:52:638 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bde80 bsize 512 into 0x801a39a0!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdec0 bsize 512 into 0x8018b940!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdf00 bsize 512 into 0x80193960!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdf40 bsize 512 into 0x8019b980!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdf80 bsize 512 into 0x801a39a0!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bdfc0 bsize 512 into 0x8018b940!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be000 bsize 512 into 0x80193960!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be040 bsize 512 into 0x8019b980!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be080 bsize 512 into 0x801a39a0!
+35:52:639 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be0c0 bsize 512 into 0x8018b940!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be100 bsize 512 into 0x80193960!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be140 bsize 512 into 0x8019b980!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be180 bsize 512 into 0x801a39a0!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be1c0 bsize 512 into 0x8018b940!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be200 bsize 512 into 0x80193960!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be240 bsize 512 into 0x8019b980!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be280 bsize 512 into 0x801a39a0!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be2c0 bsize 512 into 0x8018b940!
+35:52:640 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be300 bsize 512 into 0x80193960!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be340 bsize 512 into 0x8019b980!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be380 bsize 512 into 0x801a39a0!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be3c0 bsize 512 into 0x8018b940!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be400 bsize 512 into 0x80193960!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be440 bsize 512 into 0x8019b980!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be480 bsize 512 into 0x801a39a0!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be4c0 bsize 512 into 0x8018b940!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be500 bsize 512 into 0x80193960!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be540 bsize 512 into 0x8019b980!
+35:52:641 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be580 bsize 512 into 0x801a39a0!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be5c0 bsize 512 into 0x8018b940!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be600 bsize 512 into 0x80193960!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be640 bsize 512 into 0x8019b980!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be680 bsize 512 into 0x801a39a0!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be6c0 bsize 512 into 0x8018b940!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be700 bsize 512 into 0x80193960!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be740 bsize 512 into 0x8019b980!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be780 bsize 512 into 0x801a39a0!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be7c0 bsize 512 into 0x8018b940!
+35:52:642 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be800 bsize 512 into 0x80193960!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be840 bsize 512 into 0x8019b980!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be880 bsize 512 into 0x801a39a0!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be8c0 bsize 512 into 0x8018b940!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be900 bsize 512 into 0x80193960!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be940 bsize 512 into 0x8019b980!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be980 bsize 512 into 0x801a39a0!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001be9c0 bsize 512 into 0x8018b940!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bea00 bsize 512 into 0x80193960!
+35:52:643 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bea40 bsize 512 into 0x8019b980!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bea80 bsize 512 into 0x801a39a0!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001beac0 bsize 512 into 0x8018b940!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001beb00 bsize 512 into 0x80193960!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001beb40 bsize 512 into 0x8019b980!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001beb80 bsize 512 into 0x801a39a0!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bebc0 bsize 512 into 0x8018b940!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bec00 bsize 512 into 0x80193960!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bec40 bsize 512 into 0x8019b980!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bec80 bsize 512 into 0x801a39a0!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001becc0 bsize 512 into 0x8018b940!
+35:52:644 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bed00 bsize 512 into 0x80193960!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bed40 bsize 512 into 0x8019b980!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bed80 bsize 512 into 0x801a39a0!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bedc0 bsize 512 into 0x8018b940!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bee00 bsize 512 into 0x80193960!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bee40 bsize 512 into 0x8019b980!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bee80 bsize 512 into 0x801a39a0!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001beec0 bsize 512 into 0x8018b940!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bef00 bsize 512 into 0x80193960!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bef40 bsize 512 into 0x8019b980!
+35:52:645 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bef80 bsize 512 into 0x801a39a0!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001befc0 bsize 512 into 0x8018b940!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf000 bsize 512 into 0x80193960!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf040 bsize 512 into 0x8019b980!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf080 bsize 512 into 0x801a39a0!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf0c0 bsize 512 into 0x8018b940!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf100 bsize 512 into 0x80193960!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf140 bsize 512 into 0x8019b980!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf180 bsize 512 into 0x801a39a0!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf1c0 bsize 512 into 0x8018b940!
+35:52:646 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf200 bsize 512 into 0x80193960!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf240 bsize 512 into 0x8019b980!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf280 bsize 512 into 0x801a39a0!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf2c0 bsize 512 into 0x8018b940!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf300 bsize 512 into 0x80193960!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf340 bsize 512 into 0x8019b980!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf380 bsize 512 into 0x801a39a0!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf3c0 bsize 512 into 0x8018b940!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf400 bsize 512 into 0x80193960!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf440 bsize 512 into 0x8019b980!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf480 bsize 512 into 0x801a39a0!
+35:52:647 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf4c0 bsize 512 into 0x8018b940!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf500 bsize 512 into 0x80193960!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf540 bsize 512 into 0x8019b980!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf580 bsize 512 into 0x801a39a0!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf5c0 bsize 512 into 0x8018b940!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf600 bsize 512 into 0x80193960!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf640 bsize 512 into 0x8019b980!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf680 bsize 512 into 0x801a39a0!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf6c0 bsize 512 into 0x8018b940!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf700 bsize 512 into 0x80193960!
+35:52:648 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf740 bsize 512 into 0x8019b980!
+35:52:649 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x001bf780 bsize 512 into 0x801a39a0!exiPrintfInit bss...
+
+35:52:766 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000280 bsize 512 into 0x8018b940!
+35:52:766 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000002c0 bsize 512 into 0x80193960!
+35:52:767 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000500 bsize 512 into 0x8019b980!
+35:52:767 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000540 bsize 512 into 0x801a39a0!
+35:52:768 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00000040 bsize 512 into 0x8018b940!
+35:52:772 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002180 bsize 512 into 0x80193960!
+35:52:772 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000021c0 bsize 512 into 0x8019b980!
+35:52:772 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002200 bsize 512 into 0x801a39a0!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002240 bsize 512 into 0x80193960!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002280 bsize 512 into 0x8018b940!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000022c0 bsize 512 into 0x8019b980!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002300 bsize 512 into 0x801a39a0!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002340 bsize 512 into 0x80193960!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002380 bsize 512 into 0x8018b940!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000023c0 bsize 512 into 0x8019b980!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002400 bsize 512 into 0x801a39a0!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002440 bsize 512 into 0x80193960!
+35:52:773 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002480 bsize 512 into 0x8018b940!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000024c0 bsize 512 into 0x8019b980!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002500 bsize 512 into 0x801a39a0!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002540 bsize 512 into 0x80193960!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002580 bsize 512 into 0x8018b940!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000025c0 bsize 512 into 0x8019b980!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002600 bsize 512 into 0x801a39a0!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002640 bsize 512 into 0x80193960!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002680 bsize 512 into 0x8018b940!
+35:52:774 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000026c0 bsize 512 into 0x8019b980!
+35:52:775 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002700 bsize 512 into 0x801a39a0!
+35:52:775 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002740 bsize 512 into 0x80193960!
+35:52:775 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002780 bsize 512 into 0x8018b940!
+35:52:775 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000027c0 bsize 512 into 0x8019b980!
+35:52:775 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002800 bsize 512 into 0x801a39a0!
+35:52:776 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002840 bsize 512 into 0x80193960!
+35:52:776 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002880 bsize 512 into 0x8018b940!
+35:52:776 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000028c0 bsize 512 into 0x8019b980!
+35:52:776 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002900 bsize 512 into 0x801a39a0!
+35:52:777 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002940 bsize 512 into 0x80193960!
+35:52:777 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002980 bsize 512 into 0x8018b940!
+35:52:777 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000029c0 bsize 512 into 0x8019b980!
+35:52:777 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002a00 bsize 512 into 0x801a39a0!
+35:52:777 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002a40 bsize 512 into 0x80193960!
+35:52:778 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002a80 bsize 512 into 0x8018b940!
+35:52:778 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002ac0 bsize 512 into 0x8019b980!
+35:52:779 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002b00 bsize 512 into 0x801a39a0!
+35:52:779 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002b40 bsize 512 into 0x80193960!
+35:52:779 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002b80 bsize 512 into 0x8018b940!
+35:52:779 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002bc0 bsize 512 into 0x8019b980!
+35:52:779 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002c00 bsize 512 into 0x801a39a0!
+35:52:779 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002c40 bsize 512 into 0x80193960!
+35:52:780 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002c80 bsize 512 into 0x8018b940!
+35:52:781 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002cc0 bsize 512 into 0x8019b980!
+35:52:781 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002d00 bsize 512 into 0x801a39a0!
+35:52:781 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002d40 bsize 512 into 0x80193960!
+35:52:782 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002d80 bsize 512 into 0x8018b940!
+35:52:782 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002dc0 bsize 512 into 0x8019b980!
+35:52:782 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002e00 bsize 512 into 0x801a39a0!
+35:52:782 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002e40 bsize 512 into 0x80193960!
+35:52:783 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002e80 bsize 512 into 0x8018b940!
+35:52:783 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002ec0 bsize 512 into 0x8019b980!
+35:52:783 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002f00 bsize 512 into 0x801a39a0!
+35:52:783 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002f40 bsize 512 into 0x80193960!
+35:52:784 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002f80 bsize 512 into 0x8018b940!
+35:52:784 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00002fc0 bsize 512 into 0x8019b980!
+35:52:784 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003000 bsize 512 into 0x801a39a0!
+35:52:784 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003040 bsize 512 into 0x80193960!
+35:52:784 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003080 bsize 512 into 0x8018b940!
+35:52:785 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000030c0 bsize 512 into 0x8019b980!
+35:52:785 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003100 bsize 512 into 0x801a39a0!
+35:52:786 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003140 bsize 512 into 0x80193960!
+35:52:786 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003180 bsize 512 into 0x8018b940!
+35:52:786 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000031c0 bsize 512 into 0x8019b980!
+35:52:786 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003200 bsize 512 into 0x801a39a0!
+35:52:786 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003240 bsize 512 into 0x80193960!
+35:52:786 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003280 bsize 512 into 0x8018b940!
+35:52:787 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000032c0 bsize 512 into 0x8019b980!
+35:52:788 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003300 bsize 512 into 0x801a39a0!
+35:52:788 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003340 bsize 512 into 0x80193960!
+35:52:788 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003380 bsize 512 into 0x8018b940!
+35:52:789 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000033c0 bsize 512 into 0x8019b980!
+35:52:789 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003400 bsize 512 into 0x801a39a0!
+35:52:789 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003440 bsize 512 into 0x80193960!
+35:52:789 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003480 bsize 512 into 0x8018b940!
+35:52:790 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000034c0 bsize 512 into 0x8019b980!
+35:52:790 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003500 bsize 512 into 0x801a39a0!
+35:52:790 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003540 bsize 512 into 0x80193960!
+35:52:791 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003580 bsize 512 into 0x8018b940!
+35:52:791 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000035c0 bsize 512 into 0x8019b980!
+35:52:791 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003600 bsize 512 into 0x801a39a0!
+35:52:791 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003640 bsize 512 into 0x80193960!
+35:52:791 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003680 bsize 512 into 0x8018b940!
+35:52:792 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000036c0 bsize 512 into 0x8019b980!
+35:52:792 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003700 bsize 512 into 0x801a39a0!
+35:52:793 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003740 bsize 512 into 0x80193960!
+35:52:793 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003780 bsize 512 into 0x8018b940!
+35:52:793 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000037c0 bsize 512 into 0x8019b980!
+35:52:793 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003800 bsize 512 into 0x801a39a0!
+35:52:793 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003840 bsize 512 into 0x80193960!
+35:52:793 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003880 bsize 512 into 0x8018b940!
+35:52:794 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000038c0 bsize 512 into 0x8019b980!
+35:52:795 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003900 bsize 512 into 0x801a39a0!
+35:52:795 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003940 bsize 512 into 0x80193960!
+35:52:795 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003980 bsize 512 into 0x8018b940!
+35:52:795 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x000039c0 bsize 512 into 0x8019b980!
+35:52:796 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003a00 bsize 512 into 0x801a39a0!
+35:52:796 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003a40 bsize 512 into 0x80193960!
+35:52:796 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003a80 bsize 512 into 0x8018b940!
+35:52:796 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003ac0 bsize 512 into 0x8019b980!
+35:52:797 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003b00 bsize 512 into 0x801a39a0!
+35:52:797 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003b40 bsize 512 into 0x80193960!
+35:52:797 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 64 Block(s) from 0x00003b80 bsize 512 into 0x8018b940!
+35:52:802 Core/IOS/SDIO/SDIOSlot0.cpp:275 I[IOS_SD]: DMA Read 1 Block(s) from 0x00000040 bsize 512 into 0x8018aa80!
+35:52:806 Core/IOS/SDIO/SDIOSlot0.cpp:305 I[IOS_SD]: DMA Write 1 Block(s) from 0x8018aa80 bsize 512 to offset 0x00000040!
+35:53:005 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  Exec...
+
+35:53:011 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 83900000 82000000
+35:53:015 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 80001fff 0
+35:53:017 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 80001fff 0
+35:53:019 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 c0001fff 0
+35:53:020 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 90001fff 0
+35:53:021 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 90001fff 0
+35:53:023 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 d0001fff 0
+35:53:024 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 0 80001fff
+35:53:025 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 0 80001fff
+35:53:026 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 560 0 90001fff
+35:53:027 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 568 0 90001fff
+35:53:029 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 538 0 c0001fff
+35:53:031 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 570 0 d0001fff
+35:53:037 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:340 I[PowerPC]: HID4 updated 82000000 83900000
+35:53:151 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: IOS Subsystem Init
+
+35:53:154 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/es (mode 0, fd 0)
+35:53:156 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/stm/immediate (mode 0, fd 1)
+35:53:160 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/stm/eventhook (mode 0, fd 2)exiPrintfIOS Subsystem Init Done: 0
+
+35:53:172 Core/IOS/IOS.cpp:606 I[IOS]: Opening /shared2/sys/SYSCONF (mode 1, fd 3)
+35:53:175 Core/IOS/IOS.cpp:606 I[IOS]: Opening /title/00000001/00000002/data/setting.txt (mode 1, fd 3)
+35:53:184 Core/IOS/IOS.cpp:606 I[IOS]: Opening /title/00000001/00000002/data/state.dat (mode 1, fd 3)
+35:53:186 Core/IOS/IOS.cpp:606 I[IOS]: Opening /shared2/sys/NANDBOOTINFO (mode 1, fd 3)
+35:53:190 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  EXI init OK
+exiPrintfgame loader start; arenas = 92100000 - 92100000, 92101740 - 92FFFFFF
+exiPrintfMain thread running
+exiPrintfSect## Offset Address  EndAddr  Size
+exiPrintftext 0 000100 80003100 80005620 00002520
+exiPrintftext 1 002620 800066E0 802C1880 002BB1A0
+exiPrintftext 2 000000 00000000 00000000 00000000
+exiPrintftext 3 000000 00000000 00000000 00000000
+exiPrintftext 4 000000 00000000 00000000 00000000
+exiPrintftext 5 000000 00000000 00000000 00000000
+exiPrintftext 6 000000 00000000 00000000 00000000
+exiPrintfdata 0 2BD7C0 80005620 80005CC0 000006A0
+exiPrintfdata 1 2BDE60 80005CC0 800066E0 00000A20
+exiPrintfdata 2 2BE880 802C1880 802C18A0 00000020
+exiPrintfdata 3 2BE8A0 802C18A0 802C18C0 00000020
+exiPrintfdata 4 2BE8C0 802C18C0 802C2D60 000014A0
+exiPrintfdata 5 2BFD60 802C2D60 80335840 00072AE0
+exiPrintfdata 6 332840 803DB1E0 803DC7A0 000015C0
+exiPrintfdata 7 333E00 803DE500 803E8440 00009F40
+exiPrintfdata 8 000000 00000000 00000000 00000000
+exiPrintfdata 9 000000 00000000 00000000 00000000
+exiPrintfdata10 000000 00000000 00000000 00000000
+exiPrintfbss    ------ 80335840 803E8478 000B2C38
+exiPrintfEntry  ------ 80003140 -------- --------
+exiPrintfInit bss...
+exiPrintfLoading text0...
+exiPrintfLoading text1...
+exiPrintfLoading data0...
+exiPrintfLoading data1...
+exiPrintfLoading data2...
+exiPrintfLoading data3...
+exiPrintfLoading data4...
+exiPrintfLoading data5...
+exiPrintfLoading data6...
+exiPrintfLoading data7...
+exiPrintfapply patches
+exiPrintfdirect long jump at 8007D6DC (bl=0)
+exiPrintfdirect long jump at 80246E04 (bl=0)
+exiPrintfdirect long jump at 802510CC (bl=0)
+exiPrintfdirect long jump at 8024091C (bl=0)
+exiPrintfdirect long jump at 80248870 (bl=0)
+exiPrintfdirect long jump at 80248B9C (bl=0)
+exiPrintfdirect long jump at 80015850 (bl=0)
+exiPrintfdirect long jump at 80248F9C (bl=0)
+exiPrintfdirect long jump at 80248C64 (bl=0)
+exiPrintfdirect long jump at 80248EAC (bl=0)
+exiPrintfdirect long jump at 802490D8 (bl=0)
+exiPrintfdirect long jump at 8024AFD8 (bl=0)
+exiPrintfdirect long jump at 80242F20 (bl=0)
+exiPrintfdirect long jump at 8024363C (bl=0)
+exiPrintfdirect long jump at 80243338 (bl=0)
+exiPrintfdirect long jump at 8024FFE4 (bl=0)
+exiPrintfdirect long jump at 8024F6FC (bl=0)
+exiPrintfcall init
+exiPrintfgame thread SP=91450F70
+exiPrintfgame init hw
+exiPrintfLocked cache machine check handler installed
+exiPrintfgame init user
+exiPrintfgame main
+exiPrintfOSExceptionInit_hook
+exiPrintfOSExceptionInit_hook done
+exiPrintfFPU-unavailable handler installed
+exiPrintfLocked cache machine check handler installed
+
+35:53:293 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 80001fff 0
+35:53:297 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 536 0 800001ff
+35:53:299 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 80001fff 0
+35:53:300 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 528 0 800001ff
+35:53:301 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 541 0 1000002
+35:53:303 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 540 0 810000ff
+35:53:305 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 533 0 1000002
+35:53:306 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:445 I[PowerPC]: IBAT updated 532 0 810000ff
+35:53:315 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:
+
+35:53:315 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Dolphin OS $Revision: 54 $.
+exiPrintfKernel built : %s %s
+exiPrintfConsole Type : Retail %d
+exiPrintfMemory %d MB
+exiPrintfArena : 0x%x - 0x%x
+exiPrintfreached __DVDFSInit_hook
+exiPrintfIPC reinit OK
+exiPrintfinitThreads OK
+exiPrintfinitThreads: OK
+exiPrintfapp booted from bootrom
+
+35:53:391 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:397 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 0 set to mode 3
+35:53:398 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:398 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 1 set to mode 3
+35:53:398 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:398 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 2 set to mode 3
+35:53:398 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:398 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:399 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 543 0 e0000002
+35:53:403 Core/PowerPC/Interpreter/Interpreter_SystemRegisters.cpp:422 I[PowerPC]: DBAT updated 542 0 e00001fe
+35:53:618 Core/HW/SI/SI_DeviceGCController.cpp:98 I[SI]: PAD - Recalibrate
+35:53:627 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 0 set to mode 3
+35:53:627 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 1 set to mode 3
+35:53:627 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 2 set to mode 3
+35:53:627 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:628 Core/HW/SI/SI_DeviceGCController.cpp:98 I[SI]: PAD - Recalibrate
+35:53:628 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 1 set to mode 3
+35:53:628 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 2 set to mode 3
+35:53:628 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:628 Core/HW/SI/SI_DeviceGCController.cpp:98 I[SI]: PAD - Recalibrate
+35:53:629 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 2 set to mode 3
+35:53:629 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:629 Core/HW/SI/SI_DeviceGCController.cpp:98 I[SI]: PAD - Recalibrate
+35:53:629 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:630 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 0 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 1 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 2 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 1 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 2 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 2 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+35:53:631 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 3 set to mode 3exiPrintfinitDvdHack: init (r2=91843DBC r13=91C0D0C0)
+exiPrintfinitDvdHack: create alarm
+exiPrintfinitDvdHack: create threadQ
+exiPrintfinitDvdHack: create msgQ in
+exiPrintfinitDvdHack: create msgQ out
+exiPrintfinitDvdHack: create DVD thread
+exiPrintfDVD thread is 91426998
+exiPrintfinitDvdHack: create DVD thread alarm
+exiPrintfDVD thread setup OK, 91426998, alarm=91414928
+exiPrintfDVD thread online
+exiPrintfsdio_Startup call open
+exiPrintfLWP_InitQueue_dol: 933E0F6C -> 92100D08
+exiPrintfOSSleepThread(92100D08) self=91426998
+
+35:53:696 Core/IOS/IOS.cpp:606 I[IOS]: Opening /dev/sdio/slot0 (mode 1, fd 3)exiPrintfOSResumeThread OK for DVD
+exiPrintfinitDvdHack: OK
+
+36:03:932 Core/Core.cpp:282 I[CONSOLE]: Stop [Main Thread]		---- Shutting down ----
+36:03:932 Core/Core.cpp:285 I[CONSOLE]: Stop [Main Thread 0]	Stop CPU
+36:03:933 Core/Core.cpp:643 I[CONSOLE]: Stop [Main Thread 0]	Stopping GDB ...
+36:03:934 Core/Core.cpp:645 I[CONSOLE]: Stop [Main Thread 0]	GDB stopped.
+36:03:973 Core/Core.cpp:519 I[CONSOLE]: Stop [Video Thread 0]	Shutting down HW
+36:04:016 Core/HW/Memmap.cpp:485 I[MI]: Memory system shut down.
+36:04:023 Core/HW/GCMemcard/GCMemcardDirectory.cpp:676 I[EXI]: Flushing savedata to disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+36:04:023 Core/Core.cpp:521 I[CONSOLE]: Stop [Video Thread 0]	HW shutdown
+36:04:023 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+36:04:030 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+36:04:031 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+36:04:060 AudioCommon/AudioCommon.cpp:88 I[Audio]: Shutting down sound stream
+36:04:062 AudioCommon/AudioCommon.cpp:96 I[Audio]: Done shutting down sound stream
+36:04:062 Common/FatFsUtil.cpp:676 I[COMMON]: Starting SD card conversion from file /home/rena/.local/share/dolphin-emu/Wii/sd.raw to folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/
+36:05:007 Common/FatFsUtil.cpp:740 I[COMMON]: Successfully unpacked SD image /home/rena/.local/share/dolphin-emu/Wii/sd.raw to /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/
+36:05:007 Core/Core.cpp:462 I[CONSOLE]: Stop		---- Shutdown complete ----
+36:05:009 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+36:05:215 InputCommon/ControllerInterface/evdev/evdev.cpp:356 N[CI]: evdev hotplug thread stopped

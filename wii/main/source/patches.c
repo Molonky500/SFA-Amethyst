@@ -59,50 +59,7 @@ uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
     return addr + (oldOp & 0x03FFFFFC);
 }
 
-static void osPrintHook(const char *fmt, ...) {
-    switchToOgc();
-    char buf[1024];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    exiPuts(buf);
-    int len = strlen(buf);
-    if(buf[len-1] != '\n') exiPuts("\n");
-    va_end(args);
-    //sprintf can't be used with interrupts disabled
-    //exiPuts(fmt);
-    switchToGame();
-}
-
-static void dspDebugPrint_hook(const char *fmt, ...) {
-    switchToOgc();
-    char buf[1024];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    exiPuts(buf);
-    int len = strlen(buf);
-    if(buf[len-1] != '\n') exiPuts("\n");
-    va_end(args);
-    switchToGame();
-}
-
-uint OSGetFontEncode_hook() {
-    return 0; //English
-    //return 1; //Japanese
-}
-
-char* OSGetFontWidth_hook(char* string, s32* width) {
-    *width = 8;
-    return &string[1];
-}
-
-char* OSGetFontTexel_hook(char* string, void* image, s32 pos,
-s32 stride, s32* width) {
-    return &string[1];
-}
-
-void doPatches(DolHeader *header) {
+void doPatches() {
     //hookBranch(0x80000100, _raw_exceptionHook_Reset, 0);
     //hookBranch(0x80000200, _raw_exceptionHook_MachineCheck, 0);
     //hookBranch(0x80000300, _raw_exceptionHook_DSI, 0);
@@ -118,8 +75,11 @@ void doPatches(DolHeader *header) {
     //hookBranch(0x80001300, _raw_exceptionHook_IABR, 0);
     //hookBranch(0x80001700, _raw_exceptionHook_Thermal, 0);
     hookBranch(0x8007d6dc, osPrintHook, 0);
-    hookBranch(0x802510cc, dspDebugPrint_hook, 0);
-    hookBranch(0x80246a60, OSSleepThread_hook, 0);
+    hookBranch(0x80246e04, osPrintHook, 0);
+    hookBranch(0x802510cc, osPrintHook, 0);
+    hookBranch(0x8024091c, OSExceptionInit_hook, 0);
+
+    /*hookBranch(0x80246a60, OSSleepThread_hook, 0);
     //hookBranch(0x802462a8, OSCreateThread_hook, 0);
     hookBranch(0x801175e4, OSCreateThread_hook, 1);
     hookBranch(0x80117614, OSCreateThread_hook, 1);
@@ -147,8 +107,9 @@ void doPatches(DolHeader *header) {
     //hookBranch(0x80243790, OSEnableInterrupts_hook, 0);
     //hookBranch(0x802437a4, OSRestoreInterrupts_hook, 0);
     hookBranch(0x80243b44, OSMaskInterrupts_hook, 0);
-    hookBranch(0x80243bcc, OSUnmaskInterrupts_hook, 0);
+    hookBranch(0x80243bcc, OSUnmaskInterrupts_hook, 0);*/
 
+    hookBranch(0x80248870, __DVDFSInit_hook, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0);
     hookBranch(0x80015850, DVDRead_hook, 0);
     hookBranch(0x80248f9c, DVDReadPrio_hook, 0);
@@ -164,16 +125,10 @@ void doPatches(DolHeader *header) {
     hookBranch(0x8024ffe4, ARStartDMA_hook, 0);
     hookBranch(0x8024f6fc, AIInitDMA_hook, 0);
 
-    //this doesn't work nicely because AR DMA apparently
-    //doesn't like being done from 92xxxxxx
-    //and once we've used MEM2 it never goes back to MEM1
-    //hookBranch(0x80023cc8, alloc_hook, 0);
-    //hookBranch(0x800233e8, free_hook, 0);
-
     static const u32 patches[] = {
         //address, value
 
-        //set some header values
+        //set some header values that apploader should set
         0x80000000, 0x47534145,
         0x80000004, 0x30310000,
         0x80000008, 0x01000000,
@@ -201,8 +156,8 @@ void doPatches(DolHeader *header) {
         //0x8024037c, 0x60000000,
 
         //don't replace our external interrupt handler
-        0x80243854, 0x60000000,
-        0x802406b0, 0x60000000,
+        //0x80243854, 0x60000000,
+        //0x802406b0, 0x60000000,
 
         //disable padUpdate
         //0x80014f40, 0x4E800020,
@@ -224,12 +179,12 @@ void doPatches(DolHeader *header) {
         //0x80241c08, 0x4E800020, //kill LCEnable
 
         //disable some thread stuff
-        0x80137d28, 0x4E800020, //installBsodHandlers
-        0x802406b0, 0x60000000, //OSExceptionInit
+        //0x80137d28, 0x4E800020, //installBsodHandlers
+        //0x802406b0, 0x60000000, //OSExceptionInit
         //0x80021074, 0x60000000, //_initCardAndDsp
         //0x80240d34, 0x4E800020, //OSInitAlarm
-        0x80240bc4, 0x4E800020, //__OSSetExceptionHandler
-        0x802406b4, 0x60000000, //__OSInitSystemCall
+        //0x80240bc4, 0x4E800020, //__OSSetExceptionHandler
+        //0x802406b4, 0x60000000, //__OSInitSystemCall
         //0x802406d4, 0x60000000, //__OSContextInit
         //0x802406dc, 0x60000000, //exiInit
         //0x802406e8, 0x60000000, //_osInitThreadQueues
@@ -260,7 +215,7 @@ void doPatches(DolHeader *header) {
         //0x803ddde8, 0x00000001,
 
         //disable some DVD stuff
-        0x802491f4, 0x4E800020, //DVDInit
+        //0x802491f4, 0x4E800020, //DVDInit
         0x802408fc, 0x60000000, //DVDInquiryAsync
         0x80015624, 0x4E800020, //dvdCheckError
 
@@ -270,7 +225,7 @@ void doPatches(DolHeader *header) {
         //0x80009bf8, 0x4E800020, //other audioInit
         //0x8000d200, 0x4E800020, //streamPlay
         //0x8024afd8, 0x4E800020, //DVDCancelStreamAsync
-        0x8024b094, 0x4E800020, //DVDStopStreamAtEndAsync
+        //0x8024b094, 0x4E800020, //DVDStopStreamAtEndAsync
         //0x8024f6fc, 0x4E800020, //AIInitDMA
         //0x80284670, 0x4E800020, //audio
         //0x8024ffe4, 0x4E800020, //ARStartDMA

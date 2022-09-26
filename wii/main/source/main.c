@@ -9,29 +9,16 @@ void* loadGame(void *param) {
     /** Load the game main DOL.
      */
     exiPuts("Main thread running\n");
-    initThreads();
+    //initThreads();
 
-    char path[1024];
-    snprintf(path, sizeof(path), "sd:/%s/sys/main.dol", gameRootDir);
-    FILE *dol = fopen(path, "rb");
-    if(!dol) {
-        char msg[1024];
-        snprintf(msg, sizeof(msg), "[stage2] Error opening main.dol: %d\n", errno);
-        exiPuts(msg);
-        return NULL;
-    }
-    exiPuts("loading DOL...\n");
-
-    DolHeader header;
-    fread(&header, sizeof(DolHeader), 1, dol);
-    loadDol(dol, &header);
-    fclose(dol);
+    DolHeader *header = (DolHeader*)0x90000000;
+    loadDolFromMemory(header);
 
     exiPuts("apply patches\n");
-    doPatches(&header);
+    doPatches();
 
-    exiPuts("init DVD\n");
-    initDvdHack();
+    //exiPuts("init DVD\n");
+    //initDvdHack();
 
     //some of the game's startup code overlaps with some
     //of the Wii OS global variables (up to 0x800031A0).
@@ -56,7 +43,7 @@ int main(int argc, char **argv) {
         SYS_GetArena1Lo(), SYS_GetArena1Hi(),
         SYS_GetArena2Lo(), SYS_GetArena2Hi());
 
-    lwp_t mainThread;
+    /*lwp_t mainThread;
     u32 mainStackSize = 8192; //no idea what it should be
     //u32 mainStackSize = 65536;
     memset(0x803f8478 - mainStackSize, 0xAAAAAAAA, mainStackSize);
@@ -65,7 +52,9 @@ int main(int argc, char **argv) {
         mainStackSize, 8);
     void *result;
     LWP_JoinThread(mainThread, &result);
-    exiPrintf("main thread returned %08X\n", result);
+    exiPrintf("main thread returned %08X\n", result);*/
+    loadGame(NULL);
+    while(1);
 
     return 0;
 }

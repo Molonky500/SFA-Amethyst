@@ -43,6 +43,10 @@ GLOBALFN void drawHudBox (short x, short y, short w, short h, uint opacity, BOOL
 GLOBALFN void drawPartialTexture(float x, float y, Texture * texture, uint alpha, uint scale, int width, int height, int tx, int ty);
 GLOBALFN void drawScaledTexture(float x,float y,Texture *texture,uint opacity,uint scale,int width,int height,uint flags);
 GLOBALFN void drawTexture(float x,float y,Texture *texture,uint opacity,uint scale);
+GLOBALFN int _DVDClose(DVDFileInfo * file);
+GLOBALFN void _DVDInit(void);
+GLOBALFN BOOL _DVDOpen(const char * name, DVDFileInfo * fileInfo);
+GLOBALFN s32 _DVDRead(DVDFileInfo * file, void * addr, s32 size, s32 offset);
 GLOBALFN void endObjSequence(uint seqNo);
 GLOBALFN void expgfxRemoveAll(void);
 GLOBALFN void fearTestMeterDraw(void);

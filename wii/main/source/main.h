@@ -37,8 +37,27 @@ typedef struct {
     u32 bssAddr, bssSize, entryPoint;
 } DolHeader;
 
-#include "dvd.h"
+//this macro excludes 90xxxxxx (ARAM) and 93xxxxxx (IOS)
+#define PTR_VALID(p) (((p) >= 0x80000000 && (p) <= 0x817FFFFF) || \
+    ((p) >= 0x91000000 && (p) <= 0x92FFFFFF))
+
+#define __OSBusClock  (*(u32*)0x800000F8)
+#define __OSCoreClock (*(u32*)0x800000FC)
+#define OS_BUS_CLOCK        __OSBusClock
+#define OS_CORE_CLOCK       __OSCoreClock
+#define OS_TIMER_CLOCK      (OS_BUS_CLOCK/4)
+#define OSTicksToCycles( ticks )        (((ticks) * ((OS_CORE_CLOCK * 2) / OS_TIMER_CLOCK)) / 2)
+#define OSTicksToSeconds( ticks )       ((ticks) / OS_TIMER_CLOCK)
+#define OSTicksToMilliseconds( ticks )  ((ticks) / (OS_TIMER_CLOCK / 1000))
+#define OSTicksToMicroseconds( ticks )  (((ticks) * 8) / (OS_TIMER_CLOCK / 125000))
+#define OSTicksToNanoseconds( ticks )   (((ticks) * 8000) / (OS_TIMER_CLOCK / 125000))
+#define OSSecondsToTicks( sec )         ((sec)  * OS_TIMER_CLOCK)
+#define OSMillisecondsToTicks( msec )   ((msec) * (OS_TIMER_CLOCK / 1000))
+#define OSMicrosecondsToTicks( usec )   (((usec) * (OS_TIMER_CLOCK / 125000)) / 8)
+#define OSNanosecondsToTicks( nsec )    (((nsec) * (OS_TIMER_CLOCK / 125000)) / 8000)
+
 #include "thread.h"
+#include "dvd.h"
 
 //alloc.c
 void* alloc_hook(u32 size, u32 tag, const char *name);
@@ -50,12 +69,21 @@ bool checkAddrInheap(void *addr, u32 len);
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL);
 void AIInitDMA_hook(u32 start, uint length);
 
+//debugprint.c
+void osPrintHook(const char *fmt, ...);
+void DBPrintf_hook(const char *fmt, ...);
+void dspDebugPrint_hook(const char *fmt, ...);
+
 //dol.c
 void printDolHeader(DolHeader *header);
-void loadDol(FILE *dol, DolHeader *header);
+void loadDolFromMemory(DolHeader *header);
 
 //dvd.c
+extern volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
 void initDvdHack();
+
+//dvdhook.c
+void __DVDFSInit_hook(void);
 bool DVDOpen_hook(const char *path, DVDFileInfo *info);
 int DVDRead_hook(DVDFileInfo *file, void *addr, uint size, uint offset);
 int DVDClose_hook(DVDFileInfo *file);
@@ -67,6 +95,28 @@ BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
     u32 offset, DVDCallback callback);
 BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
     DVDCBCallback callback);
+
+//dvdio.c
+int sendToDvdThread(HackDvdMsg *msg);
+int recvFromDvdThread(HackDvdMsg **msg, u32 flags);
+int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
+    int offset, DVDCallback callback, int prio, bool async);
+
+//dvdthread.c
+extern volatile bool dvdThreadReady;
+extern OSThreadQueue dvdThreadQueue;
+extern OSThread hackDvdThread;
+extern OSMessageQueue hackDvdThreadMailIn, hackDvdThreadMailOut;
+extern int dvdMsgsInHead, dvdMsgsInTail, dvdMsgsOutHead, dvdMsgsOutTail;
+extern volatile HackDvdMsg dvdMsgsIn[DVD_MAX_MSGS], dvdMsgsOut[DVD_MAX_MSGS];
+extern OSAlarm dvdThreadAlarm;
+extern u32 dvdCmdId;
+void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx);
+void* hackDvdThreadMain(void *param);
+HackDvdOpenFile* dvd_getFileByInfo(DVDFileInfo *info);
+HackDvdOpenFile* dvd_getFileByHandle(FILE *file);
+HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file);
+void dvd_removeFile(HackDvdOpenFile* file);
 
 //exceptionRaw.s
 void _raw_exceptionHook_Reset();
@@ -117,37 +167,52 @@ void bootGame();
 int init();
 
 //irq.c
-void disableIrq();
-void enableIrq();
-void setupIrqHandler();
-void gameIrqHandler(u32 irq, void *ctx);
+void OSExceptionInit_hook();
 
 //main.c
 extern char gameRootDir[512];
 
+//osalarm.c
+extern void (*OSCreateAlarm)(OSAlarm *alarm);
+extern void (*OSSetAlarm)(OSAlarm*       alarm,
+                OSTime         tick,
+                OSAlarmHandler handler);
+
+//osfont.c
+uint OSGetFontEncode_hook();
+char* OSGetFontWidth_hook(char* string, s32* width);
+char* OSGetFontTexel_hook(char* string, void* image, s32 pos,
+    s32 stride, s32* width);
+
 //patches.c
 uint32_t hookBranch(uint32_t addr, void *target, int isBl);
-void doPatches(DolHeader *header);
+void doPatches();
 
 //thread.c
+void OSYieldThread(void);
 void initThreads();
-int OSCreateThread_hook(OSThread *thread, void *func, void *param,
-void *stack2, u32 stackSize, OSPriority priority, u16 attr);
-void OSCancelThread_hook(OSThread *thread);
-void OSResumeThread_hook(OSThread *thread);
-void OSSuspendThread_hook(OSThread *thread);
-void OSSleepThread_hook(OSThreadQueue *queue);
-void OSWakeupThread_hook(OSThreadQueue *queue);
-OSThread* OSGetCurrentThread_hook();
-void OSInitThreadQueue_hook(OSThreadQueue *queue);
-void OSInitMessageQueue_hook(void *queue, u32 *msgArray, s32 msgCount);
-BOOL OSSendMessage_hook(void *queue, u32 msg, u32 flags);
-BOOL OSReceiveMessage_hook(void *queue, u32 *msg, u32 flags);
-u32 _gameMaskInterrupts(u32 flags);
-u32 _gameUnmaskInterrupts(u32 flags);
-u32 OSMaskInterrupts_hook(u32 flags);
-u32 OSUnmaskInterrupts_hook(u32 flags);
-u32 OSDisableInterrupts_hook();
-u32 OSEnableInterrupts_hook();
-void OSRestoreInterrupts_hook(u32 level);
-void OSSwitchThreadOrSomeShit_hook(int unused);
+s32 LWP_CreateThread_dol(lwp_t *thethread,
+    void* (*entry)(void *),void *arg,void *stackbase,
+    u32 stack_size,u8 prio);
+s32 LWP_SuspendThread_dol(lwp_t thethread);
+s32 LWP_ResumeThread_dol(lwp_t thethread);
+BOOL LWP_ThreadIsSuspended_dol(lwp_t thethread);
+lwp_t LWP_GetSelf_dol(void);
+void LWP_SetThreadPriority_dol(lwp_t thethread,u32 prio);
+void LWP_YieldThread_dol(void);
+void LWP_Reschedule_dol(u32 prio);
+s32 LWP_JoinThread_dol(lwp_t thethread,void **value_ptr);
+s32 LWP_InitQueue_dol(lwpq_t *thequeue);
+void LWP_CloseQueue_dol(lwpq_t thequeue);
+s32 LWP_ThreadSleep_dol(lwpq_t thequeue);
+void LWP_ThreadSignal_dol(lwpq_t thequeue);
+void LWP_ThreadBroadcast_dol(lwpq_t thequeue);
+
+//threadmsg.c
+s32 MQ_Init_dol(mqbox_t *mqbox,u32 count);
+void MQ_Close_dol(mqbox_t mqbox);
+BOOL MQ_Send_dol(mqbox_t mqbox,mqmsg_t msg,u32 flags);
+BOOL MQ_Jam_dol(mqbox_t mqbox,mqmsg_t msg,u32 flags);
+BOOL MQ_Receive_dol(mqbox_t mqbox,mqmsg_t *msg,u32 flags);
+
+//XXX mutexes

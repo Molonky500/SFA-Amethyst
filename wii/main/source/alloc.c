@@ -83,7 +83,7 @@ bool checkAddrInheap(void *addr, u32 len) {
 }
 
 void alloc_init() {
-    LWP_MutexInit(&allocMutex, false);
+    //LWP_MutexInit(&allocMutex, false);
 
     /*u32 start = 0x803fa480;
     u32 addr  = start;

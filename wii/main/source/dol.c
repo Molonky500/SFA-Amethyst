@@ -21,8 +21,11 @@ void printDolHeader(DolHeader *header) {
         header->entryPoint);
 }
 
-void loadDol(FILE *dol, DolHeader *header) {
+void loadDolFromMemory(DolHeader *header) {
     printDolHeader(header);
+
+    void *data = (void*)header;
+
     exiPrintf("Init bss...\n");
     memset((void*)header->bssAddr, 0, header->bssSize);
     for(int i=0; i<DOL_NUM_TEXT_SECTIONS; i++) {
@@ -37,26 +40,17 @@ void loadDol(FILE *dol, DolHeader *header) {
                 header->textOffset[i] += diff;
                 header->textSize[i] -= diff;
             }
-            fseek(dol, header->textOffset[i], SEEK_SET);
-            ssize_t len = header->textSize[i];
-            void *dest = (void*)header->textAddr[i];
-            while(len > 0) {
-                size_t r = fread(dest, 1, len, dol);
-                dest += r;
-                len -= r;
-            }
+            memcpy((void*)header->textAddr[i],
+                data + header->textOffset[i],
+                header->textSize[i]);
         }
     }
     for(int i=0; i<DOL_NUM_DATA_SECTIONS; i++) {
         if(header->dataSize[i] > 0) {
-            fseek(dol, header->dataOffset[i], SEEK_SET);
-            ssize_t len = header->dataSize[i];
-            void *dest = (void*)header->dataAddr[i];
-            while(len > 0) {
-                size_t r = fread(dest, 1, len, dol);
-                dest += r;
-                len -= r;
-            }
+            exiPrintf("Loading data%d...\n", i);
+            memcpy((void*)header->dataAddr[i],
+                data + header->dataOffset[i],
+                header->dataSize[i]);
         }
     }
 }

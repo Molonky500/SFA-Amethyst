@@ -1,12 +1,14 @@
-#define DVD_DEBUG 0
+#define DVD_DEBUG 1
 //how much to read at once (doesn't need to be the same
 //as the real sector size of a DVD)
 //#define DVD_SECTOR_SIZE 2048
 #define DVD_SECTOR_SIZE (8*1024*1024)
 //#define DVD_SECTOR_SIZE (327680)
 #define DVD_MAX_MSGS 1024
-#define DVD_THREAD_PRIO 96 //0=idle 127=highest
+#define DVD_THREAD_PRIO 8 //31=lowest 0=highest
 #define DVD_MAX_OPEN_FILES 256
+#define DVD_ALARM_PERIOD OSMillisecondsToTicks(5)
+#define DVD_THREAD_STACK_SIZE 65536
 
 typedef void (*DVDCallback)(s32 result, void* fileInfo);
 #define DVD_BUSY (*(vu8*)0x803dc950)

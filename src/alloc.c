@@ -339,6 +339,7 @@ Texture* textureLoadHook(int id, int bJustCheckIfLoaded) {
 
 void allocInit() {
     memset(freeablePtrs, 0, sizeof(void*) * MAX_FREEABLE_PTRS);
+    //if(IS_WII) return;
     hookBranch((u32)allocTagged, allocTaggedHook, 0);
     hookBranch((u32)0x8001f5f4,  textureLoadHook, 1);
     hookBranch((u32)0x80029608,  textureLoadHook, 1);

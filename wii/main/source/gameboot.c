@@ -3,8 +3,10 @@
 void bootGame() {
     exiPrintf("game thread SP=%08X\n", get_r1());
 
+    //fatUnmount("sd");
+
     //register interrupt handlers
-    static OSContext ctxDspAi;
+    /*static OSContext ctxDspAi;
     static OSContext ctxDspAram;
     static OSContext ctxDsp;
     static OSContext ctxAi;
@@ -43,7 +45,11 @@ void bootGame() {
     //SYS_SetArena1Lo((void*)0x803fa480);
     //SYS_SetArena1Hi((void*)0x817ea240);
     (*(u32*)0x80000030) = 0x803fa480;
-    (*(u32*)0x80000034) = 0x817ea240;
+    (*(u32*)0x80000034) = 0x817ea240;*/
+
+    //protect ARAM area from accidental accesses
+    //SYS_ProtectRange(SYS_PROTECTCHAN0,
+    //    (void*)0x90000000, 0x01000000, SYS_PROTECTNONE);
 
     void (*game_init_hw)(void) = (void (*)())0x80003354;
     exiPuts("game init hw\n");
@@ -61,7 +67,7 @@ void bootGame() {
     //int (*gameInit)(int, char**) = (int(*)(int, char**))0x80020d8c;
     int (*gameMain)(int, char**) = (int(*)(int, char**))0x8002133c;
     exiPuts("game main\n");
-    //u32 irq = IRQ_Disable();
+    u32 irq = IRQ_Disable();
     switchToGame();
     gameMain(0, NULL);
     while(1);

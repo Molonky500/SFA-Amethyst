@@ -7,8 +7,9 @@ ORIGISO ?= original.iso
 PATCHISO ?= patched.iso
 DATA ?= ../browser/data
 ORIGDOL = $(DISCROOT)/../sys/main.dol.orig
+NEWDOL = $(DISCROOT)/../sys/main.dol
 
-all: $(BUILDDIR) $(BUILDDIR)/dolpatch.bin $(BUILDDIR)/bootstrap.bin $(patsubst %,$(BUILDDIR)/%.elf,$(PATCHES))
+all: $(BUILDDIR) $(BUILDDIR)/bootstrap.bin $(patsubst %,$(BUILDDIR)/%.elf,$(PATCHES))
 	@echo "[*] Done."
 
 $(BUILDDIR): $(ORIGDOL)
@@ -35,16 +36,6 @@ $(BUILDDIR)/%.elf: $(BUILDDIR) %/main.c
 $(BUILDDIR)/%.elf: $(BUILDDIR) $(BUILDDIR)/symbols.s %/main.s
 	@$(MAKE) --eval="NAME=$*" -f elf.mk
 
-# build patched DOL
-$(BUILDDIR)/dolpatch.bin: dolpatch/dolpatch.s $(BUILDDIR)/symbols.s
-	@echo "[*] Assembling: $<"
-	@$(call ASSEMBLE, $<, $@.elf)
-	@echo "[*] Extracting: $@"
-	@$(TOOL)objcopy -O binary $@.elf $@
-	@echo "[*] Applying DOL patch..."
-	@cp $(ORIGDOL) $(BUILDDIR)/main.patched.dol
-	@./tools/dolpatch.py $@ $(BUILDDIR)/main.patched.dol
-
 # remove build files (but not discroot)
 clean:
 	rm -rf $(BUILDDIR)
@@ -54,9 +45,8 @@ clean:
 # build patch, and install files into discroot
 install: all
 	@echo "[*] Installing..."
-	@cp $(BUILDDIR)/bootstrap.bin $(DISCROOT)/boot.bin
-	@cp $(BUILDDIR)/main.patched.dol $(DISCROOT)/../sys/main.dol
-	@./tools/elf2bin.py $(BUILDDIR) $(DISCROOT)
+	@./tools/elf2patch.py $(BUILDDIR)/src.elf $(BUILDDIR)/bootstrap.bin $(BUILDDIR)/patch.bin
+	@./tools/patchdol.py $(ORIGDOL) $(BUILDDIR)/patch.bin $(NEWDOL)
 	@./tools/makebitnames.py $(DATA)/U0/gamebits.xml $(DISCROOT)/bitnames.dat
 
 # extract ISO
@@ -72,7 +62,7 @@ $(ORIGDOL): $(ORIGISO)
 # build patch and run it
 # dolphin seems to only work with absolute paths for this
 run: install
-	dolphin-emu -d $(abspath $(DISCROOT)/../sys/main.dol)
+	dolphin-emu -d $(abspath $(NEWDOL))
 
 # build patched ISO
 # using bigger compression window (1GB) is necessary to get a patch that's
@@ -80,7 +70,6 @@ run: install
 iso: install
 	@echo "[*] Preparing files..."
 	@find . -name \*debug.log -delete
-	@cp "$(DISCROOT)/boot.bin" patchfiles/files/
 	@cp "$(DISCROOT)/bitnames.dat" patchfiles/files/
 	@cp "$(DISCROOT)/../sys/main.dol" patchfiles/sys/
 	@echo "[*] Building ISO..."
