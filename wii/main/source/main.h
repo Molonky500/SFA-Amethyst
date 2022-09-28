@@ -44,6 +44,8 @@ typedef struct {
 #define cntlzw(_val) ({u32 _rval; \
     __asm__ __volatile__ ("cntlzw %0, %1" : "=r"((_rval)) : "r"((_val))); _rval;})
 
+#define RETURN_ADDRESS (__builtin_extract_return_addr(__builtin_return_address(0)))
+
 #define __OSBusClock  (*(u32*)0x800000F8)
 #define __OSCoreClock (*(u32*)0x800000FC)
 #define OS_BUS_CLOCK        __OSBusClock
@@ -59,13 +61,13 @@ typedef struct {
 #define OSMicrosecondsToTicks( usec )   (((usec) * (OS_TIMER_CLOCK / 125000)) / 8)
 #define OSNanosecondsToTicks( nsec )    (((nsec) * (OS_TIMER_CLOCK / 125000)) / 8000)
 
+#include "irq.h"
 #include "thread.h"
 #include "dvd.h"
+#include "gameheap.h"
+#include "gamefuncs.h"
 
 //alloc.c
-void* alloc_hook(u32 size, u32 tag, const char *name);
-void free_hook(void *addr);
-void alloc_init();
 bool checkAddrInheap(void *addr, u32 len);
 
 //audio.c
@@ -74,8 +76,7 @@ void AIInitDMA_hook(u32 start, uint length);
 
 //debugprint.c
 void osPrintHook(const char *fmt, ...);
-void DBPrintf_hook(const char *fmt, ...);
-void dspDebugPrint_hook(const char *fmt, ...);
+void putHex(char *dst, u32 num);
 
 //dol.c
 void printDolHeader(DolHeader *header);
@@ -84,6 +85,10 @@ void loadDolFromMemory(DolHeader *header);
 //dvd.c
 extern volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
 void initDvdHack();
+int sendToDvdThread(HackDvdMsg *msg);
+int recvFromDvdThread(HackDvdMsg **msg, u32 flags);
+int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
+    int offset, DVDCallback callback, int prio, bool async);
 
 //dvdhook.c
 void __DVDFSInit_hook(void);
@@ -98,12 +103,6 @@ BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
     u32 offset, DVDCallback callback);
 BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
     DVDCBCallback callback);
-
-//dvdio.c
-int sendToDvdThread(HackDvdMsg *msg);
-int recvFromDvdThread(HackDvdMsg **msg, u32 flags);
-int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
-    int offset, DVDCallback callback, int prio, bool async);
 
 //dvdthread.c
 extern volatile bool dvdThreadReady;
@@ -121,42 +120,7 @@ HackDvdOpenFile* dvd_getFileByHandle(FILE *file);
 HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file);
 void dvd_removeFile(HackDvdOpenFile* file);
 
-//exceptionRaw.s
-void _raw_exceptionHook_Reset();
-void _raw_exceptionHook_MachineCheck();
-void _raw_exceptionHook_DSI();
-void _raw_exceptionHook_ISI();
-void _raw_exceptionHook_External();
-void _raw_exceptionHook_Alignment();
-void _raw_exceptionHook_Program();
-void _raw_exceptionHook_FpUnavailable();
-void _raw_exceptionHook_Decrementer();
-void _raw_exceptionHook_Syscall();
-void _raw_exceptionHook_Trace();
-void _raw_exceptionHook_PerfMon();
-void _raw_exceptionHook_IABR();
-//void _raw_exceptionHook_Thermal();
-void _raw_decrementerHook();
-//we just need the address of these symbols
-extern u32 _raw_exceptionHook_External2;
-extern u32 _raw_exceptionHook_External_END;
-extern u32 _raw_exceptionHook_FpUnavailable2;
-extern u32 _raw_exceptionHook_FpUnavailable_END;
-//XXX move these
-extern u32 get_r1();
-extern u32 get_r2();
-extern u32 get_r13();
-extern void set_r1(u32);
-extern void set_r2(u32);
-extern void set_r13(u32);
-extern u32 get_msr();
-extern void set_msr(u32);
-extern u32 get_dar();
-
 //exception.c
-void switchToGame();
-void switchToOgc();
-void putHex(char *dst, u32 num);
 void OSExceptionInit_hook();
 void exceptionHook(u32 *exc_gpr, int code);
 void gameExceptionHook(int exceptionCode, OSContext *ctx,
@@ -169,13 +133,13 @@ void exiPrintInit();
 
 //gameboot.c
 extern void *acrIrq;
-extern void *ipcIrq;
 void bootGame(DolHeader *header);
 
 //init.c
 int init();
 
 //irq.c
+extern u32 *gameIrqHandlers;
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx);
 void __OSInterruptInit_hook();
 void* __OSSetInterruptHandler_hook(int irq, void *handler);
@@ -203,7 +167,27 @@ char* OSGetFontTexel_hook(char* string, void* image, s32 pos,
 uint32_t hookBranch(uint32_t addr, void *target, int isBl);
 void doPatches();
 
+//regAccess.s
+extern u32 get_r1();
+extern u32 get_r2();
+extern u32 get_r13();
+extern void set_r1(u32);
+extern void set_r2(u32);
+extern void set_r13(u32);
+extern u32 get_msr();
+extern void set_msr(u32);
+extern u32 get_dar();
+
+//regs.c
+extern vu32* const _piReg;
+extern vu16* const _memReg;
+extern vu16* const _dspReg;
+extern vu32* const _exiReg;
+extern vu32* const _aiReg;
+
 //thread.c
+void switchToGame();
+void switchToOgc();
 void OSYieldThread(void);
 void initThreads();
 s32 LWP_CreateThread_dol(lwp_t *thethread,

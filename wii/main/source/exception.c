@@ -1,45 +1,5 @@
 #include "main.h"
 
-static vu32 ogc_r2   = 0xDEAD106C;
-static vu32 ogc_r13  = 0xDEAD106C;
-static vu32 game_r2  = 0x803E6500;
-static vu32 game_r13 = 0x803E31E0;
-
-void switchToGame() {
-    u32 irq = IRQ_Disable();
-    if(get_r2() != game_r2) {
-        ogc_r2 = get_r2();
-        set_r2(game_r2);
-        ogc_r13 = get_r13();
-        set_r13(game_r13);
-    }
-    //set_msr(0x00009032);
-    IRQ_Restore(irq);
-}
-void switchToOgc() {
-    u32 irq = IRQ_Disable();
-    //game ones never change, no need to save
-    if(get_r2() == game_r2) {
-        set_r2(ogc_r2);
-        set_r13(ogc_r13);
-    }
-    //set_msr(0x0000B036);
-    IRQ_Restore(irq);
-}
-
-void putHex(char *dst, u32 num) {
-    //snprintf doesn't work in an exception handler
-    //static const char *hex = "0123456789ABCDEF";
-    static const char *hex = "0123456789abcdef";
-    //lowercase is nice to paste into objdump | less
-    for(int i=0; i<8; i++) {
-        *(dst++) = hex[(num >> 28) & 0xF];
-        num <<= 4;
-    }
-}
-
-
-u32 (*__OSSetExceptionHandler)(u32 exception, void *handler) = 0x80240bc4;
 void __exception_sethandler(u32 nExcept, void (*pHndl)(frame_context*));
 
 void OSExceptionInit_hook() {

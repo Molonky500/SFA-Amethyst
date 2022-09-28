@@ -60,26 +60,6 @@
 .set DBAT7L, 575
 .set EXCEPTION_FRAME_END,728
 
-.extern c_exception_handler
-.global exceptionHook
-#.global _raw_exceptionHook_Reset
-.global _raw_exceptionHook_MachineCheck
-.global _raw_exceptionHook_DSI
-.global _raw_exceptionHook_ISI
-.global _raw_exceptionHook_External
-.global _raw_exceptionHook_Alignment
-.global _raw_exceptionHook_Program
-.global _raw_exceptionHook_FpUnavailable
-.global _raw_exceptionHook_Decrementer
-.global _raw_exceptionHook_Syscall
-.global _raw_exceptionHook_Trace
-.global _raw_exceptionHook_PerfMon
-.global _raw_exceptionHook_IABR
-#.global _raw_exceptionHook_Thermal
-.global _raw_exceptionHook_External2
-.global _raw_exceptionHook_External_END
-.global _raw_exceptionHook_FpUnavailable2
-.global _raw_exceptionHook_FpUnavailable_END
 .global get_r1
 .global get_r2
 .global get_r13
@@ -119,10 +99,3 @@ set_msr:
 get_dar:
     mfspr r3, 19
     blr
-
-.ctr_save:
-    .long 0xDEADBEEF
-.ogc_r2:
-    .long 0xDEADBEEF
-.ogc_r13:
-    .long 0xDEADBEEF

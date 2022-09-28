@@ -31,16 +31,6 @@ void loadDolFromMemory(DolHeader *header) {
     for(int i=0; i<DOL_NUM_TEXT_SECTIONS; i++) {
         if(header->textSize[i] > 0) {
             exiPrintf("Loading text%d...\n", i);
-            //XXX this check should no longer be needed.
-            if(header->textAddr[i] < 0x800031A0) {
-                //do not clobber OS globals.
-                //this chops off some of the game's boot code
-                //but we'll take care of that.
-                u32 diff = 0x800031A0 - header->textAddr[i];
-                header->textAddr[i] += diff;
-                header->textOffset[i] += diff;
-                header->textSize[i] -= diff;
-            }
             memcpy((void*)header->textAddr[i],
                 data + header->textOffset[i],
                 header->textSize[i]);

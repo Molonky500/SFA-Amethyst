@@ -1,12 +1,19 @@
 #include "main.h"
 
-void osPrintHook(const char *fmt, ...) {
-    if(!(get_msr() & 0x8000)) {
-        //vsnprintf doesn't work with interrupts disabled.
-        exiPuts(fmt);
-        return;
+void putHex(char *dst, u32 num) {
+    //snprintf doesn't work in an exception handler
+    //static const char *hex = "0123456789ABCDEF";
+    static const char *hex = "0123456789abcdef";
+    //lowercase is nice to paste into objdump | less
+    for(int i=0; i<8; i++) {
+        *(dst++) = hex[(num >> 28) & 0xF];
+        num <<= 4;
     }
+}
 
+//same hook is used for several debug print functions
+//that are stubbed in the game binary.
+void osPrintHook(const char *fmt, ...) {
     switchToOgc();
     char buf[1024];
 

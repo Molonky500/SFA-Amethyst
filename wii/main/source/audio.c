@@ -1,6 +1,8 @@
 #include "main.h"
 #define AUDIO_DEBUG 1
 
+//this is probably not needed
+
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
     switchToOgc();
     static int nDma = 0;

@@ -52,3 +52,128 @@ void initDvdHack() {
     exiPrintf("OSResumeThread OK for DVD\n");
     switchToOgc();
 }
+
+int sendToDvdThread(HackDvdMsg *msg) {
+    /** Called by another thread to send a message
+     *  to the DVD thread.
+     */
+    while(!dvdThreadReady) OSYieldThread();
+    //LWP_MutexLock(dvdMsgMutex);
+    int next = (dvdMsgsInHead + 1) % DVD_MAX_MSGS;
+    #if DVD_DEBUG
+        exiPrintf("sendToDvdThread h=%d t=%d msg=%08X\n",
+            dvdMsgsInHead, dvdMsgsInTail, &dvdMsgsIn[dvdMsgsInHead]);
+    #endif
+    if(next == dvdMsgsInTail) {
+        exiPuts(" *** ERROR *** sendToDvdThread msg overflow\n");
+        //LWP_MutexUnlock(dvdMsgMutex);
+        return -EOVERFLOW;
+    }
+    msg->id = dvdCmdId++;
+    void *buf = (void*)&dvdMsgsIn[dvdMsgsInHead];
+    //void *buf = malloc(sizeof(HackDvdMsg));
+    memcpy(buf, msg, sizeof(HackDvdMsg));
+    bool r = OSSendMessage(&hackDvdThreadMailIn, (OSMessage)buf, OS_MESSAGE_NOBLOCK);
+    if(!r) {
+        exiPrintf(" *** ERROR *** sendToDvdThread fail\n");
+        //LWP_MutexUnlock(dvdMsgMutex);
+        return -EIO;
+    }
+    dvdMsgsInHead = next;
+    #if DVD_DEBUG
+        exiPrintf("wakeup DVD\n");
+    #endif
+    //LWP_ThreadSignal(dvdThreadQueue);
+    //LWP_MutexUnlock(dvdMsgMutex);
+    return 0;
+}
+
+int recvFromDvdThread(HackDvdMsg **msg, u32 flags) {
+    /** Called by the DVD thread to receive the next message
+     *  from another thread.
+     */
+    while(!dvdThreadReady) OSYieldThread();
+    //LWP_MutexLock(dvdMsgMutex);
+    int next = (dvdMsgsOutTail + 1) % DVD_MAX_MSGS;
+    OSMessage m;
+    //#if DVD_DEBUG
+    //    exiPrintf("recvFromDvdThread h=%d t=%d msg=%08X\n",
+    //        dvdMsgsOutHead, dvdMsgsOutTail, &dvdMsgsOut[dvdMsgsOutTail]);
+    //#endif
+    BOOL r = OSReceiveMessage(&hackDvdThreadMailOut, &m, flags);
+    if(!r) {
+        //LWP_MutexUnlock(dvdMsgMutex);
+        return -EIO;
+    }
+    /*if(m != &dvdMsgsOut[dvdMsgsOutTail]) {
+        exiPrintf(" *** ERROR *** recvFromDvdThread m=%08X out=%08X h=%d t=%d\n", m,
+            dvdMmsgsOut[dvdMsgsOutTail], msgsOutHead, dvdMsgsOutTail);
+    }*/
+    *msg = m; //already pointing to the buffer
+    dvdMsgsOutTail = next;
+    //LWP_MutexUnlock(dvdMsgMutex);
+    return 0;
+}
+
+int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
+int offset, DVDCallback callback, int prio, bool async) {
+    DVD_BUSY = 1;
+    HackDvdMsg msg;
+    HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
+    msg.cmd = DVDCMD_READ;
+    //sendToDvdThread fills in msg.id
+    msg.read.file = file;
+    msg.read.addr = addr;
+    msg.read.length = length;
+    msg.read.offset = offset;
+    msg.read.callback = callback;
+    msg.read.prio = prio;
+    msg.read.async = async;
+    int r = 0;
+    #if DVD_DEBUG
+        exiPrintf("%s: sending...\n", __FUNCTION__);
+    #endif
+    OSYieldThread();
+    //do {
+        r = sendToDvdThread(&msg);
+    //    OSYieldThread();
+    //} while(r);
+    if(r) {
+        exiPrintf(" *** ERROR *** sendToDvdThread: %d\n", r);
+        return r;
+    }
+    #if DVD_DEBUG
+        exiPrintf("%s: sent\n", __FUNCTION__);
+    #endif
+    //OSYieldThread();
+    if(!async) { //wait for reply
+        #if DVD_DEBUG
+            exiPrintf("Wait for DVD read for file %08X id %d\n",
+                file, msg.id);
+        #endif
+        bool done = false;
+        while(!done) {
+            OSYieldThread();
+            HackDvdMsg *resp;
+            r = recvFromDvdThread(&resp, OS_MESSAGE_NOBLOCK);
+            if(r) continue;
+            //if(r) {
+            //    exiPrintf(" *** ERROR *** recvFromDvdThread: %d\n", r);
+            //    break;
+            //}
+            #if DVD_DEBUG
+                exiPrintf("recvFromDvdThread m=%d id=%d file=%08X\n",
+                    resp->cmd, resp->id, resp->read.file);
+            #endif
+            if(resp->id == msg.id) done = true;
+            //free(resp);
+        }
+    }
+    //OSYieldThread();
+    #if DVD_DEBUG
+        exiPrintf("DVD %ssync read finished, file %08X\n",
+            async ? "a" : "", file);
+    #endif
+    return length;
+}
+

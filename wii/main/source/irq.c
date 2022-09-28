@@ -1,10 +1,6 @@
 #include "main.h"
 
-static vu32* const _piReg = (u32*)0xCC003000;
-static vu16* const _memReg = (u16*)0xCC004000;
-static vu16* const _dspReg = (u16*)0xCC005000;
-static vu32* const _exiReg = (u32*)0xCD006800;
-static vu32* const _aiReg = (u32*)0xCD006C00;
+u32 *gameIrqHandlers = (u32*)0x80003040;
 
 static u32 const _irqPrio[] = {
     IM_PI_ERROR,IM_PI_DEBUG,IM_MEM,IM_PI_RSW,
@@ -22,12 +18,7 @@ struct irq_handler_s {
 };
 extern struct irq_handler_s g_IRQHandler[32];
 
-int (*OSDisableScheduler)(void) = 0x80245d94;
-int (*OSEnableScheduler)(void) = 0x80245dd4;
-//void (*__OSReschedule)(void) = 0x80246278;
-void (*OSLoadContext)(OSContext*) = 0x80242394;
 
-void (*__OSDispatchInterrupt)(int, OSContext*) = 0x80243c54;
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
     //copied from libogc to handle Wii IRQs
     u32 i,icause,intmask,irq = 0;
@@ -143,9 +134,8 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
 	if(cause&0x00004000) {
 		intmask |= IRQMASK(IRQ_PI_ACR);
 	}
-    //800000c4 = prevIrqMask
-    //800000c8 = currIrqMask
-	mask = intmask&~((*(u32*)0x800000c4)|(*(u32*)0x800000c8));
+
+	mask = intmask&~(prevIrqMask|currIrqMask);
 	if(mask) {
 		i=0;
 		irq = 0;
@@ -193,12 +183,8 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
 }
 
 void __OSInterruptInit_hook() {
-    void (*__OSInterruptInit)(void) = 0x802437f8;
     __OSInterruptInit();
-
-    u32 *handlers = (u32*)0x80003040;
-    handlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
-    handlers[IRQ_PI_ERROR] = _irqPiError;
+    gameIrqHandlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
 }
 
 void* __OSSetInterruptHandler_hook(int irq, void *handler) {
@@ -218,8 +204,7 @@ void* __OSGetInterruptHandler_hook(int irq) {
 
 void __OSMaskInterrupts_hook(u32 mask) {
     switchToOgc();
-    exiPrintf("OSMaskInterrupts(%08X) from %08X\n", mask,
-        __builtin_extract_return_addr(__builtin_return_address(0)));
+    exiPrintf("OSMaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
     //mask &= ~IM_PI_ACR; //keep that one on
     __MaskIrq(mask);
     switchToGame();
@@ -228,8 +213,7 @@ void __OSMaskInterrupts_hook(u32 mask) {
 void __OSUnmaskInterrupts_hook(u32 mask) {
     switchToOgc();
     __UnmaskIrq(mask);
-    exiPrintf("OSUnmaskInterrupts(%08X) from %08X\n", mask,
-        __builtin_extract_return_addr(__builtin_return_address(0)));
+    exiPrintf("OSUnmaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
     switchToGame();
 }
 

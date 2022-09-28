@@ -1,23 +1,5 @@
 #include "main.h"
 
-void (*OSInitMessageQueue)(
-    OSMessageQueue* mq,
-    OSMessage*      msgArray,
-    s32             msgCount) = 0x80244000;
-BOOL (*OSSendMessage)(
-    OSMessageQueue* mq,
-    OSMessage       msg,
-    s32             flags) = 0x80244060;
-/*BOOL (*OSJamMessage)(
-    OSMessageQueue* mq,
-    OSMessage       msg,
-    s32             flags);*/
-BOOL (*OSReceiveMessage)(
-    OSMessageQueue* mq,
-    OSMessage*      msg,
-    s32             flags) = 0x80244128;
-
-
 u32 lwpFlagsToDolFlags(u32 flags) {
     u32 dolFlags = 0;
     if(!(flags & MQ_MSG_NOBLOCK)) dolFlags |= OS_MESSAGE_BLOCK;

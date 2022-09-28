@@ -1,26 +1,31 @@
 #include "main.h"
 
-//pointers to Dolphin OS functions
-BOOL (*OSCreateThread)(
-    OSThread*  thread,
-    void*    (*func)(void*),
-    void*      param,
-    void*      stackBase,
-    u32        stackSize,
-    OSPriority priority,
-    u16        attribute) = 0x802462a8;
-s32 (*OSResumeThread)(OSThread* thread) = 0x80246668;
-s32 (*OSSuspendThread)(OSThread* thread) = 0x802468f0;
-OSThread* (*OSGetCurrentThread)(void) = 0x80245d88;
-BOOL (*OSSetThreadPriority)(OSThread* thread, OSPriority priority) = 0x80245eb8;
-void (*SelectThread)(BOOL) = 0x80246078;
-void (*__OSReschedule)(void) = 0x80246278;
-void (*OSSleepThread)(OSThreadQueue* queue) = 0x80246a60;
-void (*OSWakeupThread)(OSThreadQueue* queue) = 0x80246b4c;
-void (*OSInitThreadQueue)(OSThreadQueue* queue) = 0x80245d78;
-int (*OSDisableInterrupts)(void) = 0x8024377c;
-int (*OSEnableInterrupts)(void) = 0x80243790;
-int (*OSRestoreInterrupts)(int) = 0x802437a4;
+static vu32 ogc_r2   = 0xDEAD106C;
+static vu32 ogc_r13  = 0xDEAD106C;
+static vu32 game_r2  = 0x803E6500;
+static vu32 game_r13 = 0x803E31E0;
+
+void switchToGame() {
+    u32 irq = IRQ_Disable();
+    if(get_r2() != game_r2) {
+        ogc_r2 = get_r2();
+        set_r2(game_r2);
+        ogc_r13 = get_r13();
+        set_r13(game_r13);
+    }
+    //set_msr(0x00009032);
+    IRQ_Restore(irq);
+}
+void switchToOgc() {
+    u32 irq = IRQ_Disable();
+    //game ones never change, no need to save
+    if(get_r2() == game_r2) {
+        set_r2(ogc_r2);
+        set_r13(ogc_r13);
+    }
+    //set_msr(0x0000B036);
+    IRQ_Restore(irq);
+}
 
 mapDolToLwpThread_t mapDolToLwpThread[MAX_THREADS];
 
