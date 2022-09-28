@@ -197,8 +197,19 @@ void dvdIdle() {
 void* hackDvdThreadMain(void *param) {
     /** Main thread for async DVD emulation.
      */
+    __UnmaskIrq(IM_PI_ACR);
+    OSEnableInterrupts();
     switchToOgc();
     exiPuts("DVD thread online\n");
+    /*__IOS_InitializeSubsystems();
+    exiPuts("IOS initsub OK\n");
+    __IPC_Reinitialize();
+    exiPuts("IPC init OK\n");*/
+    /*exiPrintf("IOS ver %08X pref %08X\n",
+        IOS_GetVersion(),
+        IOS_GetPreferredVersion());
+    IOS_ReloadIOS(IOS_GetPreferredVersion());
+    exiPrintf("IOS reload OK\n");*/
 
     if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\n");
@@ -207,6 +218,7 @@ void* hackDvdThreadMain(void *param) {
         exiPrintf("DVD FAT init FAIL\n");
         return NULL;
     }
+    exiPuts(" *** DVD MOUNT OK\n");
     dvdThreadReady = true;
 
     int err = 0;
@@ -216,7 +228,7 @@ void* hackDvdThreadMain(void *param) {
 
         while(true) {
             #if DVD_DEBUG
-                exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
+                //exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
             switchToGame();
             OSYieldThread();
@@ -225,7 +237,7 @@ void* hackDvdThreadMain(void *param) {
             err = recvToDvdThread(&msg, OS_MESSAGE_NOBLOCK);
             if(!err) break;
             #if DVD_DEBUG
-                exiPuts("DVD thread awake\n");
+                //exiPuts("DVD thread awake\n");
             #endif
             dvdIdle();
         }

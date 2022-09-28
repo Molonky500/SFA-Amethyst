@@ -1,7 +1,7 @@
 #include "main.h"
 
-static vu32 ogc_r2   = 0xDEADBEEF;
-static vu32 ogc_r13  = 0xDEADBEEF;
+static vu32 ogc_r2   = 0xDEAD106C;
+static vu32 ogc_r13  = 0xDEAD106C;
 static vu32 game_r2  = 0x803E6500;
 static vu32 game_r13 = 0x803E31E0;
 
@@ -38,31 +38,95 @@ void putHex(char *dst, u32 num) {
     }
 }
 
-void exceptionHook(u32 *exc_gpr, int code) {
+
+u32 (*__OSSetExceptionHandler)(u32 exception, void *handler) = 0x80240bc4;
+void __exception_sethandler(u32 nExcept, void (*pHndl)(frame_context*));
+
+void OSExceptionInit_hook() {
+    //we repurpose the memory for some unused handlers
+    //to store our trampolines and such, so we disable
+    //the game's original method and install them ourselves.
+    exiPrintf("%s\n", __FUNCTION__);
+
+    *(u32*)0x803dddec = 0x80003000; //set exception handler table
+    // *(u32*)0x803dde38 = 0x80003040; //set IRQ handler table
+
+    static const void *excAddrs[] = {
+        (void*)0xFFFFFFFF, //(void*)0x80000100, //reset (not connected)
+        (void*)0xFFFFFFFF, //(void*)0x80000200, //machine check
+        (void*)0x80000300, //DSI
+        (void*)0x80000400, //ISI
+        (void*)0x80000500, //External interrupt
+        (void*)0x80000600, //alignment
+        (void*)0x80000700, //program
+        (void*)0x80000800, //FPU Unavailable
+        (void*)0x80000900, //decrementer
+        (void*)0x80000C00, //syscall
+        (void*)0x80000D00, //trace
+        (void*)0x80000F00, //perfmon
+        (void*)0x80001300, //IABR (instruction breakpoint)
+        (void*)0xFFFFFFFF, //(void*)0x80001400, //reserved
+        (void*)0x80001700, //thermal
+        (void*)0
+    };
+    for(int i=0; excAddrs[i]; i++) {
+        if(excAddrs[i] == (void*)0xFFFFFFFF) continue;
+        memcpy(excAddrs[i], 0x80240bf4, 0x98);
+        //patch in exception code.
+        //this is actually how the game does this.
+        //in fact this is part of DolphinOS, so this is
+        //probably how every game does this.
+        u32 *patch = (u32*)excAddrs[i];
+        patch[0x1A] = 0x38600000 | i;
+        //patch out debugger hook
+        patch[0x16] = 0x60000000;
+
+        //80240c90 = OSDefaultExceptionHandler
+        __OSSetExceptionHandler(i, (void*)0x80240c90);
+    }
+
+    DCInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
+    ICInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
+
+    exiPrintf("%s done\n", __FUNCTION__);
+}
+
+static const char *excNames[] = {
+    "Reset", "MachineCheck", "DSI",
+    "ISI", "External", "Alignment", "Program",
+    "FPUnavail", "Decrementer", "Rsvd0A", "Rsvd0B",
+    "Syscall", "Trace", "Rsvd0E", "Perfmon",
+    "Rsvd10", "Rsvd11", "Rsvd12", "Breakpoint",
+    "Rsvd14", "Rsvd15", "Rsvd16", "Thermal",
+};
+
+void gameExceptionHook(int exceptionCode, OSContext *ctx,
+uint cause, void *addr) {
     static bool alreadyExc = false;
     while(alreadyExc);
     alreadyExc = true;
 
     char msg[1024];
-    strcpy(msg, "ERR ........\n");
-    putHex(&msg[4], code);
+    strcpy(msg, "ERR ........ ");
+    putHex(&msg[4], exceptionCode);
+    exiPuts(msg);
+    exiPuts(excNames[exceptionCode & 0xF]);
+
+    strcpy(msg, "\nCAUSE=........ ADDR=........ DAR=........\n");
+    putHex(&msg[ 7], cause);
+    putHex(&msg[21], addr);
+    putHex(&msg[34], get_dar());
     exiPuts(msg);
 
-    //.set LR_SAVE,    0x00
-    //.set XER_SAVE,   0x04
-    //.set SRR0_SAVE,  0x08
-    //.set SRR1_SAVE,  0x0C
-    //.set GPR_SAVE,   0x10
-
     strcpy(msg, "XER=........ SRR0=........ SRR1=........ LR=........\n");
-    putHex(&msg[ 4], exc_gpr[0x04/4]);
-    putHex(&msg[18], exc_gpr[0x08/4]);
-    putHex(&msg[32], exc_gpr[0x0C/4]);
-    putHex(&msg[44], exc_gpr[0x00/4]);
+    putHex(&msg[ 4], ctx->xer);
+    putHex(&msg[18], ctx->srr0);
+    putHex(&msg[32], ctx->srr1);
+    putHex(&msg[44], ctx->lr);
     exiPuts(msg);
 
     exiPuts("GPRs:\n");
-    u32 *gpr = &exc_gpr[0x10/4];
+    u32 *gpr = &ctx->gpr;
     for(int i=0; i<32; i += 4) {
         strcpy(msg, "........ ........ ........ ........\n");
         putHex(&msg[ 0], gpr[i]);
@@ -82,8 +146,4 @@ void exceptionHook(u32 *exc_gpr, int code) {
 
     //SYS_ResetSystem(SYS_SHUTDOWN,0,0);
     while(1);
-}
-
-void c_exception_handler(frame_context *pCtx) {
-    exceptionHook(pCtx->GPR, pCtx->EXCPT_Number);
 }

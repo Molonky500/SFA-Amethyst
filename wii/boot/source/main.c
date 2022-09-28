@@ -18,6 +18,7 @@
 static void *xfb = NULL;
 static GXRModeObj *rmode = NULL;
 static char gameRootDir[512];
+extern DISC_INTERFACE __io_wiisd;
 
 int initVideo() {
     /** Init video system.
@@ -280,6 +281,7 @@ __attribute__((noreturn)) void loadAppDol() {
 
     loadGame();
     fatUnmount("sd");
+    __io_wiisd.shutdown();
     //delay to let SD tidy itself up
     u64 then = SYS_Time() + 10000000;
     while(SYS_Time() < then);

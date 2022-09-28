@@ -1,37 +1,41 @@
 #include "main.h"
 
+static vu32* const _ipcReg = (u32*)0xCD000000;
+
 void __DVDFSInit_hook(void) {
     exiPrintf("reached %s\n", __FUNCTION__);
 
     //this is a good place to init the rest of the hacks.
     //or maybe it's not? interrupts might be disabled...
     switchToOgc();
-    __IPC_Reinitialize();
-    exiPrintf("IPC reinit OK\n");
-    /*__IOS_InitializeSubsystems();
-    exiPrintf("IOS ver %08X pref %08X\n",
-        IOS_GetVersion(),
-        IOS_GetPreferredVersion());
-    IOS_ReloadIOS(IOS_GetPreferredVersion());
-    exiPrintf("IOS reload OK\n");*/
+
+    //restore Wii-exclusive IRQ handlers
+    // *(u32*)0x800030ac = acrIrq;
+    // *(u32*)0x800030b8 = ipcIrq;
+    __UnmaskIrq(IM_PI_ACR);
+    //_ipcReg[1] = 56; //IPC_WriteReg(1,56);
     initThreads();
     exiPrintf("initThreads: OK\n");
     //exiPrintf("%s: OK\n", __FUNCTION__);
+
+    initDvdHack();
+    exiPrintf("initDvdHack: OK; wait for DVD...\n");
+
+    u32 *handlers = (u32*)0x80003040;
+    for(int i=0; i<32; i += 4) {
+        exiPrintf("IRQ[%2d]: %08X %08X %08X %08X\n", i,
+            handlers[i], handlers[i+1],
+            handlers[i+2], handlers[i+3]);
+    }
+
     switchToGame();
+
+    while(!dvdThreadReady) OSYieldThread();
+    exiPrintf("DVD READY\n");
 }
 
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     switchToOgc();
-
-    static bool startedThread = false;
-    if(!startedThread) {
-        initDvdHack();
-        exiPrintf("initDvdHack: OK\n");
-        switchToGame();
-        while(!dvdThreadReady) OSYieldThread();
-        switchToOgc();
-    }
-
     char newPath[4096];
     snprintf(newPath, sizeof(newPath), "%s/files/%s",
         gameRootDir, path);
@@ -42,9 +46,11 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
         exiPuts("wait for DVD...\n");
         while(!dvdThreadReady);
     }
+    exiPrintf("fopen...\n");
     FILE *file = fopen(newPath, "rb");
+    int err = errno;
+    exiPrintf("fopen: %08X\n", file);
     if(!file) {
-        int err = errno;
         exiPrintf(" *** ERROR *** DVDOpen(%s, %08X) FAILED: %d\n",
             newPath, info, err);
         switchToGame();
@@ -63,7 +69,7 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     exiPrintf("file=0x%08X size=%d\n", file, info->length);
 //#endif
 
-    OSYieldThread();
+    //OSYieldThread();
     switchToGame();
     return true;
 }

@@ -78,6 +78,7 @@ void doPatches() {
     hookBranch(0x80246e04, osPrintHook, 0);
     hookBranch(0x802510cc, osPrintHook, 0);
     hookBranch(0x8024091c, OSExceptionInit_hook, 0);
+    hookBranch(0x80242a10, gameExceptionHook, 0);
 
     /*hookBranch(0x80246a60, OSSleepThread_hook, 0);
     //hookBranch(0x802462a8, OSCreateThread_hook, 0);
@@ -101,13 +102,17 @@ void doPatches() {
     hookBranch(0x80245d78, OSInitThreadQueue_hook, 0);
     hookBranch(0x80244000, OSInitMessageQueue_hook, 0);
     hookBranch(0x80244060, OSSendMessage_hook, 0);
-    hookBranch(0x80244128, OSReceiveMessage_hook, 0);
+    hookBranch(0x80244128, OSReceiveMessage_hook, 0);*/
 
+    hookBranch(0x802406c0, __OSInterruptInit_hook, 1);
     //hookBranch(0x8024377c, OSDisableInterrupts_hook, 0);
     //hookBranch(0x80243790, OSEnableInterrupts_hook, 0);
     //hookBranch(0x802437a4, OSRestoreInterrupts_hook, 0);
-    hookBranch(0x80243b44, OSMaskInterrupts_hook, 0);
-    hookBranch(0x80243bcc, OSUnmaskInterrupts_hook, 0);*/
+    hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0);
+    hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0);
+    //hookBranch(0x802437c8, __OSSetInterruptHandler_hook, 0);
+    //hookBranch(0x802437e4, __OSGetInterruptHandler_hook, 0);
+    hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0);
 
     hookBranch(0x80248870, __DVDFSInit_hook, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0);
@@ -156,8 +161,8 @@ void doPatches() {
         //0x8024037c, 0x60000000,
 
         //don't replace our external interrupt handler
-        //0x80243854, 0x60000000,
-        //0x802406b0, 0x60000000,
+        //0x80243854, 0x60000000, //set ext irq handler
+        //0x802406b0, 0x60000000, //OSExceptionInit
 
         //disable padUpdate
         //0x80014f40, 0x4E800020,
@@ -201,8 +206,10 @@ void doPatches() {
         //0x803dccf0, 0x8032e65c, //progressive scan mode
 
         //manually set some exception handlers
-        0x803dddec, 0x80003000, //the exception handler table
-        0x803dde38, 0x80003040, //the IRQ handler table
+        //0x803dddec, 0x80003000, //the exception handler table
+        //0x803dde38, 0x80003040, //the IRQ handler table
+        //those two don't work because the init code clears them.
+
         //0x8000301c, 0x802427fc, //fpuUnavailableHandler
         //0x80003020, 0x80241390, //DecrementerExceptionHandler
         //0x80003054, 0x8024fcd4, //DSP IRQ

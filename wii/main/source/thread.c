@@ -14,7 +14,7 @@ s32 (*OSSuspendThread)(OSThread* thread) = 0x802468f0;
 OSThread* (*OSGetCurrentThread)(void) = 0x80245d88;
 BOOL (*OSSetThreadPriority)(OSThread* thread, OSPriority priority) = 0x80245eb8;
 void (*SelectThread)(BOOL) = 0x80246078;
-void (*__OSReschedule)(int) = 0x80246278;
+void (*__OSReschedule)(void) = 0x80246278;
 void (*OSSleepThread)(OSThreadQueue* queue) = 0x80246a60;
 void (*OSWakeupThread)(OSThreadQueue* queue) = 0x80246b4c;
 void (*OSInitThreadQueue)(OSThreadQueue* queue) = 0x80245d78;
@@ -198,7 +198,7 @@ void LWP_YieldThread_dol(void) {
 
 void LWP_Reschedule_dol(u32 prio) {
     switchToGame();
-    __OSReschedule(prio);
+    __OSReschedule();
     switchToOgc();
 }
 
@@ -267,6 +267,8 @@ s32 LWP_ThreadSleep_dol(lwpq_t thequeue) {
     switchToGame();
     OSSleepThread(dolQ);
     switchToOgc();
+    exiPrintf("DONE OSSleepThread(%08X) self=%08X\n", dolQ,
+        OSGetCurrentThread());
     return 0;
 }
 

@@ -25,7 +25,7 @@ void* loadGame(void *param) {
     //so we skip reading that code, and reproduce its
     //effects here.
     exiPuts("call init\r\n");
-    bootGame();
+    bootGame(header);
 
     return NULL;
 }
@@ -42,6 +42,10 @@ int main(int argc, char **argv) {
     exiPrintf("game loader start; arenas = %08X - %08X, %08X - %08X\n",
         SYS_GetArena1Lo(), SYS_GetArena1Hi(),
         SYS_GetArena2Lo(), SYS_GetArena2Hi());
+    exiPrintf("argc=%d\n", argc);
+    for(int i=0; i<argc; i++) {
+        exiPrintf("argv[%d] = \"%s\"\n", i, argv[i]);
+    }
 
     /*lwp_t mainThread;
     u32 mainStackSize = 8192; //no idea what it should be

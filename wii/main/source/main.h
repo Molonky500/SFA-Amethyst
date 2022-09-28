@@ -41,6 +41,9 @@ typedef struct {
 #define PTR_VALID(p) (((p) >= 0x80000000 && (p) <= 0x817FFFFF) || \
     ((p) >= 0x91000000 && (p) <= 0x92FFFFFF))
 
+#define cntlzw(_val) ({u32 _rval; \
+    __asm__ __volatile__ ("cntlzw %0, %1" : "=r"((_rval)) : "r"((_val))); _rval;})
+
 #define __OSBusClock  (*(u32*)0x800000F8)
 #define __OSCoreClock (*(u32*)0x800000FC)
 #define OS_BUS_CLOCK        __OSBusClock
@@ -148,12 +151,16 @@ extern void set_r2(u32);
 extern void set_r13(u32);
 extern u32 get_msr();
 extern void set_msr(u32);
+extern u32 get_dar();
 
 //exception.c
 void switchToGame();
 void switchToOgc();
 void putHex(char *dst, u32 num);
+void OSExceptionInit_hook();
 void exceptionHook(u32 *exc_gpr, int code);
+void gameExceptionHook(int exceptionCode, OSContext *ctx,
+    uint cause, void *addr);
 
 //exi.c
 void exiPuts(const char *str);
@@ -161,13 +168,21 @@ void exiPrintf(const char *fmt, ...);
 void exiPrintInit();
 
 //gameboot.c
-void bootGame();
+extern void *acrIrq;
+extern void *ipcIrq;
+void bootGame(DolHeader *header);
 
 //init.c
 int init();
 
 //irq.c
-void OSExceptionInit_hook();
+void gameExtIrqHandler_hook(int irqNo, OSContext *ctx);
+void __OSInterruptInit_hook();
+void* __OSSetInterruptHandler_hook(int irq, void *handler);
+void* __OSGetInterruptHandler_hook(int irq);
+void __OSMaskInterrupts_hook(u32 mask);
+void __OSUnmaskInterrupts_hook(u32 mask);
+void _irqPiError(int irq, OSContext *ctx);
 
 //main.c
 extern char gameRootDir[512];

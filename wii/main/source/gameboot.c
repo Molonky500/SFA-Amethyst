@@ -1,9 +1,42 @@
 #include "main.h"
 
-void bootGame() {
+extern DISC_INTERFACE __io_wiisd;
+void *acrIrq = NULL;
+void *ipcIrq = NULL;
+
+void bootGame(DolHeader *header) {
     exiPrintf("game thread SP=%08X\n", get_r1());
 
     //fatUnmount("sd");
+    __io_wiisd.shutdown();
+
+    //get the current IPC IRQ
+    for(int i=0; i<32; i++) {
+        exiPrintf("IRQ[%2d] handler: %08X\n", i, IRQ_GetHandler(i));
+    }
+
+    //XXX 30 seems not used, even though wiibrew says
+    //it's the IPC handler...
+    //"ACR" apparently means "actual IPC handler"
+    acrIrq = (void*)IRQ_GetHandler(27);
+    ipcIrq = (void*)IRQ_GetHandler(30);
+
+    __IPC_Reinitialize();
+    exiPrintf("IPC reinit OK\n");
+    __IOS_InitializeSubsystems();
+    exiPrintf("IOS ver %08X pref %08X\n",
+        IOS_GetVersion(),
+        IOS_GetPreferredVersion());
+    IOS_ReloadIOS(IOS_GetPreferredVersion());
+    exiPrintf("IOS reload OK\n");
+
+    /*if(fatInitDefault()) {
+        exiPrintf("DVD FAT init OK\n");
+    }
+    else {
+        exiPrintf("DVD FAT init FAIL\n");
+        //return NULL;
+    }*/
 
     //register interrupt handlers
     /*static OSContext ctxDspAi;
@@ -51,25 +84,10 @@ void bootGame() {
     //SYS_ProtectRange(SYS_PROTECTCHAN0,
     //    (void*)0x90000000, 0x01000000, SYS_PROTECTNONE);
 
-    void (*game_init_hw)(void) = (void (*)())0x80003354;
-    exiPuts("game init hw\n");
+    //__MaskIrq(0xFFFFFFFF);
     switchToGame();
-    game_init_hw();
-    switchToOgc();
-
-    void (*game_init_user)(void) = (void (*)())0x80246cd4;
-    exiPuts("game init user\n");
-    switchToGame();
-    game_init_user();
-    switchToOgc();
-
-    //set_msr(get_msr() | 0x4000);
-    //int (*gameInit)(int, char**) = (int(*)(int, char**))0x80020d8c;
-    int (*gameMain)(int, char**) = (int(*)(int, char**))0x8002133c;
-    exiPuts("game main\n");
-    u32 irq = IRQ_Disable();
-    switchToGame();
-    gameMain(0, NULL);
+    void (*gameEntry)(void) = (void(*)(void))header->entryPoint;
+    gameEntry();
     while(1);
 
     //tell the compiler we're not coming back from this one.

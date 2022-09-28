@@ -88,6 +88,7 @@
 .global set_r13
 .global get_msr
 .global set_msr
+.global get_dar
 
 get_r1:
     mr r3, r1
@@ -114,6 +115,9 @@ get_msr:
     blr
 set_msr:
     mtmsr r3
+    blr
+get_dar:
+    mfspr r3, 19
     blr
 
 .ctr_save:

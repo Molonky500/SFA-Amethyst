@@ -148,7 +148,7 @@ extern s32 (*OSSuspendThread)(OSThread* thread);
 extern OSThread* (*OSGetCurrentThread)(void);
 extern BOOL (*OSSetThreadPriority)(OSThread* thread, OSPriority priority);
 extern void (*SelectThread)(BOOL);
-extern void (*__OSReschedule)(int);
+extern void (*__OSReschedule)(void);
 extern void (*OSSleepThread)(OSThreadQueue* queue);
 extern void (*OSWakeupThread)(OSThreadQueue* queue);
 extern void (*OSInitThreadQueue)(OSThreadQueue* queue);

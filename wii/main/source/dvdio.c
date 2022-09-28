@@ -43,10 +43,10 @@ int recvFromDvdThread(HackDvdMsg **msg, u32 flags) {
     //LWP_MutexLock(dvdMsgMutex);
     int next = (dvdMsgsOutTail + 1) % DVD_MAX_MSGS;
     OSMessage m;
-    #if DVD_DEBUG
-        exiPrintf("recvFromDvdThread h=%d t=%d msg=%08X\n",
-            dvdMsgsOutHead, dvdMsgsOutTail, &dvdMsgsOut[dvdMsgsOutTail]);
-    #endif
+    //#if DVD_DEBUG
+    //    exiPrintf("recvFromDvdThread h=%d t=%d msg=%08X\n",
+    //        dvdMsgsOutHead, dvdMsgsOutTail, &dvdMsgsOut[dvdMsgsOutTail]);
+    //#endif
     BOOL r = OSReceiveMessage(&hackDvdThreadMailOut, &m, flags);
     if(!r) {
         //LWP_MutexUnlock(dvdMsgMutex);

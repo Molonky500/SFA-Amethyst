@@ -1,49 +1,242 @@
 #include "main.h"
 
-u32 (*__OSSetExceptionHandler)(u32 exception, void *handler) = 0x80240bc4;
+static vu32* const _piReg = (u32*)0xCC003000;
+static vu16* const _memReg = (u16*)0xCC004000;
+static vu16* const _dspReg = (u16*)0xCC005000;
+static vu32* const _exiReg = (u32*)0xCD006800;
+static vu32* const _aiReg = (u32*)0xCD006C00;
 
-void OSExceptionInit_hook() {
-    //we repurpose the memory for some unused handlers
-    //to store our trampolines and such, so we disable
-    //the game's original method and install them ourselves.
-    exiPrintf("%s\n", __FUNCTION__);
+static u32 const _irqPrio[] = {
+    IM_PI_ERROR,IM_PI_DEBUG,IM_MEM,IM_PI_RSW,
+    IM_PI_VI,(IM_PI_PETOKEN|IM_PI_PEFINISH),
+    IM_PI_HSP,
+    (IM_DSP_ARAM|IM_DSP_DSP|IM_AI|IM_EXI|IM_PI_SI|IM_PI_DI),
+    IM_DSP_AI,IM_PI_CP,
+    IM_PI_ACR,
+    0xffffffff
+};
 
-    static const void *excAddrs[] = {
-        (void*)0xFFFFFFFF, //(void*)0x80000100, //reset (not connected)
-        (void*)0xFFFFFFFF, //(void*)0x80000200, //machine check
-        (void*)0x80000300, //DSI
-        (void*)0x80000400, //ISI
-        (void*)0x80000500, //External interrupt
-        (void*)0xFFFFFFFF, //(void*)0x80000600, //alignment
-        (void*)0xFFFFFFFF, //(void*)0x80000700, //program
-        (void*)0x80000800, //FPU Unavailable
-        (void*)0x80000900, //decrementer
-        (void*)0x80000C00, //syscall
-        (void*)0xFFFFFFFF, //(void*)0x80000D00, //trace
-        (void*)0x80000F00, //perfmon
-        (void*)0x80001300, //IABR
-        (void*)0xFFFFFFFF, //(void*)0x80001400, //reserved
-        (void*)0x80001700, //thermal
-        (void*)0
-    };
-    for(int i=0; excAddrs[i]; i++) {
-        if(excAddrs[i] == (void*)0xFFFFFFFF) continue;
-        memcpy(excAddrs[i], 0x80240bf4, 0x98);
-        //patch in exception code.
-        //this is actually how the game does this.
-        u32 *patch = (u32*)excAddrs[i];
-        patch[0x1A] = 0x38600000 | i;
-        //patch out debugger hook
-        patch[0x16] = 0x60000000;
-    }
+struct irq_handler_s {
+	void *pHndl;
+	void *pCtx;
+};
+extern struct irq_handler_s g_IRQHandler[32];
 
-    for(int exception = 0; exception < 0xf; exception = exception + 1) {
-        //80240c90 = OSDefaultExceptionHandler
-        __OSSetExceptionHandler(exception,(void*)0x80240c90);
-    }
+int (*OSDisableScheduler)(void) = 0x80245d94;
+int (*OSEnableScheduler)(void) = 0x80245dd4;
+//void (*__OSReschedule)(void) = 0x80246278;
+void (*OSLoadContext)(OSContext*) = 0x80242394;
 
-    DCInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
-    ICInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
+void (*__OSDispatchInterrupt)(int, OSContext*) = 0x80243c54;
+void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
+    //copied from libogc to handle Wii IRQs
+    u32 i,icause,intmask,irq = 0;
+	u32 cause,mask;
 
-    exiPrintf("%s done\n", __FUNCTION__);
+	cause = _piReg[0]&~0x10000;
+	mask = _piReg[1];
+
+	if(!cause || !(cause&mask)) {
+		//spuriousIrq++;
+		return;
+	}
+
+	intmask = 0;
+	if(cause&0x00000080) {		//Memory Interface
+		icause = _memReg[15];
+		if(icause&0x00000001) {
+			intmask |= IRQMASK(IRQ_MEM0);
+		}
+		if(icause&0x00000002) {
+			intmask |= IRQMASK(IRQ_MEM1);
+		}
+		if(icause&0x00000004) {
+			intmask |= IRQMASK(IRQ_MEM2);
+		}
+		if(icause&0x00000008) {
+			intmask |= IRQMASK(IRQ_MEM3);
+		}
+		if(icause&0x00000010) {
+			intmask |= IRQMASK(IRQ_MEMADDRESS);
+		}
+	}
+	if(cause&0x00000040) {		//DSP
+		icause = _dspReg[5];
+		if(icause&0x00000008){
+			intmask |= IRQMASK(IRQ_DSP_AI);
+		}
+		if(icause&0x00000020){
+			intmask |= IRQMASK(IRQ_DSP_ARAM);
+		}
+		if(icause&0x00000080){
+			intmask |= IRQMASK(IRQ_DSP_DSP);
+		}
+	}
+	if(cause&0x00000020) {		//Streaming
+		icause = _aiReg[0];
+		if(icause&0x00000008) {
+			intmask |= IRQMASK(IRQ_AI);
+		}
+	}
+	if(cause&0x00000010) {		//EXI
+		//EXI 0
+		icause = _exiReg[0];
+		if(icause&0x00000002) {
+			intmask |= IRQMASK(IRQ_EXI0_EXI);
+		}
+		if(icause&0x00000008) {
+			intmask |= IRQMASK(IRQ_EXI0_TC);
+		}
+		if(icause&0x00000800) {
+			intmask |= IRQMASK(IRQ_EXI0_EXT);
+		}
+		//EXI 1
+		icause = _exiReg[5];
+		if(icause&0x00000002) {
+			intmask |= IRQMASK(IRQ_EXI1_EXI);
+		}
+		if(icause&0x00000008) {
+			intmask |= IRQMASK(IRQ_EXI1_TC);
+		}
+		if(icause&0x00000800) {
+			intmask |= IRQMASK(IRQ_EXI1_EXT);
+		}
+		//EXI 2
+		icause = _exiReg[10];
+		if(icause&0x00000002) {
+			intmask |= IRQMASK(IRQ_EXI2_EXI);
+		}
+		if(icause&0x00000008) {
+			intmask |= IRQMASK(IRQ_EXI2_TC);
+		}
+	}
+	if(cause&0x00002000) {		//High Speed Port
+		intmask |= IRQMASK(IRQ_PI_HSP);
+	}
+	if(cause&0x00001000) {		//External Debugger
+		intmask |= IRQMASK(IRQ_PI_DEBUG);
+	}
+	if(cause&0x00000400) {		//Frame Ready (PE_FINISH)
+		intmask |= IRQMASK(IRQ_PI_PEFINISH);
+	}
+	if(cause&0x00000200) {		//Token Assertion (PE_TOKEN)
+		intmask |= IRQMASK(IRQ_PI_PETOKEN);
+	}
+	if(cause&0x00000100) {		//Video Interface
+		intmask |= IRQMASK(IRQ_PI_VI);
+	}
+	if(cause&0x00000008) {		//Serial
+		intmask |= IRQMASK(IRQ_PI_SI);
+	}
+	if(cause&0x00000004) {		//DVD
+		intmask |= IRQMASK(IRQ_PI_DI);
+	}
+	if(cause&0x00000002) {		//Reset Switch
+		intmask |= IRQMASK(IRQ_PI_RSW);
+	}
+	if(cause&0x00000800) {		//Command FIFO
+		intmask |= IRQMASK(IRQ_PI_CP);
+	}
+	if(cause&0x00000001) {		//GP Runtime Error
+		intmask |= IRQMASK(IRQ_PI_ERROR);
+	}
+	if(cause&0x00004000) {
+		intmask |= IRQMASK(IRQ_PI_ACR);
+	}
+    //800000c4 = prevIrqMask
+    //800000c8 = currIrqMask
+	mask = intmask&~((*(u32*)0x800000c4)|(*(u32*)0x800000c8));
+	if(mask) {
+		i=0;
+		irq = 0;
+		while(i<(sizeof(_irqPrio)/sizeof(u32))) {
+			if((irq=(mask&_irqPrio[i]))) {
+				irq = cntlzw(irq);
+				break;
+			}
+			i++;
+		}
+
+        //from here to end of function is from the game, not libogc
+        static u32 *handlers = (u32*)0x80003040;
+        if(irq == IRQ_PI_ACR) {
+            void (*handler)(int,OSContext*) =
+                (void(*)(int,OSContext*))handlers[irq];
+
+            /*char msg[64];
+            strcpy(msg, "IRQ_PI_ACR ........ ........\n");
+            putHex(&msg[11], handler);
+            putHex(&msg[20], g_IRQHandler[irq].pCtx);
+            exiPuts(msg);*/
+
+            handler(irq,g_IRQHandler[irq].pCtx);
+        }
+        else if(handlers[irq]) {
+            switchToGame();
+            OSDisableScheduler();
+            void (*handler)(int,OSContext*) =
+                (void(*)(int,OSContext*))handlers[irq];
+            handler(irq,ctx);
+            OSEnableScheduler();
+            __OSReschedule();
+            OSLoadContext(ctx);
+            switchToOgc();
+        }
+        else {
+            char msg[64];
+            strcpy(msg, "no handler IRQ ........\n");
+            putHex(&msg[15], irq);
+            exiPuts(msg);
+        }
+	}
+    OSLoadContext(ctx);
+}
+
+void __OSInterruptInit_hook() {
+    void (*__OSInterruptInit)(void) = 0x802437f8;
+    __OSInterruptInit();
+
+    u32 *handlers = (u32*)0x80003040;
+    handlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
+    handlers[IRQ_PI_ERROR] = _irqPiError;
+}
+
+void* __OSSetInterruptHandler_hook(int irq, void *handler) {
+    switchToOgc();
+    void *r = (void*)IRQ_Request(irq, (raw_irq_handler_t)handler,
+        OSGetCurrentThread());
+    switchToGame();
+    return r;
+}
+
+void* __OSGetInterruptHandler_hook(int irq) {
+    switchToOgc();
+    void *r = (void*)IRQ_GetHandler(irq);
+    switchToGame();
+    return r;
+}
+
+void __OSMaskInterrupts_hook(u32 mask) {
+    switchToOgc();
+    exiPrintf("OSMaskInterrupts(%08X) from %08X\n", mask,
+        __builtin_extract_return_addr(__builtin_return_address(0)));
+    //mask &= ~IM_PI_ACR; //keep that one on
+    __MaskIrq(mask);
+    switchToGame();
+}
+
+void __OSUnmaskInterrupts_hook(u32 mask) {
+    switchToOgc();
+    __UnmaskIrq(mask);
+    exiPrintf("OSUnmaskInterrupts(%08X) from %08X\n", mask,
+        __builtin_extract_return_addr(__builtin_return_address(0)));
+    switchToGame();
+}
+
+void _irqPiError(int irq, OSContext *ctx) {
+    char msg[64];
+    strcpy(msg, "PI ERROR ctx=........\n");
+    putHex(&msg[13], ctx);
+    exiPuts(msg);
+    gameExceptionHook(1, ctx, 0, NULL);
 }
