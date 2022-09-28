@@ -2,7 +2,6 @@
 
 vu32 canary1 = 0xFACEB007;
 static vu32 canary3 = 0xB000B1E5;
-mutex_t dvdMsgMutex;
 volatile bool dvdThreadReady = false;
 OSThreadQueue dvdThreadQueue;
 
@@ -189,9 +188,7 @@ void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
 }
 
 void dvdIdle() {
-    switchToGame();
     OSYieldThread();
-    switchToOgc();
 }
 
 void* hackDvdThreadMain(void *param) {
@@ -199,7 +196,6 @@ void* hackDvdThreadMain(void *param) {
      */
     __UnmaskIrq(IM_PI_ACR);
     OSEnableInterrupts();
-    switchToOgc();
     exiPuts("DVD thread online\n");
     /*__IOS_InitializeSubsystems();
     exiPuts("IOS initsub OK\n");
@@ -211,14 +207,14 @@ void* hackDvdThreadMain(void *param) {
     IOS_ReloadIOS(IOS_GetPreferredVersion());
     exiPrintf("IOS reload OK\n");*/
 
-    if(fatInitDefault()) {
+    /*if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\n");
     }
     else {
         exiPrintf("DVD FAT init FAIL\n");
         return NULL;
     }
-    exiPuts(" *** DVD MOUNT OK\n");
+    exiPuts(" *** DVD MOUNT OK\n");*/
     dvdThreadReady = true;
 
     int err = 0;
@@ -230,10 +226,8 @@ void* hackDvdThreadMain(void *param) {
             #if DVD_DEBUG
                 //exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
-            switchToGame();
             OSYieldThread();
             OSSleepThread(&dvdThreadQueue);
-            switchToOgc();
             err = recvToDvdThread(&msg, OS_MESSAGE_NOBLOCK);
             if(!err) break;
             #if DVD_DEBUG
@@ -301,9 +295,7 @@ void* hackDvdThreadMain(void *param) {
                         exiPrintf("DVD CB for file %08X: %08X(%d)\n",
                             file, callback, r);
                     #endif
-                    switchToGame();
                     callback(r, file->info);
-                    switchToOgc();
                     #if DVD_DEBUG
                         exiPrintf("DVD CB for file %08X done\n", file);
                     #endif

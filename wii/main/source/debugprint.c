@@ -14,7 +14,6 @@ void putHex(char *dst, u32 num) {
 //same hook is used for several debug print functions
 //that are stubbed in the game binary.
 void osPrintHook(const char *fmt, ...) {
-    switchToOgc();
     char buf[1024];
 
     va_list args;
@@ -25,5 +24,4 @@ void osPrintHook(const char *fmt, ...) {
     int len = strlen(buf);
     if(buf[len-1] != '\n') exiPuts("\n");
     va_end(args);
-    switchToGame();
 }

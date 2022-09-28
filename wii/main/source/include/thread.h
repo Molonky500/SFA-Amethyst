@@ -14,12 +14,6 @@ typedef struct OSMessageQueue   OSMessageQueue;
 typedef void*  OSMessage;
 
 typedef struct {
-    OSThread *dThread;
-    bool allocatedStack;
-} mapDolToLwpThread_t;
-extern mapDolToLwpThread_t mapDolToLwpThread[MAX_THREADS];
-
-typedef struct {
     u32	gpr[32];
     u32	cr;
     u32	lr;
@@ -173,23 +167,3 @@ extern BOOL (*OSReceiveMessage)(
     OSMessageQueue* mq,
     OSMessage*      msg,
     s32             flags);
-
-extern s32 (*LWP_CreateThread_hook)(lwp_t *thethread,void* (*entry)(void *),void *arg,void *stackbase,u32 stack_size,u8 prio);
-extern s32 (*LWP_SuspendThread_hook)(lwp_t thethread);
-extern s32 (*LWP_ResumeThread_hook)(lwp_t thethread);
-extern BOOL (*LWP_ThreadIsSuspended_hook)(lwp_t thethread);
-extern lwp_t (*LWP_GetSelf_hook)(void);
-extern void (*LWP_SetThreadPriority_hook)(lwp_t thethread,u32 prio);
-extern void (*LWP_YieldThread_hook)(void);
-extern void (*LWP_Reschedule_hook)(u32 prio);
-extern s32 (*LWP_JoinThread_hook)(lwp_t thethread,void **value_ptr);
-extern s32 (*LWP_InitQueue_hook)(lwpq_t *thequeue);
-extern void (*LWP_CloseQueue_hook)(lwpq_t thequeue);
-extern s32 (*LWP_ThreadSleep_hook)(lwpq_t thequeue);
-extern void (*LWP_ThreadSignal_hook)(lwpq_t thequeue);
-extern void (*LWP_ThreadBroadcast_hook)(lwpq_t thequeue);
-extern s32 (*MQ_Init_hook)(mqbox_t *mqbox,u32 count);
-extern void (*MQ_Close_hook)(mqbox_t mqbox);
-extern BOOL (*MQ_Send_hook)(mqbox_t mqbox,mqmsg_t msg,u32 flags);
-extern BOOL (*MQ_Jam_hook)(mqbox_t mqbox,mqmsg_t msg,u32 flags);
-extern BOOL (*MQ_Receive_hook)(mqbox_t mqbox,mqmsg_t *msg,u32 flags);

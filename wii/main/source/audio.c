@@ -4,10 +4,8 @@
 //this is probably not needed
 
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
-    switchToOgc();
     static int nDma = 0;
     //if(nDma >= 4400) {
-    //    switchToGame();
     //    return;
     //}
     nDma++;
@@ -25,20 +23,18 @@ void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
     if(mmEnd > 0x81800000 || arEnd > 0x01000000
     || (u32)mmaddr < 0x80000000) {
         exiPuts(" *** ERROR *** AR DMA out of range!\n");
-        switchToGame();
         return;
     }
     if(!checkAddrInheap(mmaddr, count)) {
         exiPrintf(" for AR DMA: [%08X, %08X] %s [%08X, %08X] (len=%d) @%08X\n",
             mmaddr, mmEnd, dir ? "<-" : "->", araddr, arEnd, count,
             __builtin_extract_return_addr(__builtin_return_address(0)));
-        switchToGame();
         return;
     }
 
     u32 level = IRQ_Disable();
     AR_DMA_MMADDR_H = (AR_DMA_MMADDR_H & 0xfc00) | ((uint)mmaddr >> 0x10);
-    AR_DMA_MMADDR_L = (AR_DMA_MMADDR_L & 0x001f) | (ushort)mmaddr;
+    AR_DMA_MMADDR_L = (AR_DMA_MMADDR_L & 0x001f) | (ushort)(u32)mmaddr;
     AR_DMA_ARADDR_H = (AR_DMA_ARADDR_H & 0xfc00) | ((uint)araddr >> 0x10);
     AR_DMA_ARADDR_L = (AR_DMA_ARADDR_L & 0x001f) | (ushort)araddr;
 
@@ -59,17 +55,13 @@ void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
     /*u32 lol = *(u32*)0x803de018;
     void (*irqHandler)(void) = (void (*)())lol;
     if(irqHandler) {
-        switchToGame();
         irqHandler();
-        switchToOgc();
     }*/
 
     IRQ_Restore(level);
-    switchToGame();
 }
 
 void AIInitDMA_hook(u32 start, uint length) {
-    switchToOgc();
     static int nDma = 0;
     nDma++;
     #if AUDIO_DEBUG
@@ -80,5 +72,4 @@ void AIInitDMA_hook(u32 start, uint length) {
     AI_DMA_START_LO = (AI_DMA_START_LO & 0x001f) | (ushort)start;
     AI_DMA_LENGTH   = (AI_DMA_LENGTH   & 0x8000) | (ushort)(length >> 5);
     IRQ_Restore(level);
-    switchToGame();
 }

@@ -4,12 +4,10 @@ volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
 static u8 dvdThreadStack[DVD_THREAD_STACK_SIZE];
 
 void initDvdHack() {
-    int r;
     exiPrintf("%s: init (r2=%08X r13=%08X)\n", __FUNCTION__,
         get_r2(), get_r13());
     memset((void*)dvdOpenFiles, 0, sizeof(HackDvdOpenFile) * DVD_MAX_OPEN_FILES);
 
-    switchToGame();
     exiPrintf("%s: create alarm\n", __FUNCTION__);
     OSCreateAlarm(&dvdThreadAlarm);
 
@@ -30,7 +28,6 @@ void initDvdHack() {
         NULL, dvdThreadStack, DVD_THREAD_STACK_SIZE,
         DVD_THREAD_PRIO, 0)) {
             exiPrintf(" *** ERROR *** Failed to create DVD thread\n");
-        switchToOgc();
         return;
     }
     exiPrintf("DVD thread is %08X\n", &hackDvdThread);
@@ -50,7 +47,6 @@ void initDvdHack() {
     OSResumeThread(&hackDvdThread);
     OSYieldThread();
     exiPrintf("OSResumeThread OK for DVD\n");
-    switchToOgc();
 }
 
 int sendToDvdThread(HackDvdMsg *msg) {

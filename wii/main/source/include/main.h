@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <gccore.h>
-#include <fat.h>
+//#include <fat.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/types.h>
@@ -11,31 +10,8 @@
 #include <stdarg.h>
 
 #define PACKED __attribute__(( packed ))
-#define DOL_NUM_TEXT_SECTIONS 7
-#define DOL_NUM_DATA_SECTIONS 11
-
-#define PI_INSTR        *(vu32*)0xcc003000
-#define PI_INMTR        *(vu32*)0xcc003004
-#define AR_DMA_MMADDR_H *(vu16*)0xcc005020
-#define AR_DMA_MMADDR_L *(vu16*)0xcc005022
-#define AR_DMA_ARADDR_H *(vu16*)0xcc005024
-#define AR_DMA_ARADDR_L *(vu16*)0xcc005026
-#define AR_DMA_CNT_H    *(vu16*)0xcc005028
-#define AR_DMA_CNT_L    *(vu16*)0xcc00502a
-#define AR_DMA_CNT_LEFT *(vu16*)0xCC00503a
-#define AI_DMA_START_HI *(vu16*)0xCC005030
-#define AI_DMA_START_LO *(vu16*)0xCC005032
-#define AI_DMA_LENGTH   *(vu16*)0xCC005036
-
-typedef struct {
-    u32 textOffset[DOL_NUM_TEXT_SECTIONS];
-    u32 dataOffset[DOL_NUM_DATA_SECTIONS];
-    u32 textAddr  [DOL_NUM_TEXT_SECTIONS];
-    u32 dataAddr  [DOL_NUM_DATA_SECTIONS];
-    u32 textSize  [DOL_NUM_TEXT_SECTIONS];
-    u32 dataSize  [DOL_NUM_DATA_SECTIONS];
-    u32 bssAddr, bssSize, entryPoint;
-} DolHeader;
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
 
 //this macro excludes 90xxxxxx (ARAM) and 93xxxxxx (IOS)
 #define PTR_VALID(p) (((p) >= 0x80000000 && (p) <= 0x817FFFFF) || \
@@ -45,23 +21,21 @@ typedef struct {
     __asm__ __volatile__ ("cntlzw %0, %1" : "=r"((_rval)) : "r"((_val))); _rval;})
 
 #define RETURN_ADDRESS (__builtin_extract_return_addr(__builtin_return_address(0)))
+#define ARGV_MAX 4096 //max argv total length
+#define ARGC_MAX 16   //max arg count
+extern char _argv_raw[ARGV_MAX];
+extern char *_argc_raw[ARGC_MAX];
+extern int _argc;
 
-#define __OSBusClock  (*(u32*)0x800000F8)
-#define __OSCoreClock (*(u32*)0x800000FC)
-#define OS_BUS_CLOCK        __OSBusClock
-#define OS_CORE_CLOCK       __OSCoreClock
-#define OS_TIMER_CLOCK      (OS_BUS_CLOCK/4)
-#define OSTicksToCycles( ticks )        (((ticks) * ((OS_CORE_CLOCK * 2) / OS_TIMER_CLOCK)) / 2)
-#define OSTicksToSeconds( ticks )       ((ticks) / OS_TIMER_CLOCK)
-#define OSTicksToMilliseconds( ticks )  ((ticks) / (OS_TIMER_CLOCK / 1000))
-#define OSTicksToMicroseconds( ticks )  (((ticks) * 8) / (OS_TIMER_CLOCK / 125000))
-#define OSTicksToNanoseconds( ticks )   (((ticks) * 8000) / (OS_TIMER_CLOCK / 125000))
-#define OSSecondsToTicks( sec )         ((sec)  * OS_TIMER_CLOCK)
-#define OSMillisecondsToTicks( msec )   ((msec) * (OS_TIMER_CLOCK / 1000))
-#define OSMicrosecondsToTicks( usec )   (((usec) * (OS_TIMER_CLOCK / 125000)) / 8)
-#define OSNanosecondsToTicks( nsec )    (((nsec) * (OS_TIMER_CLOCK / 125000)) / 8000)
-
+#include "gctypes.h"
+#include "gcbool.h"
+#include "gcutil.h"
+#include "processor.h"
+#include "cache.h"
+#include "regs.h"
+#include "clock.h"
 #include "irq.h"
+#include "dol.h"
 #include "thread.h"
 #include "dvd.h"
 #include "gameheap.h"
@@ -142,8 +116,8 @@ int init();
 extern u32 *gameIrqHandlers;
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx);
 void __OSInterruptInit_hook();
-void* __OSSetInterruptHandler_hook(int irq, void *handler);
-void* __OSGetInterruptHandler_hook(int irq);
+//void* __OSSetInterruptHandler_hook(int irq, void *handler);
+//void* __OSGetInterruptHandler_hook(int irq);
 void __OSMaskInterrupts_hook(u32 mask);
 void __OSUnmaskInterrupts_hook(u32 mask);
 void _irqPiError(int irq, OSContext *ctx);
@@ -167,7 +141,7 @@ char* OSGetFontTexel_hook(char* string, void* image, s32 pos,
 uint32_t hookBranch(uint32_t addr, void *target, int isBl);
 void doPatches();
 
-//regAccess.s
+//system_asm.S
 extern u32 get_r1();
 extern u32 get_r2();
 extern u32 get_r13();
@@ -178,40 +152,5 @@ extern u32 get_msr();
 extern void set_msr(u32);
 extern u32 get_dar();
 
-//regs.c
-extern vu32* const _piReg;
-extern vu16* const _memReg;
-extern vu16* const _dspReg;
-extern vu32* const _exiReg;
-extern vu32* const _aiReg;
-
 //thread.c
-void switchToGame();
-void switchToOgc();
 void OSYieldThread(void);
-void initThreads();
-s32 LWP_CreateThread_dol(lwp_t *thethread,
-    void* (*entry)(void *),void *arg,void *stackbase,
-    u32 stack_size,u8 prio);
-s32 LWP_SuspendThread_dol(lwp_t thethread);
-s32 LWP_ResumeThread_dol(lwp_t thethread);
-BOOL LWP_ThreadIsSuspended_dol(lwp_t thethread);
-lwp_t LWP_GetSelf_dol(void);
-void LWP_SetThreadPriority_dol(lwp_t thethread,u32 prio);
-void LWP_YieldThread_dol(void);
-void LWP_Reschedule_dol(u32 prio);
-s32 LWP_JoinThread_dol(lwp_t thethread,void **value_ptr);
-s32 LWP_InitQueue_dol(lwpq_t *thequeue);
-void LWP_CloseQueue_dol(lwpq_t thequeue);
-s32 LWP_ThreadSleep_dol(lwpq_t thequeue);
-void LWP_ThreadSignal_dol(lwpq_t thequeue);
-void LWP_ThreadBroadcast_dol(lwpq_t thequeue);
-
-//threadmsg.c
-s32 MQ_Init_dol(mqbox_t *mqbox,u32 count);
-void MQ_Close_dol(mqbox_t mqbox);
-BOOL MQ_Send_dol(mqbox_t mqbox,mqmsg_t msg,u32 flags);
-BOOL MQ_Jam_dol(mqbox_t mqbox,mqmsg_t msg,u32 flags);
-BOOL MQ_Receive_dol(mqbox_t mqbox,mqmsg_t *msg,u32 flags);
-
-//XXX mutexes

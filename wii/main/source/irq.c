@@ -12,12 +12,6 @@ static u32 const _irqPrio[] = {
     0xffffffff
 };
 
-struct irq_handler_s {
-	void *pHndl;
-	void *pCtx;
-};
-extern struct irq_handler_s g_IRQHandler[32];
-
 
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
     //copied from libogc to handle Wii IRQs
@@ -159,10 +153,9 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
             putHex(&msg[20], g_IRQHandler[irq].pCtx);
             exiPuts(msg);*/
 
-            handler(irq,g_IRQHandler[irq].pCtx);
+            handler(irq, ctx);
         }
         else if(handlers[irq]) {
-            switchToGame();
             OSDisableScheduler();
             void (*handler)(int,OSContext*) =
                 (void(*)(int,OSContext*))handlers[irq];
@@ -170,7 +163,6 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
             OSEnableScheduler();
             __OSReschedule();
             OSLoadContext(ctx);
-            switchToOgc();
         }
         else {
             char msg[64];
@@ -182,39 +174,148 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
     OSLoadContext(ctx);
 }
 
+static u32 __SetInterrupts(u32 iMask,u32 nMask) {
+	u32 imask;
+	u32 irq;
+
+	irq = cntlzw(iMask);
+	if(irq<=IRQ_MEMADDRESS) {
+		imask = 0;
+		if(!(nMask&IM_MEM0)) imask |= 0x0001;
+		if(!(nMask&IM_MEM1)) imask |= 0x0002;
+		if(!(nMask&IM_MEM2)) imask |= 0x0004;
+		if(!(nMask&IM_MEM3)) imask |= 0x0008;
+		if(!(nMask&IM_MEMADDRESS)) imask |= 0x0010;
+		_memReg[14] = (u16)imask;
+		return (iMask&~IM_MEM);
+	}
+
+	if(irq>=IRQ_DSP_AI && irq<=IRQ_DSP_DSP) {
+		imask = _dspReg[5]&~0x1f8;
+		if(!(nMask&IM_DSP_AI)) imask |= 0x0010;
+		if(!(nMask&IM_DSP_ARAM)) imask |= 0x0040;
+		if(!(nMask&IM_DSP_DSP)) imask |= 0x0100;
+		_dspReg[5] = (u16)imask;
+		return (iMask&~IM_DSP);
+	}
+
+	if(irq==IRQ_AI) {
+		imask = _aiReg[0]&~0x2c;
+		if(!(nMask&IM_AI)) imask |= 0x0004;
+		_aiReg[0] = imask;
+		return (iMask&~IM_AI);
+	}
+	if(irq>=IRQ_EXI0_EXI && irq<=IRQ_EXI0_EXT) {
+		imask = _exiReg[0]&~0x2c0f;
+		if(!(nMask&IM_EXI0_EXI)) imask |= 0x0001;
+		if(!(nMask&IM_EXI0_TC)) imask |= 0x0004;
+		if(!(nMask&IM_EXI0_EXT)) imask |= 0x0400;
+		_exiReg[0] = imask;
+		return (iMask&~IM_EXI0);
+	}
+
+	if(irq>=IRQ_EXI1_EXI && irq<=IRQ_EXI1_EXT) {
+		imask = _exiReg[5]&~0x0c0f;
+		if(!(nMask&IM_EXI1_EXI)) imask |= 0x0001;
+		if(!(nMask&IM_EXI1_TC)) imask |= 0x0004;
+		if(!(nMask&IM_EXI1_EXT)) imask |= 0x0400;
+		_exiReg[5] = imask;
+		return (iMask&~IM_EXI1);
+	}
+
+	if(irq>=IRQ_EXI2_EXI && irq<=IRQ_EXI2_TC) {
+		imask = _exiReg[10]&~0x000f;
+		if(!(nMask&IM_EXI2_EXI)) imask |= 0x0001;
+		if(!(nMask&IM_EXI2_TC)) imask |= 0x0004;
+		_exiReg[10] = imask;
+		return (iMask&~IM_EXI2);
+	}
+
+#if defined(HW_DOL)
+	if(irq>=IRQ_PI_CP && irq<=IRQ_PI_HSP) {
+#elif defined(HW_RVL)
+	if(irq>=IRQ_PI_CP && irq<=IRQ_PI_ACR) {
+#endif
+		imask = 0xf0;
+		if(!(nMask&IM_PI_ERROR)) {
+			imask |= 0x00000001;
+		}
+		if(!(nMask&IM_PI_RSW)) {
+			imask |= 0x00000002;
+		}
+		if(!(nMask&IM_PI_DI)) {
+			imask |= 0x00000004;
+		}
+		if(!(nMask&IM_PI_SI)) {
+			imask |= 0x00000008;
+		}
+		if(!(nMask&IM_PI_VI)) {
+			imask |= 0x00000100;
+		}
+		if(!(nMask&IM_PI_PETOKEN)) {
+			imask |= 0x00000200;
+		}
+		if(!(nMask&IM_PI_PEFINISH)) {
+			imask |= 0x00000400;
+		}
+		if(!(nMask&IM_PI_CP)) {
+			imask |= 0x00000800;
+		}
+		if(!(nMask&IM_PI_DEBUG)) {
+			imask |= 0x00001000;
+		}
+		if(!(nMask&IM_PI_HSP)) {
+			imask |= 0x00002000;
+		}
+#if defined(HW_RVL)
+		if(!(nMask&IM_PI_ACR)) {
+			imask |= 0x00004000;
+		}
+#endif
+		_piReg[1] = imask;
+		return (iMask&~IM_PI);
+	}
+	return 0;
+}
+
+void __UnmaskIrq(u32 nMask) {
+	u32 level;
+	u32 mask;
+
+	_CPU_ISR_Disable(level);
+	mask = (nMask&(prevIrqMask|currIrqMask));
+	nMask = (prevIrqMask&~nMask);
+	prevIrqMask = nMask;
+	while((mask=__SetInterrupts(mask,(nMask|currIrqMask)))!=0);
+	_CPU_ISR_Restore(level);
+}
+
+void __MaskIrq(u32 nMask) {
+	u32 level;
+	u32 mask;
+
+	_CPU_ISR_Disable(level);
+	mask = (nMask&~(prevIrqMask|currIrqMask));
+	nMask = (nMask|prevIrqMask);
+	prevIrqMask = nMask;
+	while((mask=__SetInterrupts(mask,(nMask|currIrqMask)))!=0);
+	_CPU_ISR_Restore(level);
+}
+
 void __OSInterruptInit_hook() {
     __OSInterruptInit();
-    gameIrqHandlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
-}
-
-void* __OSSetInterruptHandler_hook(int irq, void *handler) {
-    switchToOgc();
-    void *r = (void*)IRQ_Request(irq, (raw_irq_handler_t)handler,
-        OSGetCurrentThread());
-    switchToGame();
-    return r;
-}
-
-void* __OSGetInterruptHandler_hook(int irq) {
-    switchToOgc();
-    void *r = (void*)IRQ_GetHandler(irq);
-    switchToGame();
-    return r;
+    //gameIrqHandlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
 }
 
 void __OSMaskInterrupts_hook(u32 mask) {
-    switchToOgc();
     exiPrintf("OSMaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
     //mask &= ~IM_PI_ACR; //keep that one on
     __MaskIrq(mask);
-    switchToGame();
 }
 
 void __OSUnmaskInterrupts_hook(u32 mask) {
-    switchToOgc();
     __UnmaskIrq(mask);
     exiPrintf("OSUnmaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
-    switchToGame();
 }
 
 void _irqPiError(int irq, OSContext *ctx) {
@@ -223,4 +324,14 @@ void _irqPiError(int irq, OSContext *ctx) {
     putHex(&msg[13], ctx);
     exiPuts(msg);
     gameExceptionHook(1, ctx, 0, NULL);
+}
+
+u32 IRQ_Disable(void) {
+	u32 level;
+	_CPU_ISR_Disable(level);
+	return level;
+}
+
+void IRQ_Restore(u32 level) {
+	_CPU_ISR_Restore(level);
 }

@@ -1,6 +1,6 @@
 #include "main.h"
 
-mutex_t exiMutex;
+//mutex_t exiMutex;
 
 void exiPuts(const char *str) {
     /** Send a string to the EXI UART.
@@ -82,10 +82,10 @@ void exiPrintf(const char *fmt, ...) {
 
 void exiPrintInit() {
     u32 irq = IRQ_Disable();
-    LWP_MutexInit(&exiMutex, false);
-    volatile u32 *exi = (volatile u32*)0xCD006800; //channel 0
-    while(exi[3] & 1); //wait for TSTART
-    exi[3] = 0;
+    //LWP_MutexInit(&exiMutex, false);
+    _exiReg[0] = (vu32)0xCD006800; //channel 0
+    while(_exiReg[3] & 1); //wait for TSTART
+    _exiReg[3] = 0;
     (*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
     IRQ_Restore(irq);
     exiPuts("EXI init OK\n");

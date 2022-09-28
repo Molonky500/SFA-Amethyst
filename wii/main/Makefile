@@ -17,7 +17,8 @@ TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=
+INCLUDES	:= -I../source/include
+# -I path is relative to 'build'
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -30,7 +31,7 @@ INCLUDES	:=
 # this must be at least 0x91000000 since before that is ARAM.
 # also, do not use r2 (TOC) and r13 (sdata) since the game
 # will clobber those.
-CFLAGS   = -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames $(MACHDEP) $(INCLUDE)
+CFLAGS   = -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames $(MACHDEP) $(INCLUDES)
 CXXFLAGS = $(CFLAGS)
 LDFLAGS	 = -L../lib -g $(MACHDEP) \
 	-Wl,-Map,$(notdir $@).map \
@@ -38,11 +39,12 @@ LDFLAGS	 = -L../lib -g $(MACHDEP) \
 	-Wl,--section-start,.sbss=0x91400000 \
 	-Wl,--section-start,.init=0x91800000 \
 	-Wl,--section-start,.data=0x91C00000
+ASFLAGS := $(MACHDEP) -mregnames -D_LANGUAGE_ASSEMBLY $(INCLUDES)
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS := -lfatx -logcx
+LIBS :=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

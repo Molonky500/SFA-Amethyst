@@ -1,34 +1,12 @@
 #include "main.h"
 
-extern DISC_INTERFACE __io_wiisd;
-void *acrIrq = NULL;
-void *ipcIrq = NULL;
+//extern DISC_INTERFACE __io_wiisd;
 
 void bootGame(DolHeader *header) {
-    exiPrintf("game thread SP=%08X\n", get_r1());
-
-    //fatUnmount("sd");
-    __io_wiisd.shutdown();
-
-    //get the current IPC IRQ
-    for(int i=0; i<32; i++) {
-        exiPrintf("IRQ[%2d] handler: %08X\n", i, IRQ_GetHandler(i));
-    }
-
     //XXX 30 seems not used, even though wiibrew says
     //it's the IPC handler...
     //"ACR" apparently means "actual IPC handler"
-    acrIrq = (void*)IRQ_GetHandler(27);
-    ipcIrq = (void*)IRQ_GetHandler(30);
-
-    __IPC_Reinitialize();
-    exiPrintf("IPC reinit OK\n");
-    __IOS_InitializeSubsystems();
-    exiPrintf("IOS ver %08X pref %08X\n",
-        IOS_GetVersion(),
-        IOS_GetPreferredVersion());
-    IOS_ReloadIOS(IOS_GetPreferredVersion());
-    exiPrintf("IOS reload OK\n");
+    //acrIrq = (void*)IRQ_GetHandler(27);
 
     /*if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\n");
@@ -85,7 +63,6 @@ void bootGame(DolHeader *header) {
     //    (void*)0x90000000, 0x01000000, SYS_PROTECTNONE);
 
     //__MaskIrq(0xFFFFFFFF);
-    switchToGame();
     void (*gameEntry)(void) = (void(*)(void))header->entryPoint;
     gameEntry();
     while(1);

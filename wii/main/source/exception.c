@@ -1,7 +1,5 @@
 #include "main.h"
 
-void __exception_sethandler(u32 nExcept, void (*pHndl)(frame_context*));
-
 void OSExceptionInit_hook() {
     //we repurpose the memory for some unused handlers
     //to store our trampolines and such, so we disable
@@ -11,7 +9,7 @@ void OSExceptionInit_hook() {
     *(u32*)0x803dddec = 0x80003000; //set exception handler table
     // *(u32*)0x803dde38 = 0x80003040; //set IRQ handler table
 
-    static const void *excAddrs[] = {
+    static void *excAddrs[] = {
         (void*)0xFFFFFFFF, //(void*)0x80000100, //reset (not connected)
         (void*)0xFFFFFFFF, //(void*)0x80000200, //machine check
         (void*)0x80000300, //DSI
@@ -31,8 +29,9 @@ void OSExceptionInit_hook() {
     };
     for(int i=0; excAddrs[i]; i++) {
         if(excAddrs[i] == (void*)0xFFFFFFFF) continue;
-        memcpy(excAddrs[i], 0x80240bf4, 0x98);
-        //patch in exception code.
+        //copy exception handler.
+        memcpy(excAddrs[i], (void*)0x80240bf4, 0x98);
+        //patch to put exception ID in r3.
         //this is actually how the game does this.
         //in fact this is part of DolphinOS, so this is
         //probably how every game does this.
@@ -74,7 +73,7 @@ uint cause, void *addr) {
 
     strcpy(msg, "\nCAUSE=........ ADDR=........ DAR=........\n");
     putHex(&msg[ 7], cause);
-    putHex(&msg[21], addr);
+    putHex(&msg[21], (u32)addr);
     putHex(&msg[34], get_dar());
     exiPuts(msg);
 
@@ -86,7 +85,7 @@ uint cause, void *addr) {
     exiPuts(msg);
 
     exiPuts("GPRs:\n");
-    u32 *gpr = &ctx->gpr;
+    u32 *gpr = (u32*)&ctx->gpr;
     for(int i=0; i<32; i += 4) {
         strcpy(msg, "........ ........ ........ ........\n");
         putHex(&msg[ 0], gpr[i]);
