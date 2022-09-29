@@ -27,6 +27,7 @@ extern char _argv_raw[ARGV_MAX];
 extern char *_argc_raw[ARGC_MAX];
 extern int _argc;
 
+#include "printf.h"
 #include "gctypes.h"
 #include "gcbool.h"
 #include "gcutil.h"

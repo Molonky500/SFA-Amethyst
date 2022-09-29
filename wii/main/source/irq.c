@@ -335,3 +335,7 @@ u32 IRQ_Disable(void) {
 void IRQ_Restore(u32 level) {
 	_CPU_ISR_Restore(level);
 }
+
+bool areInterruptsEnabled() {
+	return get_msr() & 0x8000;
+}

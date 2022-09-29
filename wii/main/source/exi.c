@@ -67,11 +67,6 @@ void exiPuts(const char *str) {
 }
 
 void exiPrintf(const char *fmt, ...) {
-    if(!(get_msr() & 0x8000)) {
-        //vsnprintf doesn't work with interrupts disabled.
-        exiPuts(fmt);
-        return;
-    }
     char buf[1024];
     va_list args;
     va_start(args, fmt);
