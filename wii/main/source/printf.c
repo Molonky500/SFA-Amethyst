@@ -21,7 +21,10 @@ static void printf_write_file(
 printf_context *ctxt, const char *str, size_t len) {
 	//ctxt->file->cls->write(ctxt->file, str, len);
 	//write(ctxt->file, str, len);
-	exiPuts(str);
+	char buf[512];
+	memset(buf, 0, sizeof(buf));
+	strncpy(buf, str, MIN(len, sizeof(buf)));
+	exiPuts(buf);
 }
 
 static void printf_write_str(
@@ -122,6 +125,20 @@ static inline char* write_padding(char *buf, char pad, int num) {
 //used by fprintf() to print strings.
 static inline void write_str(printf_context *ctxt, const char *str) {
 	if(str == NULL) str = "(null)";
+	if(!PTR_VALID(str)) {
+		char buf[16];
+		char *c = buf;
+		*(c++) = '<';
+		u32 p = (u32)str;
+		for(int i=0; i<8; i++) {
+			*(c++) = digitsUpper[p >> 28];
+			p <<= 4;
+		}
+		*(c++) = '>';
+		*(c++) = 0;
+		ctxt->write(ctxt, buf, (c-buf)+1);
+		return;
+	}
 	int len = strlen(str);
 	ctxt->nChars += len;
 
@@ -249,7 +266,7 @@ static inline char* write_int(printf_context *ctxt) {
 	//sign character
 	//XXX should a + be added when val == 0?
 	char signChar = 0;
-	if     (ctxt->sign <  0)                    signChar = '-';
+	if     (ctxt->sign <  0)                     signChar = '-';
 	else if(ctxt->sign >  0 && ctxt->forcePlus ) signChar = '+';
 	else if(ctxt->sign == 0 && ctxt->forceSpace) signChar = ' ';
 
@@ -331,7 +348,6 @@ int _printf_internal(printf_context *ctxt) {
 		ctxt->bufLen = sizeof(buf);
 		read_flags(ctxt);
 		read_spec (ctxt);
-
 
 		//handle this format
 		size_t curnChars = ctxt->nChars;

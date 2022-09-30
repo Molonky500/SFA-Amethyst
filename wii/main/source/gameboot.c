@@ -16,51 +16,26 @@ void bootGame(DolHeader *header) {
         //return NULL;
     }*/
 
-    //register interrupt handlers
-    /*static OSContext ctxDspAi;
-    static OSContext ctxDspAram;
-    static OSContext ctxDsp;
-    static OSContext ctxAi;
-    static OSContext ctxPiCp;
-    static OSContext ctxPiPeToken;
-    static OSContext ctxPiPeFinish;
-    static OSContext ctxPiSi;
-    static OSContext ctxPiDi;
-    static OSContext ctxPiVi;
-
-    IRQ_Request(IRQ_DSP_AI,     gameIrqHandler, &ctxDspAi);
-    IRQ_Request(IRQ_DSP_ARAM,   gameIrqHandler, &ctxDspAram);
-    IRQ_Request(IRQ_DSP_DSP,    gameIrqHandler, &ctxDsp);
-    IRQ_Request(IRQ_AI,         gameIrqHandler, &ctxAi);
-    IRQ_Request(IRQ_PI_CP,      gameIrqHandler, &ctxPiCp);
-    IRQ_Request(IRQ_PI_PETOKEN, gameIrqHandler, &ctxPiPeToken);
-    IRQ_Request(IRQ_PI_PEFINISH,gameIrqHandler, &ctxPiPeFinish);
-    IRQ_Request(IRQ_PI_SI,      gameIrqHandler, &ctxPiSi);
-    IRQ_Request(IRQ_PI_DI,      gameIrqHandler, &ctxPiDi);
-    IRQ_Request(IRQ_PI_VI,      gameIrqHandler, &ctxPiVi);
-    //_gameUnmaskInterrupts(
-    __UnmaskIrq(
-        IRQMASK(IRQ_DSP_AI) |
-        IRQMASK(IRQ_DSP_ARAM) |
-        IRQMASK(IRQ_DSP_DSP) |
-        IRQMASK(IRQ_AI) |
-        IRQMASK(IRQ_PI_CP) |
-        IRQMASK(IRQ_PI_PETOKEN) |
-        IRQMASK(IRQ_PI_PEFINISH) |
-        IRQMASK(IRQ_PI_SI) |
-        IRQMASK(IRQ_PI_DI) |
-        IRQMASK(IRQ_PI_VI));
-
-    (*(u8*)0x803dca49) = 0; //isInitialized = false
-    (*(u8*)0x803dca3d) = 0; //gameState = GAME_STATE_INIT
-    //SYS_SetArena1Lo((void*)0x803fa480);
-    //SYS_SetArena1Hi((void*)0x817ea240);
-    (*(u32*)0x80000030) = 0x803fa480;
-    (*(u32*)0x80000034) = 0x817ea240;*/
-
     //protect ARAM area from accidental accesses
     //SYS_ProtectRange(SYS_PROTECTCHAN0,
     //    (void*)0x90000000, 0x01000000, SYS_PROTECTNONE);
+
+    //set up some bootinfo fields.
+    OSBootInfo *boot = (OSBootInfo*)0x80000000;
+    boot->diskId.gameName[0]      = 'G';
+    boot->diskId.gameName[1]      = 'S';
+    boot->diskId.gameName[2]      = 'A';
+    boot->diskId.gameName[3]      = 'E';
+    boot->diskId.company[0]       = '0';
+    boot->diskId.company[1]       = '1';
+    boot->diskId.diskNumber       = 0;
+    boot->diskId.gameVersion      = 0;
+    boot->diskId.streaming        = 1;
+    boot->diskId.streamingBufSize = 0; //default
+    boot->magic                   = 0x0d15ea5e; //magic
+    boot->version                 = 1;
+    boot->memorySize              = 0x01800000;
+    boot->consoleType             = 0x10000006;
 
     //__MaskIrq(0xFFFFFFFF);
     void (*gameEntry)(void) = (void(*)(void))header->entryPoint;

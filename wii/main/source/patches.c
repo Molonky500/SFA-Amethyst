@@ -225,6 +225,7 @@ void doPatches() {
         //0x802491f4, 0x4E800020, //DVDInit
         0x802408fc, 0x60000000, //DVDInquiryAsync
         0x80015624, 0x4E800020, //dvdCheckError
+        0x802492a4, 0x60000000, //__fstLoad
 
         //disable audio for now
         //0x802406ec, 0x60000000, //__OSInitAudioSystem

@@ -1,5 +1,7 @@
 #include "main.h"
+#define DEBUG_IRQ 1
 
+vs32 irqHandlerDepth = 0;
 u32 *gameIrqHandlers = (u32*)0x80003040;
 
 static u32 const _irqPrio[] = {
@@ -12,17 +14,49 @@ static u32 const _irqPrio[] = {
     0xffffffff
 };
 
+#if DEBUG_IRQ
+static const char *causes[] = {
+	"GP Runtime Error", "Reset Switch", "DVD", "Serial",
+	"EXI", "AI", "DSP", "MEM",
+	"VI", "PE", "PE Finish", "CP FIFO",
+	"Debugger", "HSP", "Hollywood IRQs", "RSVD15",
+	"Reset Switch State", "RSVD17", "RSVD18", "RSVD19",
+	"RSVD20", "RSVD21", "RSVD22", "RSVD23",
+	"RSVD24", "RSVD25", "RSVD26", "RSVD27",
+	"RSVD28", "RSVD29", "RSVD30", "RSVD31"
+};
+#endif
+
 
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
     //copied from libogc to handle Wii IRQs
     u32 i,icause,intmask,irq = 0;
-	u32 cause,mask;
 
-	cause = _piReg[0]&~0x10000;
-	mask = _piReg[1];
+	irqHandlerDepth++;
+	u32 rawCause = _piReg[0];
+	u32 mask     = _piReg[1];
+	u32 cause    = rawCause & ~0x10000;
 
 	if(!cause || !(cause&mask)) {
 		//spuriousIrq++;
+		irqHandlerDepth--;
+		#if DEBUG_IRQ
+			if(cause) { //ignore reset button
+				char msg[64];
+				strcpy(msg, "SPURIOUS IRQ ........ CAUSE=........ CTX=........\n");
+				putHex(&msg[13], irqNo);
+				putHex(&msg[28], rawCause);
+				putHex(&msg[41], (u32)ctx);
+				exiPuts(msg);
+				for(int i=0; i<31; i++) {
+					if(rawCause & (1 << i)) {
+						exiPuts(causes[i]);
+						exiPuts("\n");
+					}
+				}
+			}
+		#endif
+		OSLoadContext(ctx);
 		return;
 	}
 
@@ -125,7 +159,7 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
 	if(cause&0x00000001) {		//GP Runtime Error
 		intmask |= IRQMASK(IRQ_PI_ERROR);
 	}
-	if(cause&0x00004000) {
+	if(cause&0x00004000) { //IOS IPC
 		intmask |= IRQMASK(IRQ_PI_ACR);
 	}
 
@@ -143,28 +177,18 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
 
         //from here to end of function is from the game, not libogc
         static u32 *handlers = (u32*)0x80003040;
-        if(irq == IRQ_PI_ACR) {
-            void (*handler)(int,OSContext*) =
-                (void(*)(int,OSContext*))handlers[irq];
-
-            /*char msg[64];
-            strcpy(msg, "IRQ_PI_ACR ........ ........\n");
-            putHex(&msg[11], handler);
-            putHex(&msg[20], g_IRQHandler[irq].pCtx);
-            exiPuts(msg);*/
-
-            handler(irq, ctx);
-        }
-        else if(handlers[irq]) {
+        if(handlers[irq]) {
             OSDisableScheduler();
             void (*handler)(int,OSContext*) =
                 (void(*)(int,OSContext*))handlers[irq];
             handler(irq,ctx);
+			irqHandlerDepth--;
             OSEnableScheduler();
             __OSReschedule();
             OSLoadContext(ctx);
         }
         else {
+			irqHandlerDepth--;
             char msg[64];
             strcpy(msg, "no handler IRQ ........\n");
             putHex(&msg[15], irq);
@@ -321,7 +345,7 @@ void __OSUnmaskInterrupts_hook(u32 mask) {
 void _irqPiError(int irq, OSContext *ctx) {
     char msg[64];
     strcpy(msg, "PI ERROR ctx=........\n");
-    putHex(&msg[13], ctx);
+    putHex(&msg[13], (u32)ctx);
     exiPuts(msg);
     gameExceptionHook(1, ctx, 0, NULL);
 }

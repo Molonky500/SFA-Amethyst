@@ -44,4 +44,5 @@ void loadDolFromMemory(DolHeader *header) {
                 header->dataSize[i]);
         }
     }
+    exiPuts("DOL load OK\n");
 }

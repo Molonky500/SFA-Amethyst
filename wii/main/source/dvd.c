@@ -2,35 +2,41 @@
 
 volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
 static u8 dvdThreadStack[DVD_THREAD_STACK_SIZE];
+OSMutex dvdMsgMutex;
 
 void initDvdHack() {
     exiPrintf("%s: init (r2=%08X r13=%08X)\n", __FUNCTION__,
         get_r2(), get_r13());
     memset((void*)dvdOpenFiles, 0, sizeof(HackDvdOpenFile) * DVD_MAX_OPEN_FILES);
+    memset(dvdMsgsIn,  0, sizeof(HackDvdMsg) * DVD_MAX_MSGS);
+    memset(dvdMsgsOut, 0, sizeof(HackDvdMsg) * DVD_MAX_MSGS);
+    OSInitMutex(&dvdMsgMutex);
 
     exiPrintf("%s: create alarm\n", __FUNCTION__);
     OSCreateAlarm(&dvdThreadAlarm);
 
-    //LWP_MutexInit(&dvdMsgMutex, false);
     exiPrintf("%s: create threadQ\n", __FUNCTION__);
     OSInitThreadQueue(&dvdThreadQueue);
 
     exiPrintf("%s: create msgQ in\n", __FUNCTION__);
     OSInitMessageQueue(&hackDvdThreadMailIn,
-        (OSMessage*)dvdMsgsIn, DVD_MAX_MSGS);
+        hackDvdMailboxIn, DVD_MAX_MSGS);
 
     exiPrintf("%s: create msgQ out\n", __FUNCTION__);
     OSInitMessageQueue(&hackDvdThreadMailOut,
-        (OSMessage*)dvdMsgsOut, DVD_MAX_MSGS);
+        hackDvdMailboxOut, DVD_MAX_MSGS);
 
     exiPrintf("%s: create DVD thread\n", __FUNCTION__);
     if(!OSCreateThread(&hackDvdThread, hackDvdThreadMain,
-        NULL, dvdThreadStack, DVD_THREAD_STACK_SIZE,
-        DVD_THREAD_PRIO, 0)) {
+        NULL, dvdThreadStack+DVD_THREAD_STACK_SIZE,
+        DVD_THREAD_STACK_SIZE, DVD_THREAD_PRIO, 0)) {
             exiPrintf(" *** ERROR *** Failed to create DVD thread\n");
         return;
     }
-    exiPrintf("DVD thread is %08X\n", &hackDvdThread);
+    exiPrintf("DVD thread is %08X, queue=%08X, %08X, buf=%08X, %08X\n",
+        &hackDvdThread,
+        &hackDvdThreadMailIn, &hackDvdThreadMailOut,
+        dvdMsgsIn, dvdMsgsOut);
 
     //wake the DVD thread up periodically
     //we don't have OSSetPeriodicAlarm though
@@ -54,33 +60,32 @@ int sendToDvdThread(HackDvdMsg *msg) {
      *  to the DVD thread.
      */
     while(!dvdThreadReady) OSYieldThread();
-    //LWP_MutexLock(dvdMsgMutex);
+    OSLockMutex(&dvdMsgMutex);
     int next = (dvdMsgsInHead + 1) % DVD_MAX_MSGS;
-    #if DVD_DEBUG
-        exiPrintf("sendToDvdThread h=%d t=%d msg=%08X\n",
-            dvdMsgsInHead, dvdMsgsInTail, &dvdMsgsIn[dvdMsgsInHead]);
-    #endif
+    DVD_DPRINT("sendToDvdThread h=%d t=%d msg=%08X->%08X (cmd %02X)\n",
+        dvdMsgsInHead, dvdMsgsInTail, (u32)msg,
+        (u32)&dvdMsgsIn[dvdMsgsInHead],
+        msg->cmd);
     if(next == dvdMsgsInTail) {
         exiPuts(" *** ERROR *** sendToDvdThread msg overflow\n");
-        //LWP_MutexUnlock(dvdMsgMutex);
+        OSUnlockMutex(&dvdMsgMutex);
         return -EOVERFLOW;
     }
     msg->id = dvdCmdId++;
     void *buf = (void*)&dvdMsgsIn[dvdMsgsInHead];
     //void *buf = malloc(sizeof(HackDvdMsg));
     memcpy(buf, msg, sizeof(HackDvdMsg));
+    //send the pointer to the message
     bool r = OSSendMessage(&hackDvdThreadMailIn, (OSMessage)buf, OS_MESSAGE_NOBLOCK);
     if(!r) {
         exiPrintf(" *** ERROR *** sendToDvdThread fail\n");
-        //LWP_MutexUnlock(dvdMsgMutex);
+        OSUnlockMutex(&dvdMsgMutex);
         return -EIO;
     }
     dvdMsgsInHead = next;
-    #if DVD_DEBUG
-        exiPrintf("wakeup DVD\n");
-    #endif
+    DVD_DPRINT("wakeup DVD\n");
     //LWP_ThreadSignal(dvdThreadQueue);
-    //LWP_MutexUnlock(dvdMsgMutex);
+    OSUnlockMutex(&dvdMsgMutex);
     return 0;
 }
 
@@ -89,16 +94,14 @@ int recvFromDvdThread(HackDvdMsg **msg, u32 flags) {
      *  from another thread.
      */
     while(!dvdThreadReady) OSYieldThread();
-    //LWP_MutexLock(dvdMsgMutex);
+    OSLockMutex(&dvdMsgMutex);
     int next = (dvdMsgsOutTail + 1) % DVD_MAX_MSGS;
     OSMessage m;
-    //#if DVD_DEBUG
-    //    exiPrintf("recvFromDvdThread h=%d t=%d msg=%08X\n",
+    //    DVD_DPRINT("recvFromDvdThread h=%d t=%d msg=%08X\n",
     //        dvdMsgsOutHead, dvdMsgsOutTail, &dvdMsgsOut[dvdMsgsOutTail]);
-    //#endif
     BOOL r = OSReceiveMessage(&hackDvdThreadMailOut, &m, flags);
     if(!r) {
-        //LWP_MutexUnlock(dvdMsgMutex);
+        OSUnlockMutex(&dvdMsgMutex);
         return -EIO;
     }
     /*if(m != &dvdMsgsOut[dvdMsgsOutTail]) {
@@ -107,7 +110,7 @@ int recvFromDvdThread(HackDvdMsg **msg, u32 flags) {
     }*/
     *msg = m; //already pointing to the buffer
     dvdMsgsOutTail = next;
-    //LWP_MutexUnlock(dvdMsgMutex);
+    OSUnlockMutex(&dvdMsgMutex);
     return 0;
 }
 
@@ -126,9 +129,7 @@ int offset, DVDCallback callback, int prio, bool async) {
     msg.read.prio = prio;
     msg.read.async = async;
     int r = 0;
-    #if DVD_DEBUG
-        exiPrintf("%s: sending...\n", __FUNCTION__);
-    #endif
+    DVD_DPRINT("%s: sending...\n", __FUNCTION__);
     OSYieldThread();
     //do {
         r = sendToDvdThread(&msg);
@@ -138,15 +139,11 @@ int offset, DVDCallback callback, int prio, bool async) {
         exiPrintf(" *** ERROR *** sendToDvdThread: %d\n", r);
         return r;
     }
-    #if DVD_DEBUG
-        exiPrintf("%s: sent\n", __FUNCTION__);
-    #endif
+    DVD_DPRINT("%s: sent\n", __FUNCTION__);
     //OSYieldThread();
     if(!async) { //wait for reply
-        #if DVD_DEBUG
-            exiPrintf("Wait for DVD read for file %08X id %d\n",
-                file, msg.id);
-        #endif
+        DVD_DPRINT("Wait for DVD read for file %08X id %d\n",
+            file, msg.id);
         bool done = false;
         while(!done) {
             OSYieldThread();
@@ -157,19 +154,15 @@ int offset, DVDCallback callback, int prio, bool async) {
             //    exiPrintf(" *** ERROR *** recvFromDvdThread: %d\n", r);
             //    break;
             //}
-            #if DVD_DEBUG
-                exiPrintf("recvFromDvdThread m=%d id=%d file=%08X\n",
-                    resp->cmd, resp->id, resp->read.file);
-            #endif
+            DVD_DPRINT("recvFromDvdThread m=%d id=%d file=%08X\n",
+                resp->cmd, resp->id, resp->read.file);
             if(resp->id == msg.id) done = true;
             //free(resp);
         }
     }
     //OSYieldThread();
-    #if DVD_DEBUG
-        exiPrintf("DVD %ssync read finished, file %08X\n",
-            async ? "a" : "", file);
-    #endif
+    DVD_DPRINT("DVD %ssync read finished, file %08X\n",
+        async ? "a" : "", file);
     return length;
 }
 

@@ -1,6 +1,8 @@
 #ifndef _GAMEFUNCS_H_
 #define _GAMEFUNCS_H_
 
+extern void*     (*gameAlloc)(u32 size, u32 tag, const char *name);
+extern void      (*gameFree)(void *addr);
 extern BOOL      (*OSCreateThread)(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute);
 extern int       (*OSDisableInterrupts)(void);
 extern int       (*OSDisableScheduler)(void);

@@ -1,7 +1,8 @@
 #include "main.h"
-#define AUDIO_DEBUG 1
+#define AUDIO_DEBUG 0
 
 //this is probably not needed
+//but might be, because of different masking
 
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
     static int nDma = 0;

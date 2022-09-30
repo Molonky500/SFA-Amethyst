@@ -4,11 +4,17 @@ vu32 canary1 = 0xFACEB007;
 static vu32 canary3 = 0xB000B1E5;
 volatile bool dvdThreadReady = false;
 OSThreadQueue dvdThreadQueue;
+OSThread hackDvdThread;
 
 //DVD thread mailboxes
-OSThread hackDvdThread;
+//these are the OSMessageQueue objects that manage messages
 OSMessageQueue hackDvdThreadMailIn, hackDvdThreadMailOut;
+//these store the actual OSMessage objects (which are
+//pointers to the actual message)
+OSMessage hackDvdMailboxIn[DVD_MAX_MSGS], hackDvdMailboxOut[DVD_MAX_MSGS];
+//these store the actual messages, pointed to by above
 volatile HackDvdMsg dvdMsgsIn[DVD_MAX_MSGS], dvdMsgsOut[DVD_MAX_MSGS];
+//these keep track of what buffer space is available
 int dvdMsgsInHead=0, dvdMsgsInTail=0, dvdMsgsOutHead=0, dvdMsgsOutTail=0;
 
 OSAlarm dvdThreadAlarm;
@@ -43,7 +49,7 @@ HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file) {
         if(dvdOpenFiles[i].info == NULL) {
             dvdOpenFiles[i].info = info;
             dvdOpenFiles[i].file = file;
-            exiPrintf("dvd_addFile(%08X, %08X) slot %d %08X\n",
+            DVD_DPRINT("dvd_addFile(%08X, %08X) slot %d %08X\n",
                 info, file, i, &dvdOpenFiles[i]);
             return (HackDvdOpenFile*)&dvdOpenFiles[i];
         }
@@ -60,11 +66,11 @@ int sendFromDvdThread(HackDvdMsg *msg) {
     /** Called by the DVD thread to send a message
      *  to another thread.
      */
-    //LWP_MutexLock(dvdMsgMutex);
+    OSLockMutex(&dvdMsgMutex);
     int next = (dvdMsgsOutHead + 1) % DVD_MAX_MSGS;
     if(next == dvdMsgsOutTail) {
         exiPuts(" *** ERROR *** sendFromDvdThread msg overflow\n");
-        //LWP_MutexUnlock(dvdMsgMutex);
+        OSUnlockMutex(&dvdMsgMutex);
         return -EOVERFLOW;
     }
     //exiPrintf("sendFromDvdThread h=%d t=%d msg=%08X\n",
@@ -75,11 +81,11 @@ int sendFromDvdThread(HackDvdMsg *msg) {
     bool r = OSSendMessage(&hackDvdThreadMailOut, (OSMessage)buf, OS_MESSAGE_NOBLOCK);
     if(!r) {
         exiPrintf(" *** ERROR *** sendFromDvdThread fail\n");
-        //LWP_MutexUnlock(dvdMsgMutex);
+        OSUnlockMutex(&dvdMsgMutex);
         return -EIO;
     }
     dvdMsgsOutHead = next;
-    //LWP_MutexUnlock(dvdMsgMutex);
+    OSUnlockMutex(&dvdMsgMutex);
     return 0;
 }
 
@@ -87,19 +93,21 @@ int recvToDvdThread(HackDvdMsg **msg, u32 flags) {
     /** Called by the DVD thread to receive the next message
      *  from another thread.
      */
-    //LWP_MutexLock(dvdMsgMutex);
+    OSLockMutex(&dvdMsgMutex);
     int next = (dvdMsgsInTail + 1) % DVD_MAX_MSGS;
     OSMessage m;
     //exiPrintf("recvToDvdThread h=%d t=%d msg=%08X\n",
     //    dvdMsgsInHead, dvdMsgsInTail, &dvdMsgsIn[dvdMsgsInTail]);
     BOOL r = OSReceiveMessage(&hackDvdThreadMailIn, &m, flags);
     if(!r) {
-        //LWP_MutexUnlock(dvdMsgMutex);
+        OSUnlockMutex(&dvdMsgMutex);
         return -EIO;
     }
-    *msg = m; //already pointing to the buffer
+    *msg = (HackDvdMsg*)m; //m points to buf
+    DVD_DPRINT("recvToDvdThread m=%08X -> %08X\n",
+        (u32)m, (u32)*msg);
     dvdMsgsInTail = next;
-    //LWP_MutexUnlock(dvdMsgMutex);
+    OSUnlockMutex(&dvdMsgMutex);
     return 0;
 }
 
@@ -110,22 +118,16 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
     int nRead = 0;
     DVD_BUSY = 1; //DVD drive is busy
 
-#if DVD_DEBUG
-    exiPrintf("DVDRead(%08X %08X %08X)\n", info, addr, size);
-#endif
+    DVD_DPRINT("DVDRead(%08X %08X %08X)\n", info, addr, size);
 
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     if(!file) return -EMFILE;
     while(nRead < size) {
         //memset(addr, 0xAAAAAAAA, MIN(DVD_SECTOR_SIZE, size-nRead));
-        #if DVD_DEBUG
-            exiPrintf("DVD fread(a=%08X s=%08X f=%08X->%08X)\n",
-                addr, MIN(DVD_SECTOR_SIZE, size-nRead), file, file->file);
-        #endif
+        DVD_DPRINT("DVD fread(a=%08X s=%08X f=%08X->%08X)\n",
+            addr, MIN(DVD_SECTOR_SIZE, size-nRead), file, file->file);
         r = fread(addr, 1, MIN(DVD_SECTOR_SIZE, size-nRead), file->file);
-        #if DVD_DEBUG
-            exiPrintf("fread: %d\n", r);
-        #endif
+        DVD_DPRINT("fread: %d\n", r);
         if(r <= 0) break;
 
         DCInvalidateRange(addr, r);
@@ -137,30 +139,22 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
         //LWP_YieldThread();
 
         if(OSGetCurrentThread() == &hackDvdThread) {
-            #if DVD_DEBUG
-                exiPrintf("DVD thread pause, q=%08X\n", dvdThreadQueue);
-            #endif
+            DVD_DPRINT("DVD thread pause, q=%08X\n", dvdThreadQueue);
             OSSleepThread(&dvdThreadQueue);
-            #if DVD_DEBUG
-                exiPuts("DVD thread resume\n");
-            #endif
+            DVD_DPRINT("DVD thread resume\n");
         }
     }
     if(nRead < size) {
-#if DVD_DEBUG
-        exiPrintf("DVDRead(%08X): want %d but got %d\n",
+        DVD_DPRINT("DVDRead(%08X): want %d but got %d\n",
             file, size, nRead);
-#endif
     }
     else {
-#if DVD_DEBUG
-        exiPrintf("DVDRead(%08X -> %08X): %d: %08X %08X %08X %08X...\n",
+        DVD_DPRINT("DVDRead(%08X -> %08X): %d: %08X %08X %08X %08X...\n",
             file, (u32)addr, nRead,
             *(u32*)addr,
             *(u32*)(addr+4),
             *(u32*)(addr+8),
             *(u32*)(addr+12) );
-#endif
     }
     DVD_BUSY = 0;
     return (r >= 0) ? nRead : r;
@@ -207,14 +201,14 @@ void* hackDvdThreadMain(void *param) {
     IOS_ReloadIOS(IOS_GetPreferredVersion());
     exiPrintf("IOS reload OK\n");*/
 
-    /*if(fatInitDefault()) {
+    if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\n");
     }
     else {
         exiPrintf("DVD FAT init FAIL\n");
         return NULL;
     }
-    exiPuts(" *** DVD MOUNT OK\n");*/
+    exiPuts(" *** DVD MOUNT OK\n");
     dvdThreadReady = true;
 
     int err = 0;
@@ -244,9 +238,7 @@ void* hackDvdThreadMain(void *param) {
             //dvdIdle();
             //continue;
         }
-        #if DVD_DEBUG
-            exiPrintf("DVD thread cmd %d id %d\n", msg->cmd, msg->id);
-        #endif
+        DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\n", msg->cmd, msg->id);
 
         switch(msg->cmd) {
             case DVDCMD_SHUTDOWN: {
@@ -261,18 +253,15 @@ void* hackDvdThreadMain(void *param) {
                 uint offset = msg->read.offset;
                 DVDCallback callback = msg->read.callback;
 
-                #if DVD_DEBUG
-                    exiPrintf("DVD thread read f=%08X->%08X o=%08X a=%08X l=%08X (end %08X)\n",
-                        file, file->file, offset, addr, length, addr+length);
-                #endif
+                DVD_DPRINT("DVD thread read f=%08X->%08X o=%08X a=%08X l=%08X (end %08X)\n",
+                    file, file->file, offset, addr, length, addr+length);
                 if(!file) break;
+
                 fseek(file->file, offset, SEEK_SET);
                 file->info->cb.offset = offset;
                 int r = _dvdDoRead(file->info, addr, length);
-                #if DVD_DEBUG
-                    exiPrintf("DVD thread res=%d callback %08X\n",
-                        r, callback);
-                #endif
+                DVD_DPRINT("DVD thread res=%d callback %08X\n",
+                    r, callback);
                 dvdIdle();
 
                 if(!msg->read.async) {
@@ -291,18 +280,12 @@ void* hackDvdThreadMain(void *param) {
                     }
                 }
                 if(callback) {
-                    #if DVD_DEBUG
-                        exiPrintf("DVD CB for file %08X: %08X(%d)\n",
-                            file, callback, r);
-                    #endif
+                    DVD_DPRINT("DVD CB for file %08X: %08X(%d)\n",
+                        file, callback, r);
                     callback(r, file->info);
-                    #if DVD_DEBUG
-                        exiPrintf("DVD CB for file %08X done\n", file);
-                    #endif
+                    DVD_DPRINT("DVD CB for file %08X done\n", file);
                 }
-                #if DVD_DEBUG
-                    exiPuts("DVD thread read done\n");
-                #endif
+                DVD_DPRINT("DVD thread read done\n");
                 break;
             }
             default: {

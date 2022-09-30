@@ -8,6 +8,8 @@
 #define OS_MESSAGE_NOBLOCK  0
 #define OS_MESSAGE_BLOCK    1
 
+#define _osDisableThreadSwitching (*(u32*)0x803dde8c)
+
 typedef void*(*OSThreadFunc)(void*);
 typedef struct OSThread OSThread;
 typedef struct OSMessageQueue   OSMessageQueue;
@@ -50,8 +52,7 @@ typedef void                  (*OSSwitchThreadCallback)(OSThread* from, OSThread
 typedef s64         OSTime;
 typedef u32         OSTick;
 
-struct OSAlarm
-{
+struct OSAlarm {
     OSAlarmHandler  handler;
     u32             tag;
     OSTime          fire;
@@ -66,32 +67,38 @@ struct OSAlarm
     void*           userData;
 };
 
-struct OSThreadQueue
-{
+struct OSThreadQueue {
     OSThread*  head;
     OSThread*  tail;
 };
 
-struct OSThreadLink
-{
+struct OSThreadLink {
     OSThread*  next;
     OSThread*  prev;
 };
 
-struct OSMutexQueue
-{
+struct OSMutexQueue {
     OSMutex*   head;
     OSMutex*   tail;
 };
 
-struct OSMutexLink
-{
+struct OSMutexLink {
     OSMutex*   next;
     OSMutex*   prev;
 };
 
-struct OSThread
-{
+struct OSMutex {
+    OSThreadQueue   queue;
+    OSThread*       thread; // the current owner
+    s32             count;  // lock count
+    OSMutexLink     link;   // for OSThread.queueMutex
+};
+
+struct OSCond {
+    OSThreadQueue   queue;
+};
+
+struct OSThread {
     OSContext       context;    // register context
 
     u16             state;      // OS_THREAD_STATE_*
@@ -118,8 +125,7 @@ struct OSThread
     void*           specific[OS_THREAD_SPECIFIC_MAX];   // thread specific data
 };
 
-struct OSMessageQueue
-{
+struct OSMessageQueue {
     OSThreadQueue   queueSend;
     OSThreadQueue   queueReceive;
     OSMessage*      msgArray;
@@ -149,6 +155,8 @@ extern void (*OSInitThreadQueue)(OSThreadQueue* queue);
 extern int (*OSDisableInterrupts)(void);
 extern int (*OSEnableInterrupts)(void);
 extern int (*OSRestoreInterrupts)(int);
+void OSYieldThread(void);
+void __OSPromoteThread(OSThread* thread, OSPriority priority);
 
 //threadmsg.c
 extern void (*OSInitMessageQueue)(
@@ -167,3 +175,15 @@ extern BOOL (*OSReceiveMessage)(
     OSMessageQueue* mq,
     OSMessage*      msg,
     s32             flags);
+extern int (*__OSGetEffectivePriority)(OSThread*);
+extern OSThread* (*SetEffectivePriority)(OSThread*, int);
+
+//these don't seem to be in the game so I've added them
+//to this program.
+void OSInitMutex(OSMutex* mutex);
+void OSLockMutex(OSMutex* mutex);
+void OSUnlockMutex(OSMutex* mutex);
+bool OSTryLockMutex(OSMutex* mutex);
+void OSInitCond(OSCond* cond);
+void OSWaitCond(OSCond* cond, OSMutex* mutex);
+void OSSignalCond(OSCond* cond);

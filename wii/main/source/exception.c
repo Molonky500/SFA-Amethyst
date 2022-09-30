@@ -65,16 +65,19 @@ uint cause, void *addr) {
     while(alreadyExc);
     alreadyExc = true;
 
+    u32 msr = mfmsr();
+
     char msg[1024];
     strcpy(msg, "ERR ........ ");
     putHex(&msg[4], exceptionCode);
     exiPuts(msg);
     exiPuts(excNames[exceptionCode & 0xF]);
 
-    strcpy(msg, "\nCAUSE=........ ADDR=........ DAR=........\n");
+    strcpy(msg, "\nCAUSE=........ ADDR=........ DAR=........ MSR=........\n");
     putHex(&msg[ 7], cause);
     putHex(&msg[21], (u32)addr);
     putHex(&msg[34], get_dar());
+    putHex(&msg[47], msr);
     exiPuts(msg);
 
     strcpy(msg, "XER=........ SRR0=........ SRR1=........ LR=........\n");
@@ -82,6 +85,10 @@ uint cause, void *addr) {
     putHex(&msg[18], ctx->srr0);
     putHex(&msg[32], ctx->srr1);
     putHex(&msg[44], ctx->lr);
+    exiPuts(msg);
+
+    strcpy(msg, "IRQ=........\n");
+    putHex(&msg[ 4], irqHandlerDepth);
     exiPuts(msg);
 
     exiPuts("GPRs:\n");

@@ -42,7 +42,7 @@ void __CheckARGV() {
 	__system_argv->commandLine = _argv_raw;
 
 	_argc_raw[0] = _argv_raw;
-	char cArg = 1;
+	int cArg = 1;
 	_argc = 1;
 	while(_argc < __system_argv->argc && _argc < ARGC_MAX
 	&& cArg < len) {

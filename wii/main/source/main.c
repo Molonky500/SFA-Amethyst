@@ -7,13 +7,15 @@ char gameRootDir[512] = "*** GAME ROOT DIR ***";
 
 int main(int argc, char **argv) {
     exiPrintInit();
+    exiPrintf("loader2 start\n");
+
+    DolHeader *header = (DolHeader*)0x90000000;
+    loadDolFromMemory(header);
+
     exiPrintf("game loader start; argc=%d\n", argc);
     for(int i=0; i<argc; i++) {
         exiPrintf("argv[%d] = \"%s\"\n", i, argv[i]);
     }
-
-    DolHeader *header = (DolHeader*)0x90000000;
-    loadDolFromMemory(header);
 
     exiPuts("apply patches\n");
     doPatches();

@@ -1,6 +1,8 @@
 #include "main.h"
 
 //pointers to functions in the game binary
+void*     (*gameAlloc)(u32 size, u32 tag, const char *name) = 0x80023cc8;
+void      (*gameFree)(void *addr) = 0x800233e8;
 BOOL      (*OSCreateThread)(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute) = 0x802462a8;
 int       (*OSDisableInterrupts)(void) = 0x8024377c;
 int       (*OSDisableScheduler)(void) = 0x80245d94;
@@ -8,6 +10,7 @@ void      (*__OSDispatchInterrupt)(int, OSContext*) = 0x80243c54;
 int       (*OSEnableInterrupts)(void) = 0x80243790;
 int       (*OSEnableScheduler)(void) = 0x80245dd4;
 OSThread* (*OSGetCurrentThread)(void) = 0x80245d88;
+int       (*__OSGetEffectivePriority)(OSThread*) = 0x80245e7c;
 void      (*OSInitMessageQueue)(OSMessageQueue* mq, OSMessage* msgArray, s32 msgCount) = 0x80244000;
 void      (*OSInitThreadQueue)(OSThreadQueue* queue) = 0x80245d78;
 void      (*__OSInterruptInit)(void) = 0x802437f8;
@@ -24,3 +27,4 @@ void      (*OSSleepThread)(OSThreadQueue* queue) = 0x80246a60;
 s32       (*OSSuspendThread)(OSThread* thread) = 0x802468f0;
 void      (*OSWakeupThread)(OSThreadQueue* queue) = 0x80246b4c;
 void      (*SelectThread)(BOOL) = 0x80246078;
+OSThread* (*SetEffectivePriority)(OSThread*, int) = 0x80245eb8;

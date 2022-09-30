@@ -1,9 +1,17 @@
-#define DVD_DEBUG 1
+#define DVD_DEBUG 0
+
+#if DVD_DEBUG
+#define DVD_DPRINT exiPrintf
+#else
+#define DVD_DPRINT(...)
+#endif
+
 //how much to read at once (doesn't need to be the same
 //as the real sector size of a DVD)
 //#define DVD_SECTOR_SIZE 2048
 #define DVD_SECTOR_SIZE (8*1024*1024)
 //#define DVD_SECTOR_SIZE (327680)
+
 #define DVD_MAX_MSGS 1024
 #define DVD_THREAD_PRIO 8 //31=lowest 0=highest
 #define DVD_MAX_OPEN_FILES 256

@@ -8,14 +8,14 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdarg.h>
+#include "gcc-macros.h"
 
-#define PACKED __attribute__(( packed ))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
 //this macro excludes 90xxxxxx (ARAM) and 93xxxxxx (IOS)
-#define PTR_VALID(p) (((p) >= 0x80000000 && (p) <= 0x817FFFFF) || \
-    ((p) >= 0x91000000 && (p) <= 0x92FFFFFF))
+#define PTR_VALID(p) (((u32)(p) >= 0x80000000 && (u32)(p) <= 0x817FFFFF) || \
+    ((u32)(p) >= 0x91000000 && (u32)(p) <= 0x92FFFFFF))
 
 #define cntlzw(_val) ({u32 _rval; \
     __asm__ __volatile__ ("cntlzw %0, %1" : "=r"((_rval)) : "r"((_val))); _rval;})
@@ -34,20 +34,32 @@ extern int _argc;
 #include "processor.h"
 #include "cache.h"
 #include "regs.h"
+#include "mem.h"
+#include "malloc.h"
 #include "clock.h"
+#include "timesupp.h"
 #include "irq.h"
+#include "dvd.h"
+#include "osbootinfo.h"
 #include "dol.h"
 #include "thread.h"
-#include "dvd.h"
+#include "ipc.h"
+#include "disc_io.h"
 #include "gameheap.h"
 #include "gamefuncs.h"
 
 //alloc.c
 bool checkAddrInheap(void *addr, u32 len);
+void* _my_sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 
 //audio.c
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL);
 void AIInitDMA_hook(u32 start, uint length);
+
+//checkthread.c
+extern OSThread checkThread;
+void initCheckThread();
+void* checkThreadMain(void *param);
 
 //debugprint.c
 void osPrintHook(const char *fmt, ...);
@@ -59,6 +71,7 @@ void loadDolFromMemory(DolHeader *header);
 
 //dvd.c
 extern volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
+extern OSMutex dvdMsgMutex;
 void initDvdHack();
 int sendToDvdThread(HackDvdMsg *msg);
 int recvFromDvdThread(HackDvdMsg **msg, u32 flags);
@@ -84,6 +97,7 @@ extern volatile bool dvdThreadReady;
 extern OSThreadQueue dvdThreadQueue;
 extern OSThread hackDvdThread;
 extern OSMessageQueue hackDvdThreadMailIn, hackDvdThreadMailOut;
+extern OSMessage hackDvdMailboxIn[DVD_MAX_MSGS], hackDvdMailboxOut[DVD_MAX_MSGS];
 extern int dvdMsgsInHead, dvdMsgsInTail, dvdMsgsOutHead, dvdMsgsOutTail;
 extern volatile HackDvdMsg dvdMsgsIn[DVD_MAX_MSGS], dvdMsgsOut[DVD_MAX_MSGS];
 extern OSAlarm dvdThreadAlarm;
@@ -113,7 +127,12 @@ void bootGame(DolHeader *header);
 //init.c
 int init();
 
+//ipc.c
+void initIpc();
+void ipcIrqHandler(int irqNo, OSContext *ctx);
+
 //irq.c
+extern vs32 irqHandlerDepth;
 extern u32 *gameIrqHandlers;
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx);
 void __OSInterruptInit_hook();
@@ -123,8 +142,16 @@ void __OSMaskInterrupts_hook(u32 mask);
 void __OSUnmaskInterrupts_hook(u32 mask);
 void _irqPiError(int irq, OSContext *ctx);
 
+//libc.c
+void initLibc();
+
 //main.c
 extern char gameRootDir[512];
+
+//malloc.c
+extern u8 *heapCanaryTop, *heapCanaryBottom;
+void initAlloc();
+void checkAlloc();
 
 //osalarm.c
 extern void (*OSCreateAlarm)(OSAlarm *alarm);

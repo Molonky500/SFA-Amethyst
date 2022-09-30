@@ -1,52 +1,56 @@
 #include "main.h"
 
 void __DVDFSInit_hook(void) {
-    exiPrintf("reached %s\n", __FUNCTION__);
+    exiPuts("reached __DVDFSInit_hook\n");
 
-    //this is a good place to init the rest of the hacks.
-    //or maybe it's not? interrupts might be disabled...
+    //since this is the first thing called back into
+    //from the game, this is where we init stuff.
 
-    //restore Wii-exclusive IRQ handlers
-    // *(u32*)0x800030ac = acrIrq;
-    // *(u32*)0x800030b8 = ipcIrq;
-    __UnmaskIrq(IM_PI_ACR);
-    //_ipcReg[1] = 56; //IPC_WriteReg(1,56);
-    //exiPrintf("%s: OK\n", __FUNCTION__);
+    initAlloc();
+    exiPuts("loader2 alloc init OK\n");
+    initLibc();
+    exiPuts("loader2 libc init OK\n");
+
+    initCheckThread();
+
+    initIpc();
+    exiPuts("loader2 IPC init OK\n");
 
     initDvdHack();
-    exiPrintf("initDvdHack: OK; wait for DVD...\n");
+    exiPuts("initDvdHack: OK; wait for DVD...\n");
 
-    u32 *handlers = (u32*)0x80003040;
+    /*u32 *handlers = (u32*)0x80003040;
     for(int i=0; i<32; i += 4) {
-        exiPrintf("IRQ[%2d]: %08X %08X %08X %08X\n", i,
+        printf("IRQ[%2d]: %08X %08X %08X %08X\n", i,
             handlers[i], handlers[i+1],
             handlers[i+2], handlers[i+3]);
-    }
+    }*/
 
     while(!dvdThreadReady) OSYieldThread();
-    exiPrintf("DVD READY\n");
+    printf("DVD READY\n");
 }
 
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
-    char newPath[4096];
+    char newPath[1024];
     snprintf(newPath, sizeof(newPath), "%s/files/%s",
         gameRootDir, path);
-//#if DVD_DEBUG
-    exiPrintf("DVDOpen(%s, %08X)... ", newPath, info);
-//#endif
+    DVD_DPRINT("DVDOpen(\"%s\", %08X)... ", newPath, (u32)info);
     if(!dvdThreadReady) {
-        exiPuts("wait for DVD...\n");
+        DVD_DPRINT("wait for DVD...\n");
         while(!dvdThreadReady);
     }
-    exiPrintf("fopen...\n");
+
+    DVD_DPRINT("fopen...\n");
     FILE *file = fopen(newPath, "rb");
+
     int err = errno;
-    exiPrintf("fopen: %08X\n", file);
+    DVD_DPRINT("fopen: %08X\n", (u32)file);
     if(!file) {
-        exiPrintf(" *** ERROR *** DVDOpen(%s, %08X) FAILED: %d\n",
-            newPath, info, err);
+        printf(" *** ERROR *** DVDOpen(\"%s\", %08X) FAILED: %d\n",
+            newPath, (u32)info, err);
         return false;
     }
+
     dvd_addFile(info, file);
     info->startAddr = 0;
     info->callback = NULL;
@@ -55,10 +59,7 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     fseek(file, 0, SEEK_END);
     info->length = ftell(file);
     fseek(file, 0, SEEK_SET);
-
-//#if DVD_DEBUG
-    exiPrintf("file=0x%08X size=%d\n", file, info->length);
-//#endif
+    DVD_DPRINT("file=0x%08X size=%d\n", (u32)file, info->length);
 
     //OSYieldThread();
     return true;
@@ -66,8 +67,8 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
 
 int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
     if(!addr) {
-        exiPrintf(" *** ERROR *** DVDRead with NULL address @%08X\n",
-            __builtin_extract_return_addr(__builtin_return_address(0)));
+        printf(" *** ERROR *** DVDRead with NULL address @%08X\n",
+            (u32)RETURN_ADDRESS);
         return -EINVAL;
     }
     //int pad = size & 0x1F;
@@ -79,9 +80,7 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
 }
 
 int DVDClose_hook(DVDFileInfo *info) {
-#if DVD_DEBUG
-    exiPrintf("DVDClose(%08X)\n", info);
-#endif
+    DVD_DPRINT("DVDClose(%08X)\n", (u32)info);
     OSYieldThread();
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     if(file) {
@@ -94,8 +93,8 @@ int DVDClose_hook(DVDFileInfo *info) {
 s32 DVDReadPrio_hook(DVDFileInfo* info, void* addr,
 s32 length, s32 offset, s32 prio) {
     if(!addr) {
-        exiPrintf(" *** ERROR *** DVDReadPrio with NULL address @%08X\n",
-            __builtin_extract_return_addr(__builtin_return_address(0)));
+        printf(" *** ERROR *** DVDReadPrio with NULL address @%08X\n",
+            (u32)RETURN_ADDRESS);
         return false;
     }
     int r = sendReadToDvdThread(info, addr, length,
@@ -108,8 +107,8 @@ s32 length, s32 offset, s32 prio) {
 bool DVDReadAsyncPrio_hook(DVDFileInfo *info, void *addr, int length,
 uint offset, DVDCallback callback, int prio) {
     if(!addr) {
-        exiPrintf(" *** ERROR *** DVDReadAsyncPrio with NULL address @%08X\n",
-            __builtin_extract_return_addr(__builtin_return_address(0)));
+        printf(" *** ERROR *** DVDReadAsyncPrio with NULL address @%08X\n",
+            (u32)RETURN_ADDRESS);
         if(callback) callback(-1, info);
         return false;
     }
@@ -124,7 +123,7 @@ uint offset, DVDCallback callback, int prio) {
     int r = sendReadToDvdThread(info, addr, length,
         offset, callback, prio, true);
     if(r <= 0) {
-        exiPrintf(" *** ERROR *** DVDReadAsyncPrio send failed: %d\n", r);
+        printf(" *** ERROR *** DVDReadAsyncPrio send failed: %d\n", r);
     }
     OSYieldThread();
     return (r > 0);
