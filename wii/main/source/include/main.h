@@ -82,7 +82,7 @@ int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
 void __DVDFSInit_hook(void);
 bool DVDOpen_hook(const char *path, DVDFileInfo *info);
 int DVDRead_hook(DVDFileInfo *file, void *addr, uint size, uint offset);
-int DVDClose_hook(DVDFileInfo *file);
+int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback);
 s32 DVDReadPrio_hook(DVDFileInfo* file, void* addr,
     s32 length, s32 offset, s32 prio);
 bool DVDReadAsyncPrio_hook(DVDFileInfo *file, void *addr, int length,
@@ -133,6 +133,9 @@ void ipcIrqHandler(int irqNo, OSContext *ctx);
 
 //irq.c
 extern vs32 irqHandlerDepth;
+extern vs32 curIrqHandler;
+extern vu32 lastIrqCause;
+extern vu32 lastIrqCause2;
 extern u32 *gameIrqHandlers;
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx);
 void __OSInterruptInit_hook();

@@ -1,7 +1,10 @@
 #include "main.h"
-#define DEBUG_IRQ 1
+#define DEBUG_IRQ 0
 
 vs32 irqHandlerDepth = 0;
+vs32 curIrqHandler = -1;
+vu32 lastIrqCause = 0;
+vu32 lastIrqCause2 = 0;
 u32 *gameIrqHandlers = (u32*)0x80003040;
 
 static u32 const _irqPrio[] = {
@@ -33,9 +36,13 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
     u32 i,icause,intmask,irq = 0;
 
 	irqHandlerDepth++;
+	s32 prevIrq = curIrqHandler;
+	curIrqHandler = irqNo;
+
 	u32 rawCause = _piReg[0];
 	u32 mask     = _piReg[1];
 	u32 cause    = rawCause & ~0x10000;
+	lastIrqCause = rawCause;
 
 	if(!cause || !(cause&mask)) {
 		//spuriousIrq++;
@@ -56,6 +63,7 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
 				}
 			}
 		#endif
+		curIrqHandler = prevIrq;
 		OSLoadContext(ctx);
 		return;
 	}
@@ -163,6 +171,7 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
 		intmask |= IRQMASK(IRQ_PI_ACR);
 	}
 
+	lastIrqCause2 = icause;
 	mask = intmask&~(prevIrqMask|currIrqMask);
 	if(mask) {
 		i=0;
@@ -183,12 +192,14 @@ void gameExtIrqHandler_hook(int irqNo, OSContext *ctx) {
                 (void(*)(int,OSContext*))handlers[irq];
             handler(irq,ctx);
 			irqHandlerDepth--;
+			curIrqHandler = prevIrq;
             OSEnableScheduler();
             __OSReschedule();
             OSLoadContext(ctx);
         }
         else {
 			irqHandlerDepth--;
+			curIrqHandler = prevIrq;
             char msg[64];
             strcpy(msg, "no handler IRQ ........\n");
             putHex(&msg[15], irq);

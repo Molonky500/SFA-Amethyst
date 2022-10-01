@@ -118,17 +118,18 @@ void doPatches() {
     hookBranch(0x80248b9c, DVDOpen_hook, 0);
     hookBranch(0x80015850, DVDRead_hook, 0);
     hookBranch(0x80248f9c, DVDReadPrio_hook, 0);
-    hookBranch(0x80248c64, DVDClose_hook, 0);
+    //hookBranch(0x80248c64, DVDClose_hook, 0);
+    hookBranch(0x8024b428, DVDCancelAsync_hook, 0);
     hookBranch(0x80248eac, DVDReadAsyncPrio_hook, 0);
     hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0);
     hookBranch(0x8024afd8, DVDCancelStreamAsync_hook, 0);
 
-    hookBranch(0x80242f20, OSGetFontEncode_hook, 0);
-    hookBranch(0x8024363c, OSGetFontWidth_hook, 0);
-    hookBranch(0x80243338, OSGetFontTexel_hook, 0);
+    //hookBranch(0x80242f20, OSGetFontEncode_hook, 0);
+    //hookBranch(0x8024363c, OSGetFontWidth_hook, 0);
+    //hookBranch(0x80243338, OSGetFontTexel_hook, 0);
 
-    hookBranch(0x8024ffe4, ARStartDMA_hook, 0);
-    hookBranch(0x8024f6fc, AIInitDMA_hook, 0);
+    //hookBranch(0x8024ffe4, ARStartDMA_hook, 0);
+    //hookBranch(0x8024f6fc, AIInitDMA_hook, 0);
 
     static const u32 patches[] = {
         //address, value
@@ -290,8 +291,9 @@ void doPatches() {
         ICInvalidateRange((void*)patches[i], 32);
     }
 
-    //remap EXI regs
-    u32 exiRemap[] = {
+    //remap some HW regs
+    u32 regRemap[] = {
+        //EXI
         0x802439ac, 0x802439e8, 0x80243a4c, 0x80243d84,
         0x80243dbc, 0x80243df8, 0x80253458, 0x80253490,
         0x80253614, 0x80253670, 0x802536e0, 0x8025381c,
@@ -299,16 +301,22 @@ void doPatches() {
         0x80254040, 0x80254130, 0x802543e4, 0x80285560,
         0x8028556c, 0x802855a0, 0x802856d4, 0x80285780,
         0x8028585c, 0x80285938, 0x80285a0c, 0x80285a90,
-        0x80285c5c, 0
+        0x80285c5c,
+        //AI
+        0x8024397c, 0x80243d60, 0x8024f838, 0x8024f878,
+        0x8024f8a8, 0x8024f8d8, 0x8024f998, 0x8024f9cc,
+        0x8024fa80, 0x8024fa90, 0x8024fabc, 0x8024fb8c,
+        0x8024fc68, 0x8024fde4,
+        0 //end of list
     };
-    for(int i=0; exiRemap[i]; i++) {
-        u32 op = *(u32*)exiRemap[i];
+    for(int i=0; regRemap[i]; i++) {
+        u32 op = *(u32*)regRemap[i];
         if(op & 0xFFFF != 0xCC00) {
-            printf(" *** ERROR *** Incorrect entry %08X in exiRemap\n",
-                exiRemap[i]);
+            printf(" *** ERROR *** Incorrect entry %08X in regRemap\n",
+                regRemap[i]);
         }
-        else *(u32*)exiRemap[i] = (op & 0xFFFF0000) | 0xCD00;
-        DCInvalidateRange((void*)exiRemap[i], 32);
-        ICInvalidateRange((void*)exiRemap[i], 32);
+        else *(u32*)regRemap[i] = (op & 0xFFFF0000) | 0xCD00;
+        DCInvalidateRange((void*)regRemap[i], 32);
+        ICInvalidateRange((void*)regRemap[i], 32);
     }
 }

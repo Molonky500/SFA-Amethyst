@@ -1,4 +1,4 @@
-#define DVD_DEBUG 1
+#define DVD_DEBUG 0
 
 #if DVD_DEBUG
 #define DVD_DPRINT exiPrintf

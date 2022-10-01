@@ -2,20 +2,51 @@
 
 GameHeap *gameHeaps = (GameHeap*)0x80340698;
 
-bool checkAddrInheap(void *addr, u32 len) {
+void dumpGameHeaps() {
+    exiPuts("H#|Entry|U| Address|    Size| EndAddr|AllocTag|      LR\n");
     for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
         GameHeap *heap = &gameHeaps[iHeap];
-        for(int iBlock=0; iBlock<heap->avail; iBlock++) {
-            GameHeapEntry *block = &heap->data[iBlock];
-            if(block->type == 0) continue; //free block
-            if((u32)addr       >=  (u32)block->loc
-            && (u32)(addr+len) <= ((u32)block->loc + block->size)) {
-                return true;
+        for(int iEntry=0; iEntry<heap->avail; iEntry++) {
+            GameHeapEntry *entry = &heap->data[iEntry];
+            if(entry->size) { //ignore empty entries
+                //size is not zero-padded
+                exiPrintf("%2d|%5d|%c|%08X|%8X|%08X|%08X|%08X\n",
+                    iHeap, iEntry,
+                    entry->type == HEAP_ENTRY_TYPE_FREE ? ' ' : '*',
+                    entry->loc, entry->size, entry->loc+entry->size,
+                    entry->col, entry->unk14);
             }
         }
     }
-    exiPrintf("Addr %08X-%08X not found on heap\n",
-        (u32)addr, (u32)addr+len);
+}
+
+bool checkAddrInheap(void *addr, u32 len) {
+    GameHeapEntry *found = NULL;
+
+    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+        GameHeap *heap = &gameHeaps[iHeap];
+        int iEntry = 0;
+        while(iEntry >= 0) {
+            GameHeapEntry *entry = &heap->data[iEntry];
+            if(addr >= entry->loc
+            && (addr+len) <= (entry->loc+entry->size)) {
+                found = entry;
+                if(entry->type != HEAP_ENTRY_TYPE_FREE) break;
+            }
+            iEntry = entry->next;
+        }
+    }
+    if(!found) {
+        exiPrintf("Addr %08X-%08X not found on heap\n",
+            (u32)addr, (u32)addr+len);
+        dumpGameHeaps();
+    }
+    else if(found->type == HEAP_ENTRY_TYPE_FREE) {
+        exiPrintf(" *** ERROR *** Addr %08X-%08X found in freed heap block %08X\n",
+            (u32)addr, (u32)addr+len, found->loc);
+        dumpGameHeaps();
+    }
+    else return true;
     return false;
 }
 

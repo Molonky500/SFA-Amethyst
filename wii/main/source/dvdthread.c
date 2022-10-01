@@ -125,13 +125,14 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
     }
     void *readDest = addr;
     while(nRead < size) {
-        //memset(readDest, 0xBBBBBBBB, MIN(DVD_SECTOR_SIZE, size-nRead));
-        DCInvalidateRange(readDest, r);
+        DCInvalidateRange(readDest, size-nRead);
+        memset(readDest, 0xBBBBBBBB, MIN(DVD_SECTOR_SIZE, size-nRead));
         DVD_DPRINT("DVD fread(a=%08X s=%08X f=%08X->%08X)\n",
             readDest, MIN(DVD_SECTOR_SIZE, size-nRead), file, file->file);
         r = fread(readDest, 1, MIN(DVD_SECTOR_SIZE, size-nRead), file->file);
         DVD_DPRINT("fread: %d\n", r);
         if(r <= 0) break;
+        DCFlushRange(readDest, r);
 
         nRead    += r;
         readDest += r;
@@ -273,12 +274,21 @@ void* hackDvdThreadMain(void *param) {
                         exiPrintf(" *** ERROR *** sendFromDvdThread: %d\n", err);
                     }
                 }
+                /*if(file->info->cb.callback) {
+                    DVD_DPRINT("DVDCB callback for file %08X: %08X(%d, %08X)\n",
+                        file, file->info->cb.callback, r, &file->info->cb);
+                    //void DVDCBCallback(undefined4 param, DVDCommandBlock * block)
+                    file->info->cb.callback(r, &file->info->cb);
+                    DVD_DPRINT("DVDCB callback for file %08X done\n", file);
+                }*/
+
                 if(callback) {
-                    DVD_DPRINT("DVD CB for file %08X: %08X(%d)\n",
-                        file, callback, r);
+                    DVD_DPRINT("DVD callback for file %08X: %08X(%d, %08X)\n",
+                        file, callback, r, file->info);
                     callback(r, file->info);
-                    DVD_DPRINT("DVD CB for file %08X done\n", file);
+                    DVD_DPRINT("DVD callback for file %08X done\n", file);
                 }
+
                 DVD_DPRINT("DVD thread read done\n");
                 break;
             }

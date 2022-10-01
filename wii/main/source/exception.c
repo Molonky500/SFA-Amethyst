@@ -4,7 +4,7 @@ void OSExceptionInit_hook() {
     //we repurpose the memory for some unused handlers
     //to store our trampolines and such, so we disable
     //the game's original method and install them ourselves.
-    exiPrintf("%s\n", __FUNCTION__);
+    //exiPrintf("%s\n", __FUNCTION__);
 
     *(u32*)0x803dddec = 0x80003000; //set exception handler table
     // *(u32*)0x803dde38 = 0x80003040; //set IRQ handler table
@@ -47,7 +47,7 @@ void OSExceptionInit_hook() {
     DCInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
     ICInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
 
-    exiPrintf("%s done\n", __FUNCTION__);
+    //exiPrintf("%s done\n", __FUNCTION__);
 }
 
 static const char *excNames[] = {
@@ -87,8 +87,11 @@ uint cause, void *addr) {
     putHex(&msg[44], ctx->lr);
     exiPuts(msg);
 
-    strcpy(msg, "IRQ=........\n");
+    strcpy(msg, "IRQ=........ #........ Cause ........ ........\n");
     putHex(&msg[ 4], irqHandlerDepth);
+    putHex(&msg[14], curIrqHandler);
+    putHex(&msg[29], lastIrqCause);
+    putHex(&msg[38], lastIrqCause2);
     exiPuts(msg);
 
     exiPuts("GPRs:\n");

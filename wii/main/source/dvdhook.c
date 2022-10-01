@@ -27,7 +27,7 @@ void __DVDFSInit_hook(void) {
     }*/
 
     while(!dvdThreadReady) OSYieldThread();
-    printf("DVD READY\n");
+    DVD_DPRINT("DVD READY\n");
 }
 
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
@@ -46,21 +46,24 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     int err = errno;
     DVD_DPRINT("fopen: %08X\n", (u32)file);
     if(!file) {
-        printf(" *** ERROR *** DVDOpen(\"%s\", %08X) FAILED: %d\n",
-            newPath, (u32)info, err);
+        if(abs(err) != ENOENT) {
+            printf(" *** ERROR *** DVDOpen(\"%s\", %08X) FAILED: %d\n",
+                newPath, (u32)info, err);
+        }
         return false;
     }
     dvd_addFile(info, file);
     info->startAddr = 0;
     info->callback = NULL;
     info->cb.state = 0;
+    info->cb.callback = NULL;
 
     fseek(file, 0, SEEK_END);
     info->length = ftell(file);
     fseek(file, 0, SEEK_SET);
     DVD_DPRINT("file=0x%08X size=%d\n", (u32)file, info->length);
-    printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
-        (u32)info, (u32)file, (u32)info->length);
+    //printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
+    //    (u32)info, (u32)file, (u32)info->length);
 
     //OSYieldThread();
     return true;
@@ -72,6 +75,10 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
             (u32)RETURN_ADDRESS);
         return -EINVAL;
     }
+    if(!areInterruptsEnabled()) {
+        exiPrintf(" *** %s with interrupts idsabled @%08X\n",
+            __FUNCTION__, (u32)RETURN_ADDRESS);
+    }
     //int pad = size & 0x1F;
     //if(pad > 0) size += 32 - pad;
     int r = sendReadToDvdThread(info, addr, size,
@@ -80,14 +87,18 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
     return r;
 }
 
-int DVDClose_hook(DVDFileInfo *info) {
-    DVD_DPRINT("DVDClose(%08X)\n", (u32)info);
-    OSYieldThread();
+int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback) {
+    DVD_DPRINT("DVDCancelAsync(%08X, cb %08X)\n",
+        (u32)info, (u32)callback);
+
+    //deadlocks if called from a callback
+    //while(DVD_BUSY) OSYieldThread();
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     if(file) {
         fclose(file->file);
         dvd_removeFile(file);
     }
+    if(callback) callback(0, info);
     return 1;
 }
 
@@ -97,6 +108,10 @@ s32 length, s32 offset, s32 prio) {
         printf(" *** ERROR *** DVDReadPrio with NULL address @%08X\n",
             (u32)RETURN_ADDRESS);
         return false;
+    }
+    if(!areInterruptsEnabled()) {
+        exiPrintf(" *** %s with interrupts idsabled @%08X\n",
+            __FUNCTION__, (u32)RETURN_ADDRESS);
     }
     int r = sendReadToDvdThread(info, addr, length,
         offset, NULL, prio, false);
@@ -113,13 +128,21 @@ uint offset, DVDCallback callback, int prio) {
         if(callback) callback(-1, info);
         return false;
     }
+    if(!areInterruptsEnabled()) {
+        exiPrintf(" *** %s with interrupts idsabled @%08X\n",
+            __FUNCTION__, (u32)RETURN_ADDRESS);
+    }
 
-    (info->cb).command = 1;
+    (info->cb).command = 1; //read
     (info->cb).addr = addr;
     (info->cb).length = length;
     (info->cb).offset = offset;
     (info->cb).transferredSize = 0;
     (info->cb).callback = callback;
+    info->callback = callback;
+    //DVDReadAsyncPrio sets cb.callback to the actual callback
+    //and sets info->callback to a function that just
+    //calls cb.callback
 
     int r = sendReadToDvdThread(info, addr, length,
         offset, callback, prio, true);

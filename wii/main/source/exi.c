@@ -6,7 +6,6 @@ __attribute__ ((aligned (32))) static u8 dmaBuf[4096];
 void exiPuts(const char *str) {
     /** Send a string to the EXI UART.
      */
-    return;
     //LWP_MutexLock(exiMutex);
     u32 irq = IRQ_Disable();
 
@@ -46,6 +45,8 @@ void exiPuts(const char *str) {
             dmaBuf[outPos++] = 0;
         }
 
+        u32 prev0 = exi[0];
+
         exi[0] = (1 << 13) | //ROMDIS
             (5 << 4) | //32MHz
             (2 << 7); //device 1 (UART)
@@ -55,6 +56,7 @@ void exiPuts(const char *str) {
             (1 << 1) | //use DMA
             (1 << 0); //start now
         while(exi[3] & 1); //wait for transfer
+        exi[0] = prev0;
         len -= copyLen;
     }
     IRQ_Restore(irq);
@@ -73,7 +75,8 @@ void exiPrintf(const char *fmt, ...) {
 void exiPrintInit() {
     u32 irq = IRQ_Disable();
     //LWP_MutexInit(&exiMutex, false);
-    _exiReg[0] = (vu32)0xCD006800; //channel 0
+    //XXX fishy constant
+    //_exiReg[0] = (vu32)0xCD006800; //channel 0
     while(_exiReg[3] & 1); //wait for TSTART
     _exiReg[3] = 0;
     (*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz

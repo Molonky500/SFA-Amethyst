@@ -161,7 +161,6 @@ u32 IRQ_Disable(void);
 \return none
 */
 void IRQ_Restore(u32 level);
-
 void __MaskIrq(u32 nMask);
 void __UnmaskIrq(u32 nMask);
 bool areInterruptsEnabled();
