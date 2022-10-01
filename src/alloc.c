@@ -8,6 +8,7 @@ u8 allocFailLogIdx = 0;
 AllocFailLogItem allocFailLog[ALLOC_FAIL_LOG_SIZE];
 u32 maxMemUsed = 0; //highest total bytes used
 u32 maxBlocksUsed = 0;
+OSMutex allocMutex;
 
 void **freeablePtrs[MAX_FREEABLE_PTRS];
 const char *freeablePtrNames[MAX_FREEABLE_PTRS];
@@ -190,8 +191,36 @@ bool doEmergencyFree(int attempt) {
     return false;
 }
 
+void checkNoOverlap(void *addr, u32 size) {
+    //ensure the given region belongs to exactly one heap entry.
+    SfaHeapEntry *prevEntry = NULL;
+    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+        SfaHeap *heap = &heaps[iHeap];
+        int iEntry = 0;
+        while(iEntry >= 0) {
+            SfaHeapEntry *entry = &heap->data[iEntry];
+            if(entry->loc <= addr
+            && entry->loc+size >= addr+size
+            && entry->type != HEAP_ENTRY_TYPE_FREE) {
+                if(prevEntry) {
+                    OSReport(" *** ERROR *** Heap region %08X-%08X overlaps region %08X-%08X\n",
+                        addr, addr+size, prevEntry->loc,
+                        prevEntry->loc+prevEntry->size);
+                }
+                prevEntry = entry;
+            }
+            iEntry = entry->next;
+        }
+    }
+    if(!prevEntry) {
+        OSReport(" *** ERROR *** Addr %08X-%08X not found in heap\n",
+            addr, addr+size);
+    }
+}
+
 void* _doAlloc(int iRegion, u32 size, AllocTag tag, const char *name,
-SfaHeapEntry **outEntry) {
+SfaHeapEntry **outEntry, int *outRegion) {
+    if(outRegion) *outRegion = iRegion;
     void *res = heapAlloc(iRegion, size, tag, name);
     if(!res) {
         if(outEntry) *outEntry = NULL;
@@ -228,46 +257,50 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
 
     //mostly copied game code
     if(size == 0) return NULL;
-    if(size >= 24*1024*1024) {
-        OSReport("BOGUS ALLOC SIZE 0x%08X lr=0x%08X tag=0x%08X\n",
+    if(size >  9926944) { //size of largest file that's read all at once
+        OSReport(" *** ERROR *** BOGUS ALLOC SIZE 0x%08X lr=0x%08X tag=0x%08X\n",
             size, lr, tag);
         _printTrace();
         return NULL;
     }
 
+    OSLockMutex(&allocMutex);
+
     int count = 0;
     void *buf = NULL;
     SfaHeapEntry *entry = NULL;
+    int successfulRegion = -1;
     while((buf == NULL) && (count < 1000)) {
         if(bOnlyUseHeaps1and2 == 1) {
-            buf = _doAlloc(1, size, tag, name, &entry);
-            if(buf == NULL) buf = _doAlloc(2, size, tag, name, &entry);
+            buf = _doAlloc(1, size, tag, name, &entry, &successfulRegion);
+            if(buf == NULL) buf = _doAlloc(2, size, tag, name, &entry, &successfulRegion);
         }
-        else if(bOnlyUseHeap3 != 0) buf = _doAlloc(3, size, tag, name, &entry);
+        else if(bOnlyUseHeap3 != 0) buf = _doAlloc(3, size, tag, name, &entry, &successfulRegion);
         else if(size < 0x3000) {
             if(size < 0x400) {
-                buf = _doAlloc(2, size, tag, name, &entry);
-                if(buf == NULL) buf = _doAlloc(1, size, tag, name, &entry);
-                if(buf == NULL) buf = _doAlloc(0, size, tag, name, &entry);
+                buf = _doAlloc(2, size, tag, name, &entry, &successfulRegion);
+                if(buf == NULL) buf = _doAlloc(1, size, tag, name, &entry, &successfulRegion);
+                if(buf == NULL) buf = _doAlloc(0, size, tag, name, &entry, &successfulRegion);
             }
             else {
-                buf = _doAlloc(1, size, tag, name, &entry);
-                if(buf == NULL) buf = _doAlloc(2, size, tag, name, &entry);
-                if(buf == NULL) buf = _doAlloc(0, size, tag, name, &entry);
+                buf = _doAlloc(1, size, tag, name, &entry, &successfulRegion);
+                if(buf == NULL) buf = _doAlloc(2, size, tag, name, &entry, &successfulRegion);
+                if(buf == NULL) buf = _doAlloc(0, size, tag, name, &entry, &successfulRegion);
             }
         }
         else {
-            buf = _doAlloc(0, size, tag, name, &entry);
-            if(buf == NULL) buf = _doAlloc(1, size, tag, name, &entry);
+            buf = _doAlloc(0, size, tag, name, &entry, &successfulRegion);
+            if(buf == NULL) buf = _doAlloc(1, size, tag, name, &entry, &successfulRegion);
         }
         if(buf) {
-            //DPRINT("alloc success, %08X, entry %08X (type=%d prev=%04X stack=%04X next=%04X id=%08X)",
+            checkNoOverlap(buf, size);
+            //DPRINT("alloc success, %08X, entry %08X (type=%d prev=%04X stack=%04X next=%04X id=%08X reg=%d)",
             //    buf, entry, entry->type, entry->prev, entry->stack, entry->next,
-            //    entry->mmUniqueIdent);
+            //    entry->mmUniqueIdent, successfulRegion);
             if((!PTR_VALID(entry)) || (entry->type > 1)) {
                 //sanity check, in case our patch to return the heap entry
                 //doesn't work. XXX why does this happen?
-                OSReport("Alloc %08X got bad entry %08X (%d) ptr %08X sz %d",
+                OSReport(" *** Alloc %08X got bad entry %08X (%d) ptr %08X sz %d",
                     lr, entry, PTR_VALID(entry) ? entry->type : -1,
                     buf, size);
             }
@@ -284,6 +317,10 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
             maxBlocksUsed = MAX(maxBlocksUsed, usedBlocks);
             maxMemUsed = MAX(maxMemUsed, usedBytes);
 
+            // memset(buf, 0xDD, size);
+            // *(u32*)buf = 0x11111111;
+            //memset(buf, 0x00, size);
+            OSUnlockMutex(&allocMutex);
             return buf;
         }
         else {
@@ -320,7 +357,53 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
     allocFailLog[allocFailLogIdx].lr   = lr;
     allocFailLogIdx++;
     if(allocFailLogIdx >= ALLOC_FAIL_LOG_SIZE) allocFailLogIdx = 0;
+    OSUnlockMutex(&allocMutex);
     return NULL;
+}
+
+void freeHook(void *addr) {
+    //OSReport("free(%08X)\n", addr);
+    if(!addr) return;
+    OSLockMutex(&allocMutex);
+
+    //not same logic the game uses, but this works,
+    //whereas the original didn't. no idea why, maybe
+    //wasn't decompiled correctly
+    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+        SfaHeap *heap = &heaps[iHeap];
+        int iEntry = 0;
+        while(iEntry >= 0) {
+            SfaHeapEntry *entry = &heap->data[iEntry];
+            if(entry->loc == addr) {
+                if(entry->type == HEAP_ENTRY_TYPE_FREE) {
+                    OSReport(" *** ERROR *** double free of %08X (lr=%08X < %08X < %08X)\n",
+                        (u32)addr,
+                        (u32)__builtin_return_address(0),
+                        (u32)__builtin_return_address(1),
+                        (u32)__builtin_return_address(2));
+                }
+                memset(entry->loc, 0xEE, entry->size);
+                heapFree(iHeap, iEntry);
+                OSUnlockMutex(&allocMutex);
+                return;
+            }
+            iEntry = entry->next;
+        }
+    }
+
+    OSReport(" *** ERROR *** free(%08X) not found in heap (lr=%08X < %08X < %08X)\n",
+        (u32)addr,
+        (u32)__builtin_return_address(0),
+        (u32)__builtin_return_address(1),
+        (u32)__builtin_return_address(2));
+    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+        SfaHeap *heap = &heaps[iHeap];
+        SfaHeapEntry *last = &heap->data[heap->used-1];
+        OSReport("heap %d data %08X-%08X size=%08X used=%08X blocks=%08X used=%08X\n",
+            iHeap, heap->data, last->loc + last->size,
+            heap->dataSize, heap->size, heap->avail, heap->used);
+    }
+    OSUnlockMutex(&allocMutex);
 }
 
 //XXX move this
@@ -338,9 +421,11 @@ Texture* textureLoadHook(int id, int bJustCheckIfLoaded) {
 }
 
 void allocInit() {
+    OSInitMutex(&allocMutex);
     memset(freeablePtrs, 0, sizeof(void*) * MAX_FREEABLE_PTRS);
     //if(IS_WII) return;
     hookBranch((u32)allocTagged, allocTaggedHook, 0);
+    hookBranch((u32)free,        freeHook,        0);
     hookBranch((u32)0x8001f5f4,  textureLoadHook, 1);
     hookBranch((u32)0x80029608,  textureLoadHook, 1);
     hookBranch((u32)0x80056f00,  textureLoadHook, 1);

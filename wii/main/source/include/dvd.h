@@ -17,7 +17,7 @@
 #define DVD_MAX_MSGS 1024
 #define DVD_THREAD_PRIO 4 //31=lowest 0=highest
 #define DVD_MAX_OPEN_FILES 256
-#define DVD_ALARM_PERIOD OSMillisecondsToTicks(5)
+#define DVD_ALARM_PERIOD OSMillisecondsToTicks(1)
 #define DVD_THREAD_STACK_SIZE 65536
 
 typedef void (*DVDCallback)(s32 result, void* fileInfo);

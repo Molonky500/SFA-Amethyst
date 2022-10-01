@@ -48,6 +48,7 @@ install: all
 	@./tools/elf2patch.py $(BUILDDIR)/src.elf $(BUILDDIR)/bootstrap.bin $(BUILDDIR)/patch.bin
 	@./tools/patchdol.py $(ORIGDOL) $(BUILDDIR)/patch.bin $(NEWDOL)
 	@./tools/makebitnames.py $(DATA)/U0/gamebits.xml $(DISCROOT)/bitnames.dat
+#	@./tools/mkwiifiles.py $(DISCROOT)/../
 
 # extract ISO
 $(ORIGDOL): $(ORIGISO)

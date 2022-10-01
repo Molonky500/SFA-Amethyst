@@ -131,6 +131,7 @@ GLOBALFN void gxTextureFn_8025b6f0(int);
 GLOBALFN void gxTextureFn_8025c2a0(int);
 GLOBALFN void gxWaitFn_80258330(void);
 GLOBALFN void* heapAlloc(int region, uint size, AllocTag tag, const char* name); //don't use this, use allocTagged
+GLOBALFN void heapFree(int iHeap, int iEntry);
 GLOBALFN void hudDrawAirMeter(void);
 GLOBALFN void hudDrawButtons(int,int,int); //XXX params
 GLOBALFN void hudDrawRect(int x1,int y1,int x2,int y2,Color4b *color);
@@ -194,6 +195,30 @@ GLOBALFN void objStopSound_(ObjInstance *obj, int id);
 GLOBALFN bool objUpdateOpacity(ObjInstance *obj);
 GLOBALFN BOOL OSDisableInterrupts(void);
 GLOBALFN BOOL OSEnableInterrupts(void);
+
+GLOBALFN BOOL      _OSCreateThread(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute);
+GLOBALFN int       _OSDisableInterrupts(void);
+GLOBALFN int       _OSDisableScheduler(void);
+GLOBALFN void      ___OSDispatchInterrupt(int, OSContext*);
+GLOBALFN int       _OSEnableInterrupts(void);
+GLOBALFN int       _OSEnableScheduler(void);
+GLOBALFN OSThread* _OSGetCurrentThread(void);
+GLOBALFN int       ___OSGetEffectivePriority(OSThread*);
+GLOBALFN void      _OSInitMessageQueue(OSMessageQueue* mq, OSMessage* msgArray, s32 msgCount);
+GLOBALFN void      _OSInitThreadQueue(OSThreadQueue* queue);
+GLOBALFN void      ___OSInterruptInit(void);
+GLOBALFN void      _OSLoadContext(OSContext*);
+GLOBALFN BOOL      _OSReceiveMessage(OSMessageQueue *mq, OSMessage *msg, s32 flags);
+GLOBALFN void      ___OSReschedule(void);
+GLOBALFN int       _OSRestoreInterrupts(int);
+GLOBALFN s32       _OSResumeThread(OSThread* thread);
+GLOBALFN BOOL      _OSSendMessage( OSMessageQueue *mq, OSMessage msg, s32 flags);
+GLOBALFN u32       ___OSSetExceptionHandler(u32 exception, void *handler);
+GLOBALFN BOOL      _OSSetThreadPriority(OSThread* thread, OSPriority priority);
+GLOBALFN void      _OSSleepThread(OSThreadQueue* queue);
+GLOBALFN s32       _OSSuspendThread(OSThread* thread);
+GLOBALFN void      _OSWakeupThread(OSThreadQueue* queue);
+
 GLOBALFN u16 OSGetFontEncode(void);
 GLOBALFN OSInterruptMask OSGetInterruptMask(void);
 GLOBALFN u64 __OSGetSystemTime(void);
@@ -233,6 +258,7 @@ GLOBALFN SaveGameEnvState* saveGame_getEnv(void);
 GLOBALFN void saveSelect_drawText(void *unused, u32 alpha);
 GLOBALFN void sceneRender(void);
 GLOBALFN void selectTexture(Texture *tex, int idx);
+GLOBALFN void SelectThread(BOOL);
 GLOBALFN void setGpuErrorHandler(void*);
 GLOBALFN void setMatrixFromObjectTransposed (ObjPos * obj, Mtx * mtxOut);
 GLOBALFN void setSoundMode(u8 mode, bool force);

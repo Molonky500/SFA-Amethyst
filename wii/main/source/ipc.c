@@ -49,19 +49,19 @@ void initIpc() {
     // generate a random request magic
 	//__ipc_srand(gettick());
 	//IPC_REQ_MAGIC = __ipc_rand();
-    IPC_REQ_MAGIC = 0xBABE05FA;
+    IPC_REQ_MAGIC = 0xF0C57175;
 
     OSInitMutex(&ipcMutex);
     *(u32*)0x800030ac = (u32)ipcIrqHandler;
     __UnmaskIrq(IM_PI_ACR);
     IPC_WriteReg(1, 0x38); //HW_IPC_PPCCTRL
-    //printf("IPC init OK\n");
+    IPC_DPRINT("IPC init OK, magic=0x%08X\n", IPC_REQ_MAGIC);
 }
 
 
 static int _writeReq(IpcRequest *req) {
     req->magic = IPC_REQ_MAGIC;
-    //printf("IPC send req %08X\n", (u32)req);
+    IPC_DPRINT("IPC send req %08X\n", (u32)req);
     DCFlushRange(req, sizeof(IpcRequest));
     IPC_WriteReg(0, MEM_VIRTUAL_TO_PHYSICAL(req)); //HW_IPC_PPCMSG
     IPC_WriteReg(1, (IPC_ReadReg(1)&0x30)|0x01); //HW_IPC_PPCCTRL
@@ -117,7 +117,7 @@ static void __ipc_replyhandler(bool isAck) {
     }
     else ackAck();
 
-    //printf("IPC %s: %08X\n", isAck ? "ACK" : "RESP", req);
+    IPC_DPRINT("IPC %s: %08X\n", isAck ? "ACK" : "RESP", req);
     if(!isAck) {
         req = MEM_PHYSICAL_TO_K0(req);
         DCInvalidateRange(req, sizeof(IpcRequest));

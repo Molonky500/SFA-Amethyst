@@ -113,6 +113,8 @@ uint cause, void *addr) {
         sp = (u32*)*sp;
     }
 
+    dumpGameHeaps();
+
     //SYS_ResetSystem(SYS_SHUTDOWN,0,0);
     while(1);
 }

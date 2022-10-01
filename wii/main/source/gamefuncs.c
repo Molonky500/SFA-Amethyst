@@ -27,4 +27,4 @@ void      (*OSSleepThread)(OSThreadQueue* queue) = 0x80246a60;
 s32       (*OSSuspendThread)(OSThread* thread) = 0x802468f0;
 void      (*OSWakeupThread)(OSThreadQueue* queue) = 0x80246b4c;
 void      (*SelectThread)(BOOL) = 0x80246078;
-OSThread* (*SetEffectivePriority)(OSThread*, int) = 0x80245eb8;
+OSThread* (*SetEffectivePriority)(OSThread*, int) = 0x80245eb8; //XXX same as OSSetThreadPriority

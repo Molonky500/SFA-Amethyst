@@ -387,9 +387,7 @@ void _start(void) {
 
     if(IS_WII) {
         OSReport("Booting in Wii mode\n");
-        //don't try to init DVD again...
-        WRITE_NOP(0x80020db0); //...in game init()
-        WRITE_NOP(0x80244600); //...in __OSReboot()
+        wiiHooksInit();
     }
     else { //do the DVD init we replaced.
         OSReport("Booting in GC mode\n");

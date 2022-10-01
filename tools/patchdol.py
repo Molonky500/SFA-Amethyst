@@ -178,11 +178,15 @@ def correctSectionAddrs(header:dict) -> None:
     """
     for i in range(DOL_NUM_TEXT_SECTIONS):
         sec = header['text'][i]
-        if sec['size'] > 0 and sec['addr'] < RVL_GLOBALS_END:
-            diff = RVL_GLOBALS_END - sec['addr']
-            sec['addr']   += diff
-            sec['offset'] += diff
-            sec['size']   -= diff
+        if sec['size'] > 0:
+            if sec['addr'] < RVL_GLOBALS_END:
+                diff = RVL_GLOBALS_END - sec['addr']
+                sec['addr']   += diff
+                sec['offset'] += diff
+                sec['size']   -= diff
+            if sec['addr'] < 0x80003400:
+                # lol HBC refuses to load such things
+                sec['addr'] = 0x80600000
     # for this use case we know no data/bss section needs
     # to be adjusted, so no point doing it
 
@@ -228,20 +232,12 @@ def main():
     # also change the entry point
     header['entry'] = BIN_INJECT_ADDR
 
-    # change the sections to not overlap the RVLOS globals
-    correctSectionAddrs(header)
-
     # copy input DOL to output
     inDol.seek(0, 0)
     outDol.write(inDol.read())
 
     # append the patch
     outDol.write(inBin.read())
-
-    # go back and write the updated header
-    outDol.seek(0, 0)
-    printDolHeader(header)
-    writeDolHeader(header, outDol)
 
     # update the arena address
     newArena = BIN_INJECT_ADDR + binSize
@@ -262,6 +258,14 @@ def main():
     #outDol.seek(addrToOffset(JUMP_ADDR, header), 0)
     #outDol.write(struct.pack('>I',
     #    makeBranch(JUMP_ADDR, BIN_INJECT_ADDR)))
+
+    # change the sections to not overlap the RVLOS globals
+    correctSectionAddrs(header)
+
+    # go back and write the updated header
+    outDol.seek(0, 0)
+    printDolHeader(header)
+    writeDolHeader(header, outDol)
 
     inDol.close()
     inBin.close()

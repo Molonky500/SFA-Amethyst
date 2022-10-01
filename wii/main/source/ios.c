@@ -25,7 +25,7 @@ s32 IOS_Open(const char *filepath,u32 mode) {
 	s32 ret;
 	IpcRequest req;
 
-	//exiPrintf("%s(%s, %08X)\n", __FUNCTION__, filepath, mode);
+	IPC_DPRINT("%s(%s, %08X)\n", __FUNCTION__, filepath, mode);
 	if(filepath==NULL) return -EINVAL;
 
 	req.cmd = IOS_OPEN;
@@ -37,13 +37,14 @@ s32 IOS_Open(const char *filepath,u32 mode) {
 
 	req.open.filepath = (char*)MEM_VIRTUAL_TO_PHYSICAL(filepath);
 	req.open.mode     = mode;
-	//exiPrintf("__ipc_syncrequest...\n");
+	IPC_DPRINT("__ipc_syncrequest...\n");
 	ret = __ipc_syncrequest(&req);
-	//exiPrintf("__ipc_syncrequest done\n");
+	IPC_DPRINT("__ipc_syncrequest done\n");
 	return ret;
 }
 
 s32 IOS_Close(s32 fd) {
+	IPC_DPRINT("%s(%d)\n", __FUNCTION__, fd);
 	IpcRequest req;
 	req.cmd = IOS_CLOSE;
 	req.fd = fd;
@@ -53,6 +54,7 @@ s32 IOS_Close(s32 fd) {
 }
 
 s32 IOS_Read(s32 fd,void *buf,s32 len) {
+	IPC_DPRINT("%s(%d, %08X, %d)\n", __FUNCTION__, fd, (u32)buf, len);
 	IpcRequest req;
 	req.cmd = IOS_READ;
 	req.fd = fd;
@@ -67,6 +69,7 @@ s32 IOS_Read(s32 fd,void *buf,s32 len) {
 }
 
 s32 IOS_Write(s32 fd,const void *buf,s32 len) {
+	IPC_DPRINT("%s(%d, %08X, %d)\n", __FUNCTION__, fd, (u32)buf, len);
 	IpcRequest req;
 	req.cmd = IOS_WRITE;
 	req.fd = fd;
@@ -80,6 +83,7 @@ s32 IOS_Write(s32 fd,const void *buf,s32 len) {
 }
 
 s32 IOS_Seek(s32 fd,s32 where,s32 whence) {
+	IPC_DPRINT("%s(%d, %08X, %d)\n", __FUNCTION__, fd, where, whence);
 	IpcRequest req;
 	req.cmd = IOS_SEEK;
 	req.fd = fd;
@@ -91,6 +95,8 @@ s32 IOS_Seek(s32 fd,s32 where,s32 whence) {
 }
 
 s32 IOS_Ioctl(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 len_io) {
+	IPC_DPRINT("%s(%d, %d, %08X, %d, %08X, %d)\n", __FUNCTION__,
+		fd, ioctl, (u32)buffer_in, len_in, (u32)buffer_io, len_io);
 	IpcRequest req;
 	req.cmd = IOS_IOCTL;
 	req.fd = fd;
@@ -107,6 +113,8 @@ s32 IOS_Ioctl(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 le
 }
 
 s32 IOS_Ioctlv(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv) {
+	IPC_DPRINT("%s(%d, %d, %d, %d, %08X)\n", __FUNCTION__,
+		fd, ioctl, cnt_in, cnt_io, (u32)argv);
 	IpcRequest req;
 	req.cmd = IOS_IOCTLV;
 	req.fd = fd;

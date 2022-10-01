@@ -129,7 +129,7 @@ void doPatches() {
     //hookBranch(0x80243338, OSGetFontTexel_hook, 0);
 
     //hookBranch(0x8024ffe4, ARStartDMA_hook, 0);
-    //hookBranch(0x8024f6fc, AIInitDMA_hook, 0);
+    hookBranch(0x8024f6fc, AIInitDMA_hook, 0);
 
     static const u32 patches[] = {
         //address, value

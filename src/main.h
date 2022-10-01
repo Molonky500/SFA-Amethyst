@@ -291,5 +291,8 @@ double fmod(double x, double y);
 Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a);
 bool isDllValid(int id);
 
+//wii.c
+void wiiHooksInit();
+
 //worldmap.c
 void worldMapHook();

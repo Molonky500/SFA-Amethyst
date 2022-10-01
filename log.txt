@@ -1,0 +1,519 @@
+#./tools/genSymbols.py include/sfa/ build/
+[*] Generate symbols.s
+make[1]: Entering directory '/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst'
+[*] Linking...
+/opt/devkitpro/devkitPPC/bin/../lib/gcc/powerpc-eabi/12.1.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 0000000000000000
+done
+make[1]: Leaving directory '/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst'
+#@rm /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/build/bootstrap.elf
+make[1]: Entering directory '/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst'
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/debugprint.c: In function 'printEnvironment':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/debugprint.c:556:50: warning: iteration 5 invokes undefined behavior [-Waggressive-loop-optimizations]
+  556 |             debugPrintf("%04X ", env->envFxActIdx[i] & 0xFFFF);
+      |                                  ~~~~~~~~~~~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/debugprint.c:553:23: note: within this loop
+  553 |         for(int i=0; i<8; i++) {
+      |                      ~^~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c: In function 'drawArrow':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:20:18: warning: passing argument 1 of 'PSMTXIdentiy' from incompatible pointer type [-Wincompatible-pointer-types]
+   20 |     PSMTXIdentiy(&m);
+      |                  ^~
+      |                  |
+      |                  f32 (*)[4][4] {aka float (*)[4][4]}
+In file included from include/sfa/sfa.h:11,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/main.h:1,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:1:
+include/sfa/funcs.h:221:33: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  221 | GLOBALFN void PSMTXIdentiy(Mtx *M);
+      |                            ~~~~~^
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:21:22: warning: passing argument 1 of 'mtxRotateByVec3s' from incompatible pointer type [-Wincompatible-pointer-types]
+   21 |     mtxRotateByVec3s(&m, &rot);
+      |                      ^~
+      |                      |
+      |                      f32 (*)[4][4] {aka float (*)[4][4]}
+include/sfa/funcs.h:173:38: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  173 | GLOBALFN void mtxRotateByVec3s(Mtx * mtx, vec3s * rot);
+      |                                ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:22:22: warning: passing argument 1 of 'vec3f_multByMtx2' from incompatible pointer type [-Wincompatible-pointer-types]
+   22 |     vec3f_multByMtx2(&m, &a, &a);
+      |                      ^~
+      |                      |
+      |                      f32 (*)[4][4] {aka float (*)[4][4]}
+include/sfa/funcs.h:275:38: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  275 | GLOBALFN void vec3f_multByMtx2(Mtx * mtx, vec3f * vIn, vec3f * vOut);
+      |                                ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:23:22: warning: passing argument 1 of 'vec3f_multByMtx2' from incompatible pointer type [-Wincompatible-pointer-types]
+   23 |     vec3f_multByMtx2(&m, &b, &b);
+      |                      ^~
+      |                      |
+      |                      f32 (*)[4][4] {aka float (*)[4][4]}
+include/sfa/funcs.h:275:38: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  275 | GLOBALFN void vec3f_multByMtx2(Mtx * mtx, vec3f * vIn, vec3f * vOut);
+      |                                ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:24:22: warning: passing argument 1 of 'vec3f_multByMtx2' from incompatible pointer type [-Wincompatible-pointer-types]
+   24 |     vec3f_multByMtx2(&m, &c, &c);
+      |                      ^~
+      |                      |
+      |                      f32 (*)[4][4] {aka float (*)[4][4]}
+include/sfa/funcs.h:275:38: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  275 | GLOBALFN void vec3f_multByMtx2(Mtx * mtx, vec3f * vIn, vec3f * vOut);
+      |                                ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:25:22: warning: passing argument 1 of 'vec3f_multByMtx2' from incompatible pointer type [-Wincompatible-pointer-types]
+   25 |     vec3f_multByMtx2(&m, &d, &d);
+      |                      ^~
+      |                      |
+      |                      f32 (*)[4][4] {aka float (*)[4][4]}
+include/sfa/funcs.h:275:38: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  275 | GLOBALFN void vec3f_multByMtx2(Mtx * mtx, vec3f * vIn, vec3f * vOut);
+      |                                ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawarrow.c:26:22: warning: passing argument 1 of 'vec3f_multByMtx2' from incompatible pointer type [-Wincompatible-pointer-types]
+   26 |     vec3f_multByMtx2(&m, &e, &e);
+      |                      ^~
+      |                      |
+      |                      f32 (*)[4][4] {aka float (*)[4][4]}
+include/sfa/funcs.h:275:38: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  275 | GLOBALFN void vec3f_multByMtx2(Mtx * mtx, vec3f * vIn, vec3f * vOut);
+      |                                ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawtext.c: In function '_drawCharColored':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawtext.c:136:21: warning: passing argument 1 of 'gxSetProjection' from incompatible pointer type [-Wincompatible-pointer-types]
+  136 |     gxSetProjection(&hudMatrix, TRUE);
+      |                     ^~~~~~~~~~
+      |                     |
+      |                     f32 (*)[4][4] {aka float (*)[4][4]}
+In file included from include/sfa/sfa.h:11,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/main.h:1,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/drawtext.c:1:
+include/sfa/funcs.h:105:37: note: expected 'f32 (*)[3][4]' {aka 'float (*)[3][4]'} but argument is of type 'f32 (*)[4][4]' {aka 'float (*)[4][4]'}
+  105 | GLOBALFN void gxSetProjection(Mtx * mtx, BOOL ortho);
+      |                               ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/krystal.c: In function 'krystal_loadAssets':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/krystal.c:29:48: warning: passing argument 2 of 'loadFileByPath' from incompatible pointer type [-Wincompatible-pointer-types]
+   29 |         krystalModel = loadFileByPath(pathMod, &krystalModelSize);
+      |                                                ^~~~~~~~~~~~~~~~~
+      |                                                |
+      |                                                u32 * {aka long unsigned int *}
+In file included from include/sfa/sfa.h:11,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/main.h:1,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/krystal.c:3:
+include/sfa/funcs.h:142:48: note: expected 'uint *' {aka 'unsigned int *'} but argument is of type 'u32 *' {aka 'long unsigned int *'}
+  142 | GLOBALFN void* loadFileByPath(char *path,uint *outSize);
+      |                                          ~~~~~~^~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/krystal.c:41:50: warning: passing argument 2 of 'loadFileByPath' from incompatible pointer type [-Wincompatible-pointer-types]
+   41 |         krystalTexture = loadFileByPath(pathTex, &krystalTextureSize);
+      |                                                  ^~~~~~~~~~~~~~~~~~~
+      |                                                  |
+      |                                                  u32 * {aka long unsigned int *}
+include/sfa/funcs.h:142:48: note: expected 'uint *' {aka 'unsigned int *'} but argument is of type 'u32 *' {aka 'long unsigned int *'}
+  142 | GLOBALFN void* loadFileByPath(char *path,uint *outSize);
+      |                                          ~~~~~~^~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugGameBits.c: In function 'getBitName':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugGameBits.c:114:18: warning: passing argument 1 of 'free' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  114 |             free(bitNames);
+      |                  ^~~~~~~~
+In file included from include/sfa/sfa.h:11,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/main.h:1,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugGameBits.c:3:
+include/sfa/funcs.h:53:20: note: expected 'void *' but argument is of type 'const char *'
+   53 | GLOBALFN void free(void*);
+      |                    ^~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugMisc.c: In function 'menuDebugCopyTest_select':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugMisc.c:61:16: warning: passing argument 1 of 'memcpy' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   61 |         memcpy(msg, test, sizeof(msg));
+      |                ^~~
+In file included from include/sfa/sfa.h:11,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/main.h:1,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugMisc.c:1:
+include/sfa/funcs.h:164:29: note: expected 'void *' but argument is of type 'volatile char *'
+  164 | GLOBALFN void* memcpy(void *dest, void *src, int len); // clobbers: r0, r4, r5, r6
+      |                       ~~~~~~^~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugMisc.c:61:21: warning: passing argument 2 of 'memcpy' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+   61 |         memcpy(msg, test, sizeof(msg));
+      |                     ^~~~
+include/sfa/funcs.h:164:41: note: expected 'void *' but argument is of type 'const char *'
+  164 | GLOBALFN void* memcpy(void *dest, void *src, int len); // clobbers: r0, r4, r5, r6
+      |                                   ~~~~~~^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugMisc.c: In function 'menuDebugFileTest2_select':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugMisc.c:176:41: warning: passing argument 1 of 'loadFileByPath' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+  176 |         u32 *data = loadFileByPath(files[iFile], &size);
+      |                                    ~~~~~^~~~~~~
+include/sfa/funcs.h:142:37: note: expected 'char *' but argument is of type 'const char *'
+  142 | GLOBALFN void* loadFileByPath(char *path,uint *outSize);
+      |                               ~~~~~~^~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugMisc.c:176:50: warning: passing argument 2 of 'loadFileByPath' from incompatible pointer type [-Wincompatible-pointer-types]
+  176 |         u32 *data = loadFileByPath(files[iFile], &size);
+      |                                                  ^~~~~
+      |                                                  |
+      |                                                  u32 * {aka long unsigned int *}
+include/sfa/funcs.h:142:48: note: expected 'uint *' {aka 'unsigned int *'} but argument is of type 'u32 *' {aka 'long unsigned int *'}
+  142 | GLOBALFN void* loadFileByPath(char *path,uint *outSize);
+      |                                          ~~~~~~^~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugObjs.c: In function 'objMenuShow':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugObjs.c:271:9: warning: converting a packed 'ObjDef_Override' pointer (alignment 1) to a 'ObjDef' pointer (alignment 4) may result in an unaligned pointer value [-Waddress-of-packed-member]
+  271 |         5, -1, -1, NULL);
+      |         ^
+In file included from include/sfa/types.h:55,
+                 from include/sfa/sfa.h:9,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/main.h:1,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/menuDebugObjs.c:3:
+include/sfa/objects/objdef.h:1504:23: note: defined here
+ 1504 | typedef struct PACKED ObjDef_Override {
+      |                       ^~~~~~~~~~~~~~~
+include/sfa/objects/objdef.h:1491:16: note: defined here
+ 1491 | typedef struct ObjDef {
+      |                ^~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/title.c: In function 'titleHooksInit':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/title.c:122:18: warning: assignment to 'int (*)()' from 'u32' {aka 'long unsigned int'} makes pointer from integer without a cast [-Wint-conversion]
+  122 |     oldTitleHook = *(u32*)0x8031a320;
+      |                  ^
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/wii.c: In function 'wiiHooksInit':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/wii.c:32:33: warning: character constant too long for its type
+   32 |     void *test = loadFileByPath('/GAMETEXT.bin', &size);
+      |                                 ^~~~~~~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/wii.c:32:33: warning: passing argument 1 of 'loadFileByPath' makes pointer from integer without a cast [-Wint-conversion]
+   32 |     void *test = loadFileByPath('/GAMETEXT.bin', &size);
+      |                                 ^~~~~~~~~~~~~~~
+      |                                 |
+      |                                 int
+In file included from include/sfa/sfa.h:11,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/main.h:1,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/wii.c:1:
+include/sfa/funcs.h:142:37: note: expected 'char *' but argument is of type 'int'
+  142 | GLOBALFN void* loadFileByPath(char *path,uint *outSize);
+      |                               ~~~~~~^~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/src/wii.c:32:50: warning: passing argument 2 of 'loadFileByPath' from incompatible pointer type [-Wincompatible-pointer-types]
+   32 |     void *test = loadFileByPath('/GAMETEXT.bin', &size);
+      |                                                  ^~~~~
+      |                                                  |
+      |                                                  u32 * {aka long unsigned int *}
+include/sfa/funcs.h:142:48: note: expected 'uint *' {aka 'unsigned int *'} but argument is of type 'u32 *' {aka 'long unsigned int *'}
+  142 | GLOBALFN void* loadFileByPath(char *path,uint *outSize);
+      |                                          ~~~~~~^~~~~~~
+[*] Linking...
+done
+make[1]: Leaving directory '/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst'
+[*] Done.
+[*] Installing...
+[*] Entry point: 0x0000EEBC
+[*] GOT Offs=0x00000204, Size=0x000011C2, bootstrap=0x00000200
+Sect## Offset Address  EndAddr      Size
+text 0    1A0 800031A0 80005620     2480
+text 1   2620 800066E0 802C1880   2BB1A0
+text 2 33DD40 803FA480 804211C0    26D40
+text 3      0        0        0        0
+text 4      0        0        0        0
+text 5      0        0        0        0
+text 6      0        0        0        0
+data 0 2BD7C0 80005620 80005CC0      6A0
+data 1 2BDE60 80005CC0 800066E0      A20
+data 2 2BE880 802C1880 802C18A0       20
+data 3 2BE8A0 802C18A0 802C18C0       20
+data 4 2BE8C0 802C18C0 802C2D60     14A0
+data 5 2BFD60 802C2D60 80335840    72AE0
+data 6 332840 803DB1E0 803DC7A0     15C0
+data 7 333E00 803DE500 803E8440     9F40
+data 8      0        0        0        0
+data 9      0        0        0        0
+data10      0        0        0        0
+bss    ------ 80335840 803E8478    B2C38
+Entry  ------ 803FA480 -------- --------
+dolphin-emu -d /home/rena/projects/sfa/DATA/sys/main.dol
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.934: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.934: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.934: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.934: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.935: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.935: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.936: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.936: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.936: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.936: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.940: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.940: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.940: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.940: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.940: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.941: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.941: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.941: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.942: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:1388): Gtk-WARNING **: 18:35:07.942: Unable to locate theme engine in module_path: "murrine",
+QApplication: invalid style override 'gtk' passed, ignoring it.
+	Available styles: bb10dark, bb10bright, cleanlooks, gtk2, cde, motif, plastique, Windows, Fusion
+35:07:969 Common/FileUtil.cpp:923 I[COMMON]: CreateSysDirectoryPath: Setting to /usr/local/share/dolphin-emu/sys/
+35:07:975 DolphinQt/Translation.cpp:152 W[COMMON]: Error reading MO file '/usr/local/share/dolphin-emu//../locale/en_CA/LC_MESSAGES/dolphin-emu.mo'
+35:07:975 DiscIO/DirectoryBlob.cpp:961 E[DIO]: Couldn't detect disc type based on disc header; assuming Wii
+35:08:054 Core/IOS/ES/Formats.cpp:120 E[BOOT]: TMD signature too small for cert
+35:08:076 InputCommon/ControllerInterface/evdev/evdev.cpp:294 N[CI]: evdev hotplug thread started
+35:08:117 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+35:08:123 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
+35:08:258 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
+35:08:308 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+35:08:471 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:08:473 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp (NAND)
+35:08:473 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: OpenFile(/title/00000001/00000002/content/title.tmd): Result 0
+35:08:473 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: GetFileStatus(/title/00000001/00000002/content/title.tmd): Result 0
+35:08:473 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: Close(/title/00000001/00000002/content/title.tmd): Result 0
+35:08:702 Core/IOS/ES/Formats.cpp:127 E[BOOT]: TMD signature to small for data
+35:08:708 Core/ConfigManager.cpp:178 N[CORE]: Active title: Star Fox Adventures (GSAE01)
+35:08:712 Core/Core.cpp:1027 N[COMMON]: Want determinism <- false
+35:08:712 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:08:713 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp (NAND)
+35:08:714 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+35:08:714 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+35:08:715 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+35:08:715 Core/Core.cpp:237 I[BOOT]: Starting core = Wii mode
+35:08:715 Core/Core.cpp:238 I[BOOT]: CPU Thread separate = No
+35:08:958 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+35:08:966 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
+35:09:078 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
+35:09:151 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+35:09:205 Common/FatFsUtil.cpp:417 I[COMMON]: Starting SD card conversion from folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/ to file /home/rena/.local/share/dolphin-emu/Wii/sd.raw
+35:09:281 Common/FatFsUtil.cpp:510 I[COMMON]: Successfully packed folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/ to SD image at /home/rena/.local/share/dolphin-emu/Wii/sd.raw
+35:09:304 AudioCommon/Mixer.cpp:41 I[AI]: Mixer is initialized
+35:09:304 AudioCommon/PulseAudioStream.cpp:26 N[Audio]: PulseAudio backend using 2 channels
+35:09:306 AudioCommon/PulseAudioStream.cpp:131 I[Audio]: Pulse successfully initialized
+35:09:312 Core/HW/GCMemcard/GCMemcardRaw.cpp:51 I[EXI]: Reading memory card /home/rena/.local/share/dolphin-emu/GC/MemoryCardA.USA.raw
+35:09:324 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 0 to type 1 (notify software: true)
+35:09:324 Core/HW/GCMemcard/GCIFile.cpp:22 I[EXI]: Reading header from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+35:09:324 Core/HW/GCMemcard/GCIFile.cpp:43 I[EXI]: Reading savedata from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+35:09:324 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 1, device 0 to type 8 (notify software: true)
+35:09:326 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Shift JIS font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+35:09:326 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Windows-1252 font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+35:09:326 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 1 to type 2 (notify software: true)
+35:09:326 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 2 to type 5 (notify software: true)
+35:09:326 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 2, device 0 to type 3 (notify software: true)
+35:09:373 Core/HW/Memmap.cpp:320 I[MI]: Memory system initialized. RAM at 0x7f3f5a000000
+35:09:381 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:09:381 Core/IOS/IOS.cpp:296 I[IOS]: Starting IOS 0000000100000050
+35:09:383 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp (NAND)
+35:09:383 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #0 Constructed
+35:09:383 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #1 Constructed
+35:09:383 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #2 Constructed
+35:09:383 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #3 Constructed
+35:09:383 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #4 Constructed
+35:09:383 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+35:09:384 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+35:09:385 Core/IOS/Network/MACUtils.cpp:48 I[IOS_NET]: Using MAC address: 00:17:ab:f1:ed:15
+35:09:713 Core/Boot/Boot.cpp:522 N[BOOT]: Booting from disc: /home/rena/projects/sfa/DATA/sys/main.dol
+35:09:714 Core/Boot/Boot_BS2Emu.cpp:499 I[BOOT]: Faking Wii BS2...
+35:09:714 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: OpenFile(/sys/uid.sys): Result 0
+35:09:714 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: Close(/sys/uid.sys): Result 0
+35:09:714 Core/IOS/ES/Formats.cpp:666 I[IOS_ES]: Title 0000000100000002 already exists in uid.sys
+35:09:715 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: OpenFile(/sys/uid.sys): Result 0
+35:09:715 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: Close(/sys/uid.sys): Result 0
+35:09:715 Core/IOS/ES/Formats.cpp:666 I[IOS_ES]: Title 0000000100000002 already exists in uid.sys
+35:09:715 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: OpenFile(/sys/uid.sys): Result 0
+35:09:716 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: Close(/sys/uid.sys): Result 0
+35:09:716 Core/IOS/ES/Formats.cpp:666 I[IOS_ES]: Title 0000000100000002 already exists in uid.sys
+35:09:716 Core/Boot/Boot_BS2Emu.cpp:394 I[BOOT]: Using serial number: 216174744
+35:09:716 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /title/00000001/00000002/data/setting.txt (NAND)
+35:09:716 Core/Boot/Boot_BS2Emu.cpp:418 I[BOOT]: Setup Wii Memory...
+35:09:717 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+35:09:717 Core/IOS/IOS.cpp:296 I[IOS]: Starting IOS 0000000100000024
+35:09:718 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp (NAND)
+35:09:719 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #0 Constructed
+35:09:719 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #1 Constructed
+35:09:719 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #2 Constructed
+35:09:719 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #3 Constructed
+35:09:719 Core/IOS/USB/Bluetooth/WiimoteDevice.cpp:62 I[IOS_WIIMOTE]: Wiimote: #4 Constructed
+35:09:719 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+35:09:720 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+35:09:721 Core/IOS/Network/MACUtils.cpp:48 I[IOS_NET]: Using MAC address: 00:17:ab:f1:ed:15
+35:09:739 Core/Boot/Boot_BS2Emu.cpp:151 I[BOOT]: Call iAppLoaderEntry
+35:09:740 Core/Boot/Boot_BS2Emu.cpp:162 I[BOOT]: Call iAppLoaderInit
+35:09:740 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 812003d8->81300000| 
+Apploader Initialized.
+35:09:740 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 812003f4->81300000| This Apploader built Dec  6 2007 12:45:59 for RVL
+35:09:776 Core/Boot/Boot_BS2Emu.cpp:171 I[BOOT]: Call iAppLoaderMain
+35:09:806 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 00000420   memOffset: 812019c0   length: 32
+35:09:837 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 00000440   memOffset: 81201b20   length: 32
+35:09:866 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 00000440   memOffset: 817dce60   length: 8192
+35:09:894 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 0003dc40   memOffset: 812019e0   length: 256
+35:10:007 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 0003dde0   memOffset: 800031a0   length: 9344
+35:10:110 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 00040260   memOffset: 800066e0   length: 2863520
+35:10:143 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 0037b980   memOffset: 803fa480   length: 159040
+35:10:170 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 002fb400   memOffset: 80005620   length: 1696
+35:10:189 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELS01.png: server replied with code 404
+35:10:198 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 002fbaa0   memOffset: 80005cc0   length: 2592
+35:10:226 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 002fc4c0   memOffset: 802c1880   length: 32
+35:10:254 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 002fc4e0   memOffset: 802c18a0   length: 32
+35:10:282 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 002fc500   memOffset: 802c18c0   length: 5280
+35:10:322 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 002fd9a0   memOffset: 802c2d60   length: 469728
+35:10:350 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 00370480   memOffset: 803db1e0   length: 5568
+35:10:379 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 00371a40   memOffset: 803de500   length: 40768
+35:10:410 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 003a26e0   memOffset: 817dee60   length: 131072
+35:10:438 Core/Boot/Boot_BS2Emu.cpp:189 I[BOOT]: DVDRead: offset: 003c26e0   memOffset: 817fee60   length: 4512
+35:10:467 Core/Boot/Boot_BS2Emu.cpp:203 I[BOOT]: call iAppLoaderClose
+35:10:495 Core/IOS/ES/ES.cpp:785 I[IOS_ES]: ES_DIVerify: Title context changed: (none)
+35:10:495 Core/IOS/ES/Formats.cpp:127 E[BOOT]: TMD signature to small for data
+35:10:564 Core/HLE/HLE.cpp:133 I[HLE]: Patching OSPanic 802428c8
+35:10:565 Core/HLE/HLE.cpp:133 I[HLE]: Patching OSReport 8007d6dc
+35:10:662 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024076c->80240760| 
+Dolphin OS $Revision: 54 $.
+35:10:662 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80240780->8024076c| Kernel built : Jun  5 2002 02:09:12
+35:10:663 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024078c->80240780| Console Type : 
+35:10:663 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802407c8->802407b0| Retail 3
+35:10:664 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024086c->802407c8| Memory 24 MB
+35:10:664 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024088c->80240878| Arena : 0x804211c0 - 0x817dee60
+35:10:696 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80409584->8007d6dc| Patch running!
+35:10:696 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80137DF8 op 0x482C8289 (bl=1)
+35:10:697 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80021320 op 0x483DEADD (bl=1)
+35:10:697 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80037944 op 0x483C9138 (bl=0)
+35:10:697 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80013EC8 op 0x483F0180 (bl=0)
+35:10:698 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80020F2C op 0x483F9761 (bl=1)
+35:10:698 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80021250 op 0x483F95B9 (bl=1)
+35:10:698 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80020D4C op 0x483E81A1 (bl=1)
+35:10:698 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8005C45C op 0x483BEA2D (bl=1)
+35:10:698 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x800D9E2C op 0x4834113D (bl=1)
+35:10:699 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80023CC8 op 0x483DBA84 (bl=0)
+35:10:699 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8001F5F4 op 0x483DFA99 (bl=1)
+35:10:699 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80029608 op 0x483D5A85 (bl=1)
+35:10:699 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80056F00 op 0x483A818D (bl=1)
+35:10:699 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80062938 op 0x4839C755 (bl=1)
+35:10:700 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8016F118 op 0x4828FF75 (bl=1)
+35:10:700 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x802BC0B4 op 0x48142FD9 (bl=1)
+35:10:700 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80292DC0 op 0x481867FC (bl=0)
+35:10:700 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80292DE4 op 0x48186A1C (bl=0)
+35:10:700 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x800221A0 op 0x483F7514 (bl=0)
+35:10:701 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80105DF8 op 0x483131AD (bl=1)
+35:10:701 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80133A54 op 0x482D545C (bl=0)
+35:10:702 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8020D31C op 0x4820E879 (bl=1)
+35:10:702 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x800453E0 op 0x483C357D (bl=1)
+35:10:702 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80043D7C op 0x483C4958 (bl=0)
+35:10:702 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80046164 op 0x483C28A1 (bl=1)
+35:10:702 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80043DB8 op 0x483C4958 (bl=0)
+35:10:702 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80087050 op 0x483816DC (bl=0)
+35:10:703 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8002CB20 op 0x483DC1E9 (bl=1)
+35:10:703 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8002D5DC op 0x483DB195 (bl=1)
+35:10:703 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x801032B8 op 0x482FE9FD (bl=1)
+35:10:703 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80014C18 op 0x483ED1C4 (bl=0)
+35:10:703 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80014BC4 op 0x483ED2C4 (bl=0)
+35:10:703 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80014CC0 op 0x483ED278 (bl=0)
+35:10:704 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80014C6C op 0x483ED3A8 (bl=0)
+35:10:704 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80133AF0 op 0x482CE611 (bl=1)
+35:10:704 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80133AFC op 0x482CE655 (bl=1)
+35:10:704 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80108758 op 0x482F9A49 (bl=1)
+35:10:704 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80021078 op 0x483F7D1D (bl=1)
+35:10:704 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8002010C op 0x483E7441 (bl=1)
+35:10:705 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8005B6F8 op 0x483A6BCD (bl=1)
+35:10:708 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8041ad78->8007d6dc| Install title hook...
+35:10:708 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8011AF00 op 0x482FFB21 (bl=1)
+35:10:708 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8005C72C op 0x483ABC3D (bl=1)
+35:10:709 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8016DE64 op 0x482AC5C1 (bl=1)
+35:10:709 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x8016DE68 op 0x48000120 (bl=0)
+35:10:714 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80137948 op 0x482E44EC (bl=0)
+35:10:714 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80008CFC op 0x483FE231 (bl=1)
+35:10:715 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80008BB4 op 0x483FE379 (bl=1)
+35:10:715 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80080E14 op 0x483992C8 (bl=0)
+35:10:715 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80080C2C op 0x483994F0 (bl=0)
+35:10:716 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x80081980 op 0x483987DC (bl=0)
+35:10:716 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80408604->8007d6dc| patch short jump at 0x800175BC op 0x48403335 (bl=1)
+35:10:716 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 804098a4->8007d6dc| Booting in Wii mode
+35:10:717 Core/HW/DVD/DVDInterface.cpp:1363 I[DVD]: DTK enabled: buffer size 0
+35:10:720 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80249298->8007d6dc| app booted via JTAG
+35:10:720 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802492a4->80249298| load fst
+35:10:729 Core/HW/DVD/DVDInterface.cpp:940 I[DVD]: Read DiscID: buffer 003f82c0
+35:10:738 Core/HW/DVD/DVDInterface.cpp:925 I[DVD]: Read: DVDOffset=00000420, DMABuffer = 003ae000, SrcLength = 00000020, DMALength = 00000020
+35:10:740 Core/HW/DVD/DVDInterface.cpp:925 I[DVD]: Read: DVDOffset=00000000, DMABuffer = 00000000, SrcLength = 00000000, DMALength = 00000000
+35:10:740 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024be80->8024be74| 
+35:10:741 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024beac->8024be80|   Game Name ... GSAE
+35:10:741 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024bec8->8024beac|   Company ..... 01
+35:10:742 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024bed8->8024bec8|   Disk # ...... 0
+35:10:742 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024bee8->8024bed8|   Game ver .... 0
+35:10:743 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024bf0c->8024befc|   Streaming ... ON
+35:10:743 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 8024bf18->8024bf0c| 
+35:10:746 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242ad0->80242ac0| Unhandled Exception 2
+35:10:747 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242adc->80242ad0| 
+35:10:747 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242580->80242adc| ------------------------- Context 0x803ad848 -------------------------
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r0   = 0x80248bbc (   -2145088580)  r16  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r1   = 0x803f81e0 (   -2143321632)  r17  = 0x803fa680 (   -2143312256)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r2   = 0x803e6500 (   -2143394560)  r18  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r3   = 0x80330000 (   -2144141312)  r19  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r4   = 0x803f82c8 (   -2143321400)  r20  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r5   = 0x00000031 (            49)  r21  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r6   = 0x00000041 (            65)  r22  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r7   = 0x00000045 (            69)  r23  = 0x2e62696e (     778201454)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r8   = 0x00000000 (             0)  r24  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r9   = 0x80015ab4 (   -2147394892)  r25  = 0x2e62696e (     778201454)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r10  = 0x01000000 (      16777216)  r26  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r11  = 0x803f8340 (   -2143321280)  r27  = 0x00000000 (             0)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r12  = 0x8040987c (   -2143250308)  r28  = 0x803f8328 (   -2143321304)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r13  = 0x803e31e0 (   -2143407648)  r29  = 0x2e62696e (     778201454)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r14  = 0x803fa480 (   -2143312768)  r30  = 0x2e62696e (     778201454)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425bc->80242598| r15  = 0x803fed84 (   -2143294076)  r31  = 0x8032d830 (   -2144151504)
+35:10:748 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425e0->802425bc| LR   = 0x80248bbc                   CR   = 0x40000000
+35:10:749 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802425f4->802425e0| SRR0 = 0x802488cc                   SRR1 = 0x0000a032
+35:10:749 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242600->802425f4| 
+GQRs----------
+35:10:750 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242634->80242618| gqr0 = 0x00000000 	 gqr4 = 0x00000000
+35:10:750 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242634->80242618| gqr1 = 0x00000000 	 gqr5 = 0x00000000
+35:10:750 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242634->80242618| gqr2 = 0x00000000 	 gqr6 = 0x00000000
+35:10:750 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242634->80242618| gqr3 = 0x00000000 	 gqr7 = 0x00000000
+35:10:750 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242798->8024278c| 
+Address:      Back Chain    LR Save
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f81e0:   0x803f8228    0x80240f60
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f8228:   0x803f82c0    0x80248bbc
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f82c0:   0x803f8320    0x80015afc
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f8320:   0x803f8340    0x8041bb64
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f8340:   0x803f8358    0x804098a8
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f8358:   0x803f8458    0x803fa638
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f8458:   0x803f8470    0x802408c0
+35:10:751 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 802427c4->802427ac| 0x803f8470:   0xffffffff    0x80003240
+35:10:752 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242af8->80242ae4| 
+DSISR = 0x42000000                   DAR  = 0x2e62696e
+35:10:752 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242b10->80242afc| TB = 0x009adcf7059c4b4b
+35:10:753 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242b48->80242b34| 
+Instruction at 0x802488cc (read from SRR0) attempted to access invalid address 0x2e62696e (read from DAR)
+35:10:753 Core/HLE/HLE_OS.cpp:82 N[OSREPORT_HLE]: 80242bf8->80242b48| 
+Last interrupt (21): SRR0 = 0x802437c0  TB = 0x009adcf7059c4aa6
+35:10:797 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELSAB.png: server replied with code 404
+35:11:427 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELS01.png: server replied with code 404
+35:12:047 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/JA/PCSJ01.png: server replied with code 404
+35:12:619 Common/HttpRequest.cpp:225 E[COMMON]: Failed to GET https://art.gametdb.com/wii/cover/US/RELSAB.png: server replied with code 404
+36:59:741 Core/Core.cpp:282 I[CONSOLE]: Stop [Main Thread]		---- Shutting down ----
+36:59:741 Core/Core.cpp:285 I[CONSOLE]: Stop [Main Thread 0]	Stop CPU
+36:59:741 Core/Core.cpp:643 I[CONSOLE]: Stop [Main Thread 0]	Stopping GDB ...
+36:59:741 Core/Core.cpp:645 I[CONSOLE]: Stop [Main Thread 0]	GDB stopped.
+36:59:793 Core/Core.cpp:519 I[CONSOLE]: Stop [Video Thread 0]	Shutting down HW
+36:59:814 Core/HW/Memmap.cpp:485 I[MI]: Memory system shut down.
+36:59:818 Core/Core.cpp:521 I[CONSOLE]: Stop [Video Thread 0]	HW shutdown
+36:59:819 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+36:59:820 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp (NAND)
+36:59:827 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+36:59:832 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+36:59:833 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp (NAND)
+36:59:834 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+36:59:834 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+36:59:834 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp/SYSCONF (NAND)
+36:59:869 AudioCommon/AudioCommon.cpp:88 I[Audio]: Shutting down sound stream
+36:59:874 AudioCommon/AudioCommon.cpp:96 I[Audio]: Done shutting down sound stream
+36:59:874 Common/FatFsUtil.cpp:676 I[COMMON]: Starting SD card conversion from file /home/rena/.local/share/dolphin-emu/Wii/sd.raw to folder /home/rena/.local/share/dolphin-emu/Load/WiiSDSync/
+36:59:874 Common/FileUtil.cpp:381 E[COMMON]: Rename: rename failed on /home/rena/.local/share/dolphin-emu/Load/WiiSDSync --> /home/rena/.local/share/dolphin-emu/Load/WiiSDSync.xxx: Directory not empty
+36:59:874 Common/FatFsUtil.cpp:716 E[COMMON]: Failed to move old SD folder to /home/rena/.local/share/dolphin-emu/Load/WiiSDSync.xxx
+36:59:874 Core/Core.cpp:462 I[CONSOLE]: Stop		---- Shutdown complete ----
+36:59:875 Core/IOS/IOSC.cpp:628 W[IOS]: keys.bin could not be found. Default values will be used.
+36:59:876 Core/IOS/FS/HostBackend/FS.cpp:237 I[IOS_FS]: Creating a default entry for /tmp (NAND)
+36:59:876 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: OpenFile(/title/00000001/00000002/content/title.tmd): Result 0
+36:59:877 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: GetFileStatus(/title/00000001/00000002/content/title.tmd): Result 0
+36:59:877 Core/IOS/FS/FileSystemProxy.cpp:110 I[IOS_FS]: Command: Close(/title/00000001/00000002/content/title.tmd): Result 0
+37:00:111 InputCommon/ControllerInterface/evdev/evdev.cpp:356 N[CI]: evdev hotplug thread stopped

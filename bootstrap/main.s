@@ -6,7 +6,7 @@
 # It exppects r3 to be the address it's loaded at and r4 to be the size
 # of boot.bin.
 
-.set DEBUG,1
+.set DEBUG,0
 .text
 .include "common.s"
 
@@ -42,10 +42,29 @@ sizeGOT:   .int 0 # size of GOT in words
 offsEntry: .int 0 # entry point of ELF
 sizeBoot:  .int 0 # size of entire injected section
 
+# including this in a .text section tells Dolphin to
+# load this DOL in Wii mode instead of GC mode.
+#.long 0x7c13fba6
+
 _start2:
     # new entry point for game.
     # we need to recreate everything up to 0x800031A0
     # since it's clobbered by RevolutionOS
+
+    # copy text0 to where it's supposed to go
+    # because we have to move it to appease HBC loader.
+    # src/dst are adjusted for lwzu
+    lis    r3,  0x8060
+    subi   r3,  r3,  4
+    lis    r4,  0x8000
+    ori    r4,  r4,  0x319C
+    li     r5,  0x2480
+.start2_copy:
+    lwzu   r6,  4(r3)
+    stwu   r6,  4(r4)
+    subi   r5,  r5,  4
+    cmpwi  r5,  0
+    bne    .start2_copy
 
     # reproduce __init_registers here
     lis     r1,  0x803F

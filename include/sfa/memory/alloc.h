@@ -51,6 +51,8 @@ typedef enum { //names extracted from default.dol
 //in some places the game specifies the color directly.
 extern const u32 allocTagColorTbl[]; //drawheap.c
 
+#define GAME_NUM_HEAPS 4
+
 typedef enum {
     HEAP_ENTRY_TYPE_FREE = 0, //free block
     HEAP_ENTRY_TYPE_RAM  = 1, //RAM block

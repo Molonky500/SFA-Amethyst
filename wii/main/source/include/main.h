@@ -49,6 +49,7 @@ extern int _argc;
 #include "gamefuncs.h"
 
 //alloc.c
+void dumpGameHeaps();
 bool checkAddrInheap(void *addr, u32 len);
 void* _my_sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 
@@ -96,6 +97,7 @@ BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
 extern volatile bool dvdThreadReady;
 extern OSThreadQueue dvdThreadQueue;
 extern OSThread hackDvdThread;
+extern OSMutex dvdFileInfoMutex;
 extern OSMessageQueue hackDvdThreadMailIn, hackDvdThreadMailOut;
 extern OSMessage hackDvdMailboxIn[DVD_MAX_MSGS], hackDvdMailboxOut[DVD_MAX_MSGS];
 extern int dvdMsgsInHead, dvdMsgsInTail, dvdMsgsOutHead, dvdMsgsOutTail;

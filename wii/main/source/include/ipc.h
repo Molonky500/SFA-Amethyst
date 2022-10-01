@@ -32,6 +32,12 @@ distribution.
 #define __IPC_H__
 
 #include <gctypes.h>
+#define IPC_DEBUG 0
+#if IPC_DEBUG
+#define IPC_DPRINT exiPrintf
+#else
+#define IPC_DPRINT(...)
+#endif
 
 #define IPC_HEAP			 -1
 

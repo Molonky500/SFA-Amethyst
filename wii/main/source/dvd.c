@@ -130,7 +130,7 @@ int offset, DVDCallback callback, int prio, bool async) {
     msg.read.async = async;
     int r = 0;
     DVD_DPRINT("%s: sending...\n", __FUNCTION__);
-    OSYieldThread();
+    //OSYieldThread();
     //do {
         r = sendToDvdThread(&msg);
     //    OSYieldThread();

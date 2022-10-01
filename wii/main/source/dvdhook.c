@@ -52,7 +52,6 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
         }
         return false;
     }
-    dvd_addFile(info, file);
     info->startAddr = 0;
     info->callback = NULL;
     info->cb.state = 0;
@@ -62,6 +61,7 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     info->length = ftell(file);
     fseek(file, 0, SEEK_SET);
     DVD_DPRINT("file=0x%08X size=%d\n", (u32)file, info->length);
+    dvd_addFile(info, file);
     //printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
     //    (u32)info, (u32)file, (u32)info->length);
 
@@ -79,6 +79,7 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
         exiPrintf(" *** %s with interrupts idsabled @%08X\n",
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
+    info->cb.state = 2; //wait
     //int pad = size & 0x1F;
     //if(pad > 0) size += 32 - pad;
     int r = sendReadToDvdThread(info, addr, size,
@@ -88,17 +89,25 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
 }
 
 int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback) {
-    DVD_DPRINT("DVDCancelAsync(%08X, cb %08X)\n",
-        (u32)info, (u32)callback);
+    DVD_DPRINT("DVDCancelAsync(%08X, cb %08X) from %08X < %08X < %08X\n",
+        (u32)info, (u32)callback,
+        (u32)__builtin_extract_return_addr(__builtin_return_address(0)),
+        (u32)__builtin_extract_return_addr(__builtin_return_address(1)),
+        (u32)__builtin_extract_return_addr(__builtin_return_address(2)));
+    info->cb.state = 10; //cancelled
 
     //deadlocks if called from a callback
     //while(DVD_BUSY) OSYieldThread();
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
+    if(callback) {
+        DVD_DPRINT("DVDCancelAsync callback %08X(0, %08X)\n",
+            (u32)callback, (u32)info);
+        callback(0, info);
+    }
     if(file) {
         fclose(file->file);
         dvd_removeFile(file);
     }
-    if(callback) callback(0, info);
     return 1;
 }
 

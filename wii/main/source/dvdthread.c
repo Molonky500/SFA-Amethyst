@@ -5,6 +5,7 @@ static vu32 canary3 = 0xB000B1E5;
 volatile bool dvdThreadReady = false;
 OSThreadQueue dvdThreadQueue;
 OSThread hackDvdThread;
+OSMutex dvdFileInfoMutex;
 
 //DVD thread mailboxes
 //these are the OSMessageQueue objects that manage messages
@@ -23,21 +24,30 @@ vu32 canary2 = 0xABADBABE;
 static vu32 canary4 = 0x2D0661E5;
 
 HackDvdOpenFile* dvd_getFileByInfo(DVDFileInfo *info) {
+    OSLockMutex(&dvdFileInfoMutex);
     for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
         if(dvdOpenFiles[i].info == info) {
+            OSUnlockMutex(&dvdFileInfoMutex);
             return (HackDvdOpenFile*)&dvdOpenFiles[i];
         }
     }
-    exiPrintf(" *** ERROR *** Can't find fileinfo %08X!\n", info);
+    if(info != (DVDFileInfo*)0x803A5D60) {
+        //the game double-closes this file, which is fine.
+        exiPrintf(" *** ERROR *** Can't find fileinfo %08X!\n", info);
+    }
+    OSUnlockMutex(&dvdFileInfoMutex);
     return NULL;
 }
 HackDvdOpenFile* dvd_getFileByHandle(FILE *file) {
+    OSLockMutex(&dvdFileInfoMutex);
     for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
         if(dvdOpenFiles[i].file == file) {
+            OSUnlockMutex(&dvdFileInfoMutex);
             return (HackDvdOpenFile*)&dvdOpenFiles[i];
         }
     }
     exiPrintf(" *** ERROR *** Can't find FILE* %08X!\n", file);
+    OSUnlockMutex(&dvdFileInfoMutex);
     return NULL;
 }
 HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file) {
@@ -45,16 +55,19 @@ HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file) {
         exiPuts(" *** ERROR *** adding NULL file!\n");
         while(1);
     }
+    OSLockMutex(&dvdFileInfoMutex);
     for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
         if(dvdOpenFiles[i].info == NULL) {
             dvdOpenFiles[i].info = info;
             dvdOpenFiles[i].file = file;
             DVD_DPRINT("dvd_addFile(%08X, %08X) slot %d %08X\n",
                 info, file, i, &dvdOpenFiles[i]);
+            OSUnlockMutex(&dvdFileInfoMutex);
             return (HackDvdOpenFile*)&dvdOpenFiles[i];
         }
     }
     exiPuts(" *** ERROR *** Too many open files!\n");
+    OSUnlockMutex(&dvdFileInfoMutex);
     return NULL;
 }
 void dvd_removeFile(HackDvdOpenFile* file) {
@@ -86,6 +99,7 @@ int sendFromDvdThread(HackDvdMsg *msg) {
     }
     dvdMsgsOutHead = next;
     OSUnlockMutex(&dvdMsgMutex);
+    OSWakeupThread(&dvdThreadQueue);
     return 0;
 }
 
@@ -140,11 +154,11 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
         //the game dislikes us reading too fast
         //OSYieldThread();
 
-        if(OSGetCurrentThread() == &hackDvdThread) {
+        /*if(OSGetCurrentThread() == &hackDvdThread) {
             DVD_DPRINT("DVD thread pause, q=%08X\n", dvdThreadQueue);
             OSSleepThread(&dvdThreadQueue);
             DVD_DPRINT("DVD thread resume\n");
-        }
+        }*/
     }
     if(nRead < size) {
         DVD_DPRINT("DVDRead(%08X): want %d but got %d\n",
@@ -203,6 +217,8 @@ void* hackDvdThreadMain(void *param) {
         exiPrintf("DVD FAT init FAIL\n");
         return NULL;
     }
+
+    OSInitMutex(&dvdFileInfoMutex);
     dvdThreadReady = true;
 
     int err = 0;
@@ -243,8 +259,8 @@ void* hackDvdThreadMain(void *param) {
             case DVDCMD_READ: {
                 //XXX prio
                 HackDvdOpenFile *file = msg->read.file;
-                void *addr = msg->read.addr;
-                int length = msg->read.length;
+                void *addr  = msg->read.addr;
+                int  length = msg->read.length;
                 uint offset = msg->read.offset;
                 DVDCallback callback = msg->read.callback;
 

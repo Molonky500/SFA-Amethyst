@@ -45,8 +45,8 @@ void exiPuts(const char *str) {
             dmaBuf[outPos++] = 0;
         }
 
+        while(exi[3] & 1); //wait for any previous transfer
         u32 prev0 = exi[0];
-
         exi[0] = (1 << 13) | //ROMDIS
             (5 << 4) | //32MHz
             (2 << 7); //device 1 (UART)
