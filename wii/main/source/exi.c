@@ -6,6 +6,7 @@ __attribute__ ((aligned (32))) static u8 dmaBuf[4096];
 void exiPuts(const char *str) {
     /** Send a string to the EXI UART.
      */
+    return;
     //LWP_MutexLock(exiMutex);
     u32 irq = IRQ_Disable();
 

@@ -1,5 +1,16 @@
 #define GAME_NUM_HEAPS 4
 
+typedef enum {
+    HEAP_ENTRY_TYPE_FREE = 0, //free block
+    HEAP_ENTRY_TYPE_RAM  = 1, //RAM block
+    //only types 1 and 4 can be freed.
+    //the game seems to only use types 0 and 1.
+    //presumably the others would have been for different
+    //memory regions on the N64, such as cartridge ROM,
+    //or for ARAM on the GC.
+    HEAP_ENTRY_TYPE_RAM2 = 4, //unknown, but can be freed
+} GameHeapEntryType;
+
 typedef struct {
     void *loc;
     int	size;
@@ -8,7 +19,7 @@ typedef struct {
     s16 next;  //idx of next block
     s16 stack; //usually (not always) idx of this block
     u32 col;   //this is what the game calls this field.
-    int unk14; //not unused
+    int unk14; //set but never read
     int mmUniqueIdent;
 } GameHeapEntry;
 

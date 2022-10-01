@@ -15,6 +15,7 @@ void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
     u32 mmEnd = (u32)mmaddr + count;
     u32 arEnd = (u32)araddr + count;
     bool dir  = (cntH & 0x8000); //true: ARAM -> MRAM
+    arEnd &= 0x00FFFFFF;
 
     #if AUDIO_DEBUG
         exiPrintf("AR DMA[%8d]: [%08X, %08X] %s [%08X, %08X] (len=%d)\n",
@@ -43,21 +44,6 @@ void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL) {
     AR_DMA_CNT_H    = (AR_DMA_CNT_H & 0x7fff) | ch;
     AR_DMA_CNT_L    = (AR_DMA_CNT_L & 0x001f) | (ushort)cntL;
     //while(AR_DMA_CNT_LEFT);
-    /*if(dir) {
-        memcpy(mmaddr, araddr | 0x90000000, count);
-    }
-    else {
-        memcpy(araddr | 0x90000000, mmaddr, count);
-    }*/
-    //*(u8*)0x803d41e1 = 0; //DMA complete
-
-    //this is probably causing stack overflow because the
-    //handler tries to do more AR DMA
-    /*u32 lol = *(u32*)0x803de018;
-    void (*irqHandler)(void) = (void (*)())lol;
-    if(irqHandler) {
-        irqHandler();
-    }*/
 
     IRQ_Restore(level);
 }

@@ -225,7 +225,7 @@ void doPatches() {
         //0x802491f4, 0x4E800020, //DVDInit
         0x802408fc, 0x60000000, //DVDInquiryAsync
         0x80015624, 0x4E800020, //dvdCheckError
-        0x802492a4, 0x60000000, //__fstLoad
+        //0x802492a4, 0x60000000, //__fstLoad
 
         //disable audio for now
         //0x802406ec, 0x60000000, //__OSInitAudioSystem
@@ -263,24 +263,24 @@ void doPatches() {
         //0x803dddf8, 0x00000001,
 
         //0x8001a3f8, 0x60000000, //gameTextLoadSystemFonts
-        0x8001a9ec, 0x60000000, //OSLoadFont
+        //0x8001a9ec, 0x60000000, //OSLoadFont
         //0x800154ac, 0x4E800020, //initControllers
 
         //titleTryLoadSaveFiles
-        0x8007dbc0, 0x38600000,
-        0x8007dbc4, 0x4E800020,
+        //0x8007dbc0, 0x38600000,
+        //0x8007dbc4, 0x4E800020,
 
         //loadSaveGame
-        0x8007dc5c, 0x38600000,
-        0x8007dc60, 0x4E800020,
+        //0x8007dc5c, 0x38600000,
+        //0x8007dc60, 0x4E800020,
 
         //titleCreateCardFile
-        0x8007dd04, 0x38600000,
-        0x8007dd08, 0x4E800020,
+        //0x8007dd04, 0x38600000,
+        //0x8007dd08, 0x4E800020,
 
         //_saveGame
-        0x8007db24, 0x38600000,
-        0x8007db28, 0x4E800020,
+        //0x8007db24, 0x38600000,
+        //0x8007db28, 0x4E800020,
 
         0 //end of list
     };
@@ -288,5 +288,27 @@ void doPatches() {
         (*(u32*)patches[i]) = patches[i+1];
         DCInvalidateRange((void*)patches[i], 32);
         ICInvalidateRange((void*)patches[i], 32);
+    }
+
+    //remap EXI regs
+    u32 exiRemap[] = {
+        0x802439ac, 0x802439e8, 0x80243a4c, 0x80243d84,
+        0x80243dbc, 0x80243df8, 0x80253458, 0x80253490,
+        0x80253614, 0x80253670, 0x802536e0, 0x8025381c,
+        0x802538a0, 0x802539a4, 0x80253e68, 0x80253f54,
+        0x80254040, 0x80254130, 0x802543e4, 0x80285560,
+        0x8028556c, 0x802855a0, 0x802856d4, 0x80285780,
+        0x8028585c, 0x80285938, 0x80285a0c, 0x80285a90,
+        0x80285c5c, 0
+    };
+    for(int i=0; exiRemap[i]; i++) {
+        u32 op = *(u32*)exiRemap[i];
+        if(op & 0xFFFF != 0xCC00) {
+            printf(" *** ERROR *** Incorrect entry %08X in exiRemap\n",
+                exiRemap[i]);
+        }
+        else *(u32*)exiRemap[i] = (op & 0xFFFF0000) | 0xCD00;
+        DCInvalidateRange((void*)exiRemap[i], 32);
+        ICInvalidateRange((void*)exiRemap[i], 32);
     }
 }

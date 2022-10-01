@@ -332,14 +332,14 @@ void __OSInterruptInit_hook() {
 }
 
 void __OSMaskInterrupts_hook(u32 mask) {
-    exiPrintf("OSMaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
+    //exiPrintf("OSMaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
     //mask &= ~IM_PI_ACR; //keep that one on
     __MaskIrq(mask);
 }
 
 void __OSUnmaskInterrupts_hook(u32 mask) {
     __UnmaskIrq(mask);
-    exiPrintf("OSUnmaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
+    //exiPrintf("OSUnmaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
 }
 
 void _irqPiError(int irq, OSContext *ctx) {

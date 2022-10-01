@@ -116,27 +116,28 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
     //functions that have already switched
     int r = 0;
     int nRead = 0;
-    DVD_BUSY = 1; //DVD drive is busy
-
     DVD_DPRINT("DVDRead(%08X %08X %08X)\n", info, addr, size);
 
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
-    if(!file) return -EMFILE;
+    if(!file) {
+        printf(" *** ERROR *** too many open files\n");
+        return -EMFILE;
+    }
+    void *readDest = addr;
     while(nRead < size) {
-        //memset(addr, 0xAAAAAAAA, MIN(DVD_SECTOR_SIZE, size-nRead));
+        //memset(readDest, 0xBBBBBBBB, MIN(DVD_SECTOR_SIZE, size-nRead));
+        DCInvalidateRange(readDest, r);
         DVD_DPRINT("DVD fread(a=%08X s=%08X f=%08X->%08X)\n",
-            addr, MIN(DVD_SECTOR_SIZE, size-nRead), file, file->file);
-        r = fread(addr, 1, MIN(DVD_SECTOR_SIZE, size-nRead), file->file);
+            readDest, MIN(DVD_SECTOR_SIZE, size-nRead), file, file->file);
+        r = fread(readDest, 1, MIN(DVD_SECTOR_SIZE, size-nRead), file->file);
         DVD_DPRINT("fread: %d\n", r);
         if(r <= 0) break;
 
-        DCInvalidateRange(addr, r);
-        nRead += r;
-        addr  += r;
+        nRead    += r;
+        readDest += r;
         info->cb.offset += r;
         //the game dislikes us reading too fast
-        //for(int i=0; i<60; i++) LWP_YieldThread();
-        //LWP_YieldThread();
+        //OSYieldThread();
 
         if(OSGetCurrentThread() == &hackDvdThread) {
             DVD_DPRINT("DVD thread pause, q=%08X\n", dvdThreadQueue);
@@ -156,7 +157,6 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
             *(u32*)(addr+8),
             *(u32*)(addr+12) );
     }
-    DVD_BUSY = 0;
     return (r >= 0) ? nRead : r;
 }
 
@@ -182,7 +182,10 @@ void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
 }
 
 void dvdIdle() {
+    int wasBusy = DVD_BUSY;
+    DVD_BUSY = 0;
     OSYieldThread();
+    DVD_BUSY = wasBusy;
 }
 
 void* hackDvdThreadMain(void *param) {
@@ -191,15 +194,6 @@ void* hackDvdThreadMain(void *param) {
     __UnmaskIrq(IM_PI_ACR);
     OSEnableInterrupts();
     exiPuts("DVD thread online\n");
-    /*__IOS_InitializeSubsystems();
-    exiPuts("IOS initsub OK\n");
-    __IPC_Reinitialize();
-    exiPuts("IPC init OK\n");*/
-    /*exiPrintf("IOS ver %08X pref %08X\n",
-        IOS_GetVersion(),
-        IOS_GetPreferredVersion());
-    IOS_ReloadIOS(IOS_GetPreferredVersion());
-    exiPrintf("IOS reload OK\n");*/
 
     if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\n");
@@ -208,7 +202,6 @@ void* hackDvdThreadMain(void *param) {
         exiPrintf("DVD FAT init FAIL\n");
         return NULL;
     }
-    exiPuts(" *** DVD MOUNT OK\n");
     dvdThreadReady = true;
 
     int err = 0;
@@ -220,14 +213,14 @@ void* hackDvdThreadMain(void *param) {
             #if DVD_DEBUG
                 //exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
-            OSYieldThread();
+            DVD_BUSY = 0;
+            dvdIdle();
             OSSleepThread(&dvdThreadQueue);
             err = recvToDvdThread(&msg, OS_MESSAGE_NOBLOCK);
             if(!err) break;
             #if DVD_DEBUG
                 //exiPuts("DVD thread awake\n");
             #endif
-            dvdIdle();
         }
 
         if(err) {
@@ -238,6 +231,7 @@ void* hackDvdThreadMain(void *param) {
             //dvdIdle();
             //continue;
         }
+        DVD_BUSY = 1; //DVD drive is busy
         DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\n", msg->cmd, msg->id);
 
         switch(msg->cmd) {

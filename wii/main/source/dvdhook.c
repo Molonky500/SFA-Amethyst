@@ -50,7 +50,6 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
             newPath, (u32)info, err);
         return false;
     }
-
     dvd_addFile(info, file);
     info->startAddr = 0;
     info->callback = NULL;
@@ -60,6 +59,8 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     info->length = ftell(file);
     fseek(file, 0, SEEK_SET);
     DVD_DPRINT("file=0x%08X size=%d\n", (u32)file, info->length);
+    printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
+        (u32)info, (u32)file, (u32)info->length);
 
     //OSYieldThread();
     return true;

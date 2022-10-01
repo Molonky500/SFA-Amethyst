@@ -14,6 +14,25 @@ void initCheckThread() {
     OSResumeThread(&checkThread);
 }
 
+void checkGameHeaps() {
+    //we can't check for a magic value because our alloc hook
+    //runs late, so some allocations won't have it.
+    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+        GameHeap *heap = &gameHeaps[iHeap];
+        int iEntry = 0;
+        while(iEntry >= 0) {
+            GameHeapEntry *entry = &heap->data[iEntry];
+            if(!entry) break; //heaps not setup yet
+            if(entry->type != HEAP_ENTRY_TYPE_FREE
+            && entry->type != HEAP_ENTRY_TYPE_RAM) {
+                exiPrintf(" *** ERROR *** heap corruption at %08X (type=%08X)\n",
+                    (u32)entry, (u32)entry->type);
+            }
+            iEntry = entry->next;
+        }
+    }
+}
+
 void* checkThreadMain(void *param) {
     /** Background thread that scans for anomalies.
      */
@@ -22,6 +41,7 @@ void* checkThreadMain(void *param) {
     while(1) {
         OSYieldThread();
         checkAlloc();
+        checkGameHeaps();
 
         int iThread = 0;
         OSThread *thread = *(OSThread**)0x800000dc;
