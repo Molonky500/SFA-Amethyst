@@ -40,6 +40,19 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
         while(!dvdThreadReady);
     }
 
+    //Dolphin DVD library doesn't actually care if you close
+    //a file when you're done with it.
+    //So the game can re-use the same DVDFileInfo for multiple
+    //files without closing them.
+    //When that happens, we need to ensure we remove it from
+    //the open file list, so that we don't end up returning
+    //the previous file instead of the new one.
+    HackDvdOpenFile *oldFile = (HackDvdOpenFile*)dvd_getFileByInfo(info);
+    if(oldFile) {
+        fclose(oldFile->file);
+        dvd_removeFile(oldFile);
+    }
+
     DVD_DPRINT("fopen...\n");
     FILE *file = fopen(newPath, "rb");
 
@@ -61,7 +74,7 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     info->length = ftell(file);
     fseek(file, 0, SEEK_SET);
     DVD_DPRINT("file=0x%08X size=%d\n", (u32)file, info->length);
-    dvd_addFile(info, file);
+    dvd_addFile(info, file, path);
     //printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
     //    (u32)info, (u32)file, (u32)info->length);
 
@@ -80,6 +93,7 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
     info->cb.state = 2; //wait
+
     //int pad = size & 0x1F;
     //if(pad > 0) size += 32 - pad;
     int r = sendReadToDvdThread(info, addr, size,

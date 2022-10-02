@@ -68,6 +68,9 @@ struct DVDFileInfo {
 typedef struct {
     DVDFileInfo *info;
     FILE *file;
+    #if DVD_DEBUG
+        char path[256];
+    #endif
 } HackDvdOpenFile;
 
 typedef enum {

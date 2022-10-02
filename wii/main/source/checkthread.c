@@ -33,6 +33,40 @@ void checkGameHeaps() {
     }
 }
 
+void checkThreads() {
+    int iThread = 0;
+    OSThread *thread = *(OSThread**)0x800000dc;
+    while(thread) {
+        u32 stackTop = (u32)thread->stackBase; //high addr
+        u32 stackBot = (u32)thread->stackEnd;  //low  addr
+        u32 sp       = (u32)thread->context.gpr[1];
+        if(!(PTR_VALID(stackTop) && PTR_VALID(stackBot))) {
+            exiPrintf(" *** ERROR *** thread %08X invalid stack (%08X-%08X)\n",
+                (u32)thread, stackBot, stackTop);
+        }
+        if(sp < stackBot || sp > stackTop) {
+            exiPrintf(" *** ERROR *** stack overflow in thread %08X (%08X not in range %08X-%08X)\n",
+                (u32)thread, sp, stackBot, stackTop);
+        }
+        if(*(thread->stackEnd) != OS_THREAD_STACK_MAGIC) {
+            exiPrintf(" *** ERROR *** stack corruption in thread %08X (magic=%08X)\n",
+                (u32)thread, *(thread->stackEnd));
+        }
+        thread = thread->linkActive.next;
+        iThread++;
+        if(iThread > 256) {
+            exiPrintf(" *** ERROR *** infinite loop in thread link\n");
+            break;
+        }
+    }
+}
+
+void checkIntegrity() {
+    checkAlloc();
+    checkGameHeaps();
+    checkThreads();
+}
+
 void* checkThreadMain(void *param) {
     /** Background thread that scans for anomalies.
      */
@@ -40,33 +74,6 @@ void* checkThreadMain(void *param) {
         (u32)&checkThread, (u32)checkThreadStack);
     while(1) {
         OSYieldThread();
-        checkAlloc();
-        checkGameHeaps();
-
-        int iThread = 0;
-        OSThread *thread = *(OSThread**)0x800000dc;
-        while(thread) {
-            u32 stackTop = (u32)thread->stackBase; //high addr
-            u32 stackBot = (u32)thread->stackEnd;  //low  addr
-            u32 sp       = (u32)thread->context.gpr[1];
-            if(!(PTR_VALID(stackTop) && PTR_VALID(stackBot))) {
-                exiPrintf(" *** ERROR *** thread %08X invalid stack (%08X-%08X)\n",
-                    (u32)thread, stackBot, stackTop);
-            }
-            if(sp < stackBot || sp > stackTop) {
-                exiPrintf(" *** ERROR *** stack overflow in thread %08X (%08X not in range %08X-%08X)\n",
-                    (u32)thread, sp, stackBot, stackTop);
-            }
-            if(*(thread->stackEnd) != OS_THREAD_STACK_MAGIC) {
-                exiPrintf(" *** ERROR *** stack corruption in thread %08X (magic=%08X)\n",
-                    (u32)thread, *(thread->stackEnd));
-            }
-            thread = thread->linkActive.next;
-            iThread++;
-            if(iThread > 256) {
-                exiPrintf(" *** ERROR *** infinite loop in thread link\n");
-                break;
-            }
-        }
+        checkIntegrity();
     }
 }

@@ -60,6 +60,7 @@ void AIInitDMA_hook(u32 start, uint length);
 //checkthread.c
 extern OSThread checkThread;
 void initCheckThread();
+void checkIntegrity();
 void* checkThreadMain(void *param);
 
 //debugprint.c
@@ -108,7 +109,7 @@ void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx);
 void* hackDvdThreadMain(void *param);
 HackDvdOpenFile* dvd_getFileByInfo(DVDFileInfo *info);
 HackDvdOpenFile* dvd_getFileByHandle(FILE *file);
-HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file);
+HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file, const char *path);
 void dvd_removeFile(HackDvdOpenFile* file);
 
 //exception.c
@@ -138,7 +139,7 @@ extern vs32 irqHandlerDepth;
 extern vs32 curIrqHandler;
 extern vu32 lastIrqCause;
 extern vu32 lastIrqCause2;
-extern u32 *gameIrqHandlers;
+extern vu32 *gameIrqHandlers;
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx);
 void __OSInterruptInit_hook();
 //void* __OSSetInterruptHandler_hook(int irq, void *handler);

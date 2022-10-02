@@ -31,10 +31,7 @@ HackDvdOpenFile* dvd_getFileByInfo(DVDFileInfo *info) {
             return (HackDvdOpenFile*)&dvdOpenFiles[i];
         }
     }
-    if(info != (DVDFileInfo*)0x803A5D60) {
-        //the game double-closes this file, which is fine.
-        exiPrintf(" *** ERROR *** Can't find fileinfo %08X!\n", info);
-    }
+    //it's okay if the file isn't found.
     OSUnlockMutex(&dvdFileInfoMutex);
     return NULL;
 }
@@ -50,7 +47,7 @@ HackDvdOpenFile* dvd_getFileByHandle(FILE *file) {
     OSUnlockMutex(&dvdFileInfoMutex);
     return NULL;
 }
-HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file) {
+HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file, const char *path) {
     if(!file) {
         exiPuts(" *** ERROR *** adding NULL file!\n");
         while(1);
@@ -60,6 +57,9 @@ HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file) {
         if(dvdOpenFiles[i].info == NULL) {
             dvdOpenFiles[i].info = info;
             dvdOpenFiles[i].file = file;
+            #if DVD_DEBUG
+                strncpy(dvdOpenFiles[i].path, path, 256);
+            #endif
             DVD_DPRINT("dvd_addFile(%08X, %08X) slot %d %08X\n",
                 info, file, i, &dvdOpenFiles[i]);
             OSUnlockMutex(&dvdFileInfoMutex);
@@ -130,13 +130,16 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
     //functions that have already switched
     int r = 0;
     int nRead = 0;
-    DVD_DPRINT("DVDRead(%08X %08X %08X)\n", info, addr, size);
-
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     if(!file) {
         printf(" *** ERROR *** too many open files\n");
         return -EMFILE;
     }
+    #if DVD_DEBUG
+        DVD_DPRINT("DVDRead(f=%08X dst=%08X len=%08X) (%s)\n",
+            info, addr, size, file->path);
+    #endif
+
     void *readDest = addr;
     while(nRead < size) {
         DCInvalidateRange(readDest, size-nRead);

@@ -114,6 +114,7 @@ uint cause, void *addr) {
     }
 
     dumpGameHeaps();
+    checkIntegrity();
 
     //SYS_ResetSystem(SYS_SHUTDOWN,0,0);
     while(1);

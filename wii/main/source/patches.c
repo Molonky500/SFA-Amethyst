@@ -59,7 +59,101 @@ uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
     return addr + (oldOp & 0x03FFFFFC);
 }
 
+void gameTextGenTexture_hook(void *text) {
+    //DEBUG XXX REMOVE
+    void (*origFunc)(void*) = 0x8001ad64;
+    exiPrintf("gameTextGenTexture(%08X)\n", (u32)text);
+    void *file = *(void**)(text+0x3C);
+    u32   size = *(u32*)(text+0x40);
+
+    /*for(u32 i=0; i<size; i += 16) {
+        char buf[256];
+        snprintf(buf, sizeof(buf), "%06X", i);
+        int pos = strlen(buf);
+        for(u32 j=0; j<16; j++) {
+            const char *spc = (j&3) ? " ": "  ";
+            if((i+j) >= size) {
+                snprintf(&buf[pos], sizeof(buf)-pos, "%s..", spc);
+            }
+            else {
+                u8 data = *(u8*)(file+i+j);
+                snprintf(&buf[pos], sizeof(buf)-pos, "%s%02X",
+                    spc, data);
+            }
+            pos += strlen(spc) + 2;
+        }
+        for(u32 j=0; j<16; j++) {
+            const char *spc = (j&3) ? "": " ";
+            if((i+j) >= size) {
+                snprintf(&buf[pos], sizeof(buf)-pos, "%s.",
+                    spc);
+            }
+            else {
+                char data = *(char*)(file+i+j);
+                if(data < 0x20 || data > 0x7E) data = '.';
+                snprintf(&buf[pos], sizeof(buf)-pos, "%s%c",
+                    spc, data);
+            }
+            pos += strlen(spc) + 1;
+        }
+        buf[pos++] = '\n';
+        buf[pos++] = '\0';
+        exiPrintf(buf);
+    }*/
+
+    exiPrintf("file=%08X size=%08X\n", file, size);
+    u32 cksum = 0;
+    for(u32 i=0; i<size; i++) {
+        cksum += *(u8*)(file+i);
+    }
+    exiPrintf("cksum=%08X\n", cksum);
+
+    //read char structs
+    void *start = file;
+    u32 numCharStructs = *(u32*)file;
+    file += 4 + (numCharStructs * 16);
+    exiPrintf("CharStructs: %d\n", numCharStructs);
+
+    u16 numTexts = *(u16*)file;
+    u16 strDataLen = *(u16*)(file+2);
+    file += 4 + (numTexts * 12);
+    exiPrintf("numTexts: %d; strDataLen: %d\n", numTexts, strDataLen);
+
+    u32 numStrs = *(u32*)file;
+    file += 4 + (numStrs * 4) + strDataLen;
+    exiPrintf("numStrs: %d\n", numStrs);
+
+    u32 numUnk = *(u32*)file;
+    file += 4 + numUnk;
+    exiPrintf("numUnk: %d\n", numUnk);
+
+    while(1) {
+        u16 texFmt = *(u16*)file;
+        u16 pixFmt = *(u16*)(file+2);
+        u16 width  = *(u16*)(file+4);
+        u16 height = *(u16*)(file+6);
+        file += 8;
+        if(!(width | height)) {
+            exiPrintf("EOF: %08X (%d)\n", file - start, file - start);
+            break;
+        }
+        //weird, but what the game does.
+        u32 size = ((int)(width * height * (uint)pixFmt) >> 4) * 2;
+        exiPrintf("%08X (%9d): tex %5dx%5d fmt %04X %04X size=%08X\n",
+            file-start, file-start, width, height, texFmt, pixFmt,
+            size);
+        file += size;
+    }
+
+    //u32 irq = OSDisableInterrupts();
+    origFunc(text);
+    //OSRestoreInterrupts(irq);
+    exiPrintf("gameTextGenTexture(%08X) OK\n", (u32)text);
+}
+
 void doPatches() {
+    //hookBranch(0x80019c6c, gameTextGenTexture_hook, 1);
+
     //hookBranch(0x80000100, _raw_exceptionHook_Reset, 0);
     //hookBranch(0x80000200, _raw_exceptionHook_MachineCheck, 0);
     //hookBranch(0x80000300, _raw_exceptionHook_DSI, 0);
