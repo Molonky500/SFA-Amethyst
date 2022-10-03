@@ -1,14 +1,17 @@
 #include "main.h"
 
-mutex_t exiMutex;
+vu32* const _exiReg = (u32*)0xCD006800;
+
+//mutex_t exiMutex;
+__attribute__ ((aligned (32))) static u8 dmaBuf[4096];
 
 void exiPuts(const char *str) {
     /** Send a string to the EXI UART.
      */
-    LWP_MutexLock(exiMutex);
+    if(gIsVideoInit) printf("%s", str);
+    //LWP_MutexLock(exiMutex);
     u32 irq = IRQ_Disable();
 
-    __attribute__ ((aligned (32))) static u8 dmaBuf[4096];
     //0x800400 is address for UART.
     //high bit indicates write.
     static u32 addr = (0x800400 << 6) | 0x80000000;
@@ -32,42 +35,39 @@ void exiPuts(const char *str) {
         ssize_t pad = paddedLen & 0x1F;
         if(pad) paddedLen += (32-pad);
 
-        //copy the string, replacing '\n' with '\n\r'
-        //(NOT '\r\n') because dolphin treats '\r' as
+        //copy the string, replacing '\n' with '\r'
+        //because dolphin (and probably real HW) treats '\r' as
         //"actually print the buffered message".
         int outPos=4;
         while(*str && outPos < sizeof(dmaBuf)) {
             char c = *(str++);
-            if(c == '\n') {
-                dmaBuf[outPos++] = '\n';
-                if(outPos < sizeof(dmaBuf)) dmaBuf[outPos++] = '\r';
-            }
+            if(c == '\n') dmaBuf[outPos++] = '\r';
             else if(c != '\r') dmaBuf[outPos++] = c;
         }
         while(outPos < paddedLen && outPos < sizeof(dmaBuf)) {
             dmaBuf[outPos++] = 0;
         }
 
+        while(exi[3] & 1); //wait for any previous transfer
+        u32 prev0 = exi[0];
         exi[0] = (1 << 13) | //ROMDIS
             (5 << 4) | //32MHz
             (2 << 7); //device 1 (UART)
-
-        exi[1] = ((u32)&dmaBuf) & 0x7FFFFFFF; //DMA source
+        exi[1] = MEM_VIRTUAL_TO_PHYSICAL(dmaBuf); //DMA source
         exi[2] = outPos; //DMA length
         exi[3] = (1 << 2) | //write
             (1 << 1) | //use DMA
             (1 << 0); //start now
-
         while(exi[3] & 1); //wait for transfer
-
+        exi[0] = prev0;
         len -= copyLen;
     }
     IRQ_Restore(irq);
-    LWP_MutexUnlock(exiMutex);
+    //LWP_MutexUnlock(exiMutex);
 }
 
 void exiPrintf(const char *fmt, ...) {
-    char buf[4096];
+    char buf[1024];
     va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
@@ -77,10 +77,11 @@ void exiPrintf(const char *fmt, ...) {
 
 void exiPrintInit() {
     u32 irq = IRQ_Disable();
-    LWP_MutexInit(&exiMutex, false);
-    volatile u32 *exi = (volatile u32*)0xCD006800; //channel 0
-    while(exi[3] & 1); //wait for TSTART
-    exi[3] = 0;
+    //LWP_MutexInit(&exiMutex, false);
+    //XXX fishy constant
+    //_exiReg[0] = (vu32)0xCD006800; //channel 0
+    while(_exiReg[3] & 1); //wait for TSTART
+    _exiReg[3] = 0;
     (*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
     IRQ_Restore(irq);
     exiPuts("EXI init OK\n");

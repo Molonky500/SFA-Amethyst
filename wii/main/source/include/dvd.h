@@ -1,3 +1,6 @@
+#ifndef __DVD_H__
+#define __DVD_H__
+
 #define DVD_DEBUG 0
 
 #if DVD_DEBUG
@@ -93,3 +96,5 @@ typedef struct {
         } read;
     };
 } HackDvdMsg;
+
+#endif //__DVD_H__

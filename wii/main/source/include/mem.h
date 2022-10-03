@@ -1,3 +1,6 @@
+#ifndef __MEM_H__
+#define __MEM_H__
+
 #define SYS_BASE_CACHED					(0x80000000)
 #define SYS_BASE_UNCACHED				(0xC0000000)
 
@@ -13,3 +16,5 @@
 #define SYS_PROTECTREAD					0x00000001		/*!< Read from protected region is permitted */
 #define SYS_PROTECTWRITE				0x00000002		/*!< Write to protected region is permitted */
 #define SYS_PROTECTRDWR					(SYS_PROTECTREAD|SYS_PROTECTWRITE)	/*!< Read and write operations on protected region is permitted */
+
+#endif //__MEM_H__

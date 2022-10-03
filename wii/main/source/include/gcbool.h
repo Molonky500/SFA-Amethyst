@@ -1,3 +1,5 @@
+#ifndef __GCBOOL_H__
+#define __GCBOOL_H__
 #pragma once
 
 typedef unsigned int BOOL;
@@ -14,3 +16,4 @@ typedef unsigned int BOOL;
 #endif
 /*+----------------------------------------------------------------------------------------------+*/
 
+#endif //__GCBOOL_H__

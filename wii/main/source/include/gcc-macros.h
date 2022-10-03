@@ -1,3 +1,6 @@
+#ifndef __GCC_MACROS_H__
+#define __GCC_MACROS_H__
+
 ////////////////////////// Function attributes /////////////////////////////
 // Place these in front of a function definition/declaration
 // to hint about how the function should be optimized and what
@@ -132,3 +135,5 @@
     //x is probably going to be false most of the time.
     #define unlikely(x) __builtin_expect(!!(x), 0)
 #endif
+
+#endif //__GCC_MACROS_H__

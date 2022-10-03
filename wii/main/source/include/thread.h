@@ -1,3 +1,6 @@
+#ifndef __THREAD_H__
+#define __THREAD_H__
+
 #define MAX_THREADS 128
 #define THREAD_DEBUG 0
 
@@ -7,6 +10,9 @@
 #define OS_THREAD_STATE_MORIBUND 0x8
 #define OS_MESSAGE_NOBLOCK  0
 #define OS_MESSAGE_BLOCK    1
+
+#include "gcbool.h"
+#include "gctypes.h"
 
 #define _osDisableThreadSwitching (*(u32*)0x803dde8c)
 
@@ -187,3 +193,5 @@ bool OSTryLockMutex(OSMutex* mutex);
 void OSInitCond(OSCond* cond);
 void OSWaitCond(OSCond* cond, OSMutex* mutex);
 void OSSignalCond(OSCond* cond);
+
+#endif //__THREAD_H__

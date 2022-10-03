@@ -3,6 +3,9 @@
 //pointers to functions in the game binary
 void*     (*gameAlloc)(u32 size, u32 tag, const char *name) = 0x80023cc8;
 void      (*gameFree)(void *addr) = 0x800233e8;
+void      (*InsertAlarm)(OSAlarm *alarm, OSTime time, OSTime expiry) = 0x80240d8c;
+void      (*OSCancelAlarm)(OSAlarm *alarm) = 0x80241044;
+void      (*OSCreateAlarm)(OSAlarm *alarm) = 0x80240d80;
 BOOL      (*OSCreateThread)(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute) = 0x802462a8;
 int       (*OSDisableInterrupts)(void) = 0x8024377c;
 int       (*OSDisableScheduler)(void) = 0x80245d94;
@@ -21,6 +24,7 @@ void      (*__OSReschedule)(void) = 0x80246278;
 int       (*OSRestoreInterrupts)(int) = 0x802437a4;
 s32       (*OSResumeThread)(OSThread* thread) = 0x80246668;
 BOOL      (*OSSendMessage)( OSMessageQueue *mq, OSMessage msg, s32 flags) = 0x80244060;
+void      (*OSSetAlarm)(OSAlarm *alarm, OSTime tick, OSAlarmHandler handler) = 0x80240fdc;
 u32       (*__OSSetExceptionHandler)(u32 exception, void *handler) = 0x80240bc4;
 BOOL      (*OSSetThreadPriority)(OSThread* thread, OSPriority priority) = 0x80245eb8;
 void      (*OSSleepThread)(OSThreadQueue* queue) = 0x80246a60;

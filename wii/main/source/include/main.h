@@ -47,6 +47,12 @@ extern int _argc;
 #include "disc_io.h"
 #include "gameheap.h"
 #include "gamefuncs.h"
+#include "bte.h"
+#include "conf.h"
+
+//XXX why do these exist?
+#define iosAlloc(heap, size) malloc(size)
+#define iosFree(heap, ptr) free(ptr)
 
 //alloc.c
 void dumpGameHeaps();
@@ -56,6 +62,7 @@ void* _my_sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 //audio.c
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL);
 void AIInitDMA_hook(u32 start, uint length);
+void AIStartDMA_hook();
 
 //checkthread.c
 extern OSThread checkThread;
@@ -159,12 +166,6 @@ extern u8 *heapCanaryTop, *heapCanaryBottom;
 void initAlloc();
 void checkAlloc();
 
-//osalarm.c
-extern void (*OSCreateAlarm)(OSAlarm *alarm);
-extern void (*OSSetAlarm)(OSAlarm*       alarm,
-                OSTime         tick,
-                OSAlarmHandler handler);
-
 //osfont.c
 uint OSGetFontEncode_hook();
 char* OSGetFontWidth_hook(char* string, s32* width);
@@ -188,3 +189,6 @@ extern u32 get_dar();
 
 //thread.c
 void OSYieldThread(void);
+void __OSPromoteThread(OSThread* thread, OSPriority priority);
+void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime tStart,
+OSTime period, OSAlarmHandler handler);

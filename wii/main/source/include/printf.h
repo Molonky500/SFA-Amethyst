@@ -1,5 +1,5 @@
-#ifndef _PRINTF_H_
-#define _PRINTF_H_
+#ifndef __PRINTF_H__
+#define __PRINTF_H__
 
 //TODO:
 //-float formats: %f, %F, %e, %E, %g, %G, %a, %A
@@ -60,4 +60,4 @@ typedef struct printf_context {
 	} //extern "C"
 #endif
 
-#endif //_PRINTF_H_
+#endif //__PRINTF_H__

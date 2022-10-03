@@ -14,6 +14,16 @@ static u32 _ipc_seed = 0xffffffff;
 static OSMutex ipcMutex;
 static vu32 nAck=0; //okay if it overflows
 
+typedef struct {
+    OSMessageQueue queue;
+    OSMessage msgs[0]; //at least one
+} _AsyncMsgQueue;
+
+_AsyncMsgQueue* allocAsyncMsgQueue(int nMsgs) {
+    return malloc(sizeof(_AsyncMsgQueue) +
+        (sizeof(OSMessage) * nMsgs));
+}
+
 static __inline__ u32 IPC_ReadReg(u32 reg) {
 	return _ipcReg[reg];
 }
@@ -75,6 +85,7 @@ s32 __ipc_syncrequest(IpcRequest *req) {
 
     OSLockMutex(&ipcMutex);
     req->syncqueue = &queue;
+    req->bFreeWhenDone = 0;
 	OSInitMessageQueue(&queue, &msg, 1);
 
     u32 prevAck = (u32)nAck;
@@ -104,15 +115,42 @@ s32 __ipc_syncrequest(IpcRequest *req) {
 	return ret;
 }
 
+s32 __ipc_asyncrequest(IpcRequest *req) {
+    OSLockMutex(&ipcMutex);
+
+    req->bFreeWhenDone = 1;
+    _AsyncMsgQueue *queue = allocAsyncMsgQueue(1);
+    if(!queue) {
+        //XXX free(req) ?
+        OSUnlockMutex(&ipcMutex);
+        return -ENOMEM;
+    }
+    req->syncqueue = &queue->queue;
+    OSInitMessageQueue(&queue->queue, queue->msgs, 1);
+
+    u32 prevAck = (u32)nAck;
+	u32 ret = _writeReq(req);
+    if(ret) {
+        free(req->syncqueue);
+        req->syncqueue = NULL;
+        OSUnlockMutex(&ipcMutex);
+        printf(" *** ERROR *** _writeReq: %d\n", ret);
+        return ret;
+    }
+    //wait for ack
+    while(prevAck == nAck);
+
+    OSUnlockMutex(&ipcMutex);
+    return 0;
+}
+
 static void __ipc_replyhandler(bool isAck) {
     IpcRequest *req = NULL;
 
     if(!isAck) {
         req = (IpcRequest*)IPC_ReadReg(2);
         if(!req) return;
-        //XXX where is this stored?
-        //seems to be just the same address as
-        //the request we sent in the first place.
+        //req points to the request that this reply is for.
         ackReply(); //reply early ACK
     }
     else ackAck();
@@ -131,6 +169,10 @@ static void __ipc_replyhandler(bool isAck) {
         else if(!OSSendMessage(req->syncqueue, (OSMessage)req, OS_MESSAGE_NOBLOCK)) {
             printf(" *** ERROR *** IPC reply dropped (queue %08X full)\n",
                 (u32)req->syncqueue);
+        }
+        if(req->bFreeWhenDone) {
+            free(req->syncqueue);
+            free(req);
         }
     }
     else {

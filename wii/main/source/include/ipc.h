@@ -116,10 +116,12 @@ typedef struct {        //ipc struct size: 32
 	u32 relnch;			//40
 	OSMessageQueue *syncqueue;	//44
 	u32 magic;			//48 - used to avoid spurious responses, like from zelda.
-	u8 pad1[12];		//52 - 60
+	u8  bFreeWhenDone;  //52
+	u8 pad1[11];		//53 - 60
 } IpcRequest;
 
 s32 __ipc_syncrequest(IpcRequest *req);
+s32 __ipc_asyncrequest(IpcRequest *req);
 
 void __IPC_Reinitialize(void);
 

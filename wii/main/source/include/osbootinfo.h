@@ -1,3 +1,6 @@
+#ifndef __OSBOOTINFO_H__
+#define __OSBOOTINFO_H__
+
 typedef struct {
     DVDDiskID  diskId;
     u32        magic;
@@ -9,3 +12,5 @@ typedef struct {
     void*      FSTLocation;     // Start address of "FST area"
     u32        FSTMaxLength;    // Length of "FST area"
 } OSBootInfo;
+
+#endif //__OSBOOTINFO_H__

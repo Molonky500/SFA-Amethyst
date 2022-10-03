@@ -1,3 +1,7 @@
+#ifndef __MALLOC_H__
+#define __MALLOC_H__
+
+#include "gcc-macros.h"
 #include "string.h"
 extern size_t __malloc_margin;
 extern char *__brkval;
@@ -20,3 +24,5 @@ MALLOC MUST_CHECK void* malloc(size_t len);
 MALLOC MUST_CHECK void* calloc(size_t num, size_t size);
                   void  free(void *p);
        MUST_CHECK void* realloc(void *ptr, size_t len);
+
+#endif //__MALLOC_H__

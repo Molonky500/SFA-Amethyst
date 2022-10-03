@@ -19,6 +19,7 @@ static void *xfb = NULL;
 static GXRModeObj *rmode = NULL;
 static char gameRootDir[512];
 extern DISC_INTERFACE __io_wiisd;
+bool gIsVideoInit = false;
 
 int initVideo() {
     /** Init video system.
@@ -42,6 +43,7 @@ int initVideo() {
     VIDEO_Flush();
     VIDEO_WaitVSync();
 	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
+    gIsVideoInit = true;
 
     return 0;
 }
@@ -78,6 +80,7 @@ int init() {
      */
     int err = 0;
     exiPrintInit();
+    initVideo();
     if(!err) err = initFilesystem();
     return err;
 }

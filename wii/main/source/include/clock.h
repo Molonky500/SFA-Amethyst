@@ -1,3 +1,6 @@
+#ifndef __CLOCK_H__
+#define __CLOCK_H__
+
 #define __OSBusClock  (*(u32*)0x800000F8)
 #define __OSCoreClock (*(u32*)0x800000FC)
 #define OS_BUS_CLOCK        __OSBusClock
@@ -12,3 +15,5 @@
 #define OSMillisecondsToTicks( msec )   ((msec) * (OS_TIMER_CLOCK / 1000))
 #define OSMicrosecondsToTicks( usec )   (((usec) * (OS_TIMER_CLOCK / 125000)) / 8)
 #define OSNanosecondsToTicks( nsec )    (((nsec) * (OS_TIMER_CLOCK / 125000)) / 8000)
+
+#endif //__CLOCK_H__

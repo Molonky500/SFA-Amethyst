@@ -1,3 +1,6 @@
+#ifndef __GAMEHEAP_H__
+#define __GAMEHEAP_H__
+
 #define GAME_NUM_HEAPS 4
 
 typedef enum {
@@ -32,3 +35,5 @@ typedef struct {
 } GameHeap;
 
 extern GameHeap *gameHeaps;
+
+#endif //__GAMEHEAP_H__

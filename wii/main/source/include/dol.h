@@ -1,3 +1,6 @@
+#ifndef __DOL_H__
+#define __DOL_H__
+
 #define DOL_NUM_TEXT_SECTIONS 7
 #define DOL_NUM_DATA_SECTIONS 11
 
@@ -10,3 +13,5 @@ typedef struct {
     u32 dataSize  [DOL_NUM_DATA_SECTIONS];
     u32 bssAddr, bssSize, entryPoint;
 } DolHeader;
+
+#endif //__DOL_H__

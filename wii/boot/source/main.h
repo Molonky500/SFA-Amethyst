@@ -27,3 +27,6 @@ typedef struct {
 void exiPuts(const char *str);
 void exiPrintf(const char *fmt, ...);
 void exiPrintInit();
+
+//main.c
+extern bool gIsVideoInit;

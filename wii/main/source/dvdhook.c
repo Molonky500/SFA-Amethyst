@@ -5,6 +5,7 @@ void __DVDFSInit_hook(void) {
 
     //since this is the first thing called back into
     //from the game, this is where we init stuff.
+    //XXX move out of DVD
 
     initAlloc();
     exiPuts("loader2 alloc init OK\n");
@@ -28,6 +29,10 @@ void __DVDFSInit_hook(void) {
 
     while(!dvdThreadReady) OSYieldThread();
     DVD_DPRINT("DVD READY\n");
+
+    exiPuts("About to init WPAD\n");
+    int err = WPAD_Init();
+    exiPrintf("WPAD_Init: %d\n", err);
 }
 
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {

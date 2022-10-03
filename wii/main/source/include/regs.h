@@ -1,3 +1,6 @@
+#ifndef __REGS_H__
+#define __REGS_H__
+
 #define PI_INSTR        *(vu32*)0xCC003000
 #define PI_INMTR        *(vu32*)0xCC003004
 //these have NOT moved to CDxxxxxx
@@ -19,3 +22,5 @@ extern vu16* const _dspReg;
 extern vu32* const _ipcReg;
 extern vu32* const _exiReg;
 extern vu32* const _aiReg;
+
+#endif //__REGS_H__

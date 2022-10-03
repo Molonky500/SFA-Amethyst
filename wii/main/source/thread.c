@@ -15,3 +15,13 @@ void __OSPromoteThread(OSThread* thread, OSPriority priority) {
         thread = SetEffectivePriority(thread, priority);
     } while (thread);
 }
+
+void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime tStart,
+OSTime period, OSAlarmHandler handler) {
+    int irq = OSDisableInterrupts();
+    OSTime tBoot  = *(OSTime*)0x800030D8;
+    alarm->period = period;
+    alarm->start  = tStart + tBoot;
+    InsertAlarm(alarm, 0, handler);
+    OSRestoreInterrupts(irq);
+}

@@ -1,5 +1,5 @@
 #include "main.h"
-#define AUDIO_DEBUG 0
+#define AUDIO_DEBUG 1
 
 //this is probably not needed
 //but might be, because of different masking
@@ -17,7 +17,7 @@ void ARStartDMA_hook(u32 type, void *mmaddr, u32 araddr, u32 cntL) {
     u32 mmEnd = (u32)mmaddr + count;
     u32 arEnd = (u32)araddr + count;
     bool dir  = type != 0; //true: ARAM -> MRAM
-    arEnd &= 0x00FFFFFF;
+    //arEnd &= 0x00FFFFFF;
 
     #if AUDIO_DEBUG
         exiPrintf("AR DMA[%8d]: [%08X, %08X] %s [%08X, %08X] (len=%d)\n",
@@ -66,7 +66,7 @@ void AIInitDMA_hook(u32 start, uint length) {
     static int nDma = 0;
     nDma++;
     #if AUDIO_DEBUG
-        exiPrintf("AI DMA[%8d] %08X %08X\n", nDma, start, length);
+        //exiPrintf("AI DMA[%8d] %08X %08X\n", nDma, start, length);
     #endif
     // For AUDIO_DMA_START_HI, only bits 0x03ff can be set on
     // GCN and 0x1fff on Wii
@@ -76,4 +76,11 @@ void AIInitDMA_hook(u32 start, uint length) {
     AI_DMA_START_LO = (AI_DMA_START_LO & 0x001f) | (ushort)start;
     AI_DMA_LENGTH   = (AI_DMA_LENGTH   & 0x8000) | (ushort)(length >> 5);
     IRQ_Restore(level);
+}
+
+void AIStartDMA_hook() {
+    //u32 irq = OSDisableInterrupts();
+    AI_DMA_LENGTH |= 0x8000;
+    //while(AI_DMA_CNT_LEFT);
+    //OSRestoreInterrupts(irq);
 }
