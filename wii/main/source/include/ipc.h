@@ -32,7 +32,7 @@ distribution.
 #define __IPC_H__
 
 #include <gctypes.h>
-#define IPC_DEBUG 0
+#define IPC_DEBUG 1
 #if IPC_DEBUG
 #define IPC_DPRINT exiPrintf
 #else
@@ -121,9 +121,15 @@ typedef struct {        //ipc struct size: 32
 	u8 pad1[12];		//52 - 60
 } IpcRequest;
 
+#define IPC_REQ_STATE_EMPTY 0 //free slot
+#define IPC_REQ_STATE_PREPARING 1 //PPC is writing to it
+#define IPC_REQ_STATE_QUEUED 2 //waiting to be sent to IOS
+#define IPC_REQ_STATE_PENDING 3 //waiting for response from IOS
+#define IPC_REQ_STATE_FINISHED 4 //IOS responded; waiting for PPC to deal with it
+
 typedef struct {
 	IpcRequest request;
-	volatile bool ready; //can be sent to IOS
+	volatile u8 state;
 	OSThreadQueue queue;
 	u8 pad[20]; //size align to 32
 } IpcRequestAndMsgQueue;
@@ -181,7 +187,9 @@ s32 IOS_IoctlvAsync(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv,ipccallb
 //ipcbuf.c
 extern IpcRequestAndMsgQueue _ipcRequestQueue[IPC_QUEUE_MAX];
 extern vs32 _ipcReqQueueHead, _ipcReqQueueTail;
+extern s32  _ipcReqNext;
 extern bool _ipcIdle;
+void ipcPumpQueue();
 void _ipcWriteNextQueuedReq();
 int _ipcWriteReq(IpcRequestAndMsgQueue *req);
 
@@ -193,6 +201,7 @@ void _ipcAckReply();
 void _ipcSendEndOfReply();
 
 //ipcirq.c
+void ipcPoll();
 void ipcIrqHandler(int irqNo, OSContext *ctx);
 
 #ifdef __cplusplus

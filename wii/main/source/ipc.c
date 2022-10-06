@@ -50,14 +50,7 @@ void ipcDebugPrint() {
 s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req) {
 	s32 ret;
 
-	if(!areInterruptsEnabled()) {
-		exiPrintf(" *** ERROR *** sync req with interrupts disabled at %08x < %08x < %08x\n",
-			__builtin_extract_return_addr(__builtin_return_address(0)),
-			__builtin_extract_return_addr(__builtin_return_address(1)),
-			__builtin_extract_return_addr(__builtin_return_address(2)));
-	}
-
-    IPC_DPRINT("IPC: sending sync req %08X\n",
+	IPC_DPRINT("IPC: sending sync req %08X\n",
 		(u32)req);
 	int irq = OSDisableInterrupts();
     //OSLockMutex(&ipcMutex);
@@ -73,7 +66,16 @@ s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req) {
 
     //now wait for interrupt for response
 	OSRestoreInterrupts(irq);
-    OSSleepThread(&req->queue);
+
+	if(areInterruptsEnabled()) {
+		OSSleepThread(&req->queue);
+	}
+	else {
+		IPC_DPRINT("Polling for req %08X\n", (u32)req);
+		while(req->state != IPC_REQ_STATE_FINISHED) {
+			ipcPoll();
+		}
+	}
     IPC_DPRINT("IPC: Got response for req %08X\n", (u32)req);
     //NULL resp indicates only ACK reply
     //else resp is IpcRequest* response

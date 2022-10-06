@@ -135,11 +135,13 @@ int wiiuse_register(struct wiimote_listen_t *wml, struct bd_addr *bdaddr, struct
 	}
 
 	exiPrintf("%s\n", __FUNCTION__);
+	int irq = OSDisableInterrupts();
 	bte_arg(wml->sock,wml);
 	bte_received(wml->sock,__wiiuse_receive);
 	bte_disconnected(wml->sock,__wiiuse_disconnected);
 
 	err = bte_registerdeviceasync(wml->sock,bdaddr,__wiiuse_connected);
+	OSRestoreInterrupts(irq);
 	if(err==ERR_OK) {
 		return 1;
 	}

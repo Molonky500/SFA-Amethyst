@@ -128,7 +128,7 @@ IpcRequestAndMsgQueue* __ipc_allocreq(void) {
             _prevHead, next);
     }*/
 
-	req->ready = false;
+	req->state = IPC_REQ_STATE_PREPARING;
 	_ipcReqQueueHead = next;
 	OSInitThreadQueue(&req->queue);
 	OSRestoreInterrupts(irq);
@@ -136,7 +136,7 @@ IpcRequestAndMsgQueue* __ipc_allocreq(void) {
 }
 
 void __ipc_freereq(IpcRequestAndMsgQueue *ptr) {
-    ptr->ready = false;
+    ptr->state = IPC_REQ_STATE_EMPTY;
 }
 
 s32 __IOS_InitHeap(void) {

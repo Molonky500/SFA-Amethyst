@@ -20,12 +20,22 @@ void wiiuse_send_next_command(struct wiimote_t *wm)
 	struct cmd_blk_t *cmd;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return;
+	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) {
+        exiPrintf("WPAD: %s: not connected (%08X)\n",
+            __FUNCTION__, (u32)wm);
+        return;
+    }
 
 	cmd = wm->cmd_head;
 
-	if(!cmd) return;
-	if(cmd->state!=CMD_READY) return;
+	if(!cmd) {
+        exiPrintf("WPAD: %s: no cmd\n", __FUNCTION__);
+        return;
+    }
+	if(cmd->state!=CMD_READY) {
+        exiPrintf("WPAD: %s: not ready\n", __FUNCTION__);
+        return;
+    }
 
 	cmd->state = CMD_SENT;
 	if(WIIMOTE_IS_SET(wm,WIIMOTE_STATE_RUMBLE)) cmd->data[1] |= 0x01;
@@ -38,13 +48,17 @@ static __inline__ void __wiiuse_push_command(struct wiimote_t *wm,struct cmd_blk
 {
 	uint level;
 
-	if(!wm || !cmd) return;
+	if(!wm || !cmd) {
+        exiPrintf("WPAD: %s: cmd=%08X wm=%08X\n", __FUNCTION__,
+            (u32)cmd, (u32)wm);
+        return;
+    }
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	cmd->next = NULL;
 	cmd->state = CMD_READY;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(wm->cmd_head==NULL) {
 		wm->cmd_head = wm->cmd_tail = cmd;
 		wiiuse_send_next_command(wm);
@@ -52,7 +66,7 @@ static __inline__ void __wiiuse_push_command(struct wiimote_t *wm,struct cmd_blk
 		wm->cmd_tail->next = cmd;
 		wm->cmd_tail = cmd;
 	}
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 }
 
 #ifndef GEKKO
@@ -208,7 +222,7 @@ int wiiuse_set_report_type(struct wiimote_t *wm,cmd_blk_cb cb)
 	ubyte buf[2];
 	int motion,ir,exp;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 
 	buf[0] = (WIIMOTE_IS_FLAG_SET(wm, WIIUSE_CONTINUOUS) ? 0x04 : 0x00);	/* set to 0x04 for continuous reporting */

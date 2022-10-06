@@ -177,7 +177,7 @@ void padUpdate_hook_() {
     updateWiimote();
     displayControllerState(0, control);
     ipcDebugPrint();
-    _ipcWriteNextQueuedReq(); //XXX move
+    ipcPumpQueue(); //XXX move
 }
 void padUpdate_hook(void);
 __asm__(

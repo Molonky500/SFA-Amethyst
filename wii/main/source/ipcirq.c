@@ -23,18 +23,10 @@ void _handleReply() {
         exiPrintf("  CB %08x DATA %08x REL %08x QUEUE %08x\n", (u32)r->cb, (u32)r->usrdata, r->relnch, (u32)r->syncqueue);
     }
     else {
+        req->state = IPC_REQ_STATE_FINISHED;
         OSWakeupThread(&req->queue);
         IPC_DPRINT("IPC: sent resp to queue %08X->%08X\n",
             (u32)req, (u32)&req->queue);
-        if(req->request.cb) {
-            IPC_DPRINT("IPC: cb %08X(%08X, %08X) req %08X\n",
-                (u32)req->request.cb, (u32)req->request.result,
-                (u32)req->request.usrdata, (u32)req);
-            req->request.cb(req->request.result, req->request.usrdata);
-            __ipc_freereq(req);
-        }
-        //if no cb, this is a synchronous request, so do not
-        //free it; that's the responsibility of the caller.
     }
 }
 
@@ -46,10 +38,7 @@ void _handleAck() {
     _ipcWriteNextQueuedReq(); //keep the queue moving
 }
 
-void ipcIrqHandler(int irqNo, OSContext *ctx) {
-    //IPC (ACR) interrupt handler for communicating
-    //with Wii IOS
-
+void ipcPoll() {
     //get reply
     if((IPC_ReadReg(1) & 0x0014) == 0x0014) {
         _handleReply();
@@ -59,4 +48,12 @@ void ipcIrqHandler(int irqNo, OSContext *ctx) {
 	if((IPC_ReadReg(1) & 0x0022) == 0x0022) {
         _handleAck();
     }
+
+    ipcPumpQueue();
+}
+
+void ipcIrqHandler(int irqNo, OSContext *ctx) {
+    //IPC (ACR) interrupt handler for communicating
+    //with Wii IOS
+    ipcPoll();
 }

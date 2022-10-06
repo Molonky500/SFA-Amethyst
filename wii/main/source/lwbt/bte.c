@@ -163,14 +163,14 @@ static inline s32 __bte_cmdfinish(struct bt_state *state,err_t err)
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!state) return ERR_VAL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	state->last_err = err;
 	state->hci_cmddone = 1;
 	if(state->cb!=NULL)
 		state->cb(err,state->usrdata);
 	else
 		OSWakeupThread(&state->hci_cmdq);
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return err;
 }
@@ -255,7 +255,7 @@ static s32 __bte_send_request(struct ctrl_req_t *req)
 	req->state = STATE_READY;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(req->pcb->ctrl_req_head==NULL) {
 		req->pcb->ctrl_req_head = req->pcb->ctrl_req_tail = req;
 		err = __bte_send_pending_request(req->pcb);
@@ -264,7 +264,7 @@ static s32 __bte_send_request(struct ctrl_req_t *req)
 		req->pcb->ctrl_req_tail = req;
 		err = ERR_OK;
 	}
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return err;
 }
@@ -325,7 +325,7 @@ static void bte_process_handshake(struct bte_pcb *pcb,u8_t param,void *buf,u16_t
 
 static void bte_process_data(struct bte_pcb *pcb,u8_t param,void *buf,u16_t len)
 {
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_process_data(%p)\n",pcb);
 	switch(param) {
 		case HIDP_DATA_RTYPE_INPUT:
@@ -400,7 +400,7 @@ void BTE_Init(void)
 	OSInitThreadQueue(&btstate.hci_cmdq);
 	OSCreateAlarm(&btstate.timer_svc);
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	bte_reset_all();
 	hci_reset_all();
 	l2cap_reset_all();
@@ -408,7 +408,7 @@ void BTE_Init(void)
 
 	hci_wlp_complete(acl_wlp_completed);
 	hci_connection_complete(acl_conn_complete);
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	tb.tv_sec = 1;
 	tb.tv_nsec = 0;
@@ -426,7 +426,7 @@ void BTE_Shutdown(void)
 
 	LOG("BTE_Shutdown()\n");
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	OSCancelAlarm(&btstate.timer_svc);
 	btstate.cb = NULL;
 	btstate.usrdata = NULL;
@@ -435,7 +435,7 @@ void BTE_Shutdown(void)
 	hci_cmd_complete(__bte_shutdown_finished);
 	hci_reset();
 	__bte_waitcmdfinish(&btstate);
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	physbusif_shutdown();
 }
@@ -445,14 +445,14 @@ s32 BTE_InitCore(btecallback cb)
 	u32 level;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = NULL;
 	btstate.hci_cmddone = 0;
 	hci_arg(&btstate);
 	hci_cmd_complete(bte_hci_initcore_complete);
 	hci_reset();
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return ERR_OK;
 }
@@ -463,14 +463,14 @@ s32 BTE_ApplyPatch(btecallback cb)
 	u8 kick = 0;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = NULL;
 	btstate.hci_cmddone = 0;
 	hci_arg(&btstate);
 	hci_cmd_complete(bte_hci_apply_patch_complete);
 	hci_vendor_specific_command(HCI_VENDOR_PATCH_START_OCF,HCI_VENDOR_OGF,&kick,1);
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return ERR_OK;
 }
@@ -480,14 +480,14 @@ s32 BTE_InitSub(btecallback cb)
 	u32 level;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = NULL;
 	btstate.hci_cmddone = 0;
 	hci_arg(&btstate);
 	hci_cmd_complete(bte_hci_initsub_complete);
 	hci_write_inquiry_mode(0x01);
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return ERR_OK;
 }
@@ -497,7 +497,7 @@ s32 BTE_ReadStoredLinkKey(struct linkkey_info *keys,u8 max_cnt,btecallback cb)
 	u32 level;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = keys;
 	btstate.num_maxdevs = max_cnt;
@@ -505,7 +505,7 @@ s32 BTE_ReadStoredLinkKey(struct linkkey_info *keys,u8 max_cnt,btecallback cb)
 	hci_arg(&btstate);
 	hci_cmd_complete(bte_read_stored_link_key_complete);
 	hci_read_stored_link_key();
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return ERR_OK;
 }
@@ -515,14 +515,14 @@ s32 BTE_ReadBdAddr(struct bd_addr *bdaddr, btecallback cb)
     u32 level;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-    //_CPU_ISR_Disable(level);
+    _CPU_ISR_Disable(level);
     btstate.cb = cb;
     btstate.usrdata = bdaddr;
     btstate.hci_cmddone = 0;
     hci_arg(&btstate);
     hci_cmd_complete(bte_read_bd_addr_complete);
     hci_read_bd_addr();
-    //_CPU_ISR_Restore(level);
+    _CPU_ISR_Restore(level);
 
     return ERR_OK;
 }
@@ -555,7 +555,7 @@ s32 bte_registerdeviceasync(struct bte_pcb *pcb,struct bd_addr *bdaddr,s32 (*con
 	struct l2cap_pcb *l2capcb = NULL;
 
 	//printf("bte_registerdeviceasync()\n");
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	pcb->err = ERR_USE;
 	pcb->data_pcb = NULL;
 	pcb->ctl_pcb = NULL;
@@ -589,7 +589,7 @@ s32 bte_registerdeviceasync(struct bte_pcb *pcb,struct bd_addr *bdaddr,s32 (*con
 	}
 
 error:
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	//printf("bte_registerdeviceasync(%02x)\n",err);
 	return err;
 }
@@ -604,7 +604,7 @@ s32 bte_inquiry(struct inquiry_info *info,u8 max_cnt,u8 flush)
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	last_err = ERR_OK;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(btstate.num_founddevs==0 || flush==1) {
 		btstate.hci_cmddone = 0;
 		btstate.num_maxdevs = max_cnt;
@@ -613,7 +613,7 @@ s32 bte_inquiry(struct inquiry_info *info,u8 max_cnt,u8 flush)
 	}
 	fnd = btstate.num_founddevs;
 	pinfo = btstate.info;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	if(last_err==ERR_OK) {
 		for(i=0;i<fnd && i<max_cnt;i++) {
@@ -634,7 +634,7 @@ s32 bte_inquiry_ex(struct inquiry_info_ex *info,u8 max_cnt,u8 flush)
 	last_err = ERR_OK;
 
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(btstate.num_founddevs==0 || flush==1) {
 		btstate.hci_cmddone = 0;
 		btstate.num_maxdevs = max_cnt;
@@ -643,7 +643,7 @@ s32 bte_inquiry_ex(struct inquiry_info_ex *info,u8 max_cnt,u8 flush)
 	}
 	fnd = btstate.num_founddevs;
 	pinfo = btstate.info;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	if(last_err==ERR_OK) {
 		for(i=0;i<fnd && i<max_cnt;i++) {
@@ -665,13 +665,13 @@ s32 bte_disconnect(struct bte_pcb *pcb)
 	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(pcb==NULL) return ERR_VAL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	pcb->state = (u32)STATE_DISCONNECTING;
 	if(pcb->data_pcb!=NULL )
 		err = l2ca_disconnect_req(pcb->data_pcb,l2cap_disconnect_cfm);
 	else if(pcb->ctl_pcb!=NULL)
 		err = l2ca_disconnect_req(pcb->ctl_pcb,l2cap_disconnect_cfm);
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return err;
 }
@@ -984,7 +984,7 @@ err_t l2cap_accepted(void *arg,struct l2cap_pcb *l2cappcb,err_t err)
 {
 	struct bte_pcb *btepcb = (struct bte_pcb*)arg;
 
-	//exiPrintf("WPAD: %s err=0x%X\n", __FUNCTION__, err);
+	exiPrintf("WPAD: %s err=0x%X\n", __FUNCTION__, err);
 	//printf("l2cap_accepted(%02x)\n",err);
 	if(err==ERR_OK) {
 		l2cap_recv(l2cappcb,bte_process_input);
