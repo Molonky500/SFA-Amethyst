@@ -40,7 +40,7 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 	if(!cmd) return;
 	if(!(cmd->state==CMD_SENT && cmd->data[0]==WM_CMD_READ_DATA)) return;
 
-	//exiPrintf("WPAD: event_data_read(%08x)\n",(u32)cmd);
+	exiPrintf("WPAD: event_data_read(%08x)\n",(u32)cmd);
 
 	err = msg[2]&0x0f;
 	op = (struct op_t*)cmd->data;
@@ -51,6 +51,8 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 		if(cmd->cb!=NULL) cmd->cb(wm,op->buffer,(op->readdata.size - op->wait));
 
 		//__lwp_queue_append(&wm->cmdq,&cmd->node);
+		exiPrintf("send msg %08X to cmdq %08X\n",
+			(u32)&cmd->node, (u32)&wm->cmdq);
 		OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 		wiiuse_send_next_command(wm);
 		return;
@@ -75,6 +77,8 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 		if(cmd->cb!=NULL) cmd->cb(wm,op->buffer,op->readdata.size);
 
 		//__lwp_queue_append(&wm->cmdq,&cmd->node);
+		exiPrintf("send msg %08X to cmdq %08X\n",
+			(u32)&cmd->node, (u32)&wm->cmdq);
 		OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 		wiiuse_send_next_command(wm);
 	}
@@ -105,6 +109,8 @@ static void event_ack(struct wiimote_t *wm,ubyte *msg)
 	if(cmd->cb) cmd->cb(wm,NULL,0);
 
 	//__lwp_queue_append(&wm->cmdq,&cmd->node);
+	exiPrintf("send msg %08X to cmdq %08X\n",
+		(u32)&cmd->node, (u32)&wm->cmdq);
 	OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 	wiiuse_send_next_command(wm);
 }
@@ -117,6 +123,7 @@ static void event_status(struct wiimote_t *wm,ubyte *msg)
 	//int led[4]= {0};
 	struct cmd_blk_t *cmd = wm->cmd_head;
 
+	exiPrintf("WPAD: %s cmd=%08X\n", __FUNCTION__, (u32)cmd);
 	wiiuse_pressed_buttons(wm,msg);
 
 	wm->event = WIIUSE_STATUS;
@@ -171,6 +178,8 @@ done:
 	if(cmd->cb!=NULL) cmd->cb(wm,msg,6);
 
 	//__lwp_queue_append(&wm->cmdq,&cmd->node);
+	exiPrintf("send msg %08X to cmdq %08X\n",
+		(u32)&cmd->node, (u32)&wm->cmdq);
 	OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 	wiiuse_send_next_command(wm);
 }
@@ -230,7 +239,7 @@ void parse_event(struct wiimote_t *wm)
 
 	event = wm->event_buf[0];
 	msg = wm->event_buf+1;
-	//exiPrintf("WPAD: parse_event(%02x,%p)\n",event,msg);
+	exiPrintf("WPAD: parse_event(%02x,%p)\n",event,msg);
 	switch(event) {
 		case WM_RPT_CTRL_STATUS:
 			event_status(wm,msg);

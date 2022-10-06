@@ -119,7 +119,7 @@ static sys_resetinfo __wpad_resetinfo = {
 
 static s32 __wpad_onreset(s32 final)
 {
-	//exiPrintf("WPAD: __wpad_onreset(%d)\n",final);
+	exiPrintf("WPAD: __wpad_onreset(%d)\n",final);
 	if(final==FALSE) {
 		WPAD_Shutdown();
 	}
@@ -146,7 +146,7 @@ static void __wpad_timeouthandler(OSAlarm* alarm,void *cbarg)
 		if(wm && WIIMOTE_IS_SET(wm,WIIMOTE_STATE_CONNECTED)) {
 			wpdcb->idle_time++;
 			if(wpdcb->idle_time>=__wpad_idletimeout) {
-				//exiPrintf("WPAD: idle timer disconnect for %d\n", i);
+				exiPrintf("WPAD: idle timer disconnect for %d\n", i);
 				wpdcb->idle_time = 0;
 				wiiuse_disconnect(wm);
 			}
@@ -252,7 +252,7 @@ static s32 __wpad_init_finished(s32 result,void *usrdata)
 	u32 i;
 	struct bd_addr bdaddr;
 
-	//exiPrintf("WPAD: init_finished(%d)\n",result);
+	exiPrintf("WPAD: init_finished(%d)\n",result);
 
 	if(result==ERR_OK) {
         for(i=0;/*__wpads[i] && */i<__wpad_devs.num_registered;i++) {
@@ -271,14 +271,14 @@ static s32 __wpad_init_finished(s32 result,void *usrdata)
 
 static s32 __wpad_patch_finished(s32 result,void *usrdata)
 {
-	//exiPrintf("WPAD: patch_finished(%d)\n",result);
+	exiPrintf("WPAD: patch_finished(%d)\n",result);
 	BTE_InitSub(__wpad_init_finished);
 	return ERR_OK;
 }
 
 static s32 __readlinkkey_finished(s32 result,void *usrdata)
 {
-	//exiPrintf("WPAD: readlinkkey_finished(%d)\n",result);
+	exiPrintf("WPAD: readlinkkey_finished(%d)\n",result);
 
 	__wpads_ponded = result;
 	BTE_ApplyPatch(__wpad_patch_finished);

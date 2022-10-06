@@ -125,6 +125,8 @@ void doPatches() {
         0x80000008, 0x01000000,
         0x800000f0, 0x01800000,
 
+        0x80245980, 0x4E800020, //OSSetWirelessID
+
         //disable heap shit
         //0x80020e58, 0x60000000,
 

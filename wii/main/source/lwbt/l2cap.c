@@ -249,7 +249,7 @@ void l2cap_process_sig(struct pbuf *q, struct l2cap_hdr *l2caphdr, struct bd_add
 				i += r->len;
 			}
 		} else {
-			ERROR("l2cap_process_sig: Could not allocate buffer for fragmented packet\n");
+			ERROR(" *** ERROR *** l2cap_process_sig: Could not allocate buffer for fragmented packet\n");
 			return;
 		}
 	} else {
@@ -347,7 +347,7 @@ void l2cap_process_sig(struct pbuf *q, struct l2cap_hdr *l2caphdr, struct bd_add
 					LOG("l2cap_process_sig: A connection request was received. Send a response\n");
 					data = btpbuf_alloc(PBUF_RAW, L2CAP_CONN_RSP_SIZE, PBUF_RAM);
 					if(data == NULL) {
-						ERROR("l2cap_connect_rsp: Could not allocate memory for pbuf\n");
+						ERROR(" *** ERROR *** l2cap_connect_rsp: Could not allocate memory for pbuf\n");
 						break;
 					}
 					((u16_t *)data->payload)[0] = htole16(pcb->scid);
@@ -509,7 +509,7 @@ void l2cap_process_sig(struct pbuf *q, struct l2cap_hdr *l2caphdr, struct bd_add
 					if((flags & 0x0001) == 1) {
 						/* Send success result with no options until the full request has been received */
 						if((data = btpbuf_alloc(PBUF_RAW, L2CAP_CFG_RSP_SIZE, PBUF_RAM)) == NULL) {
-							ERROR("l2cap_process_sig: Could not allocate memory for pbuf\n");
+							ERROR(" *** ERROR *** l2cap_process_sig: Could not allocate memory for pbuf\n");
 							break;
 						}
 						((u16_t *)data->payload)[0] = htole16(pcb->dcid);
@@ -609,7 +609,7 @@ void l2cap_process_sig(struct pbuf *q, struct l2cap_hdr *l2caphdr, struct bd_add
 										if(L2CAP_MTU > le16toh(((u16_t *)p->payload)[1])) {
 											pcb->cfg.outmtu = le16toh(((u16_t *)p->payload)[1]);
 										} else {
-											ERROR("l2cap_process_sig: Configuration of MTU failed\n");
+											ERROR(" *** ERROR *** l2cap_process_sig: Configuration of MTU failed\n");
 											l2ca_disconnect_req(pcb, NULL);
 											return;
 										}
@@ -620,7 +620,7 @@ void l2cap_process_sig(struct pbuf *q, struct l2cap_hdr *l2caphdr, struct bd_add
 									case L2CAP_QOS:
 										/* If service type Best Effort is not accepted we will close the connection */
 										if(((u8_t *)p->payload)[3] != L2CAP_QOS_BEST_EFFORT) {
-											ERROR("l2cap_process_sig: Unsupported service type\n");
+											ERROR(" *** ERROR *** l2cap_process_sig: Unsupported service type\n");
 											l2ca_disconnect_req(pcb, NULL);
 											return;
 										}
@@ -656,7 +656,7 @@ void l2cap_process_sig(struct pbuf *q, struct l2cap_hdr *l2caphdr, struct bd_add
 				if((flags & 0x0001) == 1) {
 					LOG("l2cap_process_sig: Continuation flag is set. Send empty (default) config request signal\n");
 					if((data = btpbuf_alloc(PBUF_RAW, L2CAP_CFG_REQ_SIZE, PBUF_RAM)) == NULL) {
-						ERROR("l2cap_process_sig: Could not allocate memory for pbuf\n");
+						ERROR(" *** ERROR *** l2cap_process_sig: Could not allocate memory for pbuf\n");
 						return;
 					}
 					/* Assemble config request packet */
@@ -841,6 +841,7 @@ void l2cap_input(struct pbuf *p, struct bd_addr *bdaddr)
 	}
 
 	/* Handle packet */
+	LOG("WPAD: l2cap handle packet CID %02X\n", inseg->l2caphdr->cid);
 	switch(inseg->l2caphdr->cid) {
 		case L2CAP_NULL_CID:
 			/* Illegal */
@@ -875,15 +876,14 @@ void l2cap_input(struct pbuf *p, struct bd_addr *bdaddr)
 
 			/* Forward packet to higher layer */
 			LOG("l2cap_input: Forward packet to higher layer\n");
-			/*
-			LOG("l2cap_input: Remote BD address: 0x%x:0x%x:0x%x:0x%x:0x%x:0x%x\n",
+			LOG("l2cap_input: Remote BD address: %02X:%02X:%02X:%02X:%02X:%02X\n",
 							   inseg->pcb->remote_bdaddr.addr[5],
 							   inseg->pcb->remote_bdaddr.addr[4],
 							   inseg->pcb->remote_bdaddr.addr[3],
 							   inseg->pcb->remote_bdaddr.addr[2],
 							   inseg->pcb->remote_bdaddr.addr[1],
-							   inseg->pcb->remote_bdaddr.addr[0]));
-			*/
+							   inseg->pcb->remote_bdaddr.addr[0]);
+
 			L2CA_ACTION_RECV(inseg->pcb,inseg->p,ERR_OK,ret);
 			break;
 	}
@@ -954,7 +954,7 @@ struct l2cap_pcb* l2cap_new(void)
 		pcb->cfg.opt = NULL;
 		return pcb;
 	}
-	ERROR("l2cap_new: Could not allocate memory for pcb\n");
+	ERROR(" *** ERROR *** l2cap_new: Could not allocate memory for pcb\n");
 	return NULL;
 }
 
@@ -1042,13 +1042,13 @@ err_t l2cap_signal(struct l2cap_pcb *pcb, u8_t code, u16_t ursp_id, struct bd_ad
 	/* Alloc a new signal */
 	LOG("l2cap_signal: Allocate memory for l2cap_sig. Code = 0x%x\n", code);
 	if((sig = btmemb_alloc(&l2cap_sigs)) == NULL) {
-		ERROR("l2cap_signal: could not allocate memory for l2cap_sig\n");
+		ERROR(" *** ERROR *** l2cap_signal: could not allocate memory for l2cap_sig\n");
 		return ERR_MEM;
 	}
 
 	/* Alloc a pbuf for signal */
 	if((sig->p = btpbuf_alloc(PBUF_RAW, L2CAP_HDR_LEN+L2CAP_SIGHDR_LEN, PBUF_RAM)) == NULL) {
-		ERROR("l2cap_signal: could not allocate memory for pbuf\n");
+		ERROR(" *** ERROR *** l2cap_signal: could not allocate memory for pbuf\n");
 		return ERR_MEM;
 	}
 
@@ -1152,7 +1152,7 @@ err_t l2ca_connect_req(struct l2cap_pcb *pcb, struct bd_addr *bdaddr, u16_t psm,
 		ret = lp_connect_req(bdaddr, role_switch); /* Create ACL link w pcb state == CLOSED */
 	} else {
 		if((data = btpbuf_alloc(PBUF_RAW, L2CAP_CONN_REQ_SIZE, PBUF_RAM)) == NULL) {
-			ERROR("l2cap_connect_req: Could not allocate memory for pbuf\n");
+			ERROR(" *** ERROR *** l2cap_connect_req: Could not allocate memory for pbuf\n");
 			return ERR_MEM;
 		}
 		((u16_t *)data->payload)[0] = htole16(psm);
@@ -1194,7 +1194,7 @@ err_t l2ca_config_req(struct l2cap_pcb *pcb)
 			LOG("l2cap_config_req: state = L2CAP_CONFIG\n");
 
 			if((p = btpbuf_alloc(PBUF_RAW, L2CAP_CFG_REQ_SIZE, PBUF_RAM)) == NULL) {
-				ERROR("l2cap_config_req: Could not allocate memory for pbuf\n");
+				ERROR(" *** ERROR *** l2cap_config_req: Could not allocate memory for pbuf\n");
 				return ERR_MEM;
 			}
 
@@ -1211,7 +1211,7 @@ err_t l2ca_config_req(struct l2cap_pcb *pcb)
 			set to default and can be skipped */
 			if(pcb->cfg.inmtu != L2CAP_CFG_DEFAULT_INMTU) {
 				if((q = btpbuf_alloc(PBUF_RAW, L2CAP_CFGOPTHDR_LEN + L2CAP_MTU_LEN, PBUF_RAM)) == NULL) {
-					ERROR("l2cap_config_req: Could not allocate memory for pbuf\n");
+					ERROR(" *** ERROR *** l2cap_config_req: Could not allocate memory for pbuf\n");
 					btpbuf_free(p);
 					return ERR_MEM;
 				}
@@ -1225,7 +1225,7 @@ err_t l2ca_config_req(struct l2cap_pcb *pcb)
 
 			if(L2CAP_OUT_FLUSHTO != L2CAP_CFG_DEFAULT_OUTFLUSHTO) {
 				if((q = btpbuf_alloc(PBUF_RAW, L2CAP_CFGOPTHDR_LEN + L2CAP_FLUSHTO_LEN, PBUF_RAM)) == NULL) {
-					ERROR("l2cap_config_req: Could not allocate memory for pbuf\n");
+					ERROR(" *** ERROR *** l2cap_config_req: Could not allocate memory for pbuf\n");
 					btpbuf_free(p);
 					return ERR_MEM;
 				}
@@ -1242,7 +1242,7 @@ err_t l2ca_config_req(struct l2cap_pcb *pcb)
 			ret = l2cap_signal(pcb, L2CAP_CFG_REQ, 0, &(pcb->remote_bdaddr), p);
 			break;
 		default:
-			ERROR("l2cap_config_req: state = L2CAP_?. Invalid state\n");
+			ERROR(" *** ERROR *** l2cap_config_req: state = L2CAP_?. Invalid state\n");
 			return ERR_CONN; /* Invalid state. Connection is not in OPEN or CONFIG state */
 	}
 	return ret;
@@ -1262,7 +1262,7 @@ err_t l2ca_disconnect_req(struct l2cap_pcb *pcb, err_t (* l2ca_disconnect_cfm)(v
 
 	if(pcb->state == L2CAP_OPEN || pcb->state == L2CAP_CONFIG) {
 		if((data = btpbuf_alloc(PBUF_RAW, L2CAP_DISCONN_REQ_SIZE, PBUF_RAM)) == NULL) {
-			ERROR("l2cap_disconnect_req: Could not allocate memory for pbuf\n");
+			ERROR(" *** ERROR *** l2cap_disconnect_req: Could not allocate memory for pbuf\n");
 			return ERR_MEM;
 		}
 		pcb->l2ca_disconnect_cfm = l2ca_disconnect_cfm;
@@ -1295,13 +1295,13 @@ err_t l2ca_datawrite(struct l2cap_pcb *pcb, struct pbuf *p)
 	struct pbuf *q;
 
 	if(pcb->state != L2CAP_OPEN) {
-		ERROR("l2cap_datawrite: State != L2CAP_OPEN. Dropping data\n");
+		ERROR(" *** ERROR *** l2cap_datawrite: State != L2CAP_OPEN. Dropping data\n");
 		return ERR_CONN;
 	}
 
 	/* Build L2CAP header */
 	if((q = btpbuf_alloc(PBUF_RAW, L2CAP_HDR_LEN, PBUF_RAM)) == NULL) {
-		ERROR("l2cap_datawrite: Could not allocate memory for pbuf\n");
+		ERROR(" *** ERROR *** l2cap_datawrite: Could not allocate memory for pbuf\n");
 		return ERR_MEM;
 	}
 	btpbuf_chain(q, p);
@@ -1395,11 +1395,11 @@ void lp_connect_cfm(struct bd_addr *bdaddr, u8_t encrypt_mode, err_t err)
 				}
 				//LOG("lp_connect_cfm: l2cap_conn_req signal sent. err = %d\nPSM = 0x%x\nscid = 0x%x\nencrypt mode = 0x%x\n", err, pcb->psm, pcb->scid, pcb->encrypt);
 			} else {
-				ERROR("lp_connect_cfm: No resources available\n");
+				ERROR(" *** ERROR *** lp_connect_cfm: No resources available\n");
 				L2CA_ACTION_CONN_CFM(pcb,L2CAP_CONN_REF_RES,0x0000,ret); /* No resources available */
 			}
 		} else {
-			ERROR("lp_connect_cfm: Connection falied\n");
+			ERROR(" *** ERROR *** lp_connect_cfm: Connection falied\n");
 			L2CA_ACTION_CONN_CFM(pcb,L2CAP_CONN_REF_RES,0x0000,ret); /* No resources available */
 		}
 	}
@@ -1503,7 +1503,7 @@ err_t l2cap_connect_ind(struct l2cap_pcb *npcb, struct bd_addr *bdaddr, u16_t ps
 
 	lpcb = btmemb_alloc(&l2cap_listenpcbs);
 	if(lpcb == NULL) {
-		ERROR("l2cap_connect_ind: Could not allocate memory for lpcb\n");
+		ERROR(" *** ERROR *** l2cap_connect_ind: Could not allocate memory for lpcb\n");
 		return ERR_MEM;
 	}
 

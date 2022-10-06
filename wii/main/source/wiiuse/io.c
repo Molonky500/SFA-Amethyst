@@ -24,7 +24,8 @@ void wiiuse_handshake(struct wiimote_t *wm,ubyte *data,uword len)
 		case 0:
 			wm->handshake_state++;
 
-			wiiuse_set_leds(wm,WIIMOTE_LED_NONE,NULL);
+			//wiiuse_set_leds(wm,WIIMOTE_LED_NONE,NULL);
+			wiiuse_set_leds(wm,WIIMOTE_LED_2,NULL);
 			wiiuse_status(wm,wiiuse_handshake);
 			return;
 

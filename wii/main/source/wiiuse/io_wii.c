@@ -41,6 +41,8 @@ static s32 __wiiuse_disconnected(void *arg,struct bte_pcb *pcb,u8 err)
 	WIIMOTE_DISABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE|WIIMOTE_STATE_HANDSHAKE_COMPLETE));
 
 	while(wm->cmd_head) {
+		exiPrintf("send msg %08X to cmdq %08X\n",
+			(u32)&wm->cmd_head->node, (u32)&wm->cmdq);
 		OSSendMessage(&wm->cmdq,&wm->cmd_head->node,OS_MESSAGE_NOBLOCK);
 		wm->cmd_head = wm->cmd_head->next;
 	}
@@ -59,7 +61,7 @@ static s32 __wiiuse_receive(void *arg,void *buffer,u16 len)
 
 	if(!wm || !buffer || len==0) return ERR_OK;
 
-	//exiPrintf("WPAD: __wiiuse_receive[%02x]\n",*(char*)buffer);
+	exiPrintf("WPAD: __wiiuse_receive[%02x]\n",*(char*)buffer);
 	wm->event = WIIUSE_NONE;
 
 	memcpy(wm->event_buf,buffer,len);
@@ -91,9 +93,9 @@ static s32 __wiiuse_connected(void *arg,struct bte_pcb *pcb,u8 err)
 	wm->sock = wml->sock;
 	wm->bdaddr = wml->bdaddr;
 
-	//exiPrintf("WPAD: __wiiuse_connected()\n");
-	//WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE));
-	WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE_COMPLETE));
+	exiPrintf("WPAD: __wiiuse_connected()\n");
+	WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE));
+	//WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE_COMPLETE));
 
 	wm->handshake_state = 0;
 	wiiuse_handshake(wm,NULL,0);
@@ -118,20 +120,31 @@ int wiiuse_register(struct wiimote_listen_t *wml, struct bd_addr *bdaddr, struct
 {
 	s32 err;
 
-	if(!wml || !bdaddr || !assign_cb) return 0;
+	if(!wml || !bdaddr || !assign_cb) {
+		exiPrintf(" *** ERROR *** %s bad params\n",__FUNCTION__);
+		return 0;
+	}
 
 	wml->wm = NULL;
 	wml->bdaddr = *bdaddr;
 	wml->sock = bte_new();
 	wml->assign_cb = assign_cb;
-	if(wml->sock==NULL) return 0;
+	if(wml->sock==NULL) {
+		exiPrintf(" *** ERROR *** %s no sock\n",__FUNCTION__);
+		return 0;
+	}
 
+	exiPrintf("%s\n", __FUNCTION__);
 	bte_arg(wml->sock,wml);
 	bte_received(wml->sock,__wiiuse_receive);
 	bte_disconnected(wml->sock,__wiiuse_disconnected);
 
 	err = bte_registerdeviceasync(wml->sock,bdaddr,__wiiuse_connected);
-	if(err==ERR_OK) return 1;
+	if(err==ERR_OK) {
+		return 1;
+	}
+	exiPrintf(" *** ERROR *** %s register err %d\n",
+		__FUNCTION__, err);
 
 	return 0;
 }
@@ -157,7 +170,11 @@ void wiiuse_init_cmd_queue(struct wiimote_t *wm)
 	if (!__queue_buffer[wm->unid]) {
 		size = (MAX_COMMANDS*sizeof(struct cmd_blk_t));
 		__queue_buffer[wm->unid] = malloc(size);
-		if(!__queue_buffer[wm->unid]) return;
+		if(!__queue_buffer[wm->unid]) {
+			exiPrintf(" *** ERROR *** %s: alloc(%d) failed\n",
+				__FUNCTION__, size);
+			return;
+		}
 	}
 
 	OSInitMessageQueue(&wm->cmdq,(void*)&__queue_buffer[wm->unid],MAX_COMMANDS);

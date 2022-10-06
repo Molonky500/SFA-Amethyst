@@ -237,8 +237,12 @@ void wiiuse_status(struct wiimote_t *wm,cmd_blk_cb cb)
 {
 	ubyte buf;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return;
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) {
+		exiPrintf("WPAD: %s: not connected (%08X)\n", __FUNCTION__,
+			(u32)wm);
+		return;
+	}
 
 	buf = 0x00;
 	wiiuse_sendcmd(wm,WM_CMD_CTRL_STATUS,&buf,1,cb);
@@ -254,6 +258,7 @@ int wiiuse_read_data(struct wiimote_t *wm,ubyte *buffer,uint addr,uword len,cmd_
 	if(!buffer || !len) return 0;
 
 	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
+	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
 	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
 	if(!ok) return 0;
 	if(!cmd) return 0;
@@ -277,12 +282,13 @@ int wiiuse_write_data(struct wiimote_t *wm,uint addr,ubyte *data,ubyte len,cmd_b
 	struct op_t *op;
 	struct cmd_blk_t *cmd;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!data || !len) return 0;
 
 	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_NOBLOCK);
+	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
+	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
 	if(!ok) return 0;
 	if(!cmd) return 0;
 
@@ -311,6 +317,7 @@ int wiiuse_write_streamdata(struct wiimote_t *wm,ubyte *data,ubyte len,cmd_blk_c
 	if(!data || !len || len>20) return 0;
 
 	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
+	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
 	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
 	if(!ok) return 0;
 	if(!cmd) return 0;
@@ -331,10 +338,11 @@ int wiiuse_sendcmd(struct wiimote_t *wm,ubyte report_type,ubyte *msg,int len,cmd
 
 	//someone isn't putting things into this queue
 	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	//exiPrintf("WPAD: %s(%02X)\n", __FUNCTION__, report_type);
+	exiPrintf("WPAD: %s(%02X)\n", __FUNCTION__, report_type);
+	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
 	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_NOBLOCK);
-	//exiPrintf("WPAD: %s(%02X) ok=%d cmd=%08X\n", __FUNCTION__,
-	//	report_type, ok, cmd);
+	exiPrintf("WPAD: %s(%02X) ok=%d cmd=%08X\n", __FUNCTION__,
+		report_type, ok, cmd);
 	if(!ok) return 0;
 	if(!cmd) return 0;
 

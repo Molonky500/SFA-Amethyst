@@ -24,6 +24,8 @@ void initIpc() {
     IPC_WriteReg(1, 0x38); //HW_IPC_PPCCTRL
     IPC_DPRINT("IPC init OK, magic=0x%08X, buf=%08X-%08X\n",
         IPC_REQ_MAGIC, (u32)_ipc_bufferlo, (u32)_ipc_bufferhi);
+	IPC_DPRINT("sizeof(IpcRequestAndMsgQueue) = %d; queue=%08X\n",
+		sizeof(IpcRequestAndMsgQueue), (u32)_ipcRequestQueue);
 }
 
 void ipcDebugPrint() {
@@ -48,6 +50,13 @@ void ipcDebugPrint() {
 s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req) {
 	s32 ret;
 
+	if(!areInterruptsEnabled()) {
+		exiPrintf(" *** ERROR *** sync req with interrupts disabled at %08x < %08x < %08x\n",
+			__builtin_extract_return_addr(__builtin_return_address(0)),
+			__builtin_extract_return_addr(__builtin_return_address(1)),
+			__builtin_extract_return_addr(__builtin_return_address(2)));
+	}
+
     IPC_DPRINT("IPC: sending sync req %08X\n",
 		(u32)req);
 	int irq = OSDisableInterrupts();
@@ -64,13 +73,6 @@ s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req) {
 
     //now wait for interrupt for response
 	OSRestoreInterrupts(irq);
-	if(!areInterruptsEnabled()) {
-		exiPrintf(" *** ERROR *** sync req with interrupts disabled at %08x < %08x < %08x\n",
-			__builtin_extract_return_addr(__builtin_return_address(0)),
-			__builtin_extract_return_addr(__builtin_return_address(1)),
-			__builtin_extract_return_addr(__builtin_return_address(2)));
-	}
-
     OSSleepThread(&req->queue);
     IPC_DPRINT("IPC: Got response for req %08X\n", (u32)req);
     //NULL resp indicates only ACK reply
@@ -121,12 +123,12 @@ s32 IOS_Open(const char *filepath,u32 mode) {
 	req->request.open.mode     = mode;
 
 	IPC_DPRINT("%s: __ipc_syncrequest(%08X)...\n",
-		__FUNCTION__, (u32)&req);
+		__FUNCTION__, (u32)req);
 
 	ret = __ipc_syncrequest(req);
 
 	IPC_DPRINT("%s: __ipc_syncrequest(%08X) done\n",
-		__FUNCTION__, (u32)&req);
+		__FUNCTION__, (u32)req);
 
 	if(req) __ipc_freereq(req);
 	return ret;
@@ -355,7 +357,7 @@ s32 IOS_Ioctlv(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
 	IPC_DPRINT("%s(%d, %d, %d, %d, %08X) req=%08X\n", __FUNCTION__,
-		fd, ioctl, cnt_in, cnt_io, (u32)argv, (u32)&req);
+		fd, ioctl, cnt_in, cnt_io, (u32)argv, (u32)req);
 	req->request.cmd = IOS_IOCTLV;
 	req->request.fd = fd;
 	req->request.cb = NULL;

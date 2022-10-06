@@ -169,7 +169,7 @@ typedef s8 err_t;
  *
  * \hideinitializer
  */
-#define STATISTICS  0
+#define STATISTICS  1
 
 /**
  * Determines if logging of certain events should be compiled in.
@@ -180,7 +180,7 @@ typedef s8 err_t;
  *
  * \hideinitializer
  */
-#define LOGGING     0
+#define LOGGING     1
 #define ERRORING	1
 
 /**

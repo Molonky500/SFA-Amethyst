@@ -22,10 +22,10 @@
 												char* file = __FILE__;															\
 												int i = strlen(file) - 1;														\
 												for (; i && (file[i] != '\\'); --i);											\
-												exiPrintf("[DEBUG] %s:%i: " fmt "\n", file+i+1, __LINE__, ##__VA_ARGS__);	\
+												exiPrintf("WPAD: [DEBUG] %s:%i: " fmt "\n", file+i+1, __LINE__, ##__VA_ARGS__);	\
 											} while (0)
 	#else
-		#define WIIUSE_DEBUG(fmt, ...)	exiPrintf("[DEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__)
+		#define WIIUSE_DEBUG(fmt, ...)	exiPrintf("WPAD: [DEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__)
 	#endif
 #else
 	#define WIIUSE_DEBUG(fmt, ...)
@@ -33,7 +33,7 @@
 
 #if 1
 #define WII_DEBUG(fmt, ...)			do {																						\
-										exiPrintf("[WDEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__);					\
+										exiPrintf("WPAD: [WDEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__);					\
 										usleep(3000000);																		\
 									} while (0)
 #else

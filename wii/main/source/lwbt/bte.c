@@ -364,8 +364,11 @@ static err_t bte_process_input(void *arg,struct l2cap_pcb *pcb,struct pbuf *p,er
 	hdr = *buf++;
 	type = (hdr&HIDP_HDR_TRANS_MASK);
 	param = (hdr&HIDP_HDR_PARAM_MASK);
-	//exiPrintf("WPAD: %s type %02X param %02X\n", __FUNCTION__,
-	//	type, param);
+	LOG("WPAD: %s type %02X param %02X\n", __FUNCTION__,
+		type, param);
+	//for(int i=0; i<len; i++) exiPrintf("%02X ", buf[i]);
+	//exiPrintf("\n");
+
 	switch(type) {
 		case HIDP_TRANS_HANDSHAKE:
 			bte_process_handshake(bte,param,buf,len);
@@ -386,8 +389,7 @@ void BTE_Init(void)
 	u32 level;
 	struct timespec tb;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
-	LOG("BTE_Init()\n");
+	LOG("WPAD: BTE_Init()\n");
 
 	memset(&btstate,0,sizeof(struct bt_state));
 
@@ -396,7 +398,6 @@ void BTE_Init(void)
 	physbusif_init();
 
 	OSInitThreadQueue(&btstate.hci_cmdq);
-
 	OSCreateAlarm(&btstate.timer_svc);
 
 	//_CPU_ISR_Disable(level);

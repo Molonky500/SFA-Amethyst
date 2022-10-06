@@ -125,6 +125,7 @@ typedef struct {
 	IpcRequest request;
 	volatile bool ready; //can be sent to IOS
 	OSThreadQueue queue;
+	u8 pad[20]; //size align to 32
 } IpcRequestAndMsgQueue;
 
 typedef struct _ipcheap {

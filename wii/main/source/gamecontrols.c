@@ -113,8 +113,10 @@ static int prevState = -1;
 
 void updateWiimote() {
     //if(*(u8*)0x803dd5e8) return; //game is loading
+    //if((*(u32*)0x803dd5ec) < 2) return;
     if(!isWiimoteInit) initWiimote();
     if(!isWiimoteInit) return;
+
     int state = WPAD_GetStatus();
     if(state != WPAD_STATE_ENABLED) {
         if(state == WPAD_STATE_ENABLING) {
@@ -128,17 +130,17 @@ void updateWiimote() {
     if(state != prevState) {
         exiPrintf("WPAD: init OK\n");
         prevState = state;
-        int view_width=640, view_height=480;
+        /*int view_width=640, view_height=480;
         for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
             WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
             //WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC);
             //WPAD_SetDataFormat(i, WPAD_FMT_BTNS);
             WPAD_SetVRes(i, view_width + 128, view_height + 128);
-        }
+        }*/
     }
 
     int err = WPAD_ScanPads();
-    if(err <= 0) {
+    if(err < 0) {
         debugPrintf("WP SCAN ERR %d\n", err);
     }
 
@@ -153,6 +155,7 @@ void updateWiimote() {
 			wpads[iPad] = NULL;
 		}
     }
+    //WPAD_Flush(WPAD_CHAN_ALL);
 }
 
 void padUpdate_hook_() {

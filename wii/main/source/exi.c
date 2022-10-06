@@ -14,8 +14,12 @@ void exiPuts(const char *str) {
     static u32 addr = (0x800400 << 6) | 0x80000000;
     static volatile u32 *exi = (volatile u32*)0xCD006800; //channel 0
 
+    //skip any leftover line breaks and this \x01 that
+    //keeps somehow sneaking in.
+    //while(*str == '\r' || *str == '\n' || *str == '\x01') str++;
+
     ssize_t len = strlen(str);
-    while(len > 0) {
+    while(len > 0 && *str) {
         dmaBuf[0] = addr >> 24;
         dmaBuf[1] = addr >> 16;
         dmaBuf[2] = addr >>  8;
@@ -38,8 +42,12 @@ void exiPuts(const char *str) {
         int outPos=4;
         while(*str && outPos < sizeof(dmaBuf)) {
             char c = *(str++);
-            if(c == '\n') dmaBuf[outPos++] = '\r';
-            else if(c != '\r') dmaBuf[outPos++] = c;
+            if(c == '\n') {
+                dmaBuf[outPos++] = '\r';
+                while((*str == '\r') || (*str == '\n')
+                || (*str == '\x01')) str++;
+            }
+            else if(c != '\r' && c != '\x01') dmaBuf[outPos++] = c;
         }
         while(outPos < paddedLen && outPos < sizeof(dmaBuf)) {
             dmaBuf[outPos++] = 0;

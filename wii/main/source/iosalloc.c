@@ -58,9 +58,11 @@ s32 iosCreateHeap(s32 size) {
 }
 
 void* iosAlloc(s32 hid,s32 size) {
+	int irq = OSDisableInterrupts();
     if(hid<0 || hid>=IPC_NUMHEAPS || size<=0) {
         exiPrintf(" *** ERROR *** using invalid IOS heap at %08X\n",
             RETURN_ADDRESS);
+		OSRestoreInterrupts(irq);
         return NULL;
     }
     IPC_DPRINT("IPC: iosAlloc(%d,%d) ", hid, size);
@@ -71,15 +73,21 @@ void* iosAlloc(s32 hid,s32 size) {
 			hid, size, RETURN_ADDRESS);
 	}
     IPC_DPRINT("=> %p\n",r);
+	OSRestoreInterrupts(irq);
     return r;
 }
 
 void iosFree(s32 hid,void *ptr) {
+	int irq = OSDisableInterrupts();
     ptr = MEM_PHYSICAL_TO_VIRTUAL(ptr);
     IPC_DPRINT("iosFree(%d,%p) @%08x\n",hid,ptr,RETURN_ADDRESS);
-	if(hid<0 || hid>=IPC_NUMHEAPS || ptr==NULL) return;
+	if(hid<0 || hid>=IPC_NUMHEAPS || ptr==NULL) {
+		OSRestoreInterrupts(irq);
+		return;
+	}
 	__lwp_heap_free(&_ipc_heaps[hid].heap,ptr);
 	//free(ptr);
+	OSRestoreInterrupts(irq);
 }
 
 void* IPC_GetBufferLo(void) {
