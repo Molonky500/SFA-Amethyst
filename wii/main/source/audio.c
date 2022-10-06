@@ -1,5 +1,5 @@
 #include "main.h"
-#define AUDIO_DEBUG 1
+#define AUDIO_DEBUG 0
 
 //this is probably not needed
 //but might be, because of different masking
@@ -44,19 +44,19 @@ void ARStartDMA_hook(u32 type, void *mmaddr, u32 araddr, u32 cntL) {
 
     u32 level = IRQ_Disable();
     u32 wVar1 = AR_DMA_MMADDR_H;
-    AR_DMA_MMADDR_H = wVar1 & 0xfc00 | (ushort)((uint)mmaddr >> 0x10);
+    AR_DMA_MMADDR_H = (wVar1 & 0xfc00) | (ushort)((uint)mmaddr >> 0x10);
     wVar1 = AR_DMA_MMADDR_L;
-    AR_DMA_MMADDR_L = wVar1 & 0x1f | (ushort)mmaddr;
+    AR_DMA_MMADDR_L = (wVar1 & 0x1f) | (ushort)mmaddr;
     wVar1 = AR_DMA_ARADDR_H;
-    AR_DMA_ARADDR_H = wVar1 & 0xfc00 | (ushort)((uint)araddr >> 0x10);
+    AR_DMA_ARADDR_H = (wVar1 & 0xfc00) | (ushort)((uint)araddr >> 0x10);
     wVar1 = AR_DMA_ARADDR_L;
-    AR_DMA_ARADDR_L = wVar1 & 0x1f | (ushort)araddr;
+    AR_DMA_ARADDR_L = (wVar1 & 0x1f) | (ushort)araddr;
     wVar1 = AR_DMA_CNT_H;
-    AR_DMA_CNT_H = (ushort)(type << 0xf) | wVar1 & 0x7fff;
+    AR_DMA_CNT_H = (ushort)(type << 0xf) | (wVar1 & 0x7fff);
     wVar1 = AR_DMA_CNT_H;
-    AR_DMA_CNT_H = wVar1 & 0xfc00 | (ushort)((uint)cntL >> 0x10);
+    AR_DMA_CNT_H = (wVar1 & 0xfc00) | (ushort)((uint)cntL >> 0x10);
     wVar1 = AR_DMA_CNT_L;
-    AR_DMA_CNT_L = wVar1 & 0x1f | (ushort)cntL;
+    AR_DMA_CNT_L = (wVar1 & 0x1f) | (ushort)cntL;
     //while(AR_DMA_CNT_LEFT);
 
     IRQ_Restore(level);

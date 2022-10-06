@@ -39,6 +39,9 @@ distribution.
 #define IPC_DPRINT(...)
 #endif
 
+#define IOS_HEAP_SIZE 16384
+#define IPC_HEAP_SIZE			16384
+#define IPC_NUMHEAPS			8
 #define IPC_HEAP			 -1
 
 #define IPC_OPEN_NONE		  0
@@ -67,8 +70,7 @@ distribution.
    extern "C" {
 #endif /* __cplusplus */
 
-typedef struct _ioctlv
-{
+typedef struct _ioctlv {
 	void *data;
 	u32 len;
 } ioctlv;
@@ -114,49 +116,83 @@ typedef struct {        //ipc struct size: 32
 	ipccallback cb;		//32
 	void *usrdata;		//36
 	u32 relnch;			//40
-	OSMessageQueue *syncqueue;	//44
+	void *syncqueue;	//44 (not used)
 	u32 magic;			//48 - used to avoid spurious responses, like from zelda.
-	u8  bFreeWhenDone;  //52
-	u8 pad1[11];		//53 - 60
+	u8 pad1[12];		//52 - 60
 } IpcRequest;
 
-s32 __ipc_syncrequest(IpcRequest *req);
-s32 __ipc_asyncrequest(IpcRequest *req);
+typedef struct {
+	IpcRequest request;
+	volatile bool ready; //can be sent to IOS
+	OSThreadQueue queue;
+} IpcRequestAndMsgQueue;
 
-void __IPC_Reinitialize(void);
+typedef struct _ipcheap {
+	void *membase;
+	u32 size;
+	heap_cntrl heap;
+} IpcHeap;
 
+//iosalloc.c
+extern void *_ipc_bufferlo;
+extern void *_ipc_bufferhi;
+extern void *_ipc_currbufferlo;
+extern void *_ipc_currbufferhi;
+extern IpcHeap _ipc_heaps[IPC_NUMHEAPS];
 s32 iosCreateHeap(s32 size);
 void* iosAlloc(s32 hid,s32 size);
 void iosFree(s32 hid,void *ptr);
-
 void* IPC_GetBufferLo(void);
 void* IPC_GetBufferHi(void);
 void IPC_SetBufferLo(void *bufferlo);
 void IPC_SetBufferHi(void *bufferhi);
+IpcRequestAndMsgQueue* __ipc_allocreq(void);
+void __ipc_freereq(IpcRequestAndMsgQueue *ptr);
+s32 __IOS_InitHeap(void);
 
+//ipc.c
+extern u32 IPC_REQ_MAGIC;
+extern u64 ipcTotalReqsSent;
+extern OSMutex ipcMutex;
+void initIpc();
+void ipcDebugPrint();
+s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req);
+s32 __ipc_asyncrequest(IpcRequestAndMsgQueue *req);
 s32 IOS_Open(const char *filepath,u32 mode);
 s32 IOS_OpenAsync(const char *filepath,u32 mode,ipccallback ipc_cb,void *usrdata);
-
 s32 IOS_Close(s32 fd);
 s32 IOS_CloseAsync(s32 fd,ipccallback ipc_cb,void *usrdata);
-
 s32 IOS_Seek(s32 fd,s32 where,s32 whence);
 s32 IOS_SeekAsync(s32 fd,s32 where,s32 whence,ipccallback ipc_cb,void *usrdata);
 s32 IOS_Read(s32 fd,void *buf,s32 len);
 s32 IOS_ReadAsync(s32 fd,void *buf,s32 len,ipccallback ipc_cb,void *usrdata);
 s32 IOS_Write(s32 fd,const void *buf,s32 len);
 s32 IOS_WriteAsync(s32 fd,const void *buf,s32 len,ipccallback ipc_cb,void *usrdata);
-
 s32 IOS_Ioctl(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 len_io);
 s32 IOS_IoctlAsync(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 len_io,ipccallback ipc_cb,void *usrdata);
 s32 IOS_Ioctlv(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv);
 s32 IOS_IoctlvAsync(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv,ipccallback ipc_cb,void *usrdata);
+//s32 IOS_IoctlvFormat(s32 hId,s32 fd,s32 ioctl,const char *format,...);
+//s32 IOS_IoctlvFormatAsync(s32 hId,s32 fd,s32 ioctl,ipccallback usr_cb,void *usr_data,const char *format,...);
+//s32 IOS_IoctlvReboot(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv);
+//s32 IOS_IoctlvRebootBackground(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv);
 
-s32 IOS_IoctlvFormat(s32 hId,s32 fd,s32 ioctl,const char *format,...);
-s32 IOS_IoctlvFormatAsync(s32 hId,s32 fd,s32 ioctl,ipccallback usr_cb,void *usr_data,const char *format,...);
+//ipcbuf.c
+extern IpcRequestAndMsgQueue _ipcRequestQueue[IPC_QUEUE_MAX];
+extern vs32 _ipcReqQueueHead, _ipcReqQueueTail;
+extern bool _ipcIdle;
+void _ipcWriteNextQueuedReq();
+int _ipcWriteReq(IpcRequestAndMsgQueue *req);
 
-s32 IOS_IoctlvReboot(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv);
-s32 IOS_IoctlvRebootBackground(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv);
+//ipcio.c
+u32 IPC_ReadReg(u32 reg);
+void IPC_WriteReg(u32 reg,u32 val);
+void ACR_WriteReg(u32 reg,u32 val);
+void _ipcAckReply();
+void _ipcSendEndOfReply();
+
+//ipcirq.c
+void ipcIrqHandler(int irqNo, OSContext *ctx);
 
 #ifdef __cplusplus
    }

@@ -5,16 +5,16 @@
 
 #define WIIMOTE_PI			3.14159265f
 
-//#define WITH_WIIUSE_DEBUG
+#define WITH_WIIUSE_DEBUG
 
 /* Error output macros */
-#define WIIUSE_ERROR(fmt, ...)		fprintf(stderr, "[ERROR] " fmt "\n", ##__VA_ARGS__)
+#define WIIUSE_ERROR(fmt, ...)		exiPrintf("[ERROR] " fmt "\n", ##__VA_ARGS__)
 
 /* Warning output macros */
-#define WIIUSE_WARNING(fmt, ...)	fprintf(stderr, "[WARNING] " fmt "\n",	##__VA_ARGS__)
+#define WIIUSE_WARNING(fmt, ...)	exiPrintf("[WARNING] " fmt "\n",	##__VA_ARGS__)
 
 /* Information output macros */
-#define WIIUSE_INFO(fmt, ...)		fprintf(stderr, "[INFO] " fmt "\n", ##__VA_ARGS__)
+#define WIIUSE_INFO(fmt, ...)		exiPrintf("[INFO] " fmt "\n", ##__VA_ARGS__)
 
 #ifdef WITH_WIIUSE_DEBUG
 	#ifdef WIN32
@@ -22,10 +22,10 @@
 												char* file = __FILE__;															\
 												int i = strlen(file) - 1;														\
 												for (; i && (file[i] != '\\'); --i);											\
-												fprintf(stderr, "[DEBUG] %s:%i: " fmt "\n", file+i+1, __LINE__, ##__VA_ARGS__);	\
+												exiPrintf("[DEBUG] %s:%i: " fmt "\n", file+i+1, __LINE__, ##__VA_ARGS__);	\
 											} while (0)
 	#else
-		#define WIIUSE_DEBUG(fmt, ...)	fprintf(stderr, "[DEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__)
+		#define WIIUSE_DEBUG(fmt, ...)	exiPrintf("[DEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__)
 	#endif
 #else
 	#define WIIUSE_DEBUG(fmt, ...)
@@ -33,7 +33,7 @@
 
 #if 1
 #define WII_DEBUG(fmt, ...)			do {																						\
-										printf("[WDEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__);					\
+										exiPrintf("[WDEBUG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__);					\
 										usleep(3000000);																		\
 									} while (0)
 #else

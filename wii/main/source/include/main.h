@@ -13,9 +13,9 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-//this macro excludes 90xxxxxx (ARAM) and 93xxxxxx (IOS)
+//this macro excludes 90xxxxxx (ARAM)
 #define PTR_VALID(p) (((u32)(p) >= 0x80000000 && (u32)(p) <= 0x817FFFFF) || \
-    ((u32)(p) >= 0x91000000 && (u32)(p) <= 0x92FFFFFF))
+    ((u32)(p) >= 0x91000000 && (u32)(p) <= 0x93FFFFFF))
 
 #define cntlzw(_val) ({u32 _rval; \
     __asm__ __volatile__ ("cntlzw %0, %1" : "=r"((_rval)) : "r"((_val))); _rval;})
@@ -27,6 +27,10 @@ extern char _argv_raw[ARGV_MAX];
 extern char *_argc_raw[ARGC_MAX];
 extern int _argc;
 
+#define IPC_QUEUE_MAX 256
+
+#include "asminline.h"
+#include "lwpnode.h"
 #include "printf.h"
 #include "gctypes.h"
 #include "gcbool.h"
@@ -43,16 +47,17 @@ extern int _argc;
 #include "osbootinfo.h"
 #include "dol.h"
 #include "thread.h"
+#include "lwp_heap.h"
 #include "ipc.h"
 #include "disc_io.h"
 #include "gameheap.h"
 #include "gamefuncs.h"
 #include "bte.h"
 #include "conf.h"
+#include "pad.h"
+#include "gamecontrols.h"
 
-//XXX why do these exist?
-#define iosAlloc(heap, size) malloc(size)
-#define iosFree(heap, ptr) free(ptr)
+int fatInitDefault();
 
 //alloc.c
 void dumpGameHeaps();
@@ -66,6 +71,7 @@ void AIStartDMA_hook();
 
 //checkthread.c
 extern OSThread checkThread;
+void registerThreadForDebug(OSThread *thread, const char *name);
 void initCheckThread();
 void checkIntegrity();
 void* checkThreadMain(void *param);
@@ -173,8 +179,12 @@ char* OSGetFontTexel_hook(char* string, void* image, s32 pos,
     s32 stride, s32* width);
 
 //patches.c
-uint32_t hookBranch(uint32_t addr, void *target, int isBl);
+uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline);
 void doPatches();
+
+//system.c
+void* __SYS_GetIPCBufferLo(void);
+void* __SYS_GetIPCBufferHi(void);
 
 //system_asm.S
 extern u32 get_r1();
@@ -192,3 +202,7 @@ void OSYieldThread(void);
 void __OSPromoteThread(OSThread* thread, OSPriority priority);
 void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime tStart,
 OSTime period, OSAlarmHandler handler);
+
+//wiimote.c
+void initWiimote();
+void padUpdate_hook(void);

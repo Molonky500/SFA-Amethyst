@@ -13,6 +13,12 @@ void __DVDFSInit_hook(void) {
     exiPuts("loader2 libc init OK\n");
 
     initCheckThread();
+    //registerThreadForDebug(OSGetCurrentThread(),  "main");
+    registerThreadForDebug((OSThread*)0x803AD848, "game");
+    registerThreadForDebug((OSThread*)0x803AB118, "bsod");
+    registerThreadForDebug((OSThread*)0x803A54A0, "THPaudio");
+    registerThreadForDebug((OSThread*)0x803A6F08, "THPdisc");
+    registerThreadForDebug((OSThread*)0x803A8348, "THPvideo");
 
     initIpc();
     exiPuts("loader2 IPC init OK\n");
@@ -29,10 +35,6 @@ void __DVDFSInit_hook(void) {
 
     while(!dvdThreadReady) OSYieldThread();
     DVD_DPRINT("DVD READY\n");
-
-    exiPuts("About to init WPAD\n");
-    int err = WPAD_Init();
-    exiPrintf("WPAD_Init: %d\n", err);
 }
 
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
@@ -80,8 +82,8 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     fseek(file, 0, SEEK_SET);
     DVD_DPRINT("file=0x%08X size=%d\n", (u32)file, info->length);
     dvd_addFile(info, file, path);
-    //printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
-    //    (u32)info, (u32)file, (u32)info->length);
+    printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
+        (u32)info, (u32)file, (u32)info->length);
 
     //OSYieldThread();
     return true;

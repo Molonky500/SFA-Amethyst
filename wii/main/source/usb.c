@@ -253,16 +253,21 @@ static s32 __usbv0_messageCB(s32 result,void *usrdata)
 	u32 i;
 	struct _usb_msg *msg = (struct _usb_msg*)usrdata;
 
+	//exiPrintf("%s:%d msg=%08X\n", __FILE__, __LINE__, msg);
 	if(msg==NULL) return IPC_EINVAL;
 
+	//exiPrintf("%s:%d cb=%08X\n", __FILE__, __LINE__, msg->cb);
 	if(msg->cb!=NULL) msg->cb(result, msg->userdata);
 
+	//exiPrintf("%s:%d bufs=%08X\n", __FILE__, __LINE__, msg->heap_buffers);
 	for(i=0; i<msg->heap_buffers; i++) {
 		if(msg->vec[i].data!=NULL)
 			iosFree(hId,msg->vec[i].data);
 	}
 
+	//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 	iosFree(hId,msg);
+	//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 
 	return IPC_OK;
 }
@@ -588,11 +593,13 @@ static u32 __find_next_endpoint(u8 *buffer,s32 size,u8 align)
 
 s32 USB_Initialize(void)
 {
-	//if(hId==-1) hId = iosCreateHeap(USB_HEAPSIZE);
-	//if(hId<0) return IPC_ENOMEM;
+	if(hId==-1) hId = iosCreateHeap(USB_HEAPSIZE);
+	if(hId<0) return IPC_ENOMEM;
 
 	if (ven_host==NULL) {
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		s32 ven_fd = IOS_Open(__ven_path, IPC_OPEN_NONE);
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		if (ven_fd>=0) {
 			ven_host = (struct _usbv5_host*)iosAlloc(hId, sizeof(*ven_host));
 			if (ven_host==NULL) {
@@ -618,7 +625,9 @@ s32 USB_Initialize(void)
 	}
 
 	if (hid_host==NULL) {
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		s32 hid_fd = IOS_Open(__hid_path, IPC_OPEN_NONE);
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		if (hid_fd>=0) {
 			hid_host = (struct _usbv5_host*)iosAlloc(hId, sizeof(*hid_host));
 			if (hid_host==NULL) {
@@ -644,6 +653,7 @@ s32 USB_Initialize(void)
 		}
 	}
 
+	//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 	return IPC_OK;
 
 mem_error:

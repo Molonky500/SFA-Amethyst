@@ -2,11 +2,12 @@
 
 static u32 *trampoline = (u32*)0x80000200;
 
-uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
+uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline) {
     /** Replace a `b` or `bl` instruction in memory.
      *  @param addr Address to hook.
      *  @param target Function to branch to.
      *  @param isBl whether to insert a `b` or a `bl`.
+     *  @param forceTrampoline whether to force the use of a trampoline.
      *  @return The original destination address.
      *  @note The target address should be a `b` or `bl` instruction.
      *  Otherwise, the return value is not useful, and special care needs to
@@ -18,7 +19,8 @@ uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
     if(abs(dist) >= 32*1024*1024) {
         //can't reach with a single branch
         uint32_t *code = (uint32_t*)addr;
-        if((oldOp & ~0x03FFFFFF) == 0x48000000) {
+        if(forceTrampoline
+        || (oldOp & ~0x03FFFFFF) == 0x48000000) {
             //replacing a b or bl
             if((u32)trampoline >= 0x80000300) {
                 exiPrintf("Too many trampolines (%08X)\n", addr);
@@ -59,98 +61,6 @@ uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
     return addr + (oldOp & 0x03FFFFFC);
 }
 
-void gameTextGenTexture_hook(void *text) {
-    //DEBUG XXX REMOVE
-    void (*origFunc)(void*) = 0x8001ad64;
-    exiPrintf("gameTextGenTexture(%08X)\n", (u32)text);
-    void *file = *(void**)(text+0x3C);
-    u32   size = *(u32*)(text+0x40);
-
-    /*for(u32 i=0; i<size; i += 16) {
-        char buf[256];
-        snprintf(buf, sizeof(buf), "%06X", i);
-        int pos = strlen(buf);
-        for(u32 j=0; j<16; j++) {
-            const char *spc = (j&3) ? " ": "  ";
-            if((i+j) >= size) {
-                snprintf(&buf[pos], sizeof(buf)-pos, "%s..", spc);
-            }
-            else {
-                u8 data = *(u8*)(file+i+j);
-                snprintf(&buf[pos], sizeof(buf)-pos, "%s%02X",
-                    spc, data);
-            }
-            pos += strlen(spc) + 2;
-        }
-        for(u32 j=0; j<16; j++) {
-            const char *spc = (j&3) ? "": " ";
-            if((i+j) >= size) {
-                snprintf(&buf[pos], sizeof(buf)-pos, "%s.",
-                    spc);
-            }
-            else {
-                char data = *(char*)(file+i+j);
-                if(data < 0x20 || data > 0x7E) data = '.';
-                snprintf(&buf[pos], sizeof(buf)-pos, "%s%c",
-                    spc, data);
-            }
-            pos += strlen(spc) + 1;
-        }
-        buf[pos++] = '\n';
-        buf[pos++] = '\0';
-        exiPrintf(buf);
-    }*/
-
-    exiPrintf("file=%08X size=%08X\n", file, size);
-    u32 cksum = 0;
-    for(u32 i=0; i<size; i++) {
-        cksum += *(u8*)(file+i);
-    }
-    exiPrintf("cksum=%08X\n", cksum);
-
-    //read char structs
-    void *start = file;
-    u32 numCharStructs = *(u32*)file;
-    file += 4 + (numCharStructs * 16);
-    exiPrintf("CharStructs: %d\n", numCharStructs);
-
-    u16 numTexts = *(u16*)file;
-    u16 strDataLen = *(u16*)(file+2);
-    file += 4 + (numTexts * 12);
-    exiPrintf("numTexts: %d; strDataLen: %d\n", numTexts, strDataLen);
-
-    u32 numStrs = *(u32*)file;
-    file += 4 + (numStrs * 4) + strDataLen;
-    exiPrintf("numStrs: %d\n", numStrs);
-
-    u32 numUnk = *(u32*)file;
-    file += 4 + numUnk;
-    exiPrintf("numUnk: %d\n", numUnk);
-
-    while(1) {
-        u16 texFmt = *(u16*)file;
-        u16 pixFmt = *(u16*)(file+2);
-        u16 width  = *(u16*)(file+4);
-        u16 height = *(u16*)(file+6);
-        file += 8;
-        if(!(width | height)) {
-            exiPrintf("EOF: %08X (%d)\n", file - start, file - start);
-            break;
-        }
-        //weird, but what the game does.
-        u32 size = ((int)(width * height * (uint)pixFmt) >> 4) * 2;
-        exiPrintf("%08X (%9d): tex %5dx%5d fmt %04X %04X size=%08X\n",
-            file-start, file-start, width, height, texFmt, pixFmt,
-            size);
-        file += size;
-    }
-
-    //u32 irq = OSDisableInterrupts();
-    origFunc(text);
-    //OSRestoreInterrupts(irq);
-    exiPrintf("gameTextGenTexture(%08X) OK\n", (u32)text);
-}
-
 void doPatches() {
     //remap some HW regs
     u32 regRemap[] = {
@@ -172,7 +82,7 @@ void doPatches() {
     };
     for(int i=0; regRemap[i]; i++) {
         u32 op = *(u32*)regRemap[i];
-        if(op & 0xFFFF != 0xCC00) {
+        if((op & 0xFFFF) != 0xCC00) {
             exiPrintf(" *** ERROR *** Incorrect entry %08X in regRemap\n",
                 regRemap[i]);
         }
@@ -181,81 +91,30 @@ void doPatches() {
         ICInvalidateRange((void*)regRemap[i], 32);
     }
 
-    //hookBranch(0x80019c6c, gameTextGenTexture_hook, 1);
-
-    //hookBranch(0x80000100, _raw_exceptionHook_Reset, 0);
-    //hookBranch(0x80000200, _raw_exceptionHook_MachineCheck, 0);
-    //hookBranch(0x80000300, _raw_exceptionHook_DSI, 0);
-    //hookBranch(0x80000400, _raw_exceptionHook_ISI, 0);
-    //hookBranch(0x80000500, _raw_exceptionHook_External, 0);
-    //hookBranch(0x80000600, _raw_exceptionHook_Alignment, 0);
-    //hookBranch(0x80000700, _raw_exceptionHook_Program, 0);
-    //hookBranch(0x80000800, _raw_exceptionHook_FpUnavailable, 0);
-    //hookBranch(0x80000900, _raw_exceptionHook_Decrementer, 0);
-    //hookBranch(0x80000C00, _raw_exceptionHook_Syscall, 0);
-    //hookBranch(0x80000D00, _raw_exceptionHook_Trace, 0);
-    //hookBranch(0x80000F00, _raw_exceptionHook_PerfMon, 0);
-    //hookBranch(0x80001300, _raw_exceptionHook_IABR, 0);
-    //hookBranch(0x80001700, _raw_exceptionHook_Thermal, 0);
-    hookBranch(0x8007d6dc, osPrintHook, 0);
-    hookBranch(0x80246e04, osPrintHook, 0);
-    hookBranch(0x802510cc, osPrintHook, 0);
-    hookBranch(0x8024091c, OSExceptionInit_hook, 0);
-    hookBranch(0x80242a10, gameExceptionHook, 0);
-
-    /*hookBranch(0x80246a60, OSSleepThread_hook, 0);
-    //hookBranch(0x802462a8, OSCreateThread_hook, 0);
-    hookBranch(0x801175e4, OSCreateThread_hook, 1);
-    hookBranch(0x80117614, OSCreateThread_hook, 1);
-    hookBranch(0x801196c0, OSCreateThread_hook, 1);
-    hookBranch(0x80119b98, OSCreateThread_hook, 1);
-    hookBranch(0x80119bc8, OSCreateThread_hook, 1);
-    hookBranch(0x80137de0, OSCreateThread_hook, 1);
-    hookBranch(0x802464ac, OSCancelThread_hook, 0);
-    hookBranch(0x80246668, OSResumeThread_hook, 0);
-    hookBranch(0x802468f0, OSSuspendThread_hook, 0);
-    hookBranch(0x80246b4c, OSWakeupThread_hook, 0);
-    hookBranch(0x80245d88, OSGetCurrentThread_hook, 0);
-    //hookBranch(0x80242474, OSClearContext_hook, 0);
-    hookBranch(0x80246078, OSSwitchThreadOrSomeShit_hook, 0);
-    //hookBranch(0x80242394, OSLoadContext_hook, 0);
-    //hookBranch(0x80242314, OSSaveContext_hook, 0);
-    //hookBranch(0x802422ac, OSSetCurrentContext_hook, 0);
-
-    hookBranch(0x80245d78, OSInitThreadQueue_hook, 0);
-    hookBranch(0x80244000, OSInitMessageQueue_hook, 0);
-    hookBranch(0x80244060, OSSendMessage_hook, 0);
-    hookBranch(0x80244128, OSReceiveMessage_hook, 0);*/
-
-    hookBranch(0x802406c0, __OSInterruptInit_hook, 1);
-    //hookBranch(0x8024377c, OSDisableInterrupts_hook, 0);
-    //hookBranch(0x80243790, OSEnableInterrupts_hook, 0);
-    //hookBranch(0x802437a4, OSRestoreInterrupts_hook, 0);
-    hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0);
-    hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0);
-    //hookBranch(0x802437c8, __OSSetInterruptHandler_hook, 0);
-    //hookBranch(0x802437e4, __OSGetInterruptHandler_hook, 0);
-    hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0);
-
-    hookBranch(0x80248870, __DVDFSInit_hook, 0);
-    hookBranch(0x80248b9c, DVDOpen_hook, 0);
-    hookBranch(0x80015850, DVDRead_hook, 0);
-    hookBranch(0x80248f9c, DVDReadPrio_hook, 0);
-    //hookBranch(0x80248c64, DVDClose_hook, 0);
-    hookBranch(0x8024b428, DVDCancelAsync_hook, 0);
-    hookBranch(0x80248eac, DVDReadAsyncPrio_hook, 0);
-    hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0);
-    hookBranch(0x8024afd8, DVDCancelStreamAsync_hook, 0);
-
-    //hookBranch(0x80242f20, OSGetFontEncode_hook, 0);
-    //hookBranch(0x8024363c, OSGetFontWidth_hook, 0);
-    //hookBranch(0x80243338, OSGetFontTexel_hook, 0);
-
-    hookBranch(0x8024ffe4, ARStartDMA_hook, 0);
-    hookBranch(0x8024f6fc, AIInitDMA_hook, 0);
-    hookBranch(0x8024f784, AIStartDMA_hook, 0);
+    hookBranch(0x80014f40, padUpdate_hook, 0, 1);
+    hookBranch(0x8007d6dc, osPrintHook, 0, 0);
+    hookBranch(0x80246e04, osPrintHook, 0, 0);
+    hookBranch(0x802510cc, osPrintHook, 0, 0);
+    hookBranch(0x8024091c, OSExceptionInit_hook, 0, 0);
+    hookBranch(0x80242a10, gameExceptionHook, 0, 0);
+    hookBranch(0x802406c0, __OSInterruptInit_hook, 1, 0);
+    hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0, 0);
+    hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0, 0);
+    hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0, 0);
+    hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
+    hookBranch(0x80248b9c, DVDOpen_hook, 0, 0);
+    hookBranch(0x80015850, DVDRead_hook, 0, 0);
+    hookBranch(0x80248f9c, DVDReadPrio_hook, 0, 0);
+    //hookBranch(0x80248c64, DVDClose_hook, 0, 0);
+    hookBranch(0x8024b428, DVDCancelAsync_hook, 0, 0);
+    hookBranch(0x80248eac, DVDReadAsyncPrio_hook, 0, 0);
+    hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0, 0);
+    hookBranch(0x8024afd8, DVDCancelStreamAsync_hook, 0, 0);
+    hookBranch(0x8024ffe4, ARStartDMA_hook, 0, 0);
+    hookBranch(0x8024f6fc, AIInitDMA_hook, 0, 0);
+    hookBranch(0x8024f784, AIStartDMA_hook, 0, 0);
     //bypass the part of __ARCheckSize that clobbers MEM2
-    //hookBranch(0x80250788, 0x80250b18, 0);
+    //hookBranch(0x80250788, 0x80250b18, 0, 0);
 
     static const u32 patches[] = {
         //address, value

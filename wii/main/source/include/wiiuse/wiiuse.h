@@ -224,11 +224,6 @@ typedef enum data_req_s
 	REQ_DONE
 } data_req_s;
 
-typedef struct _lwpnode {
-	struct _lwpnode *next;
-	struct _lwpnode *prev;
-} lwp_node;
-
 /**
  *	@struct data_req_t
  *	@brief Data read request structure.

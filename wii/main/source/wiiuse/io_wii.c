@@ -27,11 +27,6 @@ static __inline__ u32 ACR_ReadReg(u32 reg)
 	return _ipcReg[reg>>2];
 }
 
-static __inline__ void ACR_WriteReg(u32 reg,u32 val)
-{
-	_ipcReg[reg>>2] = val;
-}
-
 static s32 __wiiuse_disconnected(void *arg,struct bte_pcb *pcb,u8 err)
 {
 	struct wiimote_listen_t *wml = (struct wiimote_listen_t*)arg;
@@ -39,7 +34,7 @@ static s32 __wiiuse_disconnected(void *arg,struct bte_pcb *pcb,u8 err)
 
 	if(!wm) return ERR_OK;
 
-	//printf("wiimote disconnected\n");
+	exiPrintf("WPAD: wiimote disconnected\n");
 	WIIMOTE_DISABLE_STATE(wm, (WIIMOTE_STATE_IR|WIIMOTE_STATE_IR_INIT));
 	WIIMOTE_DISABLE_STATE(wm, (WIIMOTE_STATE_SPEAKER|WIIMOTE_STATE_SPEAKER_INIT));
 	WIIMOTE_DISABLE_STATE(wm, (WIIMOTE_STATE_EXP|WIIMOTE_STATE_EXP_HANDSHAKE|WIIMOTE_STATE_EXP_FAILED));
@@ -64,7 +59,7 @@ static s32 __wiiuse_receive(void *arg,void *buffer,u16 len)
 
 	if(!wm || !buffer || len==0) return ERR_OK;
 
-	//printf("__wiiuse_receive[%02x]\n",*(char*)buffer);
+	//exiPrintf("WPAD: __wiiuse_receive[%02x]\n",*(char*)buffer);
 	wm->event = WIIUSE_NONE;
 
 	memcpy(wm->event_buf,buffer,len);
@@ -86,6 +81,7 @@ static s32 __wiiuse_connected(void *arg,struct bte_pcb *pcb,u8 err)
 	wm = wml->assign_cb(&wml->bdaddr);
 
 	if(!wm) {
+		exiPrintf("WPAD: unrecognized wiimote %08X", wml->bdaddr);
 		bte_disconnect(wml->sock);
 		return ERR_OK;
 	}
@@ -95,12 +91,14 @@ static s32 __wiiuse_connected(void *arg,struct bte_pcb *pcb,u8 err)
 	wm->sock = wml->sock;
 	wm->bdaddr = wml->bdaddr;
 
-	//printf("__wiiuse_connected()\n");
-	WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE));
+	//exiPrintf("WPAD: __wiiuse_connected()\n");
+	//WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE));
+	WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE_COMPLETE));
 
 	wm->handshake_state = 0;
 	wiiuse_handshake(wm,NULL,0);
 
+	exiPrintf("WPAD: connect OK\n");
 	return ERR_OK;
 }
 

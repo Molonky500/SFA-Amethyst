@@ -1,9 +1,10 @@
 #include "main.h"
 
 //pointers to functions in the game binary
+void      (*debugPrintf)(const char *fmt, ...) = 0x801378a8;
 void*     (*gameAlloc)(u32 size, u32 tag, const char *name) = 0x80023cc8;
 void      (*gameFree)(void *addr) = 0x800233e8;
-void      (*InsertAlarm)(OSAlarm *alarm, OSTime time, OSTime expiry) = 0x80240d8c;
+void      (*InsertAlarm)(OSAlarm *alarm, OSTime time, OSAlarmHandler handler) = 0x80240d8c;
 void      (*OSCancelAlarm)(OSAlarm *alarm) = 0x80241044;
 void      (*OSCreateAlarm)(OSAlarm *alarm) = 0x80240d80;
 BOOL      (*OSCreateThread)(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute) = 0x802462a8;

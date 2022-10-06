@@ -84,8 +84,8 @@ void initAlloc() {
     __malloc_heap_end   = (char*)_arena2_max;
 	_mem2_heap_start    = (char*)_arena2_min;
 	_mem2_heap_end      = (char*)_arena2_max;
-	heapCanaryTop       = malloc(HEAP_CANARY_SIZE);
-	heapCanaryBottom    = _mem2_heap_end - HEAP_CANARY_SIZE;
+	heapCanaryTop       = (u8*)malloc(HEAP_CANARY_SIZE);
+	heapCanaryBottom    = (u8*)_mem2_heap_end - HEAP_CANARY_SIZE;
 	_mem2_heap_end -= HEAP_CANARY_SIZE;
 
 	for(int i=0; i<HEAP_CANARY_SIZE; i++) {

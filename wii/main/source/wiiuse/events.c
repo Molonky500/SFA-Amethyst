@@ -40,7 +40,7 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 	if(!cmd) return;
 	if(!(cmd->state==CMD_SENT && cmd->data[0]==WM_CMD_READ_DATA)) return;
 
-	//printf("event_data_read(%p)\n",cmd);
+	//exiPrintf("WPAD: event_data_read(%08x)\n",(u32)cmd);
 
 	err = msg[2]&0x0f;
 	op = (struct op_t*)cmd->data;
@@ -51,7 +51,7 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 		if(cmd->cb!=NULL) cmd->cb(wm,op->buffer,(op->readdata.size - op->wait));
 
 		//__lwp_queue_append(&wm->cmdq,&cmd->node);
-		OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_NOBLOCK);
+		OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 		wiiuse_send_next_command(wm);
 		return;
 	}
@@ -59,7 +59,8 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 	len = ((msg[2]&0xf0)>>4)+1;
 	offset = BIG_ENDIAN_SHORT(*(uword*)(msg+3));
 
-	//printf("addr: %08x\noffset: %d\nlen: %d\n",req->addr,offset,len);
+	//exiPrintf("WPAD: addr: %08x\noffset: %d\nlen: %d\n",
+	//	op->readdata.addr,offset,len);
 
 	op->readdata.addr = (op->readdata.addr&0xffff);
 	op->wait -= len;
@@ -74,7 +75,7 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 		if(cmd->cb!=NULL) cmd->cb(wm,op->buffer,op->readdata.size);
 
 		//__lwp_queue_append(&wm->cmdq,&cmd->node);
-		OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_NOBLOCK);
+		OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 		wiiuse_send_next_command(wm);
 	}
 }
@@ -87,15 +88,15 @@ static void event_ack(struct wiimote_t *wm,ubyte *msg)
 
 	if(!cmd) return;
 	if(!cmd || cmd->state!=CMD_SENT || cmd->data[0]==WM_CMD_READ_DATA || cmd->data[0]==WM_CMD_CTRL_STATUS || cmd->data[0]!=msg[2]) {
-		WIIUSE_WARNING("Unsolicited event ack: report %02x status %02x", msg[2], msg[3]);
+		WIIUSE_WARNING("WPAD: Unsolicited event ack: report %02x status %02x", msg[2], msg[3]);
 		return;
 	}
 	if(msg[3]) {
-		WIIUSE_WARNING("Command %02x %02x failed: status %02x", cmd->data[0], cmd->data[1], msg[3]);
+		WIIUSE_WARNING("WPAD: Command %02x %02x failed: status %02x", cmd->data[0], cmd->data[1], msg[3]);
 		return;
 	}
 
-	WIIUSE_DEBUG("Received ack for command %02x %02x", cmd->data[0], cmd->data[1]);
+	WIIUSE_DEBUG("WPAD: Received ack for command %02x %02x", cmd->data[0], cmd->data[1]);
 
 	wm->cmd_head = cmd->next;
 
@@ -104,7 +105,7 @@ static void event_ack(struct wiimote_t *wm,ubyte *msg)
 	if(cmd->cb) cmd->cb(wm,NULL,0);
 
 	//__lwp_queue_append(&wm->cmdq,&cmd->node);
-	OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_NOBLOCK);
+	OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 	wiiuse_send_next_command(wm);
 }
 
@@ -170,7 +171,7 @@ done:
 	if(cmd->cb!=NULL) cmd->cb(wm,msg,6);
 
 	//__lwp_queue_append(&wm->cmdq,&cmd->node);
-	OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_NOBLOCK);
+	OSSendMessage(&wm->cmdq,&cmd->node,OS_MESSAGE_BLOCK);
 	wiiuse_send_next_command(wm);
 }
 
@@ -229,7 +230,7 @@ void parse_event(struct wiimote_t *wm)
 
 	event = wm->event_buf[0];
 	msg = wm->event_buf+1;
-	//printf("parse_event(%02x,%p)\n",event,msg);
+	//exiPrintf("WPAD: parse_event(%02x,%p)\n",event,msg);
 	switch(event) {
 		case WM_RPT_CTRL_STATUS:
 			event_status(wm,msg);
@@ -311,7 +312,7 @@ void parse_event(struct wiimote_t *wm)
 			handle_expansion(wm, msg+15);
 			break;
 		default:
-			WIIUSE_WARNING("Unknown event, can not handle it [Code 0x%x].", event);
+			WIIUSE_WARNING("WPAD: Unknown event, can not handle it [Code 0x%x].", event);
 			return;
 	}
 

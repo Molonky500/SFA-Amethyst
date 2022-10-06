@@ -8,8 +8,8 @@ void initDvdHack() {
     exiPrintf("%s: init (r2=%08X r13=%08X)\n", __FUNCTION__,
         get_r2(), get_r13());
     memset((void*)dvdOpenFiles, 0, sizeof(HackDvdOpenFile) * DVD_MAX_OPEN_FILES);
-    memset(dvdMsgsIn,  0, sizeof(HackDvdMsg) * DVD_MAX_MSGS);
-    memset(dvdMsgsOut, 0, sizeof(HackDvdMsg) * DVD_MAX_MSGS);
+    memset((void*)dvdMsgsIn,  0, sizeof(HackDvdMsg) * DVD_MAX_MSGS);
+    memset((void*)dvdMsgsOut, 0, sizeof(HackDvdMsg) * DVD_MAX_MSGS);
     OSInitMutex(&dvdMsgMutex);
 
     exiPrintf("%s: create alarm\n", __FUNCTION__);

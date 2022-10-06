@@ -18,7 +18,7 @@ void wiiuse_handshake(struct wiimote_t *wm,ubyte *data,uword len)
 	ubyte *buf = NULL;
 	struct accel_t *accel = &wm->accel_calib;
 
-	//printf("wiiuse_handshake(%d,%p,%d)\n",wm->handshake_state,data,len);
+	exiPrintf("WPAD: wiiuse_handshake(%d,%08x,%d)\n",wm->handshake_state,data,len);
 
 	switch(wm->handshake_state) {
 		case 0:
@@ -31,6 +31,9 @@ void wiiuse_handshake(struct wiimote_t *wm,ubyte *data,uword len)
 		case 1:
 			wm->handshake_state++;
 			buf = malloc(sizeof(ubyte)*8);
+			if(!buf) {
+				exiPrintf(" *** ERROR *** WPAD: malloc failed in %s\n", __FUNCTION__);
+			}
 
 			if (len > 2 && data[2]&WM_CTRL_STATUS_BYTE1_ATTACHMENT) {
 				wiiuse_read_data(wm,buf,WM_EXP_ID,6,wiiuse_handshake);

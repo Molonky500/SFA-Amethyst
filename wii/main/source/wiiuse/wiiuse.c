@@ -19,6 +19,7 @@ void wiiuse_send_next_command(struct wiimote_t *wm)
 {
 	struct cmd_blk_t *cmd;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return;
 
 	cmd = wm->cmd_head;
@@ -39,10 +40,11 @@ static __inline__ void __wiiuse_push_command(struct wiimote_t *wm,struct cmd_blk
 
 	if(!wm || !cmd) return;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	cmd->next = NULL;
 	cmd->state = CMD_READY;
 
-	_CPU_ISR_Disable(level);
+	//_CPU_ISR_Disable(level);
 	if(wm->cmd_head==NULL) {
 		wm->cmd_head = wm->cmd_tail = cmd;
 		wiiuse_send_next_command(wm);
@@ -50,7 +52,7 @@ static __inline__ void __wiiuse_push_command(struct wiimote_t *wm,struct cmd_blk
 		wm->cmd_tail->next = cmd;
 		wm->cmd_tail = cmd;
 	}
-	_CPU_ISR_Restore(level);
+	//_CPU_ISR_Restore(level);
 }
 
 #ifndef GEKKO
@@ -61,6 +63,7 @@ struct wiimote_t** wiiuse_init(int wiimotes, wii_event_cb event_cb) {
 #endif
 	int i = 0;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if (!wiimotes)
 		return NULL;
 
@@ -205,6 +208,7 @@ int wiiuse_set_report_type(struct wiimote_t *wm,cmd_blk_cb cb)
 	ubyte buf[2];
 	int motion,ir,exp;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 
 	buf[0] = (WIIMOTE_IS_FLAG_SET(wm, WIIUSE_CONTINUOUS) ? 0x04 : 0x00);	/* set to 0x04 for continuous reporting */
@@ -233,6 +237,7 @@ void wiiuse_status(struct wiimote_t *wm,cmd_blk_cb cb)
 {
 	ubyte buf;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return;
 
 	buf = 0x00;
@@ -244,11 +249,12 @@ int wiiuse_read_data(struct wiimote_t *wm,ubyte *buffer,uint addr,uword len,cmd_
 	struct op_t *op;
 	struct cmd_blk_t *cmd;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!buffer || !len) return 0;
 
 	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_NOBLOCK);
+	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
 	if(!ok) return 0;
 	if(!cmd) return 0;
 
@@ -271,6 +277,7 @@ int wiiuse_write_data(struct wiimote_t *wm,uint addr,ubyte *data,ubyte len,cmd_b
 	struct op_t *op;
 	struct cmd_blk_t *cmd;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!data || !len) return 0;
 
@@ -299,11 +306,12 @@ int wiiuse_write_streamdata(struct wiimote_t *wm,ubyte *data,ubyte len,cmd_blk_c
 {
 	struct cmd_blk_t *cmd;
 
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!data || !len || len>20) return 0;
 
 	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_NOBLOCK);
+	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
 	if(!ok) return 0;
 	if(!cmd) return 0;
 
@@ -319,10 +327,14 @@ int wiiuse_write_streamdata(struct wiimote_t *wm,ubyte *data,ubyte len,cmd_blk_c
 
 int wiiuse_sendcmd(struct wiimote_t *wm,ubyte report_type,ubyte *msg,int len,cmd_blk_cb cb)
 {
-	struct cmd_blk_t *cmd;
+	struct cmd_blk_t *cmd = NULL;
 
+	//someone isn't putting things into this queue
 	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
+	//exiPrintf("WPAD: %s(%02X)\n", __FUNCTION__, report_type);
 	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_NOBLOCK);
+	//exiPrintf("WPAD: %s(%02X) ok=%d cmd=%08X\n", __FUNCTION__,
+	//	report_type, ok, cmd);
 	if(!ok) return 0;
 	if(!cmd) return 0;
 

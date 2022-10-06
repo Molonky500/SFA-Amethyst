@@ -1,9 +1,10 @@
 #ifndef __GAMEFUNCS_H__
 #define __GAMEFUNCS_H__
 
+extern void      (*debugPrintf)(const char *fmt, ...);
 extern void*     (*gameAlloc)(u32 size, u32 tag, const char *name);
 extern void      (*gameFree)(void *addr);
-extern void      (*InsertAlarm)(OSAlarm *alarm, OSTime time, OSTime expiry);
+extern void      (*InsertAlarm)(OSAlarm *alarm, OSTime time, OSAlarmHandler handler);
 extern void      (*OSCancelAlarm)(OSAlarm *alarm);
 extern void      (*OSCreateAlarm)(OSAlarm *alarm);
 extern BOOL      (*OSCreateThread)(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute);

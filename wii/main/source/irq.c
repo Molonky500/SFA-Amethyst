@@ -30,7 +30,7 @@ static const char *causes[] = {
 
 void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
     //copied from libogc to handle Wii IRQs
-    u32 i,icause,intmask,irq = 0;
+    u32 i, icause=0, intmask, irq=0;
 
 	u32 rawCause = _piReg[0];
 	u32 mask     = _piReg[1];

@@ -212,6 +212,7 @@ void* hackDvdThreadMain(void *param) {
     __UnmaskIrq(IM_PI_ACR);
     OSEnableInterrupts();
     exiPuts("DVD thread online\n");
+    registerThreadForDebug(OSGetCurrentThread(), "dvdhack");
 
     if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\n");
