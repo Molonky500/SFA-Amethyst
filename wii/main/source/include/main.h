@@ -153,6 +153,10 @@ void exiPrintInit();
 extern void *acrIrq;
 void bootGame(DolHeader *header);
 
+//gamecontrols.c
+void initWiimote();
+u32 padUpdate_hook(GameControllerState *state);
+
 //init.c
 int init();
 
@@ -215,7 +219,3 @@ void OSYieldThread(void);
 void __OSPromoteThread(OSThread* thread, OSPriority priority);
 void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime tStart,
 OSTime period, OSAlarmHandler handler);
-
-//wiimote.c
-void initWiimote();
-void padUpdate_hook(void);

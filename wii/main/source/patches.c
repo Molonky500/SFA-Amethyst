@@ -91,7 +91,7 @@ void doPatches() {
         ICInvalidateRange((void*)regRemap[i], 32);
     }
 
-    hookBranch(0x80014f40, padUpdate_hook, 0, 1);
+    hookBranch(0x80014f90, padUpdate_hook, 1, 0);
     hookBranch(0x8007d6dc, osPrintHook, 0, 0);
     hookBranch(0x80246e04, osPrintHook, 0, 0);
     hookBranch(0x802510cc, osPrintHook, 0, 0);

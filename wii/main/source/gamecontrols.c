@@ -1,6 +1,24 @@
 #include "main.h"
 #include "wiiuse/wpad.h"
 
+//static u32 *padNewButtons = 0x803398c0;
+/*
+0x803DC944 SY
+0x803DC948 SX
+0x803398B0 buttons held
+0x803398C0 buttons held
+0x803398D0 buttons released
+0x803398E0 buttons pressed
+0x803398F0 ControllerState
+0x803398F2 SX
+0x803398F3 SY
+0x803398F4 CX
+0x803398F5 CY
+0x803398F6 L
+0x803398F7 R
+0x802c6e50 buttonEnableMask
+*/
+
 bool isWiimoteInit = false;
 bool triedWiimoteInit = false;
 WPADData *wpads[WPAD_MAX_WIIMOTES];
@@ -110,21 +128,18 @@ u32 mapWiimoteButtons(WPADData *wp, u32 btns) {
     return result;
 }
 
-void applyWiimoteInputs(int iPad) {
-    static GameControllerState *states = controllerState;
+void applyWiimoteInputs(int iPad, GameControllerState *state) {
     WPADData *wp = wpads[iPad];
-    GameControllerState *control = &states[iPad + ((whichControllerFrame^1)*4)];
     u32 bHeld = mapWiimoteButtons(wp, wp->btns_h);
     u32 bDown = mapWiimoteButtons(wp, wp->btns_d);
     u32 bUp   = mapWiimoteButtons(wp, wp->btns_u);
-    //XXX where are bHeld, bUp?
-    control->buttons = bHeld | bDown;
+    state->buttons = bHeld | bDown;
 
     //joystick inputs
     switch(wp->exp.type) {
         case WPAD_EXP_NUNCHUK: {
-            control->stickX = wp->exp.nunchuk.js.pos.x;
-            control->stickY = wp->exp.nunchuk.js.pos.y;
+            state->stickX = wp->exp.nunchuk.js.pos.x + 128;
+            state->stickY = wp->exp.nunchuk.js.pos.y + 128;
             break;
         }
         default: break;
@@ -160,7 +175,7 @@ void displayControllerState(int iPad, GameControllerState *cnt) {
 
 static int prevState = -1;
 
-void updateWiimote() {
+void updateWiimote(GameControllerState *state) {
     //if(*(u8*)0x803dd5e8) return; //game is loading
     //if((*(u32*)0x803dd5ec) < 2) return;
     initWiimote();
@@ -171,9 +186,9 @@ void updateWiimote() {
         debugPrintf("WP SCAN ERR %d\n", err);
     }
 
-    int state = WPAD_GetStatus();
-    if(state != WPAD_STATE_ENABLED) {
-        if(state == WPAD_STATE_ENABLING) {
+    int wpadState = WPAD_GetStatus();
+    if(wpadState != WPAD_STATE_ENABLED) {
+        if(wpadState == WPAD_STATE_ENABLING) {
             debugPrintf("WPAD: wait for init...\n");
         }
         else {
@@ -181,26 +196,24 @@ void updateWiimote() {
         }
         return;
     }
-    if(state != prevState) {
+    if(wpadState != prevState) {
         exiPrintf("WPAD: init OK\n");
-        prevState = state;
-        /*int view_width=640, view_height=480;
+        prevState = wpadState;
+        int view_width=640, view_height=480;
         for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
             WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
             //WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC);
             //WPAD_SetDataFormat(i, WPAD_FMT_BTNS);
             WPAD_SetVRes(i, view_width + 128, view_height + 128);
-        }*/
+        }
     }
-
-
 
     for(int iPad=0; iPad < WPAD_MAX_WIIMOTES; iPad++) {
         err = WPAD_Probe(iPad, NULL);
         if(err == WPAD_ERR_NONE) {
             debugPrintf("WP%d OK\n", iPad);
 			wpads[iPad] = WPAD_Data(iPad);
-            applyWiimoteInputs(iPad);
+            applyWiimoteInputs(iPad, &state[iPad]);
 		} else {
             debugPrintf("WP%d err %d\n", iPad, err);
 			wpads[iPad] = NULL;
@@ -209,53 +222,17 @@ void updateWiimote() {
     //WPAD_Flush(WPAD_CHAN_ALL);
 }
 
-void padUpdate_hook_() {
-    static GameControllerState *states = controllerState;
-    GameControllerState *control = &states[0 + ((whichControllerFrame^1)*4)];
-
-    /*u8 framesThisStep = *(u8*)0x803db410;
-    u8 framesThisTick = *(u8*)0x803db411;
-    float msecsThisFrame = *(float*)0x803dccc0;
-    exiPrintf("F=%d %d %d\n", framesThisStep, framesThisTick, (int)msecsThisFrame);
-    if(!framesThisTick) return;
-    if(framesThisStep > 2) return;
-    if(msecsThisFrame > 32.0f) return;*/
-
-    static int cooldown = 0;
-    if(!cooldown) {
-        if(control->buttons & PAD_BUTTON_B) {
-            //exiPrintf(" *** Manual IPC queue dump\n");
-            //ipcDumpQueueForDebug();
-            cooldown = 100;
-        }
-        if(control->buttons & PAD_BUTTON_X) {
-            step = 0; //reset bluetooth
-            cooldown = 100;
-        }
-    }
-    else cooldown--;
+u32 padUpdate_hook(GameControllerState *state) {
+    //call original method
+    u32 (*padReadControllers)(GameControllerState*) = 0x8024e864;
+    u32 result = padReadControllers(state);
 
     //avoid flooding dprint buf
     u32 debugLogEnd = *(u32*)0x803dbc14;
     if(debugLogEnd - 0x803aa018 > 3000) debugLogEnd = 0x803aa018;
 
-    //ipcPumpQueue(); //XXX move
-    updateWiimote();
-    displayControllerState(0, control);
-    //ipcDebugPrint();
+    updateWiimote(state);
+    displayControllerState(0, state);
+
+    return result;
 }
-void padUpdate_hook(void);
-__asm__(
-    ".global padUpdate_hook_\n"
-    ".global padUpdate_hook \n"
-    "padUpdate_hook:        \n"
-    ASM_FUNC_START(0x100)
-    "stwu    1,  -0x60(1)   \n" //replaced
-    //call original padUpdate()
-    "lis     12, 0x8001     \n"
-    "ori     12, 12, 0x4f44 \n"
-    "mtctr   12             \n"
-    "bctrl                  \n"
-    ASM_FUNC_END(0x100)
-    "b padUpdate_hook_      \n"
-);
