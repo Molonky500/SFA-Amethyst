@@ -38,8 +38,8 @@ u32 __lwp_heap_init(heap_cntrl *theheap,void *start_addr,u32 size,u32 pg_size)
 	theheap->final = block;
 	_CPU_ISR_Restore(level);
 
-	exiPrintf("%s(%p, %p, %d, %d)\n", __FUNCTION__,
-		theheap, start_addr, size, pg_size);
+	//exiPrintf("%s(%p, %p, %d, %d)\n", __FUNCTION__,
+	//	theheap, start_addr, size, pg_size);
 	return (dsize - HEAP_BLOCK_USED_OVERHEAD);
 }
 
@@ -53,7 +53,7 @@ void* __lwp_heap_allocate(heap_cntrl *theheap,u32 size)
 	void *ptr;
 	u32 offset,level;
 
-	exiPrintf("%s(%p, %d)\n", __FUNCTION__, theheap, size);
+	//exiPrintf("%s(%p, %d)\n", __FUNCTION__, theheap, size);
 
 	/*if(theheap->magic != LWP_HEAP_MAGIC) {
 		exiPrintf(" *** ERROR *** Heap %08x corrupted\n", theheap);

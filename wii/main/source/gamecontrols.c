@@ -113,7 +113,7 @@ u32 mapWiimoteButtons(WPADData *wp, u32 btns) {
 void applyWiimoteInputs(int iPad) {
     static GameControllerState *states = controllerState;
     WPADData *wp = wpads[iPad];
-    GameControllerState *control = &states[iPad + (whichControllerFrame*4)];
+    GameControllerState *control = &states[iPad + ((whichControllerFrame^1)*4)];
     u32 bHeld = mapWiimoteButtons(wp, wp->btns_h);
     u32 bDown = mapWiimoteButtons(wp, wp->btns_d);
     u32 bUp   = mapWiimoteButtons(wp, wp->btns_u);
@@ -211,7 +211,7 @@ void updateWiimote() {
 
 void padUpdate_hook_() {
     static GameControllerState *states = controllerState;
-    GameControllerState *control = &states[0 + (whichControllerFrame*4)];
+    GameControllerState *control = &states[0 + ((whichControllerFrame^1)*4)];
 
     /*u8 framesThisStep = *(u8*)0x803db410;
     u8 framesThisTick = *(u8*)0x803db411;

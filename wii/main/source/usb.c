@@ -239,13 +239,13 @@ static s32 __usbv5_messageCB(s32 result,void *_msg)
 {
 	struct _usb_msg *msg = (struct _usb_msg*)_msg;
 
-	exiPrintf("__usbv5_messageCB: result=%d msg=%08X\n",
-		result, (u32)_msg);
+	//exiPrintf("__usbv5_messageCB: result=%d msg=%08X\n",
+	//	result, (u32)_msg);
 	if(msg==NULL) return IPC_EINVAL;
 
 	if(msg->cb!=NULL) {
-		exiPrintf("__usbv5_messageCB: cb=%08x(%d, %08x)\n",
-			msg->cb, result, msg->userdata);
+		//exiPrintf("__usbv5_messageCB: cb=%08x(%d, %08x)\n",
+		//	msg->cb, result, msg->userdata);
 		msg->cb(result, msg->userdata);
 	}
 
@@ -259,22 +259,22 @@ static s32 __usbv0_messageCB(s32 result,void *usrdata)
 	u32 i;
 	struct _usb_msg *msg = (struct _usb_msg*)usrdata;
 
-	exiPrintf("%s:%d msg=%08X\n", __FILE__, __LINE__, msg);
+	//exiPrintf("%s:%d msg=%08X\n", __FILE__, __LINE__, msg);
 	if(msg==NULL) return IPC_EINVAL;
 
-	exiPrintf("%s:%d cb=%08X(%d, %08X)\n", __FILE__, __LINE__,
-		msg->cb, result, msg->userdata);
+	//exiPrintf("%s:%d cb=%08X(%d, %08X)\n", __FILE__, __LINE__,
+	//	msg->cb, result, msg->userdata);
 	if(msg->cb!=NULL) msg->cb(result, msg->userdata);
 
-	exiPrintf("%s:%d bufs=%08X\n", __FILE__, __LINE__, msg->heap_buffers);
+	//exiPrintf("%s:%d bufs=%08X\n", __FILE__, __LINE__, msg->heap_buffers);
 	for(i=0; i<msg->heap_buffers; i++) {
 		if(msg->vec[i].data!=NULL)
 			iosFree(hId,msg->vec[i].data);
 	}
 
-	exiPrintf("%s:%d\n", __FILE__, __LINE__);
+	//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 	iosFree(hId,msg);
-	exiPrintf("%s:%d\n", __FILE__, __LINE__);
+	//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 
 	return IPC_OK;
 }
@@ -493,9 +493,9 @@ static inline s32 __usb_interrupt_bulk_message(s32 device_id,u8 ioctl,u8 bEndpoi
 	s32 ret = IPC_ENOMEM;
 	struct _usb_msg *msg;
 
-	exiPrintf("%s(%d,%d,%d,%d,%08X,%08X,%08X)\n",
-		__FUNCTION__, device_id, ioctl, bEndpoint, wLength,
-		rpData, cb, userdata);
+	//exiPrintf("%s(%d,%d,%d,%d,%08X,%08X,%08X)\n",
+	//	__FUNCTION__, device_id, ioctl, bEndpoint, wLength,
+	//	rpData, cb, userdata);
 	if(((s32)rpData%32)!=0) {
 		exiPrintf(" *** ERROR *** %s: data not aligned\n", __FUNCTION__);
 		return IPC_EINVAL;
@@ -543,9 +543,9 @@ static inline s32 __usb_interrupt_bulk_message(s32 device_id,u8 ioctl,u8 bEndpoi
 
 		msg->heap_buffers = 2;
 
-		exiPrintf("%s: do ioctl %d, device %d, endp=%02X, len=%d, cb=%08x(%08x)\n",
-			__FUNCTION__, ioctl, device_id, bEndpoint,
-			wLength, cb, msg);
+		//exiPrintf("%s: do ioctl %d, device %d, endp=%02X, len=%d, cb=%08x(%08x)\n",
+		//	__FUNCTION__, ioctl, device_id, bEndpoint,
+		//	wLength, cb, msg);
 		if (cb==NULL)
 			ret = IOS_Ioctlv(device_id,ioctl,2,1,msg->vec);
 		else
@@ -581,7 +581,7 @@ done:
 		msg->vec[1].data = rpData;
 		msg->vec[1].len = wLength;
 
-		exiPrintf("%s: do ioctl\n");
+		//exiPrintf("%s: do ioctl\n");
 		if (cb==NULL)
 			ret = IOS_Ioctlv(fd, ioctl, 2-endpoint_dir, endpoint_dir, msg->vec);
 		else
@@ -624,9 +624,9 @@ s32 USB_Initialize(void)
 	if(hId<0) return IPC_ENOMEM;
 
 	if (ven_host==NULL) {
-		exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		s32 ven_fd = IOS_Open(__ven_path, IPC_OPEN_NONE);
-		exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		if (ven_fd>=0) {
 			ven_host = (struct _usbv5_host*)iosAlloc(hId, sizeof(*ven_host));
 			if (ven_host==NULL) {
@@ -652,9 +652,9 @@ s32 USB_Initialize(void)
 	}
 
 	if (hid_host==NULL) {
-		exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		s32 hid_fd = IOS_Open(__hid_path, IPC_OPEN_NONE);
-		exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		if (hid_fd>=0) {
 			hid_host = (struct _usbv5_host*)iosAlloc(hId, sizeof(*hid_host));
 			if (hid_host==NULL) {
@@ -680,7 +680,7 @@ s32 USB_Initialize(void)
 		}
 	}
 
-	exiPrintf("%s:%d\n", __FILE__, __LINE__);
+	//exiPrintf("%s:%d\n", __FILE__, __LINE__);
 	return IPC_OK;
 
 mem_error:

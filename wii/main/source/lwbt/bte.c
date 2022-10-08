@@ -133,7 +133,7 @@ static void bte_reset_all()
 
 static void bt_alarmhandler(OSAlarm *alarm,void *cbarg)
 {
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	OSDisableScheduler();
 	SYS_SwitchFiber(0,0,0,0,(u32)l2cap_tmr,(u32)(&ppc_stack[STACKSIZE]));
 	OSEnableScheduler();
@@ -144,7 +144,7 @@ static inline s32 __bte_waitcmdfinish(struct bt_state *state)
 	u32 level;
 	s32 ret;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!state) return ERR_VAL;
 
 	//_CPU_ISR_Disable(level);
@@ -160,7 +160,7 @@ static inline s32 __bte_cmdfinish(struct bt_state *state,err_t err)
 {
 	u32 level;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!state) return ERR_VAL;
 
 	_CPU_ISR_Disable(level);
@@ -180,7 +180,7 @@ static inline s32 __bte_waitrequest(struct ctrl_req_t *req)
 	s32 err;
 	u32 level;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!req || !req->pcb) return ERR_VAL;
 
 	//_CPU_ISR_Disable(level);
@@ -199,7 +199,7 @@ static inline void __bte_close_ctrl_queue(struct bte_pcb *pcb)
 {
 	struct ctrl_req_t *req;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	while(pcb->ctrl_req_head!=NULL) {
 		req = pcb->ctrl_req_head;
 		req->err = ERR_CLSD;
@@ -220,7 +220,7 @@ static s32 __bte_send_pending_request(struct bte_pcb *pcb)
 	s32 err;
 	struct ctrl_req_t *req;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(pcb->ctrl_req_head==NULL) return ERR_OK;
 	if(pcb->state==STATE_DISCONNECTING || pcb->state==STATE_DISCONNECTED) return ERR_CLSD;
 
@@ -254,7 +254,7 @@ static s32 __bte_send_request(struct ctrl_req_t *req)
 	req->err = ERR_VAL;
 	req->state = STATE_READY;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	_CPU_ISR_Disable(level);
 	if(req->pcb->ctrl_req_head==NULL) {
 		req->pcb->ctrl_req_head = req->pcb->ctrl_req_tail = req;
@@ -274,7 +274,7 @@ static err_t __bte_shutdown_finished(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t
 	err_t err;
 	struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(state==NULL) return ERR_OK;
 
 	state->hci_inited = 0;
@@ -292,7 +292,7 @@ static void bte_process_handshake(struct bte_pcb *pcb,u8_t param,void *buf,u16_t
 {
 	struct ctrl_req_t *req;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_process_handshake(%p)\n",pcb);
 
 	switch(param) {
@@ -325,7 +325,7 @@ static void bte_process_handshake(struct bte_pcb *pcb,u8_t param,void *buf,u16_t
 
 static void bte_process_data(struct bte_pcb *pcb,u8_t param,void *buf,u16_t len)
 {
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_process_data(%p)\n",pcb);
 	switch(param) {
 		case HIDP_DATA_RTYPE_INPUT:
@@ -347,7 +347,7 @@ static err_t bte_process_input(void *arg,struct l2cap_pcb *pcb,struct pbuf *p,er
 	u8 hdr,type,param;
 	struct bte_pcb *bte = (struct bte_pcb*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_process_input(%p,%p)\n",bte,p);
 
 	if(bte->state==STATE_DISCONNECTING
@@ -367,7 +367,7 @@ static err_t bte_process_input(void *arg,struct l2cap_pcb *pcb,struct pbuf *p,er
 	LOG("WPAD: %s type %02X param %02X\n", __FUNCTION__,
 		type, param);
 	//for(int i=0; i<len; i++) exiPrintf("%02X ", buf[i]);
-	exiPrintf("\n");
+	//exiPrintf("\n");
 
 	switch(type) {
 		case HIDP_TRANS_HANDSHAKE:
@@ -421,7 +421,7 @@ void BTE_Shutdown(void)
 {
 	u32 level;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(btstate.hci_inited==0) return;
 
 	LOG("BTE_Shutdown()\n");
@@ -444,7 +444,7 @@ s32 BTE_InitCore(btecallback cb)
 {
 	u32 level;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = NULL;
@@ -462,7 +462,7 @@ s32 BTE_ApplyPatch(btecallback cb)
 	u32 level;
 	u8 kick = 0;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = NULL;
@@ -479,7 +479,7 @@ s32 BTE_InitSub(btecallback cb)
 {
 	u32 level;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = NULL;
@@ -496,7 +496,7 @@ s32 BTE_ReadStoredLinkKey(struct linkkey_info *keys,u8 max_cnt,btecallback cb)
 {
 	u32 level;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	_CPU_ISR_Disable(level);
 	btstate.cb = cb;
 	btstate.usrdata = keys;
@@ -514,7 +514,7 @@ s32 BTE_ReadBdAddr(struct bd_addr *bdaddr, btecallback cb)
 {
     u32 level;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
     _CPU_ISR_Disable(level);
     btstate.cb = cb;
     btstate.usrdata = bdaddr;
@@ -529,7 +529,7 @@ s32 BTE_ReadBdAddr(struct bd_addr *bdaddr, btecallback cb)
 
 void (*BTE_SetDisconnectCallback(void (*callback)(struct bd_addr *bdaddr,u8 reason)))(struct bd_addr *bdaddr,u8 reason)
 {
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	return l2cap_disconnect_bb(callback);
 }
 
@@ -537,7 +537,7 @@ struct bte_pcb* bte_new(void)
 {
 	struct bte_pcb *pcb;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if((pcb=btmemb_alloc(&bte_pcbs))==NULL) return NULL;
 
 	memset(pcb,0,sizeof(struct bte_pcb));
@@ -601,7 +601,7 @@ s32 bte_inquiry(struct inquiry_info *info,u8 max_cnt,u8 flush)
 	err_t last_err;
 	struct inquiry_info_ex *pinfo;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	last_err = ERR_OK;
 
 	_CPU_ISR_Disable(level);
@@ -633,7 +633,7 @@ s32 bte_inquiry_ex(struct inquiry_info_ex *info,u8 max_cnt,u8 flush)
 
 	last_err = ERR_OK;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	_CPU_ISR_Disable(level);
 	if(btstate.num_founddevs==0 || flush==1) {
 		btstate.hci_cmddone = 0;
@@ -662,7 +662,7 @@ s32 bte_disconnect(struct bte_pcb *pcb)
 	u32 level;
 	err_t err = ERR_OK;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(pcb==NULL) return ERR_VAL;
 
 	_CPU_ISR_Disable(level);
@@ -759,7 +759,7 @@ s32 bte_senddata(struct bte_pcb *pcb,void *message,u16 len)
 	err_t err;
 	struct pbuf *p;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(pcb==NULL || message==NULL || len==0) return ERR_VAL;
 	if(pcb->state==STATE_DISCONNECTING || pcb->state==STATE_DISCONNECTED) return ERR_CLSD;
 
@@ -782,7 +782,7 @@ s32 bte_sendmessageasync(struct bte_pcb *pcb,void *message,u16 len,s32 (*sent)(v
 	struct pbuf *p;
 	struct ctrl_req_t *req;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	//printf("bte_sendmessageasync()\n");
 
 	if(pcb==NULL || message==NULL || len==0) return ERR_VAL;
@@ -814,7 +814,7 @@ s32 bte_sendmessage(struct bte_pcb *pcb,void *message,u16 len)
 	struct pbuf *p;
 	struct ctrl_req_t *req;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	//printf("bte_sendmessage()\n");
 
 	if(pcb==NULL || message==NULL || len==0) return ERR_VAL;
@@ -870,14 +870,14 @@ void bte_disconnected(struct bte_pcb *pcb,s32 (disconn_cfm)(void *arg,struct bte
 
 err_t acl_wlp_completed(void *arg,struct bd_addr *bdaddr)
 {
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	//hci_sniff_mode(bdaddr,200,100,10,10);
 	return ERR_OK;
 }
 
 err_t acl_conn_complete(void *arg,struct bd_addr *bdaddr)
 {
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	//printf("acl_conn_complete\n");
 	//memcpy(&(btstate.acl_bdaddr),bdaddr,6);
 
@@ -887,7 +887,7 @@ err_t acl_conn_complete(void *arg,struct bd_addr *bdaddr)
 
 err_t pin_req(void *arg,struct bd_addr *bdaddr)
 {
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	//printf("pin_req\n");
 	return ERR_OK;
 }
@@ -896,7 +896,7 @@ err_t l2cap_disconnected_ind(void *arg, struct l2cap_pcb *pcb, err_t err)
 {
 	struct bte_pcb *bte = (struct bte_pcb*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(bte==NULL) return ERR_OK;
 
 	bte->state = (u32)STATE_DISCONNECTING;
@@ -923,7 +923,7 @@ err_t l2cap_disconnect_cfm(void *arg, struct l2cap_pcb *pcb)
 {
 	struct bte_pcb *bte = (struct bte_pcb*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(bte==NULL) return ERR_OK;
 
 	switch(l2cap_psm(pcb)) {
@@ -955,7 +955,7 @@ err_t l2cap_disconnect_cfm(void *arg, struct l2cap_pcb *pcb)
 
 err_t link_key_not(void *arg,struct bd_addr *bdaddr,u8_t *key)
 {
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	//printf("link_key_not\n");
 	return hci_write_stored_link_key(bdaddr,key);
 }
@@ -984,7 +984,7 @@ err_t l2cap_accepted(void *arg,struct l2cap_pcb *l2cappcb,err_t err)
 {
 	struct bte_pcb *btepcb = (struct bte_pcb*)arg;
 
-	exiPrintf("WPAD: %s err=0x%X\n", __FUNCTION__, err);
+	//exiPrintf("WPAD: %s err=0x%X\n", __FUNCTION__, err);
 	//printf("l2cap_accepted(%02x)\n",err);
 	if(err==ERR_OK) {
 		l2cap_recv(l2cappcb,bte_process_input);
@@ -998,7 +998,7 @@ err_t l2cap_accepted(void *arg,struct l2cap_pcb *l2cappcb,err_t err)
 				break;
 		}
 		if(btepcb->data_pcb && btepcb->ctl_pcb) {
-			exiPrintf("WPAD: l2cap conn OK\n");
+			//exiPrintf("WPAD: l2cap conn OK\n");
 			btepcb->err = ERR_OK;
 			btepcb->state = (u32)STATE_CONNECTED;
 			if(btepcb->conn_cfm) btepcb->conn_cfm(btepcb->cbarg,btepcb,ERR_OK);
@@ -1018,7 +1018,7 @@ err_t bte_inquiry_complete(void *arg,struct hci_pcb *pcb,struct hci_inq_res *ire
 	struct hci_inq_res *p;
 	struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(result==HCI_SUCCESS) {
 		if(ires!=NULL) {
 
@@ -1065,7 +1065,7 @@ err_t bte_read_stored_link_key_complete(void *arg,struct hci_pcb *pcb,u8_t ogf,u
 
 	if(!pcb) return ERR_CONN;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_read_stored_link_key_complete(%02x,%p)\n",result,pcb->keyres);
 
 	if(state==NULL) return ERR_VAL;
@@ -1094,7 +1094,7 @@ err_t bte_read_bd_addr_complete(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t ocf,
     struct bd_addr *bdaddr;
     struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
     if(!pcb) return ERR_CONN;
 
     LOG("bte_read_bd_addr_complete(%02x,%p)\n", result, &pcb->bdaddr);
@@ -1128,7 +1128,7 @@ static err_t bte_hci_initcore_complete2(void *arg,struct hci_pcb *pcb,u8_t ogf,u
 	u8_t dev_cod[] = {0x04, 0x02,0x40};
 	struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_hci_initcore_complete2(%02x,%02x)\n",ogf,ocf);
 	switch(ogf) {
 		case HCI_HC_BB_OGF:
@@ -1177,7 +1177,7 @@ err_t bte_hci_initcore_complete(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t ocf,
 	u8_t dev_cod[] = {0x00, 0x1f,0x00};
 	struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_hci_initcore_complete(%02x,%02x)\n",ogf,ocf);
 	switch(ogf) {
 		case HCI_INFO_PARAM:
@@ -1247,7 +1247,7 @@ err_t bte_hci_apply_patch_complete(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t o
 	err_t err = ERR_OK;
 	struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_hci_apply_patch_complete(%02x,%02x,%02x)\n",ogf,ocf,result);
 	switch(ogf) {
 		case HCI_VENDOR_OGF:
@@ -1280,7 +1280,7 @@ err_t bte_hci_patch_complete(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t ocf,u8_
 	u8_t dev_cod[] = {0x04, 0x02,0x40};
 	struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_hci_patch_complete(%02x,%02x,%02x)\n",ogf,ocf,result);
 	switch(ogf) {
 		case HCI_INFO_PARAM:
@@ -1359,7 +1359,7 @@ err_t bte_hci_initsub_complete(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t ocf,u
 	u8_t dev_cod[] = {0x00, 0x04,0x48};
 	struct bt_state *state = (struct bt_state*)arg;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
+	//exiPrintf("WPAD: %s\n", __FUNCTION__);
 	LOG("bte_hci_initsub_complete(%02x,%02x)\n",ogf,ocf);
 	switch(ogf) {
 		case HCI_HC_BB_OGF:

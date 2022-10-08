@@ -73,8 +73,8 @@ static s32 __readbulkdataCB(s32 result,void *usrdata)
 	struct pbuf *p,*q;
 	struct usbtxbuf *buf = (struct usbtxbuf*)usrdata;
 
-	exiPrintf("%s(%d, %08X)\n", __FUNCTION__,
-		result, (u32)usrdata);
+	//exiPrintf("%s(%d, %08X)\n", __FUNCTION__,
+	//	result, (u32)usrdata);
 	if(__usbdev.openstate!=0x0002) return 0;
 
 	if(result>0) {
@@ -157,10 +157,10 @@ static s32 __issue_bulkread(void)
 	u8 *ptr;
 	struct usbtxbuf *buf;
 
-	exiPrintf("%s\n", __FUNCTION__);
+	//exiPrintf("%s\n", __FUNCTION__);
 	if(__usbdev.openstate!=0x0002) {
-		exiPrintf("%s: openstate=%04X\n", __FUNCTION__,
-			__usbdev.openstate);
+		//exiPrintf("%s: openstate=%04X\n", __FUNCTION__,
+		//	__usbdev.openstate);
 		return IPC_OK;
 	}
 
@@ -258,7 +258,7 @@ static s32 __usb_register(pbcallback cb)
 
 static s32 __usb_open(pbcallback cb)
 {
-	exiPrintf("%s\n", __FUNCTION__);
+	//exiPrintf("%s\n", __FUNCTION__);
 	if(__usbdev.openstate!=0x0004) return -1;
 
 	__usbdev.closecb = cb;
