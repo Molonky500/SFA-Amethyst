@@ -28,6 +28,7 @@ void __Wpad_PowerCallback(s32 chan) {
 }
 
 void resetBluetooth() {
+    //currently unused, but left for debugging.
     char bluetoothResetData1[] USB_ALIGN = { 0x20 }; //bmRequestType
     char bluetoothResetData2[] USB_ALIGN = { 0x00 }; //bmRequest
     char bluetoothResetData3[] USB_ALIGN = { 0x00, 0x00 }; //wValue
@@ -54,54 +55,30 @@ void resetBluetooth() {
     exiPuts("Reset bluetooth OK\n");
 }
 
-static int step = 0;
 void initWiimote() {
+    //init if not already tried
+    if(triedWiimoteInit) return;
     triedWiimoteInit = true;
 
-    int err = 0;
-    switch(step) {
-        case 0:
-            //resetBluetooth();
-            break;
-
-        case 10:
-            err = CONF_Init();
-            exiPrintf("\nCONF_Init: %d\n", err);
-            break;
-
-        case 20:
-            //int irq = OSDisableInterrupts();
-            err = WPAD_Init();
-            //OSRestoreInterrupts(irq);
-            exiPrintf("WPAD_Init: %d\n", err);
-            break;
-
-        case 30: {
-            int view_width=640, view_height=480;
-            for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
-                WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
-                //WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC);
-                //WPAD_SetDataFormat(i, WPAD_FMT_BTNS);
-                WPAD_SetVRes(i, view_width + 128, view_height + 128);
-            }
-
-            WPAD_SetPowerButtonCallback(__Wpad_PowerCallback);
-            WPAD_SetIdleTimeout(120);
-            exiPuts("WPAD: initWiimote OK\n");
-            isWiimoteInit = true;
-            break;
-        }
-
-        case 31:
-            step--; //don't advance
-            break;
-
-        default: break;
+    int err = CONF_Init();
+    exiPrintf("\nCONF_Init: %d\n", err);
+    err = WPAD_Init();
+    exiPrintf("WPAD_Init: %d\n", err);
+    int view_width=640, view_height=480;
+    for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
+        WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
+        WPAD_SetVRes(i, view_width + 128, view_height + 128);
     }
-    step++;
+    WPAD_SetPowerButtonCallback(__Wpad_PowerCallback);
+    WPAD_SetIdleTimeout(120);
+    exiPuts("WPAD: initWiimote OK\n");
+    isWiimoteInit = true;
 }
 
 u32 mapWiimoteButtons(WPADData *wp, u32 btns) {
+    //generate GC button mask corresponding to Wii button
+    //state on given pad.
+    //mapping chosen arbitrarily to fit the game.
     u32 result = 0;
     switch(wp->exp.type) {
         case WPAD_EXP_NUNCHUK: {
@@ -129,6 +106,8 @@ u32 mapWiimoteButtons(WPADData *wp, u32 btns) {
 }
 
 void applyWiimoteInputs(int iPad, GameControllerState *state) {
+    //only called when the Wiimote is connected.
+    //overrides the GC controller state.
     WPADData *wp = wpads[iPad];
     u32 bHeld = mapWiimoteButtons(wp, wp->btns_h);
     u32 bDown = mapWiimoteButtons(wp, wp->btns_d);
@@ -147,7 +126,7 @@ void applyWiimoteInputs(int iPad, GameControllerState *state) {
 }
 
 void displayControllerState(int iPad, GameControllerState *cnt) {
-    //display input
+    //display input for debug
     char msg[64];
     char *m = msg;
     *(m++) = (cnt->buttons & PAD_BUTTON_A)     ? 'A' : '.';
@@ -165,7 +144,6 @@ void displayControllerState(int iPad, GameControllerState *cnt) {
     *(m++) = 0;
 
     WPADData *wp = wpads[iPad];
-
     //84=enter fixed-width mode; 85=leave fixed-width mode
     //both = somehow crash
     debugPrintf("%s %3d %3d C%3d %3d X%d\n", msg,
@@ -174,16 +152,14 @@ void displayControllerState(int iPad, GameControllerState *cnt) {
 }
 
 static int prevState = -1;
-
-void updateWiimote(GameControllerState *state) {
-    //if(*(u8*)0x803dd5e8) return; //game is loading
-    //if((*(u32*)0x803dd5ec) < 2) return;
+static bool checkWpads() {
     initWiimote();
-    if(!isWiimoteInit) return;
+    if(!isWiimoteInit) return false;
 
     int err = WPAD_ScanPads();
     if(err < 0) {
         debugPrintf("WP SCAN ERR %d\n", err);
+        return false;
     }
 
     int wpadState = WPAD_GetStatus();
@@ -194,22 +170,19 @@ void updateWiimote(GameControllerState *state) {
         else {
             debugPrintf("WPAD: disabled\n");
         }
-        return;
+        return false;
     }
     if(wpadState != prevState) {
         exiPrintf("WPAD: init OK\n");
         prevState = wpadState;
-        int view_width=640, view_height=480;
-        for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
-            WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
-            //WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC);
-            //WPAD_SetDataFormat(i, WPAD_FMT_BTNS);
-            WPAD_SetVRes(i, view_width + 128, view_height + 128);
-        }
     }
+    return true;
+}
 
+void updateWiimote(GameControllerState *state) {
+    if(!checkWpads()) return;
     for(int iPad=0; iPad < WPAD_MAX_WIIMOTES; iPad++) {
-        err = WPAD_Probe(iPad, NULL);
+        int err = WPAD_Probe(iPad, NULL);
         if(err == WPAD_ERR_NONE) {
             debugPrintf("WP%d OK\n", iPad);
 			wpads[iPad] = WPAD_Data(iPad);
@@ -219,17 +192,18 @@ void updateWiimote(GameControllerState *state) {
 			wpads[iPad] = NULL;
 		}
     }
-    //WPAD_Flush(WPAD_CHAN_ALL);
 }
 
 u32 padUpdate_hook(GameControllerState *state) {
+    //replaces call to padReadControllers()
+
     //call original method
     u32 (*padReadControllers)(GameControllerState*) = 0x8024e864;
     u32 result = padReadControllers(state);
 
     //avoid flooding dprint buf
-    u32 debugLogEnd = *(u32*)0x803dbc14;
-    if(debugLogEnd - 0x803aa018 > 3000) debugLogEnd = 0x803aa018;
+    //u32 debugLogEnd = *(u32*)0x803dbc14;
+    //if(debugLogEnd - 0x803aa018 > 3000) debugLogEnd = 0x803aa018;
 
     updateWiimote(state);
     displayControllerState(0, state);
