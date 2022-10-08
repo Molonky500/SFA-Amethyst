@@ -17,6 +17,10 @@ int main(int argc, char **argv) {
         exiPrintf("argv[%d] = \"%s\"\n", i, argv[i]);
     }
 
+    u32 version = *(u32*)0x80003140;
+    exiPrintf("Running on IOS%d v%d.%d\n",
+        version >> 16, (version >> 8) & 0xFF, version & 0xFF);
+
     exiPuts("apply patches\n");
     doPatches();
 

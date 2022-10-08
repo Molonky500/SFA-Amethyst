@@ -29,7 +29,7 @@ void initIpc() {
 }
 
 void ipcDebugPrint() {
-	/*debugPrintf("IPC buf %08X - %08X queue %d,%d %s\n",
+	debugPrintf("IPC buf %08X - %08X queue %d,%d %s\n",
 		_ipc_currbufferlo, _ipc_currbufferhi,
 		_ipcReqQueueHead, _ipcReqQueueTail,
 		_ipcIdle ? "[idle]" : "");
@@ -44,14 +44,34 @@ void ipcDebugPrint() {
 		debugPrintf("heap %d: free %dblk %db used %dblk %db\n", i,
 			info.free_blocks, info.free_size,
 			info.used_size, info.used_blocks);
-	}*/
+	}
+	for(int i=0; i<IPC_QUEUE_MAX; i++) {
+		IpcRequestAndMsgQueue *req = &_ipcRequestQueue[i];
+		if(req->state == IPC_REQ_STATE_EMPTY) continue;
+		debugPrintf("%9d %08X %d %d %d %d\n",
+			req->id, (u32)req,
+			req->state, req->request.cmd,
+			req->request.fd, req->request.result);
+	}
+}
+
+static void lolol() {
+	__asm__ __volatile__ (
+		"mfmsr 3\n"
+		"ori 3,3,0x8000\n"
+		"mtmsr 3\n"
+		"sync\n"
+		"mfmsr 3\n"
+		"rlwinm 3,3,0,17,15\n"
+		"mtmsr 3\n"
+	);
 }
 
 s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req) {
 	s32 ret;
 
-	IPC_DPRINT("IPC: sending sync req %08X\n",
-		(u32)req);
+	IPC_DPRINT("IPC: sending sync req %08X ID %d\n",
+		(u32)req, req->id);
 	int irq = OSDisableInterrupts();
     //OSLockMutex(&ipcMutex);
 
@@ -62,21 +82,33 @@ s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req) {
         printf(" *** ERROR *** _ipcWriteReq: %d\n", ret);
         return ret;
     }
-    IPC_DPRINT("IPC: Wait for response: %08X\n", (u32)req);
+	//ipcDumpQueueForDebug();
+    IPC_DPRINT("IPC: Wait for response: %d\n", req->id);
 
     //now wait for interrupt for response
 	OSRestoreInterrupts(irq);
 
-	if(areInterruptsEnabled()) {
-		OSSleepThread(&req->queue);
-	}
-	else {
-		IPC_DPRINT("Polling for req %08X\n", (u32)req);
+	int lol = areInterruptsEnabled();
+	//if(areInterruptsEnabled()) {
+	if(1) {
+		IPC_DPRINT("Sleeping for req %d\n", req->id);
 		while(req->state != IPC_REQ_STATE_FINISHED) {
-			ipcPoll();
+			if(lol) lolol();
+			else {
+				OSYieldThread();
+				ipcPoll();
+			}
 		}
 	}
-    IPC_DPRINT("IPC: Got response for req %08X\n", (u32)req);
+	else {
+		/*IPC_DPRINT("Polling for req %d\n", req->id);
+		while(req->state != IPC_REQ_STATE_FINISHED) {
+			ipcPoll();
+		}*/
+		exiPuts(" *** ERROR *** IPC: sync request with interrupts disabled\n");
+		HALT;
+	}
+    IPC_DPRINT("IPC: Got response for req %d\n", req->id);
     //NULL resp indicates only ACK reply
     //else resp is IpcRequest* response
 	//resp is in a static buffer, no need to free
@@ -88,9 +120,14 @@ s32 __ipc_syncrequest(IpcRequestAndMsgQueue *req) {
 }
 
 s32 __ipc_asyncrequest(IpcRequestAndMsgQueue *req) {
-    IPC_DPRINT("IPC async req %08X\n", (u32)req);
-    //OSLockMutex(&ipcMutex);
 	int irq = OSDisableInterrupts();
+    IPC_DPRINT("IPC async req %08X ID %d\n", (u32)req, req->id);
+    //OSLockMutex(&ipcMutex);
+
+	if(!req->request.cb) {
+		exiPrintf(" *** IPC async req with no callback! (#%d from %08x)\n",
+			req->id, RETURN_ADDRESS);
+	}
 
     u32 ret = _ipcWriteReq(req);
     if(ret) {
@@ -99,7 +136,7 @@ s32 __ipc_asyncrequest(IpcRequestAndMsgQueue *req) {
         printf(" *** ERROR *** _ipcWriteReq: %d\n", ret);
         return ret;
     }
-    IPC_DPRINT("Sent async IPC req: %08X\n", (u32)req);
+    IPC_DPRINT("Sent async IPC req: %d\n", req->id);
 
     //OSUnlockMutex(&ipcMutex);
 	OSRestoreInterrupts(irq);
@@ -111,8 +148,8 @@ s32 IOS_Open(const char *filepath,u32 mode) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
 
-	IPC_DPRINT("%s(%s, %08X) req=%08X\n", __FUNCTION__,
-		filepath, mode, (u32)req);
+	IPC_DPRINT("%s(%s, %08X) req=%d\n", __FUNCTION__,
+		filepath, mode, req->id);
 	if(filepath==NULL) return -EINVAL;
 
 	req->request.cmd = IOS_OPEN;
@@ -124,13 +161,13 @@ s32 IOS_Open(const char *filepath,u32 mode) {
 	req->request.open.filepath = (char*)MEM_VIRTUAL_TO_PHYSICAL(filepath);
 	req->request.open.mode     = mode;
 
-	IPC_DPRINT("%s: __ipc_syncrequest(%08X)...\n",
-		__FUNCTION__, (u32)req);
+	IPC_DPRINT("%s: __ipc_syncrequest(%d)...\n",
+		__FUNCTION__, req->id);
 
 	ret = __ipc_syncrequest(req);
 
-	IPC_DPRINT("%s: __ipc_syncrequest(%08X) done\n",
-		__FUNCTION__, (u32)req);
+	IPC_DPRINT("%s: __ipc_syncrequest(%d) done\n",
+		__FUNCTION__, req->id);
 
 	if(req) __ipc_freereq(req);
 	return ret;
@@ -141,8 +178,8 @@ void *usrdata) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
 
-	IPC_DPRINT("%s(%s, %08X) req=%08X cb=%08X(%08X)\n",
-		__FUNCTION__, filepath, mode, (u32)req,
+	IPC_DPRINT("%s(%s, %08X) req=%d cb=%08X(%08X)\n",
+		__FUNCTION__, filepath, mode, req->id,
 		(u32)ipc_cb, (u32)usrdata);
 
 	req->request.cmd = IOS_OPEN;
@@ -155,15 +192,15 @@ void *usrdata) {
 	req->request.open.filepath	= (char*)MEM_VIRTUAL_TO_PHYSICAL(filepath);
 	req->request.open.mode		= mode;
 
-	IPC_DPRINT("%s: __ipc_asyncrequest(%08X)\n",
-		__FUNCTION__, (u32)req);
+	IPC_DPRINT("%s: __ipc_asyncrequest(%d)\n",
+		__FUNCTION__, req->id);
 	return __ipc_asyncrequest(req);
 }
 
 s32 IOS_Close(s32 fd) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d) req=%08X\n", __FUNCTION__, fd, (u32)req);
+	IPC_DPRINT("%s(%d) req=%d\n", __FUNCTION__, fd, req->id);
 	req->request.cmd = IOS_CLOSE;
 	req->request.fd = fd;
 	req->request.cb = NULL;
@@ -176,8 +213,8 @@ s32 IOS_Close(s32 fd) {
 s32 IOS_CloseAsync(s32 fd,ipccallback ipc_cb,void *usrdata) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d) req=%08X cb=%08X(%08X)\n", __FUNCTION__,
-		fd, (u32)req, (u32)ipc_cb, (u32)usrdata);
+	IPC_DPRINT("%s(%d) req=%d cb=%08X(%08X)\n", __FUNCTION__,
+		fd, req->id, (u32)ipc_cb, (u32)usrdata);
 
 	req->request.cmd = IOS_CLOSE;
 	req->request.fd = fd;
@@ -191,8 +228,8 @@ s32 IOS_CloseAsync(s32 fd,ipccallback ipc_cb,void *usrdata) {
 s32 IOS_Read(s32 fd,void *buf,s32 len) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %08X, %d) req=%08X\n", __FUNCTION__,
-		fd, (u32)buf, len, (u32)req);
+	IPC_DPRINT("%s(%d, %08X, %d) req=%d\n", __FUNCTION__,
+		fd, (u32)buf, len, req->id);
 	req->request.cmd = IOS_READ;
 	req->request.fd = fd;
 	req->request.cb = NULL;
@@ -202,9 +239,9 @@ s32 IOS_Read(s32 fd,void *buf,s32 len) {
 	req->request.read.data = (void*)MEM_VIRTUAL_TO_PHYSICAL(buf);
 	req->request.read.len  = len;
 
-	IPC_DPRINT("%s: send %08X\n", __FUNCTION__, (u32)req);
+	IPC_DPRINT("%s: send %d\n", __FUNCTION__, req->id);
 	s32 ret = __ipc_syncrequest(req);
-	IPC_DPRINT("%s: done %08X\n", __FUNCTION__, (u32)req);
+	IPC_DPRINT("%s: done %d\n", __FUNCTION__, req->id);
 	if(req) __ipc_freereq(req);
 	return ret;
 }
@@ -213,8 +250,8 @@ s32 IOS_ReadAsync(s32 fd,void *buf,s32 len,ipccallback ipc_cb,
 void *usrdata) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %08X, %d) req=%08X cb=%08X(%08X)\n",
-		__FUNCTION__, fd, (u32)buf, len, (u32)req,
+	IPC_DPRINT("%s(%d, %08X, %d) req=%d cb=%08X(%08X)\n",
+		__FUNCTION__, fd, (u32)buf, len, req->id,
 		(u32)ipc_cb, (u32)usrdata);
 
 	req->request.cmd = IOS_READ;
@@ -233,8 +270,8 @@ void *usrdata) {
 s32 IOS_Write(s32 fd,const void *buf,s32 len) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %08X, %d) req=%08X\n", __FUNCTION__,
-		fd, (u32)buf, len, (u32)req);
+	IPC_DPRINT("%s(%d, %08X, %d) req=%d\n", __FUNCTION__,
+		fd, (u32)buf, len, req->id);
 	req->request.cmd = IOS_WRITE;
 	req->request.fd = fd;
 	req->request.cb = NULL;
@@ -253,8 +290,8 @@ s32 IOS_WriteAsync(s32 fd,const void *buf,s32 len,
 ipccallback ipc_cb,void *usrdata) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %08X, %d) req=%08X cb=%08X(%08X)\n",
-		__FUNCTION__, fd, (u32)buf, len, (u32)req,
+	IPC_DPRINT("%s(%d, %08X, %d) req=%d cb=%08X(%08X)\n",
+		__FUNCTION__, fd, (u32)buf, len, req->id,
 		(u32)ipc_cb, (u32)usrdata);
 
 	req->request.cmd = IOS_WRITE;
@@ -273,8 +310,8 @@ ipccallback ipc_cb,void *usrdata) {
 s32 IOS_Seek(s32 fd,s32 where,s32 whence) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %08X, %d) req=%08X\n", __FUNCTION__,
-		fd, where, whence, (u32)req);
+	IPC_DPRINT("%s(%d, %08X, %d) req=%d\n", __FUNCTION__,
+		fd, where, whence, req->id);
 	req->request.cmd = IOS_SEEK;
 	req->request.fd = fd;
 	req->request.cb = NULL;
@@ -291,8 +328,8 @@ s32 IOS_SeekAsync(s32 fd,s32 where,s32 whence,
 ipccallback ipc_cb,void *usrdata) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %08X, %d) req=%08X cb=%08X(%08X)\n",
-		__FUNCTION__, fd, where, whence, (u32)req,
+	IPC_DPRINT("%s(%d, %08X, %d) req=%d cb=%08X(%08X)\n",
+		__FUNCTION__, fd, where, whence, req->id,
 		(u32)ipc_cb, (u32)usrdata);
 
 	req->request.cmd = IOS_SEEK;
@@ -309,9 +346,9 @@ ipccallback ipc_cb,void *usrdata) {
 s32 IOS_Ioctl(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 len_io) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %d, %08X, %d, %08X, %d) req=%08X\n",
+	IPC_DPRINT("%s(%d, %d, %08X, %d, %08X, %d) req=%d\n",
 		__FUNCTION__, fd, ioctl, (u32)buffer_in, len_in,
-		(u32)buffer_io, len_io, (u32)req);
+		(u32)buffer_io, len_io, req->id);
 	req->request.cmd = IOS_IOCTL;
 	req->request.fd = fd;
 	req->request.cb = NULL;
@@ -333,9 +370,9 @@ s32 IOS_IoctlAsync(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,
 void *buffer_io,s32 len_io,ipccallback ipc_cb,void *usrdata) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %d, %08X, %d, %08X, %d) req=%08X cb=%08X(%08X)\n",
+	IPC_DPRINT("%s(%d, %d, %08X, %d, %08X, %d) req=%d cb=%08X(%08X)\n",
 		__FUNCTION__, fd, ioctl, (u32)buffer_in, len_in,
-		(u32)buffer_io, len_io, (u32)req, (u32)ipc_cb, (u32)usrdata);
+		(u32)buffer_io, len_io, req->id, (u32)ipc_cb, (u32)usrdata);
 
 	req->request.cmd = IOS_IOCTL;
 	req->request.fd = fd;
@@ -358,8 +395,8 @@ void *buffer_io,s32 len_io,ipccallback ipc_cb,void *usrdata) {
 s32 IOS_Ioctlv(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv) {
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %d, %d, %d, %08X) req=%08X\n", __FUNCTION__,
-		fd, ioctl, cnt_in, cnt_io, (u32)argv, (u32)req);
+	IPC_DPRINT("%s(%d, %d, %d, %d, %08X) req=%d\n", __FUNCTION__,
+		fd, ioctl, cnt_in, cnt_io, (u32)argv, req->id);
 	req->request.cmd = IOS_IOCTLV;
 	req->request.fd = fd;
 	req->request.cb = NULL;
@@ -394,9 +431,9 @@ ioctlv *argv,ipccallback ipc_cb,void *usrdata) {
 	s32 i;
 	IpcRequestAndMsgQueue *req = __ipc_allocreq();
 	if(!req) return IPC_ENOMEM;
-	IPC_DPRINT("%s(%d, %d, %d, %d, %08X) req=%08X cb=%08X(%08X)\n",
+	IPC_DPRINT("%s(%d, %d, %d, %d, %08X) req=%d cb=%08X(%08X)\n",
 		__FUNCTION__, fd, ioctl, cnt_in, cnt_io, (u32)argv,
-		(u32)req, (u32)ipc_cb, (u32)usrdata);
+		req->id, (u32)ipc_cb, (u32)usrdata);
 
 	req->request.cmd = IOS_IOCTLV;
 	req->request.fd = fd;

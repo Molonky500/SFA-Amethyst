@@ -31,7 +31,8 @@ INCLUDES	:= -I../source/include
 # this must be at least 0x91000000 since before that is ARAM.
 # also, do not use r2 (TOC) and r13 (sdata) since the game
 # will clobber those.
-CFLAGS   = -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames $(MACHDEP) $(INCLUDES)
+CFLAGS   = -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames \
+	$(MACHDEP) $(INCLUDES) -ffile-prefix-map=$(abspath $(CURDIR))=.
 CXXFLAGS = $(CFLAGS)
 LDFLAGS	 = -L../lib -g $(MACHDEP) \
 	-Wl,-Map,$(notdir $@).map \

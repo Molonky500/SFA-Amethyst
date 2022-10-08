@@ -126,9 +126,15 @@ static inline char* write_padding(char *buf, char pad, int num) {
 static inline void write_str(printf_context *ctxt, const char *str) {
 	if(str == NULL) str = "(null)";
 	if(!PTR_VALID(str)) {
-		char buf[16];
+		char buf[64];
 		char *c = buf;
 		*(c++) = '<';
+		*(c++) = 'I';
+		*(c++) = 'N';
+		*(c++) = 'V';
+		*(c++) = 'A';
+		*(c++) = 'L';
+		*(c++) = ':';
 		u32 p = (u32)str;
 		for(int i=0; i<8; i++) {
 			*(c++) = digitsUpper[p >> 28];
@@ -203,7 +209,7 @@ static inline int write_uint(printf_context *ctxt, char *buf, int base) {
 		ctxt->forceDecimal = 0;
 		ctxt->precision    = 0;
 		strncpy(&buf[-5], "(nil)", 6); //strlen("(nil)") = 5, +1 for \0
-		return 6;
+		return 5;
 	}
 	if(val > 0) ctxt->sign = 1;
 

@@ -19,7 +19,7 @@ void wiiuse_send_next_command(struct wiimote_t *wm)
 {
 	struct cmd_blk_t *cmd;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) {
         exiPrintf("WPAD: %s: not connected (%08X)\n",
             __FUNCTION__, (u32)wm);
@@ -54,7 +54,7 @@ static __inline__ void __wiiuse_push_command(struct wiimote_t *wm,struct cmd_blk
         return;
     }
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	cmd->next = NULL;
 	cmd->state = CMD_READY;
 
@@ -77,7 +77,7 @@ struct wiimote_t** wiiuse_init(int wiimotes, wii_event_cb event_cb) {
 #endif
 	int i = 0;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if (!wiimotes)
 		return NULL;
 
@@ -267,7 +267,7 @@ int wiiuse_read_data(struct wiimote_t *wm,ubyte *buffer,uint addr,uword len,cmd_
 	struct op_t *op;
 	struct cmd_blk_t *cmd;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!buffer || !len) return 0;
 
@@ -326,7 +326,7 @@ int wiiuse_write_streamdata(struct wiimote_t *wm,ubyte *data,ubyte len,cmd_blk_c
 {
 	struct cmd_blk_t *cmd;
 
-	//exiPrintf("WPAD: %s\n", __FUNCTION__);
+	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!data || !len || len>20) return 0;
 

@@ -18,9 +18,7 @@ s32 iosCreateHeap(s32 size) {
 	s32 free;
 	u32 level;
 	u32 ipclo,ipchi;
-#if IPC_DEBUG
-	exiPrintf("iosCreateHeap(%d)\n",size);
-#endif
+	IPC_DPRINT("iosCreateHeap(%d)\n",size);
 	_CPU_ISR_Disable(level);
 
 	i=0;
@@ -106,29 +104,58 @@ void IPC_SetBufferHi(void *bufferhi) {
 	if(bufferhi<=_ipc_bufferhi) _ipc_currbufferhi = bufferhi;
 }
 
+static u32 nextId = 0;
 IpcRequestAndMsgQueue* __ipc_allocreq(void) {
 	//IpcRequestAndMsgQueue *req = iosAlloc(_ipc_hid,
 	//	sizeof(IpcRequestAndMsgQueue));
 	//if(!req) return NULL;
 	int irq = OSDisableInterrupts();
+	IpcRequestAndMsgQueue *req;
 
-	int next = (_ipcReqQueueHead + 1) % IPC_QUEUE_MAX;
-	if(next == _ipcReqQueueTail) {
-		OSRestoreInterrupts(irq);
-        exiPrintf(" *** ERROR *** IPC outgoing request buffer full\n");
-		return NULL;
+	int next = _ipcReqQueueHead;
+	int count = 0;
+	while(count < IPC_QUEUE_MAX) {
+		/*if(next == _ipcReqQueueTail) {
+			exiPrintf(" *** ERROR *** IPC outgoing request buffer full\n");
+			ipcDumpQueueForDebug();
+			while(1);
+			OSRestoreInterrupts(irq);
+			//return NULL;
+			ipcPumpQueue();
+			OSYieldThread();
+			irq = OSDisableInterrupts();
+			continue;
+		}
+
+		req = &_ipcRequestQueue[_ipcReqQueueHead];
+		if(req->state != IPC_REQ_STATE_EMPTY) {
+			exiPrintf(" *** ERROR *** IPC outgoing request buffer full (next req state %d)\n",
+				req->state);
+			ipcDumpQueueForDebug();
+			while(1);
+			OSRestoreInterrupts(irq);
+			//return NULL;
+			ipcPumpQueue();
+			OSYieldThread();
+			irq = OSDisableInterrupts();
+			continue;
+		}
+		else break;*/
+		req = &_ipcRequestQueue[next];
+		if(req->state == IPC_REQ_STATE_EMPTY) break;
+		next = (next + 1) % IPC_QUEUE_MAX;
+		count++;
 	}
+	if(req->state != IPC_REQ_STATE_EMPTY) {
+		exiPrintf(" *** ERROR *** IPC outgoing request buffer full\n");
+		ipcDumpQueueForDebug();
+		HALT;
+	}
+	IPC_DPRINT("IPC: alloc new req at %08X (slot %d ID %d)\n",
+		(u32)req, next, nextId);
 
-	IpcRequestAndMsgQueue *req = &_ipcRequestQueue[_ipcReqQueueHead];
-    IPC_DPRINT("IPC: alloc new req at %08X (slot %d)\n",
-        (u32)req, _ipcReqQueueHead);
-
-    /*if(next <= _prevHead && next > 1) {
-        exiPrintf(" *** ERROR *** IPC head corrupted (%d -> %d)\n",
-            _prevHead, next);
-    }*/
-
-	req->state = IPC_REQ_STATE_PREPARING;
+    req->state = IPC_REQ_STATE_PREPARING;
+	req->id = (nextId++);
 	_ipcReqQueueHead = next;
 	OSInitThreadQueue(&req->queue);
 	OSRestoreInterrupts(irq);
@@ -136,6 +163,7 @@ IpcRequestAndMsgQueue* __ipc_allocreq(void) {
 }
 
 void __ipc_freereq(IpcRequestAndMsgQueue *ptr) {
+	memset(ptr, 0, sizeof(IpcRequestAndMsgQueue));
     ptr->state = IPC_REQ_STATE_EMPTY;
 }
 

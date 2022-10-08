@@ -121,17 +121,23 @@ typedef struct {        //ipc struct size: 32
 	u8 pad1[12];		//52 - 60
 } IpcRequest;
 
-#define IPC_REQ_STATE_EMPTY 0 //free slot
-#define IPC_REQ_STATE_PREPARING 1 //PPC is writing to it
-#define IPC_REQ_STATE_QUEUED 2 //waiting to be sent to IOS
-#define IPC_REQ_STATE_PENDING 3 //waiting for response from IOS
-#define IPC_REQ_STATE_FINISHED 4 //IOS responded; waiting for PPC to deal with it
+enum IpcRequestState {
+	IPC_REQ_STATE_EMPTY, //free slot
+	IPC_REQ_STATE_PREPARING, //PPC is writing to it
+	IPC_REQ_STATE_QUEUED, //waiting to be sent to IOS
+	IPC_REQ_STATE_PENDING, //waiting for ACK from IOS
+	IPC_REQ_STATE_PROCESSING, //waiting for response from IOS
+	IPC_REQ_STATE_FINISHING, //IOS responded; waiting for PPC to deal with it
+	IPC_REQ_STATE_FINISHED, //PPC is now dealing with it
+	IPC_NUM_REQ_STATES
+};
 
 typedef struct {
 	IpcRequest request;
 	volatile u8 state;
-	OSThreadQueue queue;
-	u8 pad[20]; //size align to 32
+	OSThreadQueue queue; //XXX needed?
+	u32 id; //for debug
+	u8 pad[16]; //size align to 32
 } IpcRequestAndMsgQueue;
 
 typedef struct _ipcheap {
@@ -186,21 +192,25 @@ s32 IOS_IoctlvAsync(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv,ipccallb
 
 //ipcbuf.c
 extern IpcRequestAndMsgQueue _ipcRequestQueue[IPC_QUEUE_MAX];
-extern vs32 _ipcReqQueueHead, _ipcReqQueueTail;
-extern s32  _ipcReqNext;
+extern vs32 _ipcReqQueueHead; //next slot to allocate
+extern vs32 _ipcReqQueueTail; //next slot to send to IOS
+extern vs32 _ipcReqSlotCur; //slot currently awaiting completion
+extern vs32 _ipcReqSlotWait; //slot currently awaiting ACK
 extern bool _ipcIdle;
+void ipcDumpQueueForDebug();
 void ipcPumpQueue();
 void _ipcWriteNextQueuedReq();
 int _ipcWriteReq(IpcRequestAndMsgQueue *req);
 
 //ipcio.c
-u32 IPC_ReadReg(u32 reg);
+vu32 IPC_ReadReg(u32 reg);
 void IPC_WriteReg(u32 reg,u32 val);
 void ACR_WriteReg(u32 reg,u32 val);
 void _ipcAckReply();
 void _ipcSendEndOfReply();
 
 //ipcirq.c
+void _ipcHandleReply(IpcRequestAndMsgQueue *req);
 void ipcPoll();
 void ipcIrqHandler(int irqNo, OSContext *ctx);
 

@@ -206,18 +206,18 @@ wiimote *__wpad_assign_slot(struct bd_addr *pad_addr)
 {
     u32 i, level;
     struct bd_addr bdaddr;
-    //exiPrintf("WPAD: Assigning slot (active: 0x%02x)\n", __wpads_used);
-    //_CPU_ISR_Disable(level);
+    exiPrintf("WPAD: Assigning slot (active: 0x%02x)\n", __wpads_used);
+    _CPU_ISR_Disable(level);
 
 	// check for balance board
 	BD_ADDR(&(bdaddr),__wpad_devs.balance_board.bdaddr[5],__wpad_devs.balance_board.bdaddr[4],__wpad_devs.balance_board.bdaddr[3],__wpad_devs.balance_board.bdaddr[2],__wpad_devs.balance_board.bdaddr[1],__wpad_devs.balance_board.bdaddr[0]);
 	if(bd_addr_cmp(pad_addr,&bdaddr)) {
 		if(!(__wpads_used&(1<<WPAD_BALANCE_BOARD))) {
 			__wpads_used |= (0x01<<WPAD_BALANCE_BOARD);
-			//_CPU_ISR_Restore(level);
+			_CPU_ISR_Restore(level);
 			return __wpads[WPAD_BALANCE_BOARD];
 		} else {
-			//_CPU_ISR_Restore(level);
+			_CPU_ISR_Restore(level);
 			return NULL;
 		}
 	}
@@ -226,9 +226,9 @@ wiimote *__wpad_assign_slot(struct bd_addr *pad_addr)
     for(i=0; i<CONF_PAD_MAX_ACTIVE /*&& i<WPAD_MAX_WIIMOTES*/; i++) {
         BD_ADDR(&(bdaddr),__wpad_devs.active[i].bdaddr[5],__wpad_devs.active[i].bdaddr[4],__wpad_devs.active[i].bdaddr[3],__wpad_devs.active[i].bdaddr[2],__wpad_devs.active[i].bdaddr[1],__wpad_devs.active[i].bdaddr[0]);
         if(bd_addr_cmp(pad_addr,&bdaddr) && !(__wpads_used & (1<<i))) {
-            //exiPrintf("WPAD: Got Preassigned Slot %d\n", i);
+            exiPrintf("WPAD: Got Preassigned Slot %d\n", i);
             __wpads_used |= (0x01<<i);
-            //_CPU_ISR_Restore(level);
+            _CPU_ISR_Restore(level);
             return __wpads[i];
         }
     }
@@ -236,14 +236,14 @@ wiimote *__wpad_assign_slot(struct bd_addr *pad_addr)
     // No match, pick the first free slot
     for(i=0; i<WPAD_MAX_WIIMOTES; i++) {
         if(!(__wpads_used & (1<<i))) {
-            //exiPrintf("WPAD: Got Free Slot %d\n", i);
+            exiPrintf("WPAD: Got Free Slot %d\n", i);
             __wpads_used |= (0x01<<i);
-            //_CPU_ISR_Restore(level);
+            _CPU_ISR_Restore(level);
             return __wpads[i];
         }
     }
-    //exiPrintf("WPAD: All Slots Used\n");
-    //_CPU_ISR_Restore(level);
+    exiPrintf("WPAD: All Slots Used\n");
+    _CPU_ISR_Restore(level);
     return NULL;
 }
 
@@ -288,7 +288,7 @@ static s32 __readlinkkey_finished(s32 result,void *usrdata)
 
 static s32 __initcore_finished(s32 result,void *usrdata)
 {
-	//exiPrintf("WPAD: initcore_finished(%d)\n",result);
+	exiPrintf("WPAD: initcore_finished(%d)\n",result);
 
 	if(result==ERR_OK) {
 		BTE_ReadStoredLinkKey(__wpad_keys,WPAD_MAX_WIIMOTES,__readlinkkey_finished);
@@ -661,7 +661,7 @@ s32 WPAD_Init(void)
 	struct timespec tb;
 	int i;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
 		__wpads_ponded = 0;
 		__wpads_active = 0;
@@ -683,26 +683,26 @@ s32 WPAD_Init(void)
 
 		if(CONF_GetPadDevices(&__wpad_devs) < 0) {
 			WPAD_Shutdown();
-			//_CPU_ISR_Restore(level);
+			_CPU_ISR_Restore(level);
 			return WPAD_ERR_BADCONF;
 		}
 
 		if(__wpad_devs.num_registered == 0) {
 			WPAD_Shutdown();
-			//_CPU_ISR_Restore(level);
+			_CPU_ISR_Restore(level);
 			return WPAD_ERR_NONEREGISTERED;
 		}
 
 		if(__wpad_devs.num_registered > CONF_PAD_MAX_REGISTERED) {
 			WPAD_Shutdown();
-			//_CPU_ISR_Restore(level);
+			_CPU_ISR_Restore(level);
 			return WPAD_ERR_BADCONF;
 		}
 
 		__wpads = wiiuse_init(WPAD_MAX_WIIMOTES,__wpad_eventCB);
 		if(__wpads==NULL) {
 			WPAD_Shutdown();
-			//_CPU_ISR_Restore(level);
+			_CPU_ISR_Restore(level);
 			return WPAD_ERR_UNKNOWN;
 		}
 
@@ -722,7 +722,7 @@ s32 WPAD_Init(void)
 			__wpad_timeouthandler);
 		__wpads_inited = WPAD_STATE_ENABLING;
 	}
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -736,9 +736,9 @@ s32 WPAD_ReadEvent(s32 chan, WPADData *data)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -753,7 +753,7 @@ s32 WPAD_ReadEvent(s32 chan, WPADData *data)
 				wpadd = wpdcb->queue_int;
 			}
 			if(wpdcb->queue_full == 0) {
-				//_CPU_ISR_Restore(level);
+				_CPU_ISR_Restore(level);
 				return WPAD_ERR_QUEUE_EMPTY;
 			}
 			if(data)
@@ -765,15 +765,15 @@ s32 WPAD_ReadEvent(s32 chan, WPADData *data)
 			accel_calib = &__wpads[chan]->accel_calib;
 			smoothed = WIIMOTE_IS_FLAG_SET(__wpads[chan], WIIUSE_SMOOTHING);
 		} else {
-			//_CPU_ISR_Restore(level);
+			_CPU_ISR_Restore(level);
 			return WPAD_ERR_NOT_READY;
 		}
 	} else {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NO_CONTROLLER;
 	}
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	if(data)
 		__wpad_calc_data(data,lstate,accel_calib,smoothed);
 	return 0;
@@ -797,9 +797,9 @@ s32 WPAD_DroppedEvents(s32 chan)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -807,7 +807,7 @@ s32 WPAD_DroppedEvents(s32 chan)
 		dropped = __wpdcb[chan].dropped_events;
 		__wpdcb[chan].dropped_events = 0;
 	}
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return dropped;
 }
 
@@ -908,9 +908,9 @@ s32 WPAD_SetDataFormat(s32 chan, s32 fmt)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -923,11 +923,11 @@ s32 WPAD_SetDataFormat(s32 chan, s32 fmt)
 				__wpad_setfmt(chan);
 				break;
 			default:
-				//_CPU_ISR_Restore(level);
+				_CPU_ISR_Restore(level);
 				return WPAD_ERR_BADVALUE;
 		}
 	}
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -946,16 +946,16 @@ s32 WPAD_SetMotionPlus(s32 chan, u8 enable)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
 	if(__wpads[chan]!=NULL) {
 		wiiuse_set_motion_plus(__wpads[chan], enable);
 	}
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -974,16 +974,16 @@ s32 WPAD_SetVRes(s32 chan,u32 xres,u32 yres)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
 	if(__wpads[chan]!=NULL)
 		wiiuse_set_ir_vres(__wpads[chan],xres,yres);
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -992,9 +992,9 @@ s32 WPAD_GetStatus(void)
 	s32 ret;
 	u32 level;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	ret = __wpads_inited;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return ret;
 }
@@ -1007,9 +1007,9 @@ s32 WPAD_Probe(s32 chan,u32 *type)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -1033,7 +1033,7 @@ s32 WPAD_Probe(s32 chan,u32 *type)
 			ret = WPAD_ERR_NOT_READY;
 	} else
 		ret = WPAD_ERR_NO_CONTROLLER;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	return ret;
 }
@@ -1045,14 +1045,14 @@ s32 WPAD_SetEventBufs(s32 chan, WPADData *bufs, u32 cnt)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	wpdcb = &__wpdcb[chan];
 	wpdcb->queue_head = 0;
 	wpdcb->queue_tail = 0;
 	wpdcb->queue_full = 0;
 	wpdcb->queue_length = cnt;
 	wpdcb->queue_ext = bufs;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -1060,21 +1060,21 @@ void WPAD_SetPowerButtonCallback(WPADShutdownCallback cb)
 {
 	u32 level;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(cb)
 		__wpad_powcb = cb;
 	else
 		__wpad_powcb = __wpad_def_powcb;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 }
 
 void WPAD_SetBatteryDeadCallback(WPADShutdownCallback cb)
 {
 	u32 level;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	__wpad_batcb = cb;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 }
 
 s32 WPAD_Disconnect(s32 chan)
@@ -1084,16 +1084,16 @@ s32 WPAD_Disconnect(s32 chan)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
 	wpdcb = &__wpdcb[chan];
 	__wpad_disconnect(wpdcb);
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	while(__wpads_active&(0x01<<chan)) {
 		usleep(50);
@@ -1110,7 +1110,7 @@ void WPAD_Shutdown(void)
 	u32 cnt = 0;
 	struct _wpad_cb *wpdcb = NULL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 
 	__wpads_inited = WPAD_STATE_DISABLED;
 	OSCancelAlarm(&__wpad_timer);
@@ -1121,7 +1121,7 @@ void WPAD_Shutdown(void)
 	}
 
 	__wiiuse_sensorbar_enable(0);
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 
 	while(__wpads_active) {
 		usleep(50);
@@ -1135,9 +1135,9 @@ void WPAD_SetIdleTimeout(u32 seconds)
 {
 	u32 level;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	__wpad_idletimeout = seconds;
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 }
 
 s32 WPAD_ScanPads(void)
@@ -1160,16 +1160,16 @@ s32 WPAD_Rumble(s32 chan, int status)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
 	if(__wpads[chan]!=NULL)
 		wiiuse_rumble(__wpads[chan],status);
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -1188,9 +1188,9 @@ s32 WPAD_SetIdleThresholds(s32 chan, s32 btns, s32 ir, s32 accel, s32 js, s32 wb
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -1202,7 +1202,7 @@ s32 WPAD_SetIdleThresholds(s32 chan, s32 btns, s32 ir, s32 accel, s32 js, s32 wb
 	__wpdcb[chan].thresh.mp = mp;
 
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -1221,9 +1221,9 @@ s32 WPAD_ControlSpeaker(s32 chan,s32 enable)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -1232,7 +1232,7 @@ s32 WPAD_ControlSpeaker(s32 chan,s32 enable)
 		wiiuse_set_speaker(__wpads[chan],enable);
 	}
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 
@@ -1244,9 +1244,9 @@ s32 WPAD_IsSpeakerEnabled(s32 chan)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -1257,7 +1257,7 @@ s32 WPAD_IsSpeakerEnabled(s32 chan)
 			&& WIIMOTE_IS_SET(wm,WIIMOTE_STATE_SPEAKER)) ret = WPAD_ERR_NONE;
 	}
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return ret;
 }
 
@@ -1269,9 +1269,9 @@ s32 WPAD_SendStreamData(s32 chan,void *buf,u32 len)
 
 	if(chan<WPAD_CHAN_0 || chan>=WPAD_MAX_WIIMOTES) return WPAD_ERR_BAD_CHANNEL;
 
-	//_CPU_ISR_Disable(level);
+	_CPU_ISR_Disable(level);
 	if(__wpads_inited==WPAD_STATE_DISABLED) {
-		//_CPU_ISR_Restore(level);
+		_CPU_ISR_Restore(level);
 		return WPAD_ERR_NOT_READY;
 	}
 
@@ -1292,7 +1292,7 @@ s32 WPAD_SendStreamData(s32 chan,void *buf,u32 len)
 		}
 	}
 
-	//_CPU_ISR_Restore(level);
+	_CPU_ISR_Restore(level);
 	return WPAD_ERR_NONE;
 }
 

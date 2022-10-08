@@ -114,19 +114,23 @@ void checkThreads() {
         if(!(PTR_VALID(stackTop) && PTR_VALID(stackBot))) {
             exiPrintf(" *** ERROR *** thread %08X (%s) invalid stack (%08X-%08X) PC=%08X\n",
                 (u32)thread, name, stackBot, stackTop, pc);
+            *(int*)0 = 0; //trigger a crash
         }
         if(sp < stackBot || sp > stackTop) {
             exiPrintf(" *** ERROR *** stack overflow in thread %08X (%s) (%08X not in range %08X-%08X) PC=%08X\n",
                 (u32)thread, name, sp, stackBot, stackTop, pc);
+            *(int*)0 = 0; //trigger a crash
         }
         if(*(thread->stackEnd) != OS_THREAD_STACK_MAGIC) {
             exiPrintf(" *** ERROR *** stack corruption in thread %08X (%s) (magic=%08X) PC=%08X\n",
                 (u32)thread, name, *(thread->stackEnd), pc);
+            *(int*)0 = 0; //trigger a crash
         }
         thread = thread->linkActive.next;
         iThread++;
         if(iThread > 256) {
             exiPrintf(" *** ERROR *** infinite loop in thread link\n");
+            *(int*)0 = 0; //trigger a crash
             break;
         }
     }

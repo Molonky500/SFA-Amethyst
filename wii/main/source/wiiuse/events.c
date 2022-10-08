@@ -61,8 +61,8 @@ static void event_data_read(struct wiimote_t *wm,ubyte *msg)
 	len = ((msg[2]&0xf0)>>4)+1;
 	offset = BIG_ENDIAN_SHORT(*(uword*)(msg+3));
 
-	//exiPrintf("WPAD: addr: %08x\noffset: %d\nlen: %d\n",
-	//	op->readdata.addr,offset,len);
+	exiPrintf("WPAD: addr: %08x\noffset: %d\nlen: %d\n",
+		op->readdata.addr,offset,len);
 
 	op->readdata.addr = (op->readdata.addr&0xffff);
 	op->wait -= len;

@@ -109,7 +109,7 @@
 			"ori %0,%0,0x8000\n" \
 			"mtmsr %0" \
 			: "=&r" ((_val)) : "0" ((_val)) \
-			: : "memory" \
+			: "memory" \
 		); \
 	} while (0)
 

@@ -9,29 +9,78 @@ void __Wpad_PowerCallback(s32 chan) {
     exiPrintf("%s(%d)\n", __FUNCTION__, chan);
 }
 
+void resetBluetooth() {
+    char bluetoothResetData1[] USB_ALIGN = { 0x20 }; //bmRequestType
+    char bluetoothResetData2[] USB_ALIGN = { 0x00 }; //bmRequest
+    char bluetoothResetData3[] USB_ALIGN = { 0x00, 0x00 }; //wValue
+    char bluetoothResetData4[] USB_ALIGN = { 0x00, 0x00 }; //wIndex
+    char bluetoothResetData5[] USB_ALIGN = { 0x03, 0x00 }; //wLength
+    char bluetoothResetData6[] USB_ALIGN = { 0x00 }; //unknown; set to zero.
+    char bluetoothResetData7[] USB_ALIGN = { 0x03, 0x0c, 0x00 }; //Mesage payload.
+
+    /** Vectors of data transfered. */
+    ioctlv bluetoothReset[] USB_ALIGN = {
+        { bluetoothResetData1, sizeof(bluetoothResetData1) },
+        { bluetoothResetData2, sizeof(bluetoothResetData2) },
+        { bluetoothResetData3, sizeof(bluetoothResetData3) },
+        { bluetoothResetData4, sizeof(bluetoothResetData4) },
+        { bluetoothResetData5, sizeof(bluetoothResetData5) },
+        { bluetoothResetData6, sizeof(bluetoothResetData6) },
+        { bluetoothResetData7, sizeof(bluetoothResetData7) },
+    };
+
+    exiPuts("Reset bluetooth...\n");
+    int fd = IOS_Open("/dev/usb/oh1/57e/305", IOS_WRITE);
+	IOS_Ioctlv(fd, 0, 6, 1, bluetoothReset);
+	IOS_Close(fd);
+    exiPuts("Reset bluetooth OK\n");
+}
+
+static int step = 0;
 void initWiimote() {
-    if(triedWiimoteInit) return;
     triedWiimoteInit = true;
 
-    int err = CONF_Init();
-    exiPrintf("\nCONF_Init: %d\n", err);
+    int err = 0;
+    switch(step) {
+        case 0:
+            //resetBluetooth();
+            break;
 
-    err = WPAD_Init();
-    exiPrintf("WPAD_Init: %d\n", err);
-    if(err) return;
+        case 10:
+            err = CONF_Init();
+            exiPrintf("\nCONF_Init: %d\n", err);
+            break;
 
-    int view_width=640, view_height=480;
-    for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
-        WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
-        //WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC);
-        //WPAD_SetDataFormat(i, WPAD_FMT_BTNS);
-        WPAD_SetVRes(i, view_width + 128, view_height + 128);
+        case 20:
+            //int irq = OSDisableInterrupts();
+            err = WPAD_Init();
+            //OSRestoreInterrupts(irq);
+            exiPrintf("WPAD_Init: %d\n", err);
+            break;
+
+        case 30: {
+            int view_width=640, view_height=480;
+            for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
+                WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
+                //WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC);
+                //WPAD_SetDataFormat(i, WPAD_FMT_BTNS);
+                WPAD_SetVRes(i, view_width + 128, view_height + 128);
+            }
+
+            WPAD_SetPowerButtonCallback(__Wpad_PowerCallback);
+            WPAD_SetIdleTimeout(120);
+            exiPuts("WPAD: initWiimote OK\n");
+            isWiimoteInit = true;
+            break;
+        }
+
+        case 31:
+            step--; //don't advance
+            break;
+
+        default: break;
     }
-
-    WPAD_SetPowerButtonCallback(__Wpad_PowerCallback);
-    WPAD_SetIdleTimeout(120);
-    exiPuts("WPAD: initWiimote OK\n");
-    isWiimoteInit = true;
+    step++;
 }
 
 u32 mapWiimoteButtons(WPADData *wp, u32 btns) {
@@ -114,8 +163,13 @@ static int prevState = -1;
 void updateWiimote() {
     //if(*(u8*)0x803dd5e8) return; //game is loading
     //if((*(u32*)0x803dd5ec) < 2) return;
-    if(!isWiimoteInit) initWiimote();
+    initWiimote();
     if(!isWiimoteInit) return;
+
+    int err = WPAD_ScanPads();
+    if(err < 0) {
+        debugPrintf("WP SCAN ERR %d\n", err);
+    }
 
     int state = WPAD_GetStatus();
     if(state != WPAD_STATE_ENABLED) {
@@ -139,10 +193,7 @@ void updateWiimote() {
         }*/
     }
 
-    int err = WPAD_ScanPads();
-    if(err < 0) {
-        debugPrintf("WP SCAN ERR %d\n", err);
-    }
+
 
     for(int iPad=0; iPad < WPAD_MAX_WIIMOTES; iPad++) {
         err = WPAD_Probe(iPad, NULL);
@@ -170,14 +221,28 @@ void padUpdate_hook_() {
     if(framesThisStep > 2) return;
     if(msecsThisFrame > 32.0f) return;*/
 
+    static int cooldown = 0;
+    if(!cooldown) {
+        if(control->buttons & PAD_BUTTON_B) {
+            exiPrintf(" *** Manual IPC queue dump\n");
+            ipcDumpQueueForDebug();
+            cooldown = 100;
+        }
+        if(control->buttons & PAD_BUTTON_X) {
+            step = 0;
+            cooldown = 100;
+        }
+    }
+    else cooldown--;
+
     //avoid flooding dprint buf
     u32 debugLogEnd = *(u32*)0x803dbc14;
     if(debugLogEnd - 0x803aa018 > 3000) debugLogEnd = 0x803aa018;
 
+    ipcPumpQueue(); //XXX move
     updateWiimote();
     displayControllerState(0, control);
     ipcDebugPrint();
-    ipcPumpQueue(); //XXX move
 }
 void padUpdate_hook(void);
 __asm__(

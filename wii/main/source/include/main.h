@@ -12,6 +12,10 @@
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
+#define HALT do { \
+    exiPrintf(" *** ERROR *** HALT at %s:%d\n", __FILE__, __LINE__); \
+    *(u32*)0 = 0; /* crash to get backtrace */ \
+} while(0)
 
 //this macro excludes 90xxxxxx (ARAM)
 #define PTR_VALID(p) (((u32)(p) >= 0x80000000 && (u32)(p) <= 0x817FFFFF) || \
@@ -28,6 +32,7 @@ extern char *_argc_raw[ARGC_MAX];
 extern int _argc;
 
 #define IPC_QUEUE_MAX 256
+#define USB_ALIGN __attribute__ ((aligned(32)))
 
 #include "asminline.h"
 #include "lwpnode.h"

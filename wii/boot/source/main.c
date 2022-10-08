@@ -289,6 +289,8 @@ __attribute__((noreturn)) void loadAppDol() {
     u64 then = SYS_Time() + 10000000;
     while(SYS_Time() < then);
     __IOS_ShutdownSubsystems();
+    then = SYS_Time() + 10000000;
+    while(SYS_Time() < then);
 
     //for(int i=0; i<120; i++) VIDEO_WaitVSync();
     exiPrintf("Exec...\n");
