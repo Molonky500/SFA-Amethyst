@@ -1,6 +1,7 @@
 #include "main.h"
 
-//the game doesn't contain this
+//the game doesn't contain these
+
 void OSYieldThread(void) {
     int irq = OSDisableInterrupts();
     SelectThread(true);

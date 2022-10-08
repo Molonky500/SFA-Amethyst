@@ -23,6 +23,9 @@ bool isWiimoteInit = false;
 bool triedWiimoteInit = false;
 WPADData *wpads[WPAD_MAX_WIIMOTES];
 
+//XXX properly integrate with OG code
+void *pPlayer = (void*)0x803428f8;
+
 void __Wpad_PowerCallback(s32 chan) {
     exiPrintf("%s(%d)\n", __FUNCTION__, chan);
 }

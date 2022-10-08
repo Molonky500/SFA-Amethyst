@@ -16,6 +16,7 @@
 #define AI_DMA_LENGTH   *(vu16*)0xCC005036
 
 //regs.c
+extern vu16* const _viReg;
 extern vu32* const _piReg;
 extern vu16* const _memReg;
 extern vu16* const _dspReg;

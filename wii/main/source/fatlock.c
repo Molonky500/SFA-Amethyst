@@ -6,7 +6,7 @@ void _FAT_lock_init(mutex_t *mutex) {
     //printf("%s(%08X)\n", __FUNCTION__, (u32)mutex);
     OSMutex *osm = malloc(sizeof(OSMutex));
     if(!osm) {
-        printf(" *** ERROR *** %s alloc fail\n", __FUNCTION__);
+        exiPrintf(" *** ERROR *** %s alloc fail\n", __FUNCTION__);
         return;
     }
     OSInitMutex(osm);

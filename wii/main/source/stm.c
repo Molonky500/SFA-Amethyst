@@ -76,8 +76,6 @@ static s32 __STMEventHandler(s32 result,void *usrdata);
 
 stmcallback __stm_eventcb = NULL;
 
-static vu16* const _viReg = (u16*)0xCC002000;
-
 s32 __STM_Init(void)
 {
 	if(__stm_initialized==1) return 1;

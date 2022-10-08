@@ -32,18 +32,13 @@ static PrevThreadState* findThread(OSThread *thread) {
     }
     //not found
     if(!pState) {
-        if(!empty) {
-            exiPuts(" *** ERROR *** too many threads!\n");
-            return NULL;
-        }
-        else {
-            exiPrintf("New thread %08X\n", thread);
-            empty->thread   = thread;
-            empty->stackTop = (u32)thread->stackBase;
-            empty->stackBot = (u32)thread->stackEnd;
-            empty->name     = NULL;
-            pState = empty;
-        }
+        if(!empty) PANIC("Too many threads!\n");
+        exiPrintf("New thread %08X\n", thread);
+        empty->thread   = thread;
+        empty->stackTop = (u32)thread->stackBase;
+        empty->stackBot = (u32)thread->stackEnd;
+        empty->name     = NULL;
+        pState = empty;
     }
     return pState;
 }
@@ -75,6 +70,7 @@ void checkGameHeaps() {
             && entry->type != HEAP_ENTRY_TYPE_RAM) {
                 exiPrintf(" *** ERROR *** heap corruption at %08X (type=%08X)\n",
                     (u32)entry, (u32)entry->type);
+                PANIC("Heap corruption detected!\n");
             }
             iEntry = entry->next;
         }
@@ -114,23 +110,23 @@ void checkThreads() {
         if(!(PTR_VALID(stackTop) && PTR_VALID(stackBot))) {
             exiPrintf(" *** ERROR *** thread %08X (%s) invalid stack (%08X-%08X) PC=%08X\n",
                 (u32)thread, name, stackBot, stackTop, pc);
-            *(int*)0 = 0; //trigger a crash
+            PANIC("Stack corruption detected!\n");
         }
         if(sp < stackBot || sp > stackTop) {
             exiPrintf(" *** ERROR *** stack overflow in thread %08X (%s) (%08X not in range %08X-%08X) PC=%08X\n",
                 (u32)thread, name, sp, stackBot, stackTop, pc);
-            *(int*)0 = 0; //trigger a crash
+            PANIC("Stack overflow detected!\n");
         }
         if(*(thread->stackEnd) != OS_THREAD_STACK_MAGIC) {
             exiPrintf(" *** ERROR *** stack corruption in thread %08X (%s) (magic=%08X) PC=%08X\n",
                 (u32)thread, name, *(thread->stackEnd), pc);
-            *(int*)0 = 0; //trigger a crash
+            PANIC("Stack corruption detected!\n");
         }
         thread = thread->linkActive.next;
         iThread++;
         if(iThread > 256) {
             exiPrintf(" *** ERROR *** infinite loop in thread link\n");
-            *(int*)0 = 0; //trigger a crash
+            PANIC("Thread corruption detected!\n");
             break;
         }
     }

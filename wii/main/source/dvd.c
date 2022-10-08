@@ -30,7 +30,7 @@ void initDvdHack() {
     if(!OSCreateThread(&hackDvdThread, hackDvdThreadMain,
         NULL, dvdThreadStack+DVD_THREAD_STACK_SIZE,
         DVD_THREAD_STACK_SIZE, DVD_THREAD_PRIO, 0)) {
-            exiPrintf(" *** ERROR *** Failed to create DVD thread\n");
+            PANIC("Failed to create DVD thread\n");
         return;
     }
     exiPrintf("DVD thread is %08X, queue=%08X, %08X, buf=%08X, %08X\n",

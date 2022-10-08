@@ -5,38 +5,7 @@ void __DVDFSInit_hook(void) {
 
     //since this is the first thing called back into
     //from the game, this is where we init stuff.
-    //XXX move out of DVD
-
-    initAlloc();
-    exiPuts("loader2 alloc init OK\n");
-    initLibc();
-    exiPuts("loader2 libc init OK\n");
-
-    initCheckThread();
-    //registerThreadForDebug(OSGetCurrentThread(),  "main");
-    registerThreadForDebug((OSThread*)0x803AD848, "game");
-    registerThreadForDebug((OSThread*)0x803AB118, "bsod");
-    registerThreadForDebug((OSThread*)0x803A54A0, "THPaudio");
-    registerThreadForDebug((OSThread*)0x803A6F08, "THPdisc");
-    registerThreadForDebug((OSThread*)0x803A8348, "THPvideo");
-
-    __lwp_wkspace_init(1*1024*1024);
-    __IPC_ClntInit();
-    __IOS_InitializeSubsystems();
-    exiPuts("loader2 IPC init OK\n");
-
-    initDvdHack();
-    exiPuts("initDvdHack: OK; wait for DVD...\n");
-
-    /*u32 *handlers = (u32*)0x80003040;
-    for(int i=0; i<32; i += 4) {
-        printf("IRQ[%2d]: %08X %08X %08X %08X\n", i,
-            handlers[i], handlers[i+1],
-            handlers[i+2], handlers[i+3]);
-    }*/
-
-    while(!dvdThreadReady) OSYieldThread();
-    DVD_DPRINT("DVD READY\n");
+    initGameHooks();
 }
 
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {

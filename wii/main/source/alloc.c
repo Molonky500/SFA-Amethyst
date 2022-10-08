@@ -39,12 +39,12 @@ bool checkAddrInheap(void *addr, u32 len) {
     if(!found) {
         exiPrintf("Addr %08X-%08X not found on heap\n",
             (u32)addr, (u32)addr+len);
-        dumpGameHeaps();
+        PANIC("Heap corruption detected!\n");
     }
     else if(found->type == HEAP_ENTRY_TYPE_FREE) {
         exiPrintf(" *** ERROR *** Addr %08X-%08X found in freed heap block %08X\n",
             (u32)addr, (u32)addr+len, found->loc);
-        dumpGameHeaps();
+        PANIC("Heap corruption detected!\n");
     }
     else return true;
     return false;

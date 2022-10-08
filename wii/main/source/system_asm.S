@@ -1,5 +1,6 @@
 #include <asm.h>
 
+//XXX some of these are redundant
 .global get_r1
 .global get_r2
 .global get_r13

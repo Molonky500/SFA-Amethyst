@@ -22,6 +22,9 @@ void printDolHeader(DolHeader *header) {
 }
 
 void loadDolFromMemory(DolHeader *header) {
+    //expects the entire DOL, not just the header.
+    //Used to load the DOL that the first-stage loader
+    //placed at a fixed memory location.
     printDolHeader(header);
 
     void *data = (void*)header;

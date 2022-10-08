@@ -13,6 +13,8 @@ void putHex(char *dst, u32 num) {
 
 //same hook is used for several debug print functions
 //that are stubbed in the game binary.
+//XXX any reason we can't do this on the GC side instead?
+//only the lack of vsnprintf which we could port?
 void osPrintHook(const char *fmt, ...) {
     char buf[1024];
 

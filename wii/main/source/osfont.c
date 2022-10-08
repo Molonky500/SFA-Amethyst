@@ -1,5 +1,7 @@
 #include "main.h"
 
+//XXX still used?
+
 uint OSGetFontEncode_hook() {
     return 0; //English
     //return 1; //Japanese

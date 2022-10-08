@@ -14,6 +14,7 @@ void SYS_Init(void) {
 	_CPU_ISR_Disable(level);
     __ipcbufferlo = (void*)__ipcbufferLo; //what the fuck
 	__ipcbufferhi = (void*)__ipcbufferHi;
+	//why would you have these differ only by one letter case
     main(_argc, _argc_raw);
 }
 

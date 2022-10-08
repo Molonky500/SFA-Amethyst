@@ -217,10 +217,7 @@ void* hackDvdThreadMain(void *param) {
     if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\n");
     }
-    else {
-        exiPrintf("DVD FAT init FAIL\n");
-        return NULL;
-    }
+    else PANIC("DVD FAT init FAIL\n");
 
     OSInitMutex(&dvdFileInfoMutex);
     dvdThreadReady = true;
@@ -244,14 +241,6 @@ void* hackDvdThreadMain(void *param) {
             #endif
         }
 
-        if(err) {
-            //happens if DVD thread priority is too low.
-            exiPrintf(" *** ERROR *** recvToDvdThread: %d\n", err);
-            run = false;
-            break;
-            //dvdIdle();
-            //continue;
-        }
         DVD_BUSY = 1; //DVD drive is busy
         DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\n", msg->cmd, msg->id);
 

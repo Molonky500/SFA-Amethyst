@@ -3,19 +3,6 @@
 //extern DISC_INTERFACE __io_wiisd;
 
 void bootGame(DolHeader *header) {
-    //XXX 30 seems not used, even though wiibrew says
-    //it's the IPC handler...
-    //"ACR" apparently means "actual IPC handler"
-    //acrIrq = (void*)IRQ_GetHandler(27);
-
-    /*if(fatInitDefault()) {
-        exiPrintf("DVD FAT init OK\n");
-    }
-    else {
-        exiPrintf("DVD FAT init FAIL\n");
-        //return NULL;
-    }*/
-
     //protect ARAM area from accidental accesses
     //SYS_ProtectRange(SYS_PROTECTCHAN0,
     //    (void*)0x90000000, 0x01000000, SYS_PROTECTNONE);
