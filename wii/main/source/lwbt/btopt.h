@@ -169,7 +169,7 @@ typedef s8 err_t;
  *
  * \hideinitializer
  */
-#define STATISTICS  1
+#define STATISTICS  0
 
 /**
  * Determines if logging of certain events should be compiled in.
@@ -180,8 +180,8 @@ typedef s8 err_t;
  *
  * \hideinitializer
  */
-#define LOGGING     1
-#define ERRORING	1
+#define LOGGING     0
+#define ERRORING	0
 
 /**
  * Print out a uIP log message.

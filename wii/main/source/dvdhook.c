@@ -20,7 +20,9 @@ void __DVDFSInit_hook(void) {
     registerThreadForDebug((OSThread*)0x803A6F08, "THPdisc");
     registerThreadForDebug((OSThread*)0x803A8348, "THPvideo");
 
-    initIpc();
+    __lwp_wkspace_init(1*1024*1024);
+    __IPC_ClntInit();
+    __IOS_InitializeSubsystems();
     exiPuts("loader2 IPC init OK\n");
 
     initDvdHack();

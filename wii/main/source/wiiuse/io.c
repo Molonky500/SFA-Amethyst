@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "nunchuk.h"
@@ -11,30 +10,26 @@
 #include "wiiboard.h"
 #include "motion_plus.h"
 #include "io.h"
-//#include "lwp_wkspace.h"
+#include "lwp_wkspace.h"
 
 void wiiuse_handshake(struct wiimote_t *wm,ubyte *data,uword len)
 {
 	ubyte *buf = NULL;
 	struct accel_t *accel = &wm->accel_calib;
 
-	exiPrintf("WPAD: wiiuse_handshake(%d,%08x,%d)\n",wm->handshake_state,data,len);
+	//printf("wiiuse_handshake(%d,%p,%d)\n",wm->handshake_state,data,len);
 
 	switch(wm->handshake_state) {
 		case 0:
 			wm->handshake_state++;
 
-			//wiiuse_set_leds(wm,WIIMOTE_LED_NONE,NULL);
-			wiiuse_set_leds(wm,WIIMOTE_LED_2,NULL);
+			wiiuse_set_leds(wm,WIIMOTE_LED_NONE,NULL);
 			wiiuse_status(wm,wiiuse_handshake);
 			return;
 
 		case 1:
 			wm->handshake_state++;
-			buf = malloc(sizeof(ubyte)*8);
-			if(!buf) {
-				exiPrintf(" *** ERROR *** WPAD: malloc failed in %s\n", __FUNCTION__);
-			}
+			buf = __lwp_wkspace_allocate(sizeof(ubyte)*8);
 
 			if (len > 2 && data[2]&WM_CTRL_STATUS_BYTE1_ATTACHMENT) {
 				wiiuse_read_data(wm,buf,WM_EXP_ID,6,wiiuse_handshake);
@@ -61,7 +56,7 @@ void wiiuse_handshake(struct wiimote_t *wm,ubyte *data,uword len)
 	accel->cal_g.x = (((data[4]<<2)|((data[7]>>4)&3)) - accel->cal_zero.x);
 	accel->cal_g.y = (((data[5]<<2)|((data[7]>>2)&3)) - accel->cal_zero.y);
 	accel->cal_g.z = (((data[6]<<2)|(data[7]&3)) - accel->cal_zero.z);
-	free(data);
+	__lwp_wkspace_free(data);
 
 	WIIMOTE_DISABLE_STATE(wm, WIIMOTE_STATE_HANDSHAKE);
 	WIIMOTE_ENABLE_STATE(wm, WIIMOTE_STATE_HANDSHAKE_COMPLETE);
@@ -100,7 +95,7 @@ void wiiuse_handshake_expansion(struct wiimote_t *wm,ubyte *data,uword len)
 			break;
 		case 2:
 			wm->expansion_state = 3;
-			buf = malloc(sizeof(ubyte)*EXP_HANDSHAKE_LEN);
+			buf = __lwp_wkspace_allocate(sizeof(ubyte)*EXP_HANDSHAKE_LEN);
 			wiiuse_read_data(wm,buf,WM_EXP_MEM_CALIBR,EXP_HANDSHAKE_LEN,wiiuse_handshake_expansion);
 			break;
 		case 3:
@@ -133,11 +128,11 @@ void wiiuse_handshake_expansion(struct wiimote_t *wm,ubyte *data,uword len)
 					if(!classic_ctrl_handshake(wm,&wm->exp.classic,data,len)) return;
 					/*WIIMOTE_DISABLE_STATE(wm,WIIMOTE_STATE_EXP_HANDSHAKE);
 					WIIMOTE_ENABLE_STATE(wm,WIIMOTE_STATE_EXP_FAILED);
-					free(data);
+					__lwp_wkspace_free(data);
 					wiiuse_status(wm,NULL);
 					return;*/
 			}
-			free(data);
+			__lwp_wkspace_free(data);
 
 			WIIMOTE_DISABLE_STATE(wm,WIIMOTE_STATE_EXP_HANDSHAKE);
 			WIIMOTE_ENABLE_STATE(wm,WIIMOTE_STATE_EXP);

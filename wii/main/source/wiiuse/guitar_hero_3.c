@@ -40,7 +40,6 @@
 	#include <Winsock2.h>
 #endif
 
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "dynamics.h"
@@ -99,7 +98,7 @@ int guitar_hero_3_handshake(struct wiimote_t* wm, struct guitar_hero_3_t* gh3, u
  *
  *	@param cc		A pointer to a classic_ctrl_t structure.
  */
-void guitar_hero_3_disconnected(struct guitar_hero_3_t* gh3)
+void guitar_hero_3_disconnected(struct guitar_hero_3_t* gh3) 
 {
 	memset(gh3, 0, sizeof(struct guitar_hero_3_t));
 }
@@ -149,7 +148,7 @@ void guitar_hero_3_event(struct guitar_hero_3_t* gh3, ubyte* msg) {
 		gh3->touch_bar = GUITAR_HERO_3_TOUCH_RED | GUITAR_HERO_3_TOUCH_GREEN;
 	else if (gh3->tb_raw > 0x02)
 		gh3->touch_bar = GUITAR_HERO_3_TOUCH_GREEN;
-
+	
 	/* whammy bar */
 	gh3->whammy_bar = (gh3->wb_raw - GUITAR_HERO_3_WHAMMY_BAR_MIN) / (float)(GUITAR_HERO_3_WHAMMY_BAR_MAX - GUITAR_HERO_3_WHAMMY_BAR_MIN);
 

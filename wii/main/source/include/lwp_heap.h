@@ -14,12 +14,17 @@
 #define HEAP_BLOCK_USED_OVERHEAD		(sizeof(void*)*2)
 #define HEAP_MIN_SIZE					(HEAP_OVERHEAD+sizeof(heap_block))
 
+//added for debug
+#define LWP_HEAP_MAGIC 0xDEADD0D0
+#define LWP_HEAP_BLOCK_MAGIC 0xF007FACE
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct _heap_block_st heap_block;
 struct _heap_block_st {
+	//u32 magic;
 	u32 back_flag;
 	u32 front_flag;
 	heap_block *next;
@@ -34,6 +39,7 @@ typedef struct _heap_iblock_st {
 } heap_iblock;
 
 typedef struct _heap_cntrl_st {
+	//u32 magic;
 	heap_block *start;
 	heap_block *final;
 

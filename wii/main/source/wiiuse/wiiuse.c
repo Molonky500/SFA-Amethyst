@@ -8,7 +8,6 @@
 	#include <Winsock2.h>
 #endif
 
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "io.h"
@@ -19,23 +18,12 @@ void wiiuse_send_next_command(struct wiimote_t *wm)
 {
 	struct cmd_blk_t *cmd;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
-	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) {
-        exiPrintf("WPAD: %s: not connected (%08X)\n",
-            __FUNCTION__, (u32)wm);
-        return;
-    }
+	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return;
 
 	cmd = wm->cmd_head;
 
-	if(!cmd) {
-        exiPrintf("WPAD: %s: no cmd\n", __FUNCTION__);
-        return;
-    }
-	if(cmd->state!=CMD_READY) {
-        exiPrintf("WPAD: %s: not ready\n", __FUNCTION__);
-        return;
-    }
+	if(!cmd) return;
+	if(cmd->state!=CMD_READY) return;
 
 	cmd->state = CMD_SENT;
 	if(WIIMOTE_IS_SET(wm,WIIMOTE_STATE_RUMBLE)) cmd->data[1] |= 0x01;
@@ -48,13 +36,8 @@ static __inline__ void __wiiuse_push_command(struct wiimote_t *wm,struct cmd_blk
 {
 	uint level;
 
-	if(!wm || !cmd) {
-        exiPrintf("WPAD: %s: cmd=%08X wm=%08X\n", __FUNCTION__,
-            (u32)cmd, (u32)wm);
-        return;
-    }
+	if(!wm || !cmd) return;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	cmd->next = NULL;
 	cmd->state = CMD_READY;
 
@@ -77,19 +60,18 @@ struct wiimote_t** wiiuse_init(int wiimotes, wii_event_cb event_cb) {
 #endif
 	int i = 0;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if (!wiimotes)
 		return NULL;
 
 	if (!__wm) {
-		__wm = malloc(sizeof(struct wiimote_t*) * wiimotes);
+		__wm = __lwp_wkspace_allocate(sizeof(struct wiimote_t*) * wiimotes);
 		if(!__wm) return NULL;
 		memset(__wm, 0, sizeof(struct wiimote_t*) * wiimotes);
 	}
 
 	for (i = 0; i < wiimotes; ++i) {
 		if(!__wm[i])
-			__wm[i] = malloc(sizeof(struct wiimote_t));
+			__wm[i] = __lwp_wkspace_allocate(sizeof(struct wiimote_t));
 
 		memset(__wm[i], 0, sizeof(struct wiimote_t));
 		__wm[i]->unid = i;
@@ -162,7 +144,7 @@ int wiiuse_set_flags(struct wiimote_t* wm, int enable, int disable) {
  *	the wiimote saves power by not transmitting it
  *	by default.
  */
-void wiiuse_motion_sensing(struct wiimote_t* wm, int status)
+void wiiuse_motion_sensing(struct wiimote_t* wm, int status) 
 {
 	if (status) {
 		if(WIIMOTE_IS_SET(wm,WIIMOTE_STATE_ACC)) return;
@@ -182,7 +164,7 @@ void wiiuse_motion_sensing(struct wiimote_t* wm, int status)
  *
  *	@param wm		Pointer to a wiimote_t structure.
  */
-void wiiuse_toggle_rumble(struct wiimote_t* wm)
+void wiiuse_toggle_rumble(struct wiimote_t* wm) 
 {
 	if (!wm) return;
 
@@ -198,7 +180,7 @@ void wiiuse_toggle_rumble(struct wiimote_t* wm)
  *	@param wm		Pointer to a wiimote_t structure.
  *	@param status	1 to enable, 0 to disable.
  */
-void wiiuse_rumble(struct wiimote_t* wm, int status)
+void wiiuse_rumble(struct wiimote_t* wm, int status) 
 {
 	if (status && WIIMOTE_IS_SET(wm,WIIMOTE_STATE_RUMBLE)) return;
 	else if(!status && !WIIMOTE_IS_SET(wm,WIIMOTE_STATE_RUMBLE)) return;
@@ -222,7 +204,6 @@ int wiiuse_set_report_type(struct wiimote_t *wm,cmd_blk_cb cb)
 	ubyte buf[2];
 	int motion,ir,exp;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 
 	buf[0] = (WIIMOTE_IS_FLAG_SET(wm, WIIUSE_CONTINUOUS) ? 0x04 : 0x00);	/* set to 0x04 for continuous reporting */
@@ -251,13 +232,8 @@ void wiiuse_status(struct wiimote_t *wm,cmd_blk_cb cb)
 {
 	ubyte buf;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
-	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) {
-		exiPrintf("WPAD: %s: not connected (%08X)\n", __FUNCTION__,
-			(u32)wm);
-		return;
-	}
-
+	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return;
+	
 	buf = 0x00;
 	wiiuse_sendcmd(wm,WM_CMD_CTRL_STATUS,&buf,1,cb);
 }
@@ -267,14 +243,10 @@ int wiiuse_read_data(struct wiimote_t *wm,ubyte *buffer,uint addr,uword len,cmd_
 	struct op_t *op;
 	struct cmd_blk_t *cmd;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!buffer || !len) return 0;
-
-	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
-	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
-	if(!ok) return 0;
+	
+	cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
 	if(!cmd) return 0;
 
 	cmd->cb = cb;
@@ -296,14 +268,10 @@ int wiiuse_write_data(struct wiimote_t *wm,uint addr,ubyte *data,ubyte len,cmd_b
 	struct op_t *op;
 	struct cmd_blk_t *cmd;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!data || !len) return 0;
-
-	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
-	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
-	if(!ok) return 0;
+	
+	cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
 	if(!cmd) return 0;
 
 	cmd->cb = cb;
@@ -326,14 +294,10 @@ int wiiuse_write_streamdata(struct wiimote_t *wm,ubyte *data,ubyte len,cmd_blk_c
 {
 	struct cmd_blk_t *cmd;
 
-	exiPrintf("WPAD: %s\n", __FUNCTION__);
 	if(!wm || !WIIMOTE_IS_CONNECTED(wm)) return 0;
 	if(!data || !len || len>20) return 0;
 
-	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
-	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_BLOCK);
-	if(!ok) return 0;
+	cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
 	if(!cmd) return 0;
 
 	cmd->cb = cb;
@@ -348,16 +312,9 @@ int wiiuse_write_streamdata(struct wiimote_t *wm,ubyte *data,ubyte len,cmd_blk_c
 
 int wiiuse_sendcmd(struct wiimote_t *wm,ubyte report_type,ubyte *msg,int len,cmd_blk_cb cb)
 {
-	struct cmd_blk_t *cmd = NULL;
+	struct cmd_blk_t *cmd;
 
-	//someone isn't putting things into this queue
-	//cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
-	exiPrintf("WPAD: %s(%02X)\n", __FUNCTION__, report_type);
-	exiPrintf("WPAD: %s: read msg from cmdq %08X\n", __FUNCTION__, (u32)&wm->cmdq);
-	BOOL ok = OSReceiveMessage(&wm->cmdq, (void**)&cmd, OS_MESSAGE_NOBLOCK);
-	exiPrintf("WPAD: %s(%02X) ok=%d cmd=%08X\n", __FUNCTION__,
-		report_type, ok, cmd);
-	if(!ok) return 0;
+	cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
 	if(!cmd) return 0;
 
 	cmd->cb = cb;

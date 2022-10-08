@@ -40,7 +40,6 @@
 	#include <Winsock2.h>
 #endif
 
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "dynamics.h"
@@ -57,7 +56,7 @@
  *
  *	@return	Returns 1 if handshake was successful, 0 if not.
  */
-int wii_board_handshake(struct wiimote_t* wm, struct wii_board_t* wb, ubyte* data, uword len)
+int wii_board_handshake(struct wiimote_t* wm, struct wii_board_t* wb, ubyte* data, uword len) 
 {
 	int offset = 0;
 
@@ -89,7 +88,7 @@ int wii_board_handshake(struct wiimote_t* wm, struct wii_board_t* wb, ubyte* dat
 	wm->event = WIIUSE_WII_BOARD_INSERTED;
 	wm->exp.type = EXP_WII_BOARD;
 
-	return 1;
+	return 1; 
 }
 
 
@@ -111,9 +110,9 @@ void wii_board_disconnected(struct wii_board_t* wb)
  *	@param msg		The message specified in the event packet.
  */
 void wii_board_event(struct wii_board_t* wb, ubyte* msg)
-{
+{ 
 	wb->rtr = (msg[0]<<8)|msg[1];
 	wb->rbr = (msg[2]<<8)|msg[3];
 	wb->rtl = (msg[4]<<8)|msg[5];
-	wb->rbl = (msg[6]<<8)|msg[7];
+	wb->rbl = (msg[6]<<8)|msg[7];	
 }

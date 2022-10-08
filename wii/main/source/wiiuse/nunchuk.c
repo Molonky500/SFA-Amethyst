@@ -3,7 +3,6 @@
 #include <math.h>
 #include <string.h>
 
-#include "main.h"
 #include "dynamics.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
@@ -103,7 +102,7 @@ int nunchuk_handshake(struct wiimote_t *wm,struct nunchuk_t *nc,ubyte *data,uwor
  *
  *	@param nc		A pointer to a nunchuk_t structure.
  */
-void nunchuk_disconnected(struct nunchuk_t* nc)
+void nunchuk_disconnected(struct nunchuk_t* nc) 
 {
 	//printf("nunchuk_disconnected()\n");
 	memset(nc, 0, sizeof(struct nunchuk_t));

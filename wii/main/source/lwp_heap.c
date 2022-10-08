@@ -15,10 +15,12 @@ u32 __lwp_heap_init(heap_cntrl *theheap,void *start_addr,u32 size,u32 pg_size)
 	if(!__lwp_heap_pgsize_valid(pg_size) || size<HEAP_MIN_SIZE) return 0;
 
 	_CPU_ISR_Disable(level);
+	//theheap->magic = LWP_HEAP_MAGIC;
 	theheap->pg_size = pg_size;
 	dsize = (size - HEAP_OVERHEAD);
 
 	block = (heap_block*)start_addr;
+	//block->magic = LWP_HEAP_BLOCK_MAGIC;
 	block->back_flag = HEAP_DUMMY_FLAG;
 	block->front_flag = dsize;
 	block->next	= __lwp_heap_tail(theheap);
@@ -30,11 +32,14 @@ u32 __lwp_heap_init(heap_cntrl *theheap,void *start_addr,u32 size,u32 pg_size)
 	theheap->last = block;
 
 	block = __lwp_heap_nextblock(block);
+	//block->magic = LWP_HEAP_BLOCK_MAGIC;
 	block->back_flag = dsize;
 	block->front_flag = HEAP_DUMMY_FLAG;
 	theheap->final = block;
 	_CPU_ISR_Restore(level);
 
+	exiPrintf("%s(%p, %p, %d, %d)\n", __FUNCTION__,
+		theheap, start_addr, size, pg_size);
 	return (dsize - HEAP_BLOCK_USED_OVERHEAD);
 }
 
@@ -48,8 +53,16 @@ void* __lwp_heap_allocate(heap_cntrl *theheap,u32 size)
 	void *ptr;
 	u32 offset,level;
 
+	exiPrintf("%s(%p, %d)\n", __FUNCTION__, theheap, size);
 
-	if(size>=(-1-HEAP_BLOCK_USED_OVERHEAD)) return NULL;
+	/*if(theheap->magic != LWP_HEAP_MAGIC) {
+		exiPrintf(" *** ERROR *** Heap %08x corrupted\n", theheap);
+		HALT;
+	}*/
+	if(size>=(-1-HEAP_BLOCK_USED_OVERHEAD)) {
+		exiPrintf("invalid alloc size %d!\n", size);
+		return NULL;
+	}
 
 	_CPU_ISR_Disable(level);
 	excess = (size % theheap->pg_size);
@@ -62,6 +75,7 @@ void* __lwp_heap_allocate(heap_cntrl *theheap,u32 size)
 
 	for(block=theheap->first;;block=block->next) {
 		if(block==__lwp_heap_tail(theheap)) {
+			PANIC("alloc failed!\n");
 			_CPU_ISR_Restore(level);
 			return NULL;
 		}
@@ -76,6 +90,8 @@ void* __lwp_heap_allocate(heap_cntrl *theheap,u32 size)
 		tmp_block = __lwp_heap_blockat(next_block,dsize);
 		tmp_block->back_flag = next_block->front_flag = __lwp_heap_buildflag(dsize,HEAP_BLOCK_USED);
 
+		//tmp_block->magic = LWP_HEAP_BLOCK_MAGIC;
+		//next_block->magic = LWP_HEAP_BLOCK_MAGIC;
 		ptr = __lwp_heap_startuser(next_block);
 	} else {
 		next_block = __lwp_heap_nextblock(block);
@@ -85,12 +101,19 @@ void* __lwp_heap_allocate(heap_cntrl *theheap,u32 size)
 		block->next->prev = block->prev;
 		block->prev->next = block->next;
 
+		//next_block->magic = LWP_HEAP_BLOCK_MAGIC;
+		//block->magic = LWP_HEAP_BLOCK_MAGIC;
 		ptr = __lwp_heap_startuser(block);
 	}
 
 	offset = (theheap->pg_size - ((u32)ptr&(theheap->pg_size-1)));
 	ptr += offset;
 	*(((u32*)ptr)-1) = offset;
+
+	/*if(theheap->magic != LWP_HEAP_MAGIC) {
+		exiPrintf(" *** ERROR *** Heap %08x corrupted\n", theheap);
+		HALT;
+	}*/
 	_CPU_ISR_Restore(level);
 
 	return ptr;
@@ -107,7 +130,30 @@ BOOL __lwp_heap_free(heap_cntrl *theheap,void *ptr)
 
 	_CPU_ISR_Disable(level);
 
+	/*if(theheap->magic != LWP_HEAP_MAGIC) {
+		exiPrintf(" *** ERROR *** Heap %08x corrupted\n", theheap);
+		HALT;
+	}*/
+
 	block = __lwp_heap_usrblockat(ptr);
+	if(!block) {
+		exiPrintf(" *** ERROR *** No heap block for %08x\n", ptr);
+		HALT;
+	}
+	/*if(block->magic != LWP_HEAP_BLOCK_MAGIC) {
+		exiPrintf(" *** ERROR *** Heap block %08x corrupted (magic=%08X)\n",
+			block, block->magic);
+		HALT;
+	}*/
+	if(!__lwp_heap_blockin(theheap,block)) {
+		exiPrintf(" *** ERROR *** Heap block %08x not in heap %08x\n",
+			block, theheap);
+		HALT;
+	}
+	if(__lwp_heap_blockfree(block)) {
+		exiPrintf(" *** ERROR *** Heap block %08x not allocated\n", block);
+		HALT;
+	}
 	if(!__lwp_heap_blockin(theheap,block) || __lwp_heap_blockfree(block)) {
 		_CPU_ISR_Restore(level);
 		return FALSE;
@@ -154,6 +200,11 @@ BOOL __lwp_heap_free(heap_cntrl *theheap,void *ptr)
 		theheap->first = block;
 		block->next->prev = block;
 	}
+
+	/*if(theheap->magic != LWP_HEAP_MAGIC) {
+		exiPrintf(" *** ERROR *** Heap %08x corrupted\n", theheap);
+		HALT;
+	}*/
 	_CPU_ISR_Restore(level);
 
 	return TRUE;

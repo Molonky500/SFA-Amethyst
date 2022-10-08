@@ -3,7 +3,7 @@
 #define CHECK_THREAD_STACK_SIZE 8192
 #define CHECK_THREAD_PRIO 30 //31=lowest 0=highest
 #define OS_THREAD_STACK_MAGIC 0xDEADBABE
-#define MAX_THREADS 16
+#define MAX_THREADS_CHECK 16
 
 OSThread checkThread;
 static u8 checkThreadStack[CHECK_THREAD_STACK_SIZE];
@@ -15,12 +15,12 @@ typedef struct {
     const char *name;
 } PrevThreadState;
 
-PrevThreadState prevThreadState[MAX_THREADS];
+PrevThreadState prevThreadState[MAX_THREADS_CHECK];
 
 static PrevThreadState* findThread(OSThread *thread) {
     PrevThreadState *pState = NULL;
     PrevThreadState *empty = NULL;
-    for(int i=0; i<MAX_THREADS; i++) {
+    for(int i=0; i<MAX_THREADS_CHECK; i++) {
         if(prevThreadState[i].thread == thread) {
             pState = &prevThreadState[i];
             break;

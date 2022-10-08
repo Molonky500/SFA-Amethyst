@@ -8,7 +8,6 @@
 #ifdef GEKKO
 	#include <ogcsys.h>
 #endif
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "ir.h"

@@ -12,6 +12,11 @@
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
+#define PANIC(msg) do { \
+    exiPrintf(" *** ERROR *** %s:%d: %s\n", __FILE__, __LINE__, msg); \
+    *(u32*)0 = 0; /* crash to get backtrace */ \
+} while(0)
+//XXX remove
 #define HALT do { \
     exiPrintf(" *** ERROR *** HALT at %s:%d\n", __FILE__, __LINE__); \
     *(u32*)0 = 0; /* crash to get backtrace */ \
@@ -53,7 +58,10 @@ extern int _argc;
 #include "dol.h"
 #include "thread.h"
 #include "lwp_heap.h"
+#include "lwp_wkspace.h"
+#include "sys_alarm.h"
 #include "ipc.h"
+#include "ios.h"
 #include "disc_io.h"
 #include "gameheap.h"
 #include "gamefuncs.h"

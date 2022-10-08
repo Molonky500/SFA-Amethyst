@@ -40,7 +40,6 @@
 	#include <Winsock2.h>
 #endif
 
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "dynamics.h"

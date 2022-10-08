@@ -7,14 +7,13 @@
 	#include <Winsock2.h>
 #endif
 
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "dynamics.h"
 #include "events.h"
 #include "wiiboard.h"
 #include "io.h"
-//#include "lwp_wkspace.h"
+#include "lwp_wkspace.h"
 #include "motion_plus.h"
 
 static void wiiuse_probe_motion_plus_check2(struct wiimote_t *wm, ubyte *data, uword len)
@@ -33,17 +32,17 @@ static void wiiuse_probe_motion_plus_check1(struct wiimote_t *wm, ubyte *data, u
 	{
 		WIIMOTE_DISABLE_STATE(wm, WIIMOTE_STATE_MPLUS_PRESENT);
 		WIIMOTE_DISABLE_STATE(wm, WIIMOTE_STATE_EXP_HANDSHAKE);
-		free(data);
+		__lwp_wkspace_free(data);
 		return;
 	}
-	free(data);
+	__lwp_wkspace_free(data);
 	ubyte val = 0x55;
 	wiiuse_write_data(wm, WM_EXP_MOTION_PLUS_ENABLE, &val, 1, wiiuse_probe_motion_plus_check2);
 }
 
 void wiiuse_probe_motion_plus(struct wiimote_t *wm)
 {
-	ubyte *buf = malloc(MAX_PAYLOAD);
+	ubyte *buf = __lwp_wkspace_allocate(MAX_PAYLOAD);
 	wiiuse_read_data(wm, buf, WM_EXP_MOTION_PLUS_MODE, 2, wiiuse_probe_motion_plus_check1);
 }
 
@@ -65,7 +64,7 @@ void wiiuse_motion_plus_check(struct wiimote_t *wm,ubyte *data,uword len)
 			/* handshake done */
 			wm->event = WIIUSE_MOTION_PLUS_ACTIVATED;
 			wm->exp.type = EXP_MOTION_PLUS;
-
+			
 			WIIMOTE_ENABLE_STATE(wm,WIIMOTE_STATE_EXP);
 			wiiuse_set_ir_mode(wm);
 			wiiuse_status(wm, NULL);
@@ -95,14 +94,14 @@ void wiiuse_set_motion_plus(struct wiimote_t *wm, int status)
 
 	if(WIIMOTE_IS_SET(wm,WIIMOTE_STATE_EXP_HANDSHAKE))
 		return;
-
+	
 	WIIMOTE_ENABLE_STATE(wm, WIIMOTE_STATE_EXP_HANDSHAKE);
 	if (!WIIMOTE_IS_SET(wm, WIIMOTE_STATE_MPLUS_PRESENT))
 	{
 		wiiuse_probe_motion_plus(wm);
 		return;
 	}
-
+	
 	if(status)
 	{
 		val = 0x04;

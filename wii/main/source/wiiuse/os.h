@@ -14,13 +14,14 @@
 	/* nix/gekko */
 	#ifdef GEKKO
 		//#include <gccore.h>
-		//#include <ogcsys.h>
+		#include "main.h"
+		#include <ogcsys.h>
 		#include "bte.h"
 		#include "network.h"
 		//#include "lwp_queue.h"
 		#include "asm.h"
 		#include "processor.h"
-		//#include "lwp_wkspace.h"
+		#include "lwp_wkspace.h"
 	#else
 	#endif
 #endif

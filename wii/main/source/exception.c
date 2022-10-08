@@ -114,7 +114,7 @@ uint cause, void *addr) {
     }
 
     dumpGameHeaps();
-    ipcDumpQueueForDebug();
+    //ipcDumpQueueForDebug();
     checkIntegrity();
 
     //SYS_ResetSystem(SYS_SHUTDOWN,0,0);

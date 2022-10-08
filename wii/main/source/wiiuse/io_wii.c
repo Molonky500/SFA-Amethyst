@@ -5,12 +5,11 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "main.h"
 #include "definitions.h"
 #include "wiiuse_internal.h"
 #include "events.h"
 #include "io.h"
-//#include "lwp_wkspace.h"
+#include "lwp_wkspace.h"
 
 #define MAX_COMMANDS					0x100
 #define MAX_WIIMOTES					5
@@ -27,6 +26,11 @@ static __inline__ u32 ACR_ReadReg(u32 reg)
 	return _ipcReg[reg>>2];
 }
 
+static __inline__ void ACR_WriteReg(u32 reg,u32 val)
+{
+	_ipcReg[reg>>2] = val;
+}
+
 static s32 __wiiuse_disconnected(void *arg,struct bte_pcb *pcb,u8 err)
 {
 	struct wiimote_listen_t *wml = (struct wiimote_listen_t*)arg;
@@ -34,16 +38,14 @@ static s32 __wiiuse_disconnected(void *arg,struct bte_pcb *pcb,u8 err)
 
 	if(!wm) return ERR_OK;
 
-	exiPrintf("WPAD: wiimote disconnected\n");
+	//printf("wiimote disconnected\n");
 	WIIMOTE_DISABLE_STATE(wm, (WIIMOTE_STATE_IR|WIIMOTE_STATE_IR_INIT));
 	WIIMOTE_DISABLE_STATE(wm, (WIIMOTE_STATE_SPEAKER|WIIMOTE_STATE_SPEAKER_INIT));
 	WIIMOTE_DISABLE_STATE(wm, (WIIMOTE_STATE_EXP|WIIMOTE_STATE_EXP_HANDSHAKE|WIIMOTE_STATE_EXP_FAILED));
 	WIIMOTE_DISABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE|WIIMOTE_STATE_HANDSHAKE_COMPLETE));
 
 	while(wm->cmd_head) {
-		exiPrintf("send msg %08X to cmdq %08X\n",
-			(u32)&wm->cmd_head->node, (u32)&wm->cmdq);
-		OSSendMessage(&wm->cmdq,&wm->cmd_head->node,OS_MESSAGE_NOBLOCK);
+		__lwp_queue_append(&wm->cmdq,&wm->cmd_head->node);
 		wm->cmd_head = wm->cmd_head->next;
 	}
 	wm->cmd_tail = NULL;
@@ -61,7 +63,7 @@ static s32 __wiiuse_receive(void *arg,void *buffer,u16 len)
 
 	if(!wm || !buffer || len==0) return ERR_OK;
 
-	exiPrintf("WPAD: __wiiuse_receive[%02x]\n",*(char*)buffer);
+	//printf("__wiiuse_receive[%02x]\n",*(char*)buffer);
 	wm->event = WIIUSE_NONE;
 
 	memcpy(wm->event_buf,buffer,len);
@@ -83,7 +85,6 @@ static s32 __wiiuse_connected(void *arg,struct bte_pcb *pcb,u8 err)
 	wm = wml->assign_cb(&wml->bdaddr);
 
 	if(!wm) {
-		exiPrintf("WPAD: unrecognized wiimote %08X", wml->bdaddr);
 		bte_disconnect(wml->sock);
 		return ERR_OK;
 	}
@@ -93,14 +94,12 @@ static s32 __wiiuse_connected(void *arg,struct bte_pcb *pcb,u8 err)
 	wm->sock = wml->sock;
 	wm->bdaddr = wml->bdaddr;
 
-	exiPrintf("WPAD: __wiiuse_connected()\n");
+	//printf("__wiiuse_connected()\n");
 	WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE));
-	//WIIMOTE_ENABLE_STATE(wm,(WIIMOTE_STATE_CONNECTED|WIIMOTE_STATE_HANDSHAKE_COMPLETE));
 
 	wm->handshake_state = 0;
 	wiiuse_handshake(wm,NULL,0);
 
-	exiPrintf("WPAD: connect OK\n");
 	return ERR_OK;
 }
 
@@ -120,33 +119,20 @@ int wiiuse_register(struct wiimote_listen_t *wml, struct bd_addr *bdaddr, struct
 {
 	s32 err;
 
-	if(!wml || !bdaddr || !assign_cb) {
-		exiPrintf(" *** ERROR *** %s bad params\n",__FUNCTION__);
-		return 0;
-	}
+	if(!wml || !bdaddr || !assign_cb) return 0;
 
 	wml->wm = NULL;
 	wml->bdaddr = *bdaddr;
 	wml->sock = bte_new();
 	wml->assign_cb = assign_cb;
-	if(wml->sock==NULL) {
-		exiPrintf(" *** ERROR *** %s no sock\n",__FUNCTION__);
-		return 0;
-	}
+	if(wml->sock==NULL) return 0;
 
-	exiPrintf("%s\n", __FUNCTION__);
-	int irq = OSDisableInterrupts();
 	bte_arg(wml->sock,wml);
 	bte_received(wml->sock,__wiiuse_receive);
 	bte_disconnected(wml->sock,__wiiuse_disconnected);
 
 	err = bte_registerdeviceasync(wml->sock,bdaddr,__wiiuse_connected);
-	OSRestoreInterrupts(irq);
-	if(err==ERR_OK) {
-		return 1;
-	}
-	exiPrintf(" *** ERROR *** %s register err %d\n",
-		__FUNCTION__, err);
+	if(err==ERR_OK) return 1;
 
 	return 0;
 }
@@ -171,15 +157,11 @@ void wiiuse_init_cmd_queue(struct wiimote_t *wm)
 
 	if (!__queue_buffer[wm->unid]) {
 		size = (MAX_COMMANDS*sizeof(struct cmd_blk_t));
-		__queue_buffer[wm->unid] = malloc(size);
-		if(!__queue_buffer[wm->unid]) {
-			exiPrintf(" *** ERROR *** %s: alloc(%d) failed\n",
-				__FUNCTION__, size);
-			return;
-		}
+		__queue_buffer[wm->unid] = __lwp_wkspace_allocate(size);
+		if(!__queue_buffer[wm->unid]) return;
 	}
 
-	OSInitMessageQueue(&wm->cmdq,(void*)&__queue_buffer[wm->unid],MAX_COMMANDS);
+	__lwp_queue_initialize(&wm->cmdq,__queue_buffer[wm->unid],MAX_COMMANDS,sizeof(struct cmd_blk_t));
 }
 
 int wiiuse_io_write(struct wiimote_t *wm,ubyte *buf,int len)

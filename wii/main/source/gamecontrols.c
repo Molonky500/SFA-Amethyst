@@ -224,12 +224,12 @@ void padUpdate_hook_() {
     static int cooldown = 0;
     if(!cooldown) {
         if(control->buttons & PAD_BUTTON_B) {
-            exiPrintf(" *** Manual IPC queue dump\n");
-            ipcDumpQueueForDebug();
+            //exiPrintf(" *** Manual IPC queue dump\n");
+            //ipcDumpQueueForDebug();
             cooldown = 100;
         }
         if(control->buttons & PAD_BUTTON_X) {
-            step = 0;
+            step = 0; //reset bluetooth
             cooldown = 100;
         }
     }
@@ -239,10 +239,10 @@ void padUpdate_hook_() {
     u32 debugLogEnd = *(u32*)0x803dbc14;
     if(debugLogEnd - 0x803aa018 > 3000) debugLogEnd = 0x803aa018;
 
-    ipcPumpQueue(); //XXX move
+    //ipcPumpQueue(); //XXX move
     updateWiimote();
     displayControllerState(0, control);
-    ipcDebugPrint();
+    //ipcDebugPrint();
 }
 void padUpdate_hook(void);
 __asm__(

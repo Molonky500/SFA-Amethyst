@@ -262,7 +262,8 @@ static s32 __usbv0_messageCB(s32 result,void *usrdata)
 	exiPrintf("%s:%d msg=%08X\n", __FILE__, __LINE__, msg);
 	if(msg==NULL) return IPC_EINVAL;
 
-	exiPrintf("%s:%d cb=%08X\n", __FILE__, __LINE__, msg->cb);
+	exiPrintf("%s:%d cb=%08X(%d, %08X)\n", __FILE__, __LINE__,
+		msg->cb, result, msg->userdata);
 	if(msg->cb!=NULL) msg->cb(result, msg->userdata);
 
 	exiPrintf("%s:%d bufs=%08X\n", __FILE__, __LINE__, msg->heap_buffers);
@@ -542,9 +543,9 @@ static inline s32 __usb_interrupt_bulk_message(s32 device_id,u8 ioctl,u8 bEndpoi
 
 		msg->heap_buffers = 2;
 
-		exiPrintf("%s: do ioctl %d, device %d, endp=%02X, len=%d, cb=%08x\n",
+		exiPrintf("%s: do ioctl %d, device %d, endp=%02X, len=%d, cb=%08x(%08x)\n",
 			__FUNCTION__, ioctl, device_id, bEndpoint,
-			wLength, cb);
+			wLength, cb, msg);
 		if (cb==NULL)
 			ret = IOS_Ioctlv(device_id,ioctl,2,1,msg->vec);
 		else
