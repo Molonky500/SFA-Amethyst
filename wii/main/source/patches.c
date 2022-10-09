@@ -115,6 +115,7 @@ void doPatches() {
     hookBranch(0x8024f784, AIStartDMA_hook, 0, 0);
     //bypass the part of __ARCheckSize that clobbers MEM2
     //hookBranch(0x80250788, 0x80250b18, 0, 0);
+    doDspPatch();
 
     static const u32 patches[] = {
         //address, value
@@ -145,6 +146,7 @@ void doPatches() {
         //manually instead.
         0x80250218, 0x4E800020, //__ARCheckSize
         0x803de01c, 0x01000000, //__ARSize
+        //0x8024fbe0, 0x60000000, //don't set AI interrupt timing
 
         //disable audio for now
         //0x802406ec, 0x60000000, //__OSInitAudioSystem

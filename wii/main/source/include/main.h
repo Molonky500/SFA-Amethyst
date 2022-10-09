@@ -78,6 +78,7 @@ bool checkAddrInheap(void *addr, u32 len);
 void* _my_sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 
 //audio.c
+void doDspPatch();
 void ARStartDMA_hook(u32 cntH, void *mmaddr, u32 araddr, u32 cntL);
 void AIInitDMA_hook(u32 start, uint length);
 void AIStartDMA_hook();

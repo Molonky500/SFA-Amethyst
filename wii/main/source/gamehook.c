@@ -1,6 +1,9 @@
 #include "main.h"
 
 void initGameHooks() {
+    //memset(0x90000000, 0, 16*1024*1024);
+    //_dspReg[5] = 0x801; //DSP reset
+
     initAlloc();
     exiPuts("loader2 alloc init OK\n");
     initLibc();
