@@ -110,11 +110,6 @@ void doPatches() {
     hookBranch(0x80248eac, DVDReadAsyncPrio_hook, 0, 0);
     hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0, 0);
     hookBranch(0x8024afd8, DVDCancelStreamAsync_hook, 0, 0);
-    hookBranch(0x8024ffe4, ARStartDMA_hook, 0, 0);
-    hookBranch(0x8024f6fc, AIInitDMA_hook, 0, 0);
-    hookBranch(0x8024f784, AIStartDMA_hook, 0, 0);
-    //bypass the part of __ARCheckSize that clobbers MEM2
-    //hookBranch(0x80250788, 0x80250b18, 0, 0);
     doDspPatch();
 
     static const u32 patches[] = {
@@ -139,43 +134,12 @@ void doPatches() {
         //0x802491f4, 0x4E800020, //DVDInit
         0x802408fc, 0x60000000, //DVDInquiryAsync
         0x80015624, 0x4E800020, //dvdCheckError
-        //0x802492a4, 0x60000000, //__fstLoad
 
         //__ARCheckSize probes ARAM to detect size, but this
         //clobbers MEM2, so disable it and set the size
         //manually instead.
         0x80250218, 0x4E800020, //__ARCheckSize
         0x803de01c, 0x01000000, //__ARSize
-        //0x8024fbe0, 0x60000000, //don't set AI interrupt timing
-
-        //disable audio for now
-        //0x802406ec, 0x60000000, //__OSInitAudioSystem
-        //0x80020ec8, 0x38600001, //audioInit
-        //0x80009bf8, 0x4E800020, //other audioInit
-        //0x8000d200, 0x4E800020, //streamPlay
-        //0x8024afd8, 0x4E800020, //DVDCancelStreamAsync
-        //0x8024b094, 0x4E800020, //DVDStopStreamAtEndAsync
-        //0x8024f6fc, 0x4E800020, //AIInitDMA
-        //0x80284670, 0x4E800020, //audio
-        //0x8024ffe4, 0x4E800020, //ARStartDMA
-        //0x80284224, 0x4E800020, //waits for AR DMA
-        //0x80284048, 0x4E800020, //waits for AR DMA
-        //0x802843f0, 0x60000000, //don't wait for AR DMA
-        //0x8024fcd4, 0x4E800020, //irq_DSP
-        //0x802501a0, 0x4E800020, //__ARHandler
-        //0x8025111c, 0x4E800020, //__DSPHandler
-        //0x8024fc58, 0x4E800020, //__AISHandler
-        //0x8024f9ac, 0x4E800020, //__AI_set_stream_sample_rate
-        //0x8024f7d0, 0x4E800020, //AISetStreamPlayState
-        //0x8024fabc, 0x4E800020, //AISetStreamVolLeft
-        //0x8024fa90, 0x4E800020, //AISetStreamVolRight
-
-        //these do nothing lmao
-        //0x80020c68, 0x60000000, //mainLoopAudioUpdate
-        //0x80020c6c, 0x60000000, //mainLoopDoQueuedSounds
-
-        //0x8011937c, 0x38600001, //XXX
-        //0x80102aa0, 0x4E800020, //Camera::triggerAction
 
         //titleTryLoadSaveFiles
         //0x8007dbc0, 0x38600000,

@@ -272,7 +272,7 @@ __attribute__((noreturn)) void loadAppDol() {
     //load the DOL
     DolHeader header;
     fread(&header, sizeof(DolHeader), 1, dol);
-    printDolHeader(&header);
+    //printDolHeader(&header);
     loadDol(dol, &header);
     fclose(dol);
 
