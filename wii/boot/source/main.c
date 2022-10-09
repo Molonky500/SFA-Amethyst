@@ -21,6 +21,8 @@ static char gameRootDir[512];
 extern DISC_INTERFACE __io_wiisd;
 bool gIsVideoInit = false;
 
+static const char *defaultRootDir = "sd:/apps/SFA";
+
 int initVideo() {
     /** Init video system.
      *  @returns 0 on success, nonzero on failure.
@@ -62,6 +64,11 @@ void quit(const char *msg) {
     }
     printf("\n  Exiting  \n");
     exit(0);
+}
+
+void checkForExitButton() {
+    PAD_ScanPads();
+    if(PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_START) exit(0);
 }
 
 int initFilesystem() {
@@ -157,20 +164,36 @@ int _depth) {
     return 0;
 }
 
-void initGameFiles() {
+void initGameFiles(const char *appPath) {
     /** Find the game files.
      *  If not found, displays an error and exits the application.
+     *  appPath: path to this executable, passed by most loaders.
+     *   not by Dolphin when running from the local FS though,
+     *   because how would that even work?
      */
-
-    //temp override
-    strcpy(gameRootDir, "sd:/apps/SFA");
-    return;
-
-    //printf("Looking for game files... (START to exit)\n");
-    strcpy(gameRootDir, "/");
-    //strcpy(gameRootDir, "//apps/SFA");
+    if(appPath) {
+        strncpy(gameRootDir, appPath, sizeof(gameRootDir));
+        //cut off the name
+        int n = strlen(gameRootDir) - 1;
+        while(n >= 0) {
+            if(gameRootDir[n] == '/') {
+                gameRootDir[n] = 0;
+                break;
+            }
+            else n--;
+        }
+    }
+    else strcpy(gameRootDir, defaultRootDir);
     int err = _scanForGameFiles(gameRootDir, sizeof(gameRootDir), 0);
-    //printf("\n");
+    if(err > 0) { //success
+        exiPrintf("Found game files:\n\"%s\"\n", gameRootDir);
+        return;
+    }
+
+    printf("Looking for game files... (START to exit)\n");
+    printf("Tip: place them at %s to skip this step!\n", defaultRootDir);
+    strcpy(gameRootDir, "/");
+    err = _scanForGameFiles(gameRootDir, sizeof(gameRootDir), 0);
     if(err > 0) { //success
         exiPrintf("Found game files:\n\"%s\"\n", gameRootDir);
     }
@@ -239,12 +262,14 @@ void loadGame() {
     int r = 0;
     u32 offset = 0;
     while(offset < size) {
-        r = fread(dest, 1, size-offset, file);
+        r = fread(dest, 1, MIN(1024, size-offset), file);
         if(r < 0) {
             initVideo();
             printf("[stage1] Error reading %s: %d\n", path, errno);
             quit(NULL);
         }
+        printf("\x1B[2;0H\x1B[2KLoading: %5.2f%%  ", //home, clear line
+            ((float)offset/(float)size) * 100.0f);
         offset += r;
         dest += r;
     }
@@ -254,6 +279,9 @@ __attribute__((noreturn)) void loadAppDol() {
     /** Load the second stage bootloader DOL.
      */
     char path[4096];
+
+    //display a nice splash screen that's on the game
+    //disc but normally unused.
     snprintf(path, sizeof(path), "%s/files/splashScreen.bin", gameRootDir);
     FILE *splash = fopen(path, "rb");
     if(splash) {
@@ -261,6 +289,7 @@ __attribute__((noreturn)) void loadAppDol() {
         fclose(splash);
     }
 
+    //load the DOL.
     snprintf(path, sizeof(path), "%s/main.dol", gameRootDir);
     FILE *dol = fopen(path, "rb");
     if(!dol) {
@@ -268,8 +297,6 @@ __attribute__((noreturn)) void loadAppDol() {
         printf("[stage1] Error opening %s: %d\n", path, errno);
         quit(NULL);
     }
-
-    //load the DOL
     DolHeader header;
     fread(&header, sizeof(DolHeader), 1, dol);
     //printDolHeader(&header);
@@ -284,7 +311,10 @@ __attribute__((noreturn)) void loadAppDol() {
             j<header.dataAddr[i]+header.dataSize[i]; j++) {
                 if(!strncmp((char*)j, magic, 21)) {
                     //printf("Found magic at %08X\n", j);
-                    strncpy((char*)j, gameRootDir, sizeof(gameRootDir));
+                    //suppress warning about using the wrong thing
+                    //for the size to strncpy (we're not)
+                    size_t size = sizeof(gameRootDir);
+                    strncpy((char*)j, gameRootDir, size);
                 }
             }
         }
@@ -300,15 +330,7 @@ __attribute__((noreturn)) void loadAppDol() {
     then = SYS_Time() + 10000000;
     while(SYS_Time() < then);
 
-    //for(int i=0; i<120; i++) VIDEO_WaitVSync();
     exiPrintf("Exec...\n");
-    /*while(1) {
-        PAD_ScanPads();
-        u32 buttons = PAD_ButtonsDown(PAD_CHAN0);
-        if(buttons & PAD_BUTTON_B) exit(0);
-        if(buttons & (PAD_BUTTON_START|PAD_BUTTON_A)) break;
-    }*/
-    VIDEO_SetBlack(TRUE);
     void (*boot)(void) = (void (*)())header.entryPoint;
     IRQ_Disable();
     boot(); //shouldn't return
@@ -318,7 +340,11 @@ __attribute__((noreturn)) void loadAppDol() {
 int main(int argc, char **argv) {
     int err = init();
     if(err) quit("Startup failed\n");
-    initGameFiles();
+    /*printf("argc=%d\n", argc);
+    for(int i=0; i<argc; i++) {
+        printf("argv[%d]=\"%s\"\n", i, argv[i]);
+    }*/
+    initGameFiles(argc > 0 ? argv[0] : NULL);
     loadAppDol();
 	return 0;
 }
