@@ -214,6 +214,7 @@ u32 padUpdate_hook(GameControllerState *state) {
     //call original method
     u32 (*padReadControllers)(GameControllerState*) = 0x8024e864;
     u32 result = padReadControllers(state);
+    state->state = 0; //present
 
     //avoid flooding dprint buf
     //u32 debugLogEnd = *(u32*)0x803dbc14;

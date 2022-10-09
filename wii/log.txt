@@ -1,827 +1,1159 @@
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
-make[1]: Warning: File '/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c' has modification time 36 s in the future
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build/main.d -g -O2 -Wall -fPIC -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c -o main.o 
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c: In function '_scanForGameFiles':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c:129:9: warning: implicit declaration of function 'checkForExitButton' [-Wimplicit-function-declaration]
-  129 |         checkForExitButton();
-      |         ^~~~~~~~~~~~~~~~~~
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c: In function 'loadAppDol':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c:287:58: warning: argument to 'sizeof' in 'strncpy' call is the same expression as the source; did you mean to use the size of the destination? [-Wsizeof-pointer-memaccess]
-  287 |                     strncpy((char*)j, gameRootDir, sizeof(gameRootDir));
-      |                                                          ^
-powerpc-eabi-gcc  exi.o main.o -g -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -Wl,-Map,boot.elf.map -L/opt/devkitpro/libogc/lib/wii  -lfat -logc -lm -o /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf
 elf2dol /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.dol
-make[1]: warning:  Clock skew detected.  Your build may be incomplete.
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
+make[1]: Warning: File '/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamecontrols.c' has modification time 36 s in the future
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/gamecontrols.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamecontrols.c -o gamecontrols.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamecontrols.c: In function 'applyWiimoteInputs':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamecontrols.c:117:9: warning: unused variable 'bUp' [-Wunused-variable]
+  117 |     u32 bUp   = mapWiimoteButtons(wp, wp->btns_u);
+      |         ^~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamecontrols.c: In function 'padUpdate_hook':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamecontrols.c:221:55: warning: initialization of 'u32 (*)(GameControllerState *)' {aka 'unsigned int (*)(GameControllerState *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+  221 |     u32 (*padReadControllers)(GameControllerState*) = 0x8024e864;
+      |                                                       ^~~~~~~~~~
+powerpc-eabi-gcc  alloc.o argv.o audio.o cache.o checkthread.o conf.o debugprint.o dol.o dvd.o dvdhook.o dvdthread.o es.o exception.o exi.o fatlock.o gameboot.o gamecontrols.o gamefuncs.o gamehook.o ios.o ipc.o irq.o libc.o lwp_heap.o lwp_queue.o lwp_wkspace.o main.o malloc.o osfont.o osmutex.o patches.o printf.o regs.o stm.o sys_alarm.o system.o thread.o timesupp.o usb.o wiisd.o classic.o dynamics.o events.o guitar_hero_3.o io.o io_wii.o ir.o motion_plus.o nunchuk.o speaker.o wiiboard.o wiiuse.o wpad.o bte.o btmemb.o btmemr.o btpbuf.o hci.o l2cap.o physbusif.o cache_asm.o crt0.o system_asm.o -L../lib -g -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -Wl,-Map,main.elf.map -Wl,--section-start,.stub=0x91000000 -Wl,--section-start,.sbss=0x91400000 -Wl,--section-start,.init=0x91800000 -Wl,--section-start,.data=0x91C00000 -L/opt/devkitpro/libogc/lib/wii  -lfatx -lm -o /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.elf
 elf2dol /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.elf /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.dol
+make[1]: warning:  Clock skew detected.  Your build may be incomplete.
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.961: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.544: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.962: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.545: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.962: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.545: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.962: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.545: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.963: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.546: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.964: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.546: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.964: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.547: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.964: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.547: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.964: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.547: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.965: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.547: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.968: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.550: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.968: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.550: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.968: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.550: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.968: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.550: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.969: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.551: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.969: Unable to locate theme engine in module_path: "adwaita",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.551: Unable to locate theme engine in module_path: "adwaita",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.969: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.552: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.970: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.552: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.970: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.552: Unable to locate theme engine in module_path: "murrine",
 
-(dolphin-emu:7540): Gtk-WARNING **: 09:29:06.970: Unable to locate theme engine in module_path: "murrine",
+(dolphin-emu:13085): Gtk-WARNING **: 09:51:22.552: Unable to locate theme engine in module_path: "murrine",
 QApplication: invalid style override 'gtk' passed, ignoring it.
 	Available styles: bb10dark, bb10bright, cleanlooks, gtk2, cde, motif, plastique, Windows, Fusion
-29:07:027 InputCommon/ControllerInterface/evdev/evdev.cpp:294 N[CI]: evdev hotplug thread started
-29:07:037 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
-29:07:043 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
-29:07:077 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
-29:07:077 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
-29:07:078 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
-29:07:078 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
-29:07:078 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
-29:07:094 Core/HW/WiimoteReal/WiimoteReal.cpp:865 N[Wiimote]: WiimoteReal::Initialize
-29:07:094 Core/HW/WiimoteReal/WiimoteReal.cpp:665 N[Wiimote]: Wiimote scanning thread has started.
-29:07:384 Core/ConfigManager.cpp:178 N[CORE]: Active title: 
-29:07:388 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
-29:07:389 Core/Core.cpp:237 I[BOOT]: Starting core = Wii mode
-29:07:389 Core/Core.cpp:238 I[BOOT]: CPU Thread separate = No
-29:08:375 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
-29:08:380 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
-29:09:434 AudioCommon/Mixer.cpp:41 I[AI]: Mixer is initialized
-29:09:434 AudioCommon/PulseAudioStream.cpp:26 N[Audio]: PulseAudio backend using 2 channels
-29:09:436 AudioCommon/PulseAudioStream.cpp:131 I[Audio]: Pulse successfully initialized
-29:09:443 Core/HW/GCMemcard/GCMemcardRaw.cpp:51 I[EXI]: Reading memory card /home/rena/.local/share/dolphin-emu/GC/MemoryCardA.USA.raw
-29:09:455 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 0 to type 1 (notify software: true)
-29:09:456 Core/HW/GCMemcard/GCIFile.cpp:22 I[EXI]: Reading header from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
-29:09:456 Core/HW/GCMemcard/GCIFile.cpp:43 I[EXI]: Reading savedata from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
-29:09:456 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 1, device 0 to type 8 (notify software: true)
-29:09:457 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Shift JIS font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
-29:09:457 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Windows-1252 font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
-29:09:457 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 1 to type 2 (notify software: true)
-29:09:457 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 2 to type 5 (notify software: true)
-29:09:457 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 2, device 0 to type 3 (notify software: true)
-29:10:458 Core/Boot/Boot.cpp:538 N[BOOT]: Booting from executable: ./app/boot.dol
-29:10:466 Core/Boot/Boot_BS2Emu.cpp:394 I[BOOT]: Using serial number: 216174744
-29:10:466 Core/Boot/Boot_BS2Emu.cpp:418 I[BOOT]: Setup Wii Memory...
-29:10:644 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
-29:10:937 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  Size
-29:10:953 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 0 000100 91800000 0003E440
-29:10:954 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 1 000000 00000000 00000000
-29:10:954 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 2 000000 00000000 00000000
-29:10:954 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 3 000000 00000000 00000000
-29:10:955 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 4 000000 00000000 00000000
-29:10:955 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 5 000000 00000000 00000000
-29:10:955 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 6 000000 00000000 00000000
-29:10:955 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 0 03E540 9183E440 003CFE20
-29:10:956 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 1 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 2 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 3 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 4 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 5 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 6 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 7 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 8 000000 00000000 00000000
-29:10:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 9 000000 00000000 00000000
-29:10:960 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data10 000000 00000000 00000000
-29:10:960 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: bss    ------ 91400000 0009CDA0
-29:10:961 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Entry  ------ 91800000 ------
-29:10:963 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
-29:10:976 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data0...
-29:11:029 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
-29:13:005 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Exec...
-29:13:050 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
-29:13:055 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 start
-29:13:057 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  EndAddr  Size
-29:13:074 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 0 0001A0 80600000 80602480 00002480
-29:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 1 002620 800066E0 802C1880 002BB1A0
-29:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 2 33DD40 803FA480 80421B40 000276C0
-29:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 3 000000 00000000 00000000 00000000
-29:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 4 000000 00000000 00000000 00000000
-29:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 5 000000 00000000 00000000 00000000
-29:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 6 000000 00000000 00000000 00000000
-29:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 0 2BD7C0 80005620 80005CC0 000006A0
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 1 2BDE60 80005CC0 800066E0 00000A20
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 2 2BE880 802C1880 802C18A0 00000020
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 3 2BE8A0 802C18A0 802C18C0 00000020
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 4 2BE8C0 802C18C0 802C2D60 000014A0
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 5 2BFD60 802C2D60 80335840 00072AE0
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 6 332840 803DB1E0 803DC7A0 000015C0
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 7 333E00 803DE500 803E8440 00009F40
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 8 000000 00000000 00000000 00000000
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 9 000000 00000000 00000000 00000000
-29:13:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data10 000000 00000000 00000000 00000000
-29:13:082 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: bss    ------ 80335840 803E8478 000B2C38
-29:13:082 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Entry  ------ 803FA480 -------- --------
-29:13:083 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
-29:13:085 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
-29:13:087 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text1...
-29:13:088 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text2...
-29:13:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data0...
-29:13:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data1...
-29:13:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data2...
-29:13:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data3...
-29:13:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data4...
-29:13:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data5...
-29:13:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data6...
-29:13:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data7...
-29:13:092 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DOL load OK
-29:13:093 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: game loader start; argc=0
-29:13:094 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Running on IOS58 v24.32
-29:13:094 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: apply patches
-29:13:097 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80014F90 -> 80000200 op 482398D5 -> 4BFEB271 (bl=1)
-29:13:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8007D6DC (bl=0)
-29:13:099 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80246E04 (bl=0)
-29:13:099 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802510CC (bl=0)
-29:13:100 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024091C (bl=0)
-29:13:100 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80242A10 (bl=0)
-29:13:101 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 802406C0 -> 80000210 op 48003139 -> 4BDBFB51 (bl=1)
-29:13:101 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243B44 (bl=0)
-29:13:101 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243BCC (bl=0)
-29:13:102 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80243FE4 -> 80000220 op 4BFFFC70 -> 4BDBC23C (bl=0)
-29:13:102 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248870 (bl=0)
-29:13:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248B9C (bl=0)
-29:13:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80015850 (bl=0)
-29:13:104 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248F9C (bl=0)
-29:13:104 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024B428 (bl=0)
-29:13:105 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248EAC (bl=0)
-29:13:105 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802490D8 (bl=0)
-29:13:105 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024AFD8 (bl=0)
-29:13:106 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024FFE4 (bl=0)
-29:13:106 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024F6FC (bl=0)
-29:13:107 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024F784 (bl=0)
-29:13:107 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: boot game
-29:13:121 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Locked cache machine check handler installed
-29:13:137 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: FPU-unavailable handler installed
-29:13:137 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Locked cache machine check handler installed
-29:13:189 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 
-29:13:189 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Dolphin OS $Revision: 54 $.
-29:13:194 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Kernel built : Jun  5 2002 02:09:12
-29:13:195 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Console Type : 
-29:13:206 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Development HW3
-29:13:207 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Memory 24 MB
-29:13:210 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Arena : 0x80421b30 - 0x817fec60
-29:13:239 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Patch running!
-29:13:242 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80137DF8 op 0x482C8605 (bl=1)
-29:13:243 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021320 op 0x483DEE59 (bl=1)
-29:13:244 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80037944 op 0x483C94B4 (bl=0)
-29:13:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80013EC8 op 0x483F04FC (bl=0)
-29:13:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80020F2C op 0x483F9FBD (bl=1)
-29:13:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021250 op 0x483F9E15 (bl=1)
-29:13:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80020D4C op 0x483E851D (bl=1)
-29:13:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005C45C op 0x483BF289 (bl=1)
-29:13:246 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800D9E2C op 0x48341999 (bl=1)
-29:13:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80023CC8 op 0x483DBD98 (bl=0)
-29:13:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800233E8 op 0x483DBDE4 (bl=0)
-29:13:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8001F5F4 op 0x483DFB09 (bl=1)
-29:13:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80029608 op 0x483D5AF5 (bl=1)
-29:13:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80056F00 op 0x483A81FD (bl=1)
-29:13:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80062938 op 0x4839C7C5 (bl=1)
-29:13:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016F118 op 0x4828FFE5 (bl=1)
-29:13:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x802BC0B4 op 0x48143049 (bl=1)
-29:13:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80292DC0 op 0x48187058 (bl=0)
-29:13:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80292DE4 op 0x48187278 (bl=0)
-29:13:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800221A0 op 0x483F7D70 (bl=0)
-29:13:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80105DF8 op 0x48313A09 (bl=1)
-29:13:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133A54 op 0x482D57D8 (bl=0)
-29:13:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8020D31C op 0x4820F085 (bl=1)
-29:13:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800453E0 op 0x483C38F9 (bl=1)
-29:13:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80043D7C op 0x483C4CD4 (bl=0)
-29:13:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80046164 op 0x483C2C1D (bl=1)
-29:13:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80043DB8 op 0x483C4CD4 (bl=0)
-29:13:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80087050 op 0x48381A58 (bl=0)
-29:13:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002CB20 op 0x483DC565 (bl=1)
-29:13:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002D5DC op 0x483DB511 (bl=1)
-29:13:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x801032B8 op 0x482FED79 (bl=1)
-29:13:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014C18 op 0x483ED540 (bl=0)
-29:13:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014BC4 op 0x483ED640 (bl=0)
-29:13:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014CC0 op 0x483ED5F4 (bl=0)
-29:13:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014C6C op 0x483ED724 (bl=0)
-29:13:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133AF0 op 0x482CE98D (bl=1)
-29:13:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133AFC op 0x482CE9D1 (bl=1)
-29:13:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80108758 op 0x482F9DC5 (bl=1)
-29:13:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021078 op 0x483F8579 (bl=1)
-29:13:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002010C op 0x483E77BD (bl=1)
-29:13:253 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005B6F8 op 0x483A6F49 (bl=1)
-29:13:256 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Install title hook...
-29:13:256 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8011AF00 op 0x4830037D (bl=1)
-29:13:256 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005C72C op 0x483ABFB9 (bl=1)
-29:13:257 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016DE64 op 0x482ACE1D (bl=1)
-29:13:257 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016DE68 op 0x48000120 (bl=0)
-29:13:260 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80137948 op 0x482E4CF8 (bl=0)
-29:13:261 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80008CFC op 0x483FE5AD (bl=1)
-29:13:261 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80008BB4 op 0x483FE6F5 (bl=1)
-29:13:262 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80080E14 op 0x48399B24 (bl=0)
-29:13:262 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80080C2C op 0x48399D4C (bl=0)
-29:13:262 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80081980 op 0x48399038 (bl=0)
-29:13:262 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800175BC op 0x48403B91 (bl=1)
-29:13:263 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Booting in Wii mode
-29:13:264 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: reached __DVDFSInit_hook
-29:13:275 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 alloc init OK
-29:13:276 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 libc init OK
-29:13:282 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803AD848
-29:13:283 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803AB118
-29:13:283 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A54A0
-29:13:283 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A6F08
-29:13:283 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A8348
-29:13:303 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: checkThread online (914071E8, stack 914051E8)
-29:13:305 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 914071E8
-29:13:323 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 IPC init OK
-29:13:324 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: init (r2=803E6500 r13=803E31E0)
-29:13:326 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create alarm
-29:13:327 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create threadQ
-29:13:327 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create msgQ in
-29:13:328 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create msgQ out
-29:13:329 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create DVD thread
-29:13:329 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread is 9142FEC8, queue=9142FE90, 9142FE70, buf=91424E70, 9141BE70
-29:13:330 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create DVD thread alarm
-29:13:332 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread setup OK, 9142FEC8, alarm=9141BE40
-29:13:333 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread online
-29:13:333 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 9142FEC8
-29:13:338 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: fatMount(sd iface=91C00360 start=00000000 cache=00000004 page=00000040)
-29:13:339 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: sdio_Startup call open
-29:13:340 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: OSResumeThread OK for DVD
-29:13:340 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: OK; wait for DVD...
-29:13:341 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: sdio_Startup open done
-29:13:373 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __sd0_initio OK
-29:13:405 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mount(sd) OK
-29:13:420 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD FAT init OK
-29:13:427 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: app booted from bootrom
-29:13:427 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Hooks installed!
-29:13:767 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mem 0k/12519904k 0k/1835008k 288k/655264k 2080k/4587424k
-29:13:767 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 	slot 4/250 1/850 2/850 3/580	
-29:13:767 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  
-29:13:791 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 
-29:13:791 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: CONF_Init: 0
-29:13:957 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD_Init: 0
-29:13:961 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD: initWiimote OK
-29:13:990 Core/HW/AudioInterface.cpp:340 I[AI]: Reset AIS sample counter
-29:13:990 Core/HW/AudioInterface.cpp:378 I[AI]: AI_INTERRUPT_TIMING=00000000 at PC: 8024fbe0
-29:13:991 Core/HW/AudioInterface.cpp:291 I[AI]: Change AIINTMSK to 1
-29:14:005 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSPInit(): Build Date: Dec 17 2001 18:25:00
-29:14:010 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSP is booting task: 0x803D4880
-29:14:010 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM MMEM ADDR: 0x80330840
-29:14:012 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM DSP ADDR : 0x00000000
-29:14:012 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM LENGTH   : 0x000019E0
-29:14:012 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : DRAM MMEM ADDR: 0x00002000
-29:14:012 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : Start Vector  : 0x00000010
-29:14:017 Core/HW/DSP.cpp:391 I[AI]: Audio DMA configured: 20 blocks from 0x013a36a0
-29:14:194 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Music.bin", 81304AE0) => 92000690, size 000009F0
-29:14:308 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Sfx.bin", 81304B20) => 92000700, size 000096A0
-29:14:315 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Streams.bin", 81304AE0) => 92000690, size 00004DD0
-29:14:320 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.poo", 81304B20) => 92000700, size 0000EE60
-29:14:323 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.pro", 81304AE0) => 92000690, size 00001B4C
-29:14:326 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.sdi", 81304B20) => 92000700, size 0000A714
-29:14:329 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.sam", 81304AE0) => 92000690, size 00514F60
-29:14:979 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD: init OK
-29:15:072 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.poo", 813049C0) => 92000690, size 00010B30
-29:15:074 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.pro", 81304A00) => 92000700, size 00005B90
-29:15:076 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.sdi", 813049C0) => 92000690, size 0000F6F4
-29:15:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.sam", 81304A00) => 92000700, size 00977920
-29:15:266 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("audio/midi.wad", 813049C0) => 92000690, size 00136DC0
-29:15:315 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("CAMACTIO.bin", 813EE260) => 92000690, size 00000800
-29:15:320 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ2C.tab", 813EE2A0) => 92000700, size 00000BA0
-29:15:321 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("globalma.bin", 813EE260) => 92000690, size 00000300
-29:15:322 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TABLES.bin", 813EE2A0) => 92000700, size 000002E0
-29:15:323 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TABLES.tab", 813EE260) => 92000690, size 00000060
-29:15:325 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("WARPTAB.bin", 813EE2A0) => 92000700, size 00000800
-29:15:326 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPS.bin", 813EE260) => 92000690, size 0001B420
-29:15:329 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPS.tab", 813EE2A0) => 92000700, size 00000CE0
-29:15:331 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPINFO.bin", 813EE260) => 92000690, size 00000EA0
-29:15:334 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODANIM.TAB", 813EE2A0) => 92000700, size 000009E0
-29:15:337 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODANIM.BIN", 813EE260) => 92000690, size 00002BE0
-29:15:340 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("AMAP.TAB", 813EE2A0) => 92000700, size 000013C0
-29:15:342 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("AMAP.BIN", 813EE260) => 92000690, size 000325A0
-29:15:346 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("BITTABLE.bin", 813EE2A0) => 92000700, size 00003D40
-29:15:348 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("WEAPONDA.bin", 813EE260) => 92000690, size 0000C840
-29:15:350 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODLINES.bin", 813EE2A0) => 92000700, size 00001D00
-29:15:352 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODLINES.tab", 813EE260) => 92000690, size 000000C0
-29:15:354 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ.bin", 813EE2A0) => 92000700, size 000070A0
-29:15:356 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ.tab", 813EE260) => 92000690, size 00000BA0
-29:15:358 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJECTS.tab", 813EE2A0) => 92000700, size 00001720
-29:15:362 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJECTS.bin", 813EE260) => 92000690, size 00049A80
-29:15:367 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJINDEX.bin", 813EE2A0) => 92000700, size 00001120
-29:15:369 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJEVENT.bin", 813EE260) => 92000690, size 00002560
-29:15:371 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJHITS.bin", 813EE2A0) => 92000700, size 00006BC0
-29:15:373 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXPRE.bin", 813EE260) => 92000690, size 00075B00
-29:15:381 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXPRE.tab", 813EE2A0) => 92000700, size 00000340
-29:15:383 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("PREANIM.bin", 813EE260) => 92000690, size 000E72C0
-29:15:395 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("PREANIM.tab", 813EE2A0) => 92000700, size 000028A0
-29:15:398 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("ENVFXACT.bin", 813EE260) => 92000690, size 00018000
-29:15:419 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.bin", 813EE260) => 92000690, size 000323A0
-29:15:425 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.tab", 813EE2A0) => 92000700, size 00000DA0
-29:15:451 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXTABLE.bin", 803F83A8) => 92000690, size 00001960
-29:15:480 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.tab", 803F83A8) => 92000690, size 00001900
-29:15:483 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TRKBLK.tab", 803F83A8) => 92000690, size 000000A0
-29:15:489 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01C4, 0)
-29:15:501 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/Link/English.bin", 8033AFE0) => 92000690, size 000080C4
-29:15:506 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/FrontEnd/English.bin", 8033B02C) => 92000700, size 000364CC
-29:15:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x025D, 0)
-29:15:528 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0001, 0)
-29:15:528 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0002, 0)
-29:15:556 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05B0, 0)
-29:15:557 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0600, 0)
-29:15:557 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C18, 0)
-29:15:593 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0019, 0)
-29:15:593 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0018, 0)
-29:15:593 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x001A, 0)
-29:15:594 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0646, 0)
-29:15:595 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSPInit(): Build Date: Dec 17 2001 18:25:00
-29:15:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0000, 0x000F)
-29:15:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC4, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC5, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC8, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC9, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCA, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCB, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCC, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDE, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDF, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF5, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C24, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C25, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C26, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C27, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFE, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFF, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C00, 0)
-29:15:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C01, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCD, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCE, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCF, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD0, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD1, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF1, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE0, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE1, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE2, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE3, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C70, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE4, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD2, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01D2, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC7, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C92, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C02, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C03, 0)
-29:15:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C04, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF0, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C72, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC6, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD3, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD4, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD5, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD6, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD7, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEB, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF2, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF3, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF4, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEC, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BED, 0)
-29:15:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEE, 0)
-29:15:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03F5, 0)
-29:15:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FA, 0)
-29:15:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FB, 0)
-29:15:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FC, 0)
-29:15:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FD, 0)
-29:15:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FE, 0)
-29:15:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0400, 0)
-29:15:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0401, 0)
-29:15:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0458, 0)
-29:15:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05A7, 0)
-29:15:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01A5, 0)
-29:15:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0435, 0)
-29:15:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0436, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0438, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0275, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0268, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF9, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFA, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFB, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFC, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE8, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE6, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE9, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEA, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2B, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C0C, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C20, 0)
-29:15:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059A, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059B, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059C, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059D, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059E, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05AD, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDB, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDC, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDD, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD8, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD9, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDA, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0307, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF6, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF7, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF8, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D4, 0)
-29:15:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D3, 0)
-29:15:620 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D2, 0)
-29:15:620 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1E, 0)
-29:15:620 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1C, 0)
-29:15:620 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1D, 0)
-29:15:620 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C71, 0)
-29:15:620 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0500, 0)
-29:15:621 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0001, 0x0017)
-29:15:622 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("VOXOBJ.tab", 803F8360) => 92000770, size 00000020
-29:15:624 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0012, 0x0008)
-29:15:625 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000F, 0x0016)
-29:15:625 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0002, 0x001D)
-29:15:631 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0016, 0x0004)
-29:15:631 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0005, 0x000F)
-29:15:631 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0006, 0x000C)
-29:15:632 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0007, 0x0008)
-29:15:632 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0009, 0x000A)
-29:15:632 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0003, 0x000D)
-29:15:632 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0004, 0x0024)
-29:15:632 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000A, 0x000A)
-29:15:635 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000B, 0x000C)
-29:15:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000C, 0x0008)
-29:15:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000D, 0x0003)
-29:15:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000E, 0x0002)
-29:15:637 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0011, 0x0003)
-29:15:637 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0013, 0x0007)
-29:15:638 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0056, 0)
-29:15:638 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2A, 0)
-29:15:638 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2C, 0)
-29:15:638 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2D, 0)
-29:15:660 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0014, 0x0026)
-29:15:660 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x003C, 0x0007)
-29:15:660 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0314, 0)
-29:15:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0315, 0)
-29:15:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0317, 0)
-29:15:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0319, 0)
-29:15:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0318, 0)
-29:15:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x031A, 0)
-29:15:662 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043B, 0)
-29:15:662 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043E, 0)
-29:15:662 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043D, 0)
-29:15:662 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0015, 0x0009)
-29:15:663 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0017, 0x0024)
-29:15:665 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0018, 0x0006)
-29:15:665 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x016B, 0)
-29:15:665 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0201, 0)
-29:15:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0019, 0x0016)
-29:15:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0031, 0x0002)
-29:15:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE5, 0)
-29:15:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x002F, 0x000C)
-29:15:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x003D, 0x000A)
-29:15:674 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05DC, 0)
-29:15:676 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0032, 0x0001)
-29:15:688 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX1.bin", 813EE2A0) => 92000770, size 000C9AA0
-29:15:688 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Krystal texture not loaded
-29:15:696 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX1.tab", 813EE2A0) => 92000770, size 00002400
-29:15:699 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX0.bin", 813EE2A0) => 92000770, size 0004F360
-29:15:702 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX0.tab", 813EE2A0) => 92000770, size 00000DA0
-29:15:707 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/ANIM.BIN", 813EE2A0) => 92000770, size 000C30A0
-29:15:714 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/ANIM.TAB", 813EE2A0) => 92000770, size 000028A0
-29:15:719 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/MODELS.bin", 813EE2A0) => 92000770, size 00079FC0
-29:15:719 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Krystal model not loaded
-29:15:726 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/MODELS.tab", 813EE2A0) => 92000770, size 000013C0
-29:15:732 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront.romlist.zlb", 813EE2A0) => 92000770, size 00000420
-29:15:735 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/mod62.tab", 813EE260) => 920007E0, size 00001800
-29:15:739 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/mod62.zlb.bin", 813EE260) => 92000770, size 0000F020
-29:15:744 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/voxmap.tab", 813EE260) => 92000770, size 00001900
-29:15:750 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/voxmap.bin", 813EE260) => 92000770, size 00000000
-29:15:752 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("warlock/voxmap.bin", 813EE260) => 92000770, size 00006520
-29:15:757 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/animcurv.tab", 813EE260) => 92000770, size 000062C0
-29:15:764 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/animcurv.bin", 813EE260) => 92000770, size 00007860
-29:15:794 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x860E, 1)
-29:15:823 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYSun
-29:15:824 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8609, 1)
-29:15:825 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYMoon
-29:15:828 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A4, 1)
-29:15:835 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A5, 1)
-29:15:836 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A6, 1)
-29:15:838 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
-29:15:839 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87C4, 1)
-29:15:839 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
-29:15:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
-29:15:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
-29:15:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
-29:15:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
-29:15:841 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:15:841 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85C1, 1)
-29:15:847 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT communicato
-29:15:848 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:15:848 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8752, 1)
-29:15:849 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT WORLDcomm
-29:15:849 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:15:849 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8663, 1)
-29:15:849 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commCube
-29:15:850 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:15:850 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commCubeFro
-29:15:850 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:15:850 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D4, 1)
-29:15:853 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commQuitObj
-29:15:853 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:15:854 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x875B, 1)
-29:15:854 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commMemoryC
-29:15:854 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00E3, 0x0006)
-29:15:854 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8815, 1)
-29:15:857 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8561, 1)
-29:15:857 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D7, 1)
-29:15:869 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT projball
-29:15:870 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D8, 1)
-29:15:870 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C9, 1)
-29:15:871 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x83F5, 1)
-29:15:871 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F5, 1)
-29:15:871 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x83F5, 1)
-29:15:871 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LockIcon
-29:15:893 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init done; bytes used 3484440/15010176, blocks 508/2530, took %f sec
-29:15:898 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0034, 0x0001)
-29:15:917 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("starfox.thp", 803A5D60) => 92000770, size 02EAA1F8
-29:16:118 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0136)
-29:16:122 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0137)
-29:16:122 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0143)
-29:16:209 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x016A, 0)
-29:16:209 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05DA, 0)
-29:16:209 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x063F, 0)
-29:16:210 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0640, 0)
-29:16:210 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0641, 0)
-29:16:210 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0151, 0)
-29:16:226 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0009)
-29:16:256 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
-29:16:257 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
-29:16:285 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05FA, 0)
-29:16:341 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: main loop hook OK
-29:16:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x81EF, 0)
-29:16:443 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A9, 0)
-29:16:444 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A4, 0)
-29:16:444 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AD, 0)
-29:16:444 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A6, 0)
-29:16:445 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829E, 0)
-29:16:445 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A8, 0)
-29:16:445 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829F, 0)
-29:16:445 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A3, 0)
-29:16:445 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A1, 0)
-29:16:445 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829B, 0)
-29:16:446 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A0, 0)
-29:16:446 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82B1, 0)
-29:16:446 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AF, 0)
-29:16:449 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82B0, 0)
-29:16:449 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AC, 0)
-29:16:449 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x81F0, 0)
-29:16:449 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AE, 0)
-29:16:449 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829C, 0)
-29:16:463 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00F0, 0x0006)
-29:16:464 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85FD, 1)
-29:16:464 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x861A, 1)
-29:16:464 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85F8, 1)
-29:16:464 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x879F, 1)
-29:16:465 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT WarpPoint
-29:16:466 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C8, 0x0006)
-29:16:466 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87A0, 1)
-29:16:467 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DepthOfFiel
-29:16:467 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:467 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x00C5, 0)
-29:16:468 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060B, 0)
-29:16:469 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060C, 0)
-29:16:469 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060D, 0)
-29:16:469 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060E, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060F, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0610, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0611, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0612, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0619, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061A, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061B, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061C, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061D, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0620, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0621, 0)
-29:16:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0622, 0)
-29:16:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061E, 0)
-29:16:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061F, 0)
-29:16:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0618, 0)
-29:16:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C5, 1)
-29:16:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C4, 1)
-29:16:472 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B1, 1)
-29:16:472 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8888, 1)
-29:16:472 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8731, 1)
-29:16:476 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86F8, 1)
-29:16:482 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
-29:16:482 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:504 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:504 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:506 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:506 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:507 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:507 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:507 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:507 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
-29:16:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 920007E0, size 00000EC0
-29:16:511 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8000, 1)
-29:16:517 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
-29:16:517 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x012E, 0x0006)
-29:16:517 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AA, 1)
-29:16:518 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AB, 1)
-29:16:519 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_JukeBox
-29:16:519 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:519 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
-29:16:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:523 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865D, 1)
-29:16:524 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8665, 1)
-29:16:524 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865E, 1)
-29:16:525 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8661, 1)
-29:16:525 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8660, 1)
-29:16:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontFox
-29:16:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x868D, 1)
-29:16:532 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x884B, 1)
-29:16:533 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x857A, 1)
-29:16:535 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontSlippy
-29:16:535 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:536 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86D2, 1)
-29:16:536 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87BC, 1)
-29:16:536 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8895, 1)
-29:16:537 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87B8, 1)
-29:16:537 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87BA, 1)
-29:16:538 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPeppy
-29:16:538 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:538 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x828B, 1)
-29:16:539 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x828E, 1)
-29:16:539 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontRob
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C5, 1)
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C4, 1)
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B1, 1)
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8887, 1)
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86F9, 1)
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
-29:16:540 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
-29:16:541 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F0, 1)
-29:16:542 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPlanet
-29:16:542 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8080, 1)
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0134, 0x0006)
-29:16:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8899, 1)
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT texscroll2
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0110, 0x0006)
-29:16:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A5, 1)
-29:16:550 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A7, 1)
-29:16:550 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A2, 1)
-29:16:550 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829D, 1)
-29:16:552 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorLeft
-29:16:552 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0110, 0x0006)
-29:16:552 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorLeft
-29:16:552 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
-29:16:553 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 920007E0, size 00000EC0
-29:16:553 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
-29:16:554 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
-29:16:554 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 920007E0, size 00000EC0
-29:16:555 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
-29:16:555 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0112, 0x0006)
-29:16:555 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F4, 1)
-29:16:555 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B4, 1)
-29:16:556 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontSeq
-29:16:583 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
-29:16:583 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
-29:16:584 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05FA, 0)
-29:16:585 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0019, 0)
-29:16:585 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0018, 0)
-29:16:585 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x001A, 0)
-29:16:585 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0646, 0)
-29:16:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading km0
-29:16:588 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("km0", 803F83A0) => 920007E0, size 00012B40
-29:16:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loaded km0 @0x80F19D20 size 0x00012B40
-29:16:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading kt0
-29:16:591 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("kt0", 803F83A0) => 920007E0, size 0001B0C0
-29:16:592 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loaded kt0 @0x80EFEC60 size 0x0001B0C0
-29:16:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: objRunSeq(0x0, 0x81311520 "GF_DoorLeft", 0xFFFFFFFF)
-29:16:623 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:16:626 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT Override
-29:16:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:16:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A5, 1)
-29:16:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A7, 1)
-29:16:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A2, 1)
-29:16:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829D, 1)
-29:16:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorRigh
-29:16:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: objRunSeq(0x0, 0x81311240 "GF_DoorLeft", 0xFFFFFFFF)
-29:16:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:16:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT Override
-29:16:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
-29:16:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorRigh
-29:16:650 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x002D, 0x0002)
-29:16:662 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x00DF, 0)
-29:16:682 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x021F)
-29:16:684 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8780, 1)
-29:16:684 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8781, 1)
-29:16:684 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x877F, 1)
-29:16:685 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYScapeSpa
-29:16:689 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0616, 0)
-29:16:689 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0615, 0)
-29:16:689 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0309, 0)
-29:16:690 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030A, 0)
-29:16:690 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030B, 0)
-29:16:690 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030C, 0)
-29:16:725 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C10, 0)
-29:16:803 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6500 "Override")
-29:16:829 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6900 "GF_DoorRigh")
-29:16:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D4F00 "Override")
-29:16:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D60E0 "GF_DoorRigh")
-29:16:837 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0057, 0x0004)
-29:17:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C75, 0)
-29:17:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C77, 0)
-29:17:738 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6900 "GF_DoorRigh")
-29:17:738 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6500 "Override")
-29:17:738 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D60E0 "GF_DoorRigh")
-29:17:738 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D4F00 "Override")
-29:17:952 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: No args file
-29:18:454 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C76, 0)
-29:19:260 Core/Core.cpp:282 I[CONSOLE]: Stop [Main Thread]		---- Shutting down ----
-29:19:260 Core/Core.cpp:285 I[CONSOLE]: Stop [Main Thread 0]	Stop CPU
-29:19:260 Core/Core.cpp:643 I[CONSOLE]: Stop [Main Thread 0]	Stopping GDB ...
-29:19:260 Core/Core.cpp:645 I[CONSOLE]: Stop [Main Thread 0]	GDB stopped.
-29:19:322 Core/Core.cpp:519 I[CONSOLE]: Stop [Video Thread 0]	Shutting down HW
-29:21:479 Core/HW/GCMemcard/GCMemcardDirectory.cpp:676 I[EXI]: Flushing savedata to disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
-29:21:479 Core/Core.cpp:521 I[CONSOLE]: Stop [Video Thread 0]	HW shutdown
-29:21:487 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
-29:21:516 AudioCommon/AudioCommon.cpp:88 I[Audio]: Shutting down sound stream
-29:21:517 AudioCommon/AudioCommon.cpp:96 I[Audio]: Done shutting down sound stream
-29:22:310 Core/Core.cpp:462 I[CONSOLE]: Stop		---- Shutdown complete ----
-29:22:360 InputCommon/ControllerInterface/evdev/evdev.cpp:356 N[CI]: evdev hotplug thread stopped
-29:22:594 Core/HW/WiimoteReal/WiimoteReal.cpp:755 N[Wiimote]: Wiimote scanning thread has stopped.
-29:22:594 Core/HW/WiimoteReal/WiimoteReal.cpp:884 N[Wiimote]: WiimoteReal::Shutdown
+51:22:609 InputCommon/ControllerInterface/evdev/evdev.cpp:294 N[CI]: evdev hotplug thread started
+51:22:619 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+51:22:624 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+51:22:657 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+51:22:657 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+51:22:657 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+51:22:658 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+51:22:658 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+51:22:674 Core/HW/WiimoteReal/WiimoteReal.cpp:865 N[Wiimote]: WiimoteReal::Initialize
+51:22:674 Core/HW/WiimoteReal/WiimoteReal.cpp:665 N[Wiimote]: Wiimote scanning thread has started.
+51:22:981 Core/ConfigManager.cpp:178 N[CORE]: Active title: 
+51:22:984 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+51:22:985 Core/Core.cpp:237 I[BOOT]: Starting core = Wii mode
+51:22:985 Core/Core.cpp:238 I[BOOT]: CPU Thread separate = No
+51:23:983 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+51:23:988 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+51:25:051 AudioCommon/Mixer.cpp:41 I[AI]: Mixer is initialized
+51:25:051 AudioCommon/PulseAudioStream.cpp:26 N[Audio]: PulseAudio backend using 2 channels
+51:25:053 AudioCommon/PulseAudioStream.cpp:131 I[Audio]: Pulse successfully initialized
+51:25:059 Core/HW/GCMemcard/GCMemcardRaw.cpp:51 I[EXI]: Reading memory card /home/rena/.local/share/dolphin-emu/GC/MemoryCardA.USA.raw
+51:25:070 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 0 to type 1 (notify software: true)
+51:25:070 Core/HW/GCMemcard/GCIFile.cpp:22 I[EXI]: Reading header from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+51:25:070 Core/HW/GCMemcard/GCIFile.cpp:43 I[EXI]: Reading savedata from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+51:25:071 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 1, device 0 to type 8 (notify software: true)
+51:25:072 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Shift JIS font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+51:25:072 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Windows-1252 font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+51:25:072 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 1 to type 2 (notify software: true)
+51:25:072 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 2 to type 5 (notify software: true)
+51:25:072 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 2, device 0 to type 3 (notify software: true)
+51:26:084 Core/Boot/Boot.cpp:538 N[BOOT]: Booting from executable: ./app/boot.dol
+51:26:092 Core/Boot/Boot_BS2Emu.cpp:394 I[BOOT]: Using serial number: 216174744
+51:26:093 Core/Boot/Boot_BS2Emu.cpp:418 I[BOOT]: Setup Wii Memory...
+51:26:273 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
+51:26:570 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  Size
+51:26:585 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 0 000100 91800000 0003E440
+51:26:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 1 000000 00000000 00000000
+51:26:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 2 000000 00000000 00000000
+51:26:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 3 000000 00000000 00000000
+51:26:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 4 000000 00000000 00000000
+51:26:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 5 000000 00000000 00000000
+51:26:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 6 000000 00000000 00000000
+51:26:588 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 0 03E540 9183E440 003CFE20
+51:26:589 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 1 000000 00000000 00000000
+51:26:589 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 2 000000 00000000 00000000
+51:26:589 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 3 000000 00000000 00000000
+51:26:589 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 4 000000 00000000 00000000
+51:26:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 5 000000 00000000 00000000
+51:26:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 6 000000 00000000 00000000
+51:26:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 7 000000 00000000 00000000
+51:26:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 8 000000 00000000 00000000
+51:26:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 9 000000 00000000 00000000
+51:26:593 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data10 000000 00000000 00000000
+51:26:593 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: bss    ------ 91400000 0009CDA0
+51:26:594 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Entry  ------ 91800000 ------
+51:26:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
+51:26:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data0...
+51:26:662 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
+51:28:005 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Exec...
+51:28:049 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
+51:28:054 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 start
+51:28:056 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  EndAddr  Size
+51:28:073 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 0 0001A0 80600000 80602480 00002480
+51:28:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 1 002620 800066E0 802C1880 002BB1A0
+51:28:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 2 33DD40 803FA480 80421B40 000276C0
+51:28:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 3 000000 00000000 00000000 00000000
+51:28:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 4 000000 00000000 00000000 00000000
+51:28:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 5 000000 00000000 00000000 00000000
+51:28:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 6 000000 00000000 00000000 00000000
+51:28:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 0 2BD7C0 80005620 80005CC0 000006A0
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 1 2BDE60 80005CC0 800066E0 00000A20
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 2 2BE880 802C1880 802C18A0 00000020
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 3 2BE8A0 802C18A0 802C18C0 00000020
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 4 2BE8C0 802C18C0 802C2D60 000014A0
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 5 2BFD60 802C2D60 80335840 00072AE0
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 6 332840 803DB1E0 803DC7A0 000015C0
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 7 333E00 803DE500 803E8440 00009F40
+51:28:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 8 000000 00000000 00000000 00000000
+51:28:080 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 9 000000 00000000 00000000 00000000
+51:28:080 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data10 000000 00000000 00000000 00000000
+51:28:080 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: bss    ------ 80335840 803E8478 000B2C38
+51:28:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Entry  ------ 803FA480 -------- --------
+51:28:082 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
+51:28:084 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
+51:28:086 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text1...
+51:28:088 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text2...
+51:28:089 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data0...
+51:28:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data1...
+51:28:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data2...
+51:28:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data3...
+51:28:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data4...
+51:28:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data5...
+51:28:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data6...
+51:28:090 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data7...
+51:28:091 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DOL load OK
+51:28:092 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: game loader start; argc=0
+51:28:093 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Running on IOS58 v24.32
+51:28:093 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: apply patches
+51:28:096 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80014F90 -> 80000200 op 482398D5 -> 4BFEB271 (bl=1)
+51:28:097 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8007D6DC (bl=0)
+51:28:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80246E04 (bl=0)
+51:28:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802510CC (bl=0)
+51:28:099 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024091C (bl=0)
+51:28:099 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80242A10 (bl=0)
+51:28:100 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 802406C0 -> 80000210 op 48003139 -> 4BDBFB51 (bl=1)
+51:28:100 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243B44 (bl=0)
+51:28:100 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243BCC (bl=0)
+51:28:101 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80243FE4 -> 80000220 op 4BFFFC70 -> 4BDBC23C (bl=0)
+51:28:101 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248870 (bl=0)
+51:28:102 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248B9C (bl=0)
+51:28:102 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80015850 (bl=0)
+51:28:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248F9C (bl=0)
+51:28:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024B428 (bl=0)
+51:28:104 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248EAC (bl=0)
+51:28:104 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802490D8 (bl=0)
+51:28:104 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024AFD8 (bl=0)
+51:28:105 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024FFE4 (bl=0)
+51:28:105 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024F6FC (bl=0)
+51:28:106 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024F784 (bl=0)
+51:28:107 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: boot game
+51:28:120 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Locked cache machine check handler installed
+51:28:136 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: FPU-unavailable handler installed
+51:28:137 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Locked cache machine check handler installed
+51:28:188 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 
+51:28:188 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Dolphin OS $Revision: 54 $.
+51:28:193 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Kernel built : Jun  5 2002 02:09:12
+51:28:194 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Console Type : 
+51:28:205 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Development HW3
+51:28:206 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Memory 24 MB
+51:28:209 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Arena : 0x80421b30 - 0x817fec60
+51:28:238 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Patch running!
+51:28:241 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80137DF8 op 0x482C8605 (bl=1)
+51:28:241 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021320 op 0x483DEE59 (bl=1)
+51:28:243 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80037944 op 0x483C94B4 (bl=0)
+51:28:243 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80013EC8 op 0x483F04FC (bl=0)
+51:28:243 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80020F2C op 0x483F9FBD (bl=1)
+51:28:243 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021250 op 0x483F9E15 (bl=1)
+51:28:244 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80020D4C op 0x483E851D (bl=1)
+51:28:244 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005C45C op 0x483BF289 (bl=1)
+51:28:244 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800D9E2C op 0x48341999 (bl=1)
+51:28:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80023CC8 op 0x483DBD98 (bl=0)
+51:28:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800233E8 op 0x483DBDE4 (bl=0)
+51:28:245 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8001F5F4 op 0x483DFB09 (bl=1)
+51:28:246 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80029608 op 0x483D5AF5 (bl=1)
+51:28:246 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80056F00 op 0x483A81FD (bl=1)
+51:28:246 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80062938 op 0x4839C7C5 (bl=1)
+51:28:246 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016F118 op 0x4828FFE5 (bl=1)
+51:28:246 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x802BC0B4 op 0x48143049 (bl=1)
+51:28:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80292DC0 op 0x48187058 (bl=0)
+51:28:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80292DE4 op 0x48187278 (bl=0)
+51:28:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800221A0 op 0x483F7D70 (bl=0)
+51:28:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80105DF8 op 0x48313A09 (bl=1)
+51:28:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133A54 op 0x482D57D8 (bl=0)
+51:28:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8020D31C op 0x4820F085 (bl=1)
+51:28:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800453E0 op 0x483C38F9 (bl=1)
+51:28:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80043D7C op 0x483C4CD4 (bl=0)
+51:28:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80046164 op 0x483C2C1D (bl=1)
+51:28:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80043DB8 op 0x483C4CD4 (bl=0)
+51:28:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80087050 op 0x48381A58 (bl=0)
+51:28:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002CB20 op 0x483DC565 (bl=1)
+51:28:249 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002D5DC op 0x483DB511 (bl=1)
+51:28:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x801032B8 op 0x482FED79 (bl=1)
+51:28:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014C18 op 0x483ED540 (bl=0)
+51:28:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014BC4 op 0x483ED640 (bl=0)
+51:28:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014CC0 op 0x483ED5F4 (bl=0)
+51:28:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014C6C op 0x483ED724 (bl=0)
+51:28:250 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133AF0 op 0x482CE98D (bl=1)
+51:28:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133AFC op 0x482CE9D1 (bl=1)
+51:28:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80108758 op 0x482F9DC5 (bl=1)
+51:28:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021078 op 0x483F8579 (bl=1)
+51:28:251 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002010C op 0x483E77BD (bl=1)
+51:28:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005B6F8 op 0x483A6F49 (bl=1)
+51:28:254 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Install title hook...
+51:28:255 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8011AF00 op 0x4830037D (bl=1)
+51:28:255 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005C72C op 0x483ABFB9 (bl=1)
+51:28:255 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016DE64 op 0x482ACE1D (bl=1)
+51:28:256 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016DE68 op 0x48000120 (bl=0)
+51:28:259 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80137948 op 0x482E4CF8 (bl=0)
+51:28:260 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80008CFC op 0x483FE5AD (bl=1)
+51:28:260 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80008BB4 op 0x483FE6F5 (bl=1)
+51:28:260 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80080E14 op 0x48399B24 (bl=0)
+51:28:260 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80080C2C op 0x48399D4C (bl=0)
+51:28:261 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80081980 op 0x48399038 (bl=0)
+51:28:261 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800175BC op 0x48403B91 (bl=1)
+51:28:261 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Booting in Wii mode
+51:28:262 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: reached __DVDFSInit_hook
+51:28:273 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 alloc init OK
+51:28:274 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 libc init OK
+51:28:280 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803AD848
+51:28:281 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803AB118
+51:28:281 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A54A0
+51:28:281 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A6F08
+51:28:282 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A8348
+51:28:301 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: checkThread online (914071E8, stack 914051E8)
+51:28:303 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 914071E8
+51:28:321 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 IPC init OK
+51:28:322 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: init (r2=803E6500 r13=803E31E0)
+51:28:324 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create alarm
+51:28:324 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create threadQ
+51:28:325 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create msgQ in
+51:28:326 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create msgQ out
+51:28:326 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create DVD thread
+51:28:327 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread is 9142FEC8, queue=9142FE90, 9142FE70, buf=91424E70, 9141BE70
+51:28:328 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create DVD thread alarm
+51:28:330 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread setup OK, 9142FEC8, alarm=9141BE40
+51:28:330 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread online
+51:28:331 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 9142FEC8
+51:28:336 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: fatMount(sd iface=91C00360 start=00000000 cache=00000004 page=00000040)
+51:28:337 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: sdio_Startup call open
+51:28:338 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: OSResumeThread OK for DVD
+51:28:338 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: OK; wait for DVD...
+51:28:339 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: sdio_Startup open done
+51:28:370 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __sd0_initio OK
+51:28:401 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mount(sd) OK
+51:28:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD FAT init OK
+51:28:423 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: app booted from bootrom
+51:28:424 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Hooks installed!
+51:28:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mem 0k/12519904k 0k/1835008k 288k/655264k 2080k/4587424k
+51:28:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 	slot 4/250 1/850 2/850 3/580	
+51:28:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  
+51:28:790 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 
+51:28:790 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: CONF_Init: 0
+51:28:969 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD_Init: 0
+51:28:976 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD: initWiimote OK
+51:29:021 Core/HW/AudioInterface.cpp:340 I[AI]: Reset AIS sample counter
+51:29:021 Core/HW/AudioInterface.cpp:378 I[AI]: AI_INTERRUPT_TIMING=00000000 at PC: 8024fbe0
+51:29:022 Core/HW/AudioInterface.cpp:291 I[AI]: Change AIINTMSK to 1
+51:29:037 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSPInit(): Build Date: Dec 17 2001 18:25:00
+51:29:042 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSP is booting task: 0x803D4880
+51:29:043 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM MMEM ADDR: 0x80330840
+51:29:045 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM DSP ADDR : 0x00000000
+51:29:045 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM LENGTH   : 0x000019E0
+51:29:045 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : DRAM MMEM ADDR: 0x00002000
+51:29:045 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : Start Vector  : 0x00000010
+51:29:051 Core/HW/DSP.cpp:391 I[AI]: Audio DMA configured: 20 blocks from 0x013a36a0
+51:29:231 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Music.bin", 81304AE0) => 92000690, size 000009F0
+51:29:338 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Sfx.bin", 81304B20) => 92000700, size 000096A0
+51:29:345 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Streams.bin", 81304AE0) => 92000690, size 00004DD0
+51:29:350 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.poo", 81304B20) => 92000700, size 0000EE60
+51:29:353 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.pro", 81304AE0) => 92000690, size 00001B4C
+51:29:355 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.sdi", 81304B20) => 92000700, size 0000A714
+51:29:365 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.sam", 81304AE0) => 92000690, size 00514F60
+51:29:996 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD: init OK
+51:30:080 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.poo", 813049C0) => 92000690, size 00010B30
+51:30:082 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.pro", 81304A00) => 92000700, size 00005B90
+51:30:084 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.sdi", 813049C0) => 92000690, size 0000F6F4
+51:30:087 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.sam", 81304A00) => 92000700, size 00977920
+51:30:275 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("audio/midi.wad", 813049C0) => 92000690, size 00136DC0
+51:30:322 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("CAMACTIO.bin", 813EE260) => 92000690, size 00000800
+51:30:328 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ2C.tab", 813EE2A0) => 92000700, size 00000BA0
+51:30:329 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("globalma.bin", 813EE260) => 92000690, size 00000300
+51:30:330 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TABLES.bin", 813EE2A0) => 92000700, size 000002E0
+51:30:331 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TABLES.tab", 813EE260) => 92000690, size 00000060
+51:30:332 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("WARPTAB.bin", 813EE2A0) => 92000700, size 00000800
+51:30:333 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPS.bin", 813EE260) => 92000690, size 0001B420
+51:30:337 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPS.tab", 813EE2A0) => 92000700, size 00000CE0
+51:30:339 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPINFO.bin", 813EE260) => 92000690, size 00000EA0
+51:30:341 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODANIM.TAB", 813EE2A0) => 92000700, size 000009E0
+51:30:344 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODANIM.BIN", 813EE260) => 92000690, size 00002BE0
+51:30:346 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("AMAP.TAB", 813EE2A0) => 92000700, size 000013C0
+51:30:350 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("AMAP.BIN", 813EE260) => 92000690, size 000325A0
+51:30:353 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("BITTABLE.bin", 813EE2A0) => 92000700, size 00003D40
+51:30:355 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("WEAPONDA.bin", 813EE260) => 92000690, size 0000C840
+51:30:358 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODLINES.bin", 813EE2A0) => 92000700, size 00001D00
+51:30:360 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODLINES.tab", 813EE260) => 92000690, size 000000C0
+51:30:362 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ.bin", 813EE2A0) => 92000700, size 000070A0
+51:30:364 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ.tab", 813EE260) => 92000690, size 00000BA0
+51:30:366 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJECTS.tab", 813EE2A0) => 92000700, size 00001720
+51:30:369 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJECTS.bin", 813EE260) => 92000690, size 00049A80
+51:30:375 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJINDEX.bin", 813EE2A0) => 92000700, size 00001120
+51:30:378 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJEVENT.bin", 813EE260) => 92000690, size 00002560
+51:30:380 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJHITS.bin", 813EE2A0) => 92000700, size 00006BC0
+51:30:381 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXPRE.bin", 813EE260) => 92000690, size 00075B00
+51:30:388 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXPRE.tab", 813EE2A0) => 92000700, size 00000340
+51:30:391 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("PREANIM.bin", 813EE260) => 92000690, size 000E72C0
+51:30:403 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("PREANIM.tab", 813EE2A0) => 92000700, size 000028A0
+51:30:405 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("ENVFXACT.bin", 813EE260) => 92000690, size 00018000
+51:30:426 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.bin", 813EE260) => 92000690, size 000323A0
+51:30:432 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.tab", 813EE2A0) => 92000700, size 00000DA0
+51:30:457 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXTABLE.bin", 803F83A8) => 92000690, size 00001960
+51:30:484 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.tab", 803F83A8) => 92000690, size 00001900
+51:30:487 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TRKBLK.tab", 803F83A8) => 92000690, size 000000A0
+51:30:493 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01C4, 0)
+51:30:504 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/Link/English.bin", 8033AFE0) => 92000690, size 000080C4
+51:30:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/FrontEnd/English.bin", 8033B02C) => 92000700, size 000364CC
+51:30:515 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x025D, 0)
+51:30:530 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0001, 0)
+51:30:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0002, 0)
+51:30:557 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05B0, 0)
+51:30:558 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0600, 0)
+51:30:558 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C18, 0)
+51:30:591 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0019, 0)
+51:30:591 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0018, 0)
+51:30:592 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x001A, 0)
+51:30:592 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0646, 0)
+51:30:594 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSPInit(): Build Date: Dec 17 2001 18:25:00
+51:30:607 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0000, 0x000F)
+51:30:608 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC4, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC5, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC8, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC9, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCA, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCB, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCC, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDE, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDF, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF5, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C24, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C25, 0)
+51:30:609 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C26, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C27, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFE, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFF, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C00, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C01, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCD, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCE, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCF, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD0, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD1, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF1, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE0, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE1, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE2, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE3, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C70, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE4, 0)
+51:30:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD2, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01D2, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC7, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C92, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C02, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C03, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C04, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF0, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C72, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC6, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD3, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD4, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD5, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD6, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD7, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEB, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF2, 0)
+51:30:611 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF3, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF4, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEC, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BED, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEE, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03F5, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FA, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FB, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FC, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FD, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FE, 0)
+51:30:612 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0400, 0)
+51:30:615 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0401, 0)
+51:30:615 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0458, 0)
+51:30:615 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05A7, 0)
+51:30:615 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01A5, 0)
+51:30:615 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0435, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0436, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0438, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0275, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0268, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF9, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFA, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFB, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFC, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE8, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE6, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE9, 0)
+51:30:616 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEA, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2B, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C0C, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C20, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059A, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059B, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059C, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059D, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059E, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05AD, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDB, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDC, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDD, 0)
+51:30:617 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD8, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD9, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDA, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0307, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF6, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF7, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF8, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D4, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D3, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D2, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1E, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1C, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1D, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C71, 0)
+51:30:618 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0500, 0)
+51:30:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0001, 0x0017)
+51:30:621 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("VOXOBJ.tab", 803F8360) => 92000770, size 00000020
+51:30:623 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0012, 0x0008)
+51:30:623 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000F, 0x0016)
+51:30:623 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0002, 0x001D)
+51:30:629 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0016, 0x0004)
+51:30:630 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0005, 0x000F)
+51:30:630 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0006, 0x000C)
+51:30:630 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0007, 0x0008)
+51:30:630 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0009, 0x000A)
+51:30:631 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0003, 0x000D)
+51:30:631 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0004, 0x0024)
+51:30:631 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000A, 0x000A)
+51:30:634 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000B, 0x000C)
+51:30:635 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000C, 0x0008)
+51:30:635 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000D, 0x0003)
+51:30:635 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000E, 0x0002)
+51:30:635 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0011, 0x0003)
+51:30:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0013, 0x0007)
+51:30:636 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0056, 0)
+51:30:637 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2A, 0)
+51:30:637 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2C, 0)
+51:30:637 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2D, 0)
+51:30:657 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0014, 0x0026)
+51:30:657 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x003C, 0x0007)
+51:30:658 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0314, 0)
+51:30:659 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0315, 0)
+51:30:659 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0317, 0)
+51:30:659 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0319, 0)
+51:30:659 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0318, 0)
+51:30:659 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x031A, 0)
+51:30:660 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043B, 0)
+51:30:660 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043E, 0)
+51:30:660 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043D, 0)
+51:30:660 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0015, 0x0009)
+51:30:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0017, 0x0024)
+51:30:663 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0018, 0x0006)
+51:30:663 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x016B, 0)
+51:30:663 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0201, 0)
+51:30:666 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0019, 0x0016)
+51:30:666 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0031, 0x0002)
+51:30:666 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE5, 0)
+51:30:666 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x002F, 0x000C)
+51:30:666 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x003D, 0x000A)
+51:30:671 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05DC, 0)
+51:30:673 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0032, 0x0001)
+51:30:684 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX1.bin", 813EE2A0) => 92000770, size 000C9AA0
+51:30:684 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Krystal texture not loaded
+51:30:694 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX1.tab", 813EE2A0) => 92000770, size 00002400
+51:30:696 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX0.bin", 813EE2A0) => 92000770, size 0004F360
+51:30:700 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX0.tab", 813EE2A0) => 92000770, size 00000DA0
+51:30:704 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/ANIM.BIN", 813EE2A0) => 92000770, size 000C30A0
+51:30:711 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/ANIM.TAB", 813EE2A0) => 92000770, size 000028A0
+51:30:716 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/MODELS.bin", 813EE2A0) => 92000770, size 00079FC0
+51:30:716 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Krystal model not loaded
+51:30:723 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/MODELS.tab", 813EE2A0) => 92000770, size 000013C0
+51:30:728 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront.romlist.zlb", 813EE2A0) => 92000770, size 00000420
+51:30:730 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/mod62.tab", 813EE260) => 920007E0, size 00001800
+51:30:735 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/mod62.zlb.bin", 813EE260) => 92000770, size 0000F020
+51:30:740 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/voxmap.tab", 813EE260) => 92000770, size 00001900
+51:30:745 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/voxmap.bin", 813EE260) => 92000770, size 00000000
+51:30:748 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("warlock/voxmap.bin", 813EE260) => 92000770, size 00006520
+51:30:752 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/animcurv.tab", 813EE260) => 92000770, size 000062C0
+51:30:758 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/animcurv.bin", 813EE260) => 92000770, size 00007860
+51:30:786 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x860E, 1)
+51:30:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYSun
+51:30:815 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8609, 1)
+51:30:816 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYMoon
+51:30:819 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A4, 1)
+51:30:825 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A5, 1)
+51:30:826 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A6, 1)
+51:30:828 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:30:829 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87C4, 1)
+51:30:829 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:30:830 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:30:830 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:30:830 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:30:830 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:30:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:30:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85C1, 1)
+51:30:837 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT communicato
+51:30:838 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:30:838 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8752, 1)
+51:30:838 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT WORLDcomm
+51:30:839 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:30:839 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8663, 1)
+51:30:839 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commCube
+51:30:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:30:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commCubeFro
+51:30:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:30:840 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D4, 1)
+51:30:842 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commQuitObj
+51:30:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:30:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x875B, 1)
+51:30:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commMemoryC
+51:30:844 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00E3, 0x0006)
+51:30:844 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8815, 1)
+51:30:847 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8561, 1)
+51:30:847 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D7, 1)
+51:30:858 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT projball
+51:30:858 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D8, 1)
+51:30:859 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C9, 1)
+51:30:859 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x83F5, 1)
+51:30:859 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F5, 1)
+51:30:859 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x83F5, 1)
+51:30:859 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LockIcon
+51:30:879 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init done; bytes used 3484440/15010176, blocks 508/2530, took %f sec
+51:30:885 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0034, 0x0001)
+51:30:902 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("starfox.thp", 803A5D60) => 92000770, size 02EAA1F8
+51:31:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0136)
+51:31:102 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0137)
+51:31:102 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0143)
+51:31:184 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x016A, 0)
+51:31:184 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05DA, 0)
+51:31:185 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x063F, 0)
+51:31:185 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0640, 0)
+51:31:185 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0641, 0)
+51:31:185 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0151, 0)
+51:31:200 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0009)
+51:31:229 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+51:31:230 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+51:31:266 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05FA, 0)
+51:31:313 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: main loop hook OK
+51:31:414 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x81EF, 0)
+51:31:414 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A9, 0)
+51:31:415 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A4, 0)
+51:31:415 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AD, 0)
+51:31:415 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A6, 0)
+51:31:416 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829E, 0)
+51:31:416 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A8, 0)
+51:31:416 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829F, 0)
+51:31:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A3, 0)
+51:31:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A1, 0)
+51:31:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829B, 0)
+51:31:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A0, 0)
+51:31:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82B1, 0)
+51:31:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AF, 0)
+51:31:420 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82B0, 0)
+51:31:420 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AC, 0)
+51:31:421 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x81F0, 0)
+51:31:421 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AE, 0)
+51:31:421 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829C, 0)
+51:31:436 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00F0, 0x0006)
+51:31:436 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85FD, 1)
+51:31:436 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x861A, 1)
+51:31:436 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85F8, 1)
+51:31:436 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x879F, 1)
+51:31:437 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT WarpPoint
+51:31:438 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C8, 0x0006)
+51:31:438 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87A0, 1)
+51:31:439 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DepthOfFiel
+51:31:439 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:439 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x00C5, 0)
+51:31:440 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060B, 0)
+51:31:441 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060C, 0)
+51:31:441 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060D, 0)
+51:31:441 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060E, 0)
+51:31:441 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060F, 0)
+51:31:441 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0610, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0611, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0612, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0619, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061A, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061B, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061C, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061D, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0620, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0621, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0622, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061E, 0)
+51:31:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061F, 0)
+51:31:443 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0618, 0)
+51:31:443 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C5, 1)
+51:31:443 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C4, 1)
+51:31:443 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B1, 1)
+51:31:444 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8888, 1)
+51:31:444 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8731, 1)
+51:31:448 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86F8, 1)
+51:31:454 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+51:31:454 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:476 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:476 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:477 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:477 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:478 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:479 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:479 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:479 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
+51:31:480 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 920007E0, size 00000EC0
+51:31:482 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8000, 1)
+51:31:489 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
+51:31:489 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x012E, 0x0006)
+51:31:489 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AA, 1)
+51:31:489 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AB, 1)
+51:31:490 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_JukeBox
+51:31:490 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+51:31:492 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:494 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865D, 1)
+51:31:495 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8665, 1)
+51:31:496 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865E, 1)
+51:31:496 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8661, 1)
+51:31:496 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8660, 1)
+51:31:502 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontFox
+51:31:502 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:503 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x868D, 1)
+51:31:504 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x884B, 1)
+51:31:504 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x857A, 1)
+51:31:506 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontSlippy
+51:31:506 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:507 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86D2, 1)
+51:31:507 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87BC, 1)
+51:31:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8895, 1)
+51:31:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87B8, 1)
+51:31:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87BA, 1)
+51:31:509 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPeppy
+51:31:509 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:510 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x828B, 1)
+51:31:510 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x828E, 1)
+51:31:511 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontRob
+51:31:511 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+51:31:511 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+51:31:511 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C5, 1)
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C4, 1)
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B1, 1)
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8887, 1)
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86F9, 1)
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+51:31:512 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F0, 1)
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPlanet
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8080, 1)
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+51:31:514 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0134, 0x0006)
+51:31:515 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8899, 1)
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT texscroll2
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0110, 0x0006)
+51:31:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A5, 1)
+51:31:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A7, 1)
+51:31:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A2, 1)
+51:31:522 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829D, 1)
+51:31:523 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorLeft
+51:31:523 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0110, 0x0006)
+51:31:523 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorLeft
+51:31:523 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
+51:31:524 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 920007E0, size 00000EC0
+51:31:525 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
+51:31:525 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
+51:31:526 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 920007E0, size 00000EC0
+51:31:526 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
+51:31:526 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0112, 0x0006)
+51:31:526 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F4, 1)
+51:31:526 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B4, 1)
+51:31:527 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontSeq
+51:31:545 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+51:31:546 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+51:31:547 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05FA, 0)
+51:31:548 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0019, 0)
+51:31:548 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0018, 0)
+51:31:548 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x001A, 0)
+51:31:548 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0646, 0)
+51:31:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading km0
+51:31:550 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("km0", 803F83A0) => 920007E0, size 00012B40
+51:31:552 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loaded km0 @0x80F19D20 size 0x00012B40
+51:31:552 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading kt0
+51:31:553 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("kt0", 803F83A0) => 920007E0, size 0001B0C0
+51:31:554 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loaded kt0 @0x80EFEC60 size 0x0001B0C0
+51:31:573 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: objRunSeq(0x0, 0x81311520 "GF_DoorLeft", 0xFFFFFFFF)
+51:31:583 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:31:587 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT Override
+51:31:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:31:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A5, 1)
+51:31:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A7, 1)
+51:31:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A2, 1)
+51:31:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829D, 1)
+51:31:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorRigh
+51:31:600 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: objRunSeq(0x0, 0x81311240 "GF_DoorLeft", 0xFFFFFFFF)
+51:31:601 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:31:601 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT Override
+51:31:601 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:31:601 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorRigh
+51:31:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x002D, 0x0002)
+51:31:620 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x00DF, 0)
+51:31:639 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x021F)
+51:31:640 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8780, 1)
+51:31:640 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8781, 1)
+51:31:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x877F, 1)
+51:31:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYScapeSpa
+51:31:645 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0616, 0)
+51:31:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0615, 0)
+51:31:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0309, 0)
+51:31:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030A, 0)
+51:31:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030B, 0)
+51:31:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030C, 0)
+51:31:681 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C10, 0)
+51:31:755 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6500 "Override")
+51:31:781 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6900 "GF_DoorRigh")
+51:31:783 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D4F00 "Override")
+51:31:783 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D60E0 "GF_DoorRigh")
+51:31:788 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0057, 0x0004)
+51:32:548 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C75, 0)
+51:32:548 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C77, 0)
+51:32:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6900 "GF_DoorRigh")
+51:32:670 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6500 "Override")
+51:32:670 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D60E0 "GF_DoorRigh")
+51:32:670 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D4F00 "Override")
+51:32:882 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: No args file
+51:33:384 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C76, 0)
+51:35:555 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 0
+51:35:564 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 1
+51:35:568 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 2
+51:35:573 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 3
+51:35:588 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 4
+51:35:639 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 26
+51:35:647 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 25
+51:39:826 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0035, 0x0001)
+51:39:826 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x02DD, 0)
+51:39:830 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x031D, 0)
+51:39:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x031F, 0)
+51:39:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x031E, 0)
+51:39:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0000, 0)
+51:40:793 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 0
+51:40:809 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 1
+51:40:824 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 2
+51:40:840 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 3
+51:40:855 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 4
+51:40:872 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 26
+51:40:887 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 25
+51:41:861 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 0
+51:41:878 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 1
+51:41:892 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 2
+51:41:908 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 3
+51:41:923 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 4
+51:41:940 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 26
+51:41:955 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 25
+51:42:928 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 0
+51:42:945 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 1
+51:42:960 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 2
+51:42:975 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 3
+51:42:991 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 4
+51:43:007 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 26
+51:43:023 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 25
+51:45:231 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mem 0k/12519904k 640000k/1835008k 60384k/655264k 3902784k/4587424k
+51:45:231 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 	slot 65/250 196/850 160/850 388/580	
+51:45:231 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  
+51:46:622 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 0
+51:46:638 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 1
+51:46:653 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 2
+51:46:669 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 3
+51:46:685 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 4
+51:46:701 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 26
+51:46:717 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 25
+51:46:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading char 1 pos: %f, %f, %f layer 0 rot -123
+51:46:742 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0010, 0x0001)
+51:46:836 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX1.bin", 813EE260) => 92000770, size 0007D5E0
+51:46:839 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX1.tab", 813EE260) => 92000770, size 00002400
+51:46:841 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.bin", 813EE260) => 92000770, size 000323A0
+51:46:847 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.tab", 813EE260) => 92000770, size 00000DA0
+51:46:848 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/ANIM.BIN", 813EE260) => 92000770, size 000CF480
+51:46:856 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/ANIM.TAB", 813EE260) => 92000770, size 000028A0
+51:46:857 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/MODELS.bin", 813EE260) => 92000770, size 0004ED20
+51:46:858 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: MODELS.BIN size=322848 + 76608 = 399456
+51:46:860 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/MODELS.tab", 813EE260) => 92000770, size 000013C0
+51:46:862 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("frontend2.romlist.zlb", 813EE260) => 92000770, size 00000040
+51:46:863 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/mod6.tab", 813EE2A0) => 920007E0, size 00000260
+51:46:864 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/mod6.zlb.bin", 813EE2A0) => 92000770, size 00006FC0
+51:46:866 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/voxmap.tab", 813EE2A0) => 92000770, size 00001900
+51:46:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/voxmap.bin", 813EE2A0) => 92000770, size 00001920
+51:46:869 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/animcurv.tab", 813EE2A0) => 92000770, size 000062C0
+51:46:870 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/animcurv.bin", 813EE2A0) => 92000770, size 00004DA0
+51:46:874 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest.romlist.zlb", 813EE2A0) => 92000770, size 00000040
+51:46:876 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8014, 0)
+51:46:877 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:877 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8007, 0)
+51:46:878 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:880 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:880 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:881 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:882 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:882 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:882 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800A, 0)
+51:46:882 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8011, 0)
+51:46:885 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800D, 0)
+51:46:885 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8008, 0)
+51:46:885 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8009, 0)
+51:46:886 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:887 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:887 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:888 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8012, 0)
+51:46:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:890 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:890 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:891 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:891 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8012, 0)
+51:46:891 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:892 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:893 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:893 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8012, 0)
+51:46:893 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8013, 0)
+51:46:894 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:895 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:897 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:897 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8012, 0)
+51:46:897 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:899 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:899 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:899 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800C, 0)
+51:46:899 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:902 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:903 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800C, 0)
+51:46:903 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8010, 0)
+51:46:903 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:905 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:907 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:907 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800F, 0)
+51:46:907 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8006, 0)
+51:46:907 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:909 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:910 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:910 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800F, 0)
+51:46:910 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:912 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:913 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:913 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800F, 0)
+51:46:913 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:916 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:916 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:916 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800F, 0)
+51:46:916 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:918 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:919 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:919 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:919 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:919 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:919 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:922 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:923 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:923 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:926 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:926 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:926 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:928 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:930 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:930 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:932 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:932 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800E, 0)
+51:46:932 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x800B, 0)
+51:46:934 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.bin", 803F7838) => 92000770, size 0005FD60
+51:46:936 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 
+51:46:936 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:     LOADING CHARACTER     maptype 0  playerno 1
+51:46:942 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8725, 1)
+51:46:949 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8726, 1)
+51:46:950 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8729, 1)
+51:46:950 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x872A, 1)
+51:46:950 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8724, 1)
+51:46:953 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8728, 1)
+51:46:965 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865D, 1)
+51:46:970 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8665, 1)
+51:46:971 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865E, 1)
+51:46:972 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8661, 1)
+51:46:972 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8660, 1)
+51:46:977 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x880F, 1)
+51:46:980 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8823, 1)
+51:46:982 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8821, 1)
+51:47:033 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT Sabre
+51:47:035 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0042, 0x0004)
+51:47:153 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+51:47:154 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+51:47:154 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05FA, 0)
+51:47:154 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0019, 0)
+51:47:154 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0018, 0)
+51:47:154 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x001A, 0)
+51:47:154 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0646, 0)
+51:47:156 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x01B2)
+51:47:167 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0244)
+51:47:172 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x01B3)
+51:47:173 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8000, 1)
+51:47:173 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYScapeDef
+51:47:173 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x01B4)
+51:47:187 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00E2, 0x0006)
+51:47:191 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C9F, 0)
+51:47:191 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C9F, 0)
+51:47:191 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x005A, 0x0001)
+51:47:191 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8582, 1)
+51:47:191 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x872D, 1)
+51:47:193 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT staff
+51:47:194 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865A, 1)
+51:47:194 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mmUniqueIdent
+51:47:194 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT BackPack
+51:47:195 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00E5, 0x0006)
+51:47:196 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D1, 1)
+51:47:198 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT fox_shield
+51:47:308 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("bitnames.dat", 803F82B8) => 92000770, size 00005431
+51:47:310 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0965 (ITEM_Spell0965_Disabled) set to 0
+51:47:312 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0986 (ITEM_FireBlaster_Disabled) set to 0
+51:47:312 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0961 (ITEM_Spell0961_Disabled) set to 0
+51:47:316 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x096B (ITEM_SuperQuake_Disabled) set to 0
+51:47:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85C2, 1)
+51:47:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:47:472 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85C3, 1)
+51:47:472 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85C4, 1)
+51:47:472 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+51:47:506 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/Animtest/English.bin", 8033B02C) => 92000700, size 0001139C
+51:47:581 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C3D, 0)
+51:47:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C3C, 0)
+51:47:800 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C8A, 0)
+51:47:800 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C06, 0)
+51:47:800 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C87, 0)
+51:47:800 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C89, 0)
+51:47:801 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C93, 0)
+51:47:801 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1D, 0)
+51:47:801 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1B, 0)
+51:47:801 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C88, 0)
+51:55:000 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0052, 0x0004)
+51:55:011 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:039 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:058 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:096 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:114 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:133 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:152 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:170 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:189 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:208 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:226 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:268 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:286 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:305 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:323 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:341 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:360 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:379 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:397 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:415 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:434 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:452 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:489 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:526 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:544 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:55:563 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:56:041 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mem 0k/12519904k 521440k/1835008k 35936k/655264k 3902784k/4587424k
+51:56:041 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 	slot 41/250 145/850 128/850 388/580	
+51:56:041 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  
+51:56:918 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:56:943 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:56:962 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:56:981 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:001 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:020 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:040 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:059 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:097 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:116 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:135 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:154 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:172 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:192 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:210 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:229 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:247 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:266 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:285 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:304 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:322 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:341 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:360 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:378 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:397 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:415 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:434 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:452 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:57:471 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+51:59:860 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:59:864 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86AA, 1)
+51:59:865 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commRobHead
+51:59:866 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:59:866 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8286, 1)
+51:59:866 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commPepperH
+51:59:866 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87BE, 1)
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8895, 1)
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86D2, 1)
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commPeppyHe
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85ED, 1)
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85EC, 1)
+51:59:867 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commSlippyH
+51:59:872 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/Communicator/English.bin", 8033B02C) => 92000700, size 00023AD0
+52:01:257 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/Animtest/English.bin", 8033B02C) => 92000700, size 0001139C
+52:01:725 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0044, 0x0004)
+52:01:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0965 (ITEM_Spell0965_Disabled) set to 1
+52:01:764 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0986 (ITEM_FireBlaster_Disabled) set to 1
+52:01:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0961 (ITEM_Spell0961_Disabled) set to 1
+52:01:767 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x096B (ITEM_SuperQuake_Disabled) set to 1
+52:01:775 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:790 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:809 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:827 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:846 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:862 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:876 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:890 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:905 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:920 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:934 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:951 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:972 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:01:992 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:02:011 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:02:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:02:913 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:02:929 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:02:945 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:02:960 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:02:987 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:001 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:019 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:037 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:053 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:067 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:080 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:096 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:110 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:123 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:139 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: t=%f
+52:03:177 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0965 (ITEM_Spell0965_Disabled) set to 0
+52:03:178 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0986 (ITEM_FireBlaster_Disabled) set to 0
+52:03:179 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x0961 (ITEM_Spell0961_Disabled) set to 0
+52:03:182 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GameBit 0x096B (ITEM_SuperQuake_Disabled) set to 0
+52:05:181 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mem 0k/12519904k 521440k/1835008k 35904k/655264k 3902784k/4587424k
+52:05:181 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 	slot 41/250 145/850 126/850 388/580	
+52:05:181 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  
+52:06:133 Core/Core.cpp:282 I[CONSOLE]: Stop [Main Thread]		---- Shutting down ----
+52:06:133 Core/Core.cpp:285 I[CONSOLE]: Stop [Main Thread 0]	Stop CPU
+52:06:133 Core/Core.cpp:643 I[CONSOLE]: Stop [Main Thread 0]	Stopping GDB ...
+52:06:133 Core/Core.cpp:645 I[CONSOLE]: Stop [Main Thread 0]	GDB stopped.
+52:06:193 Core/Core.cpp:519 I[CONSOLE]: Stop [Video Thread 0]	Shutting down HW
+52:06:473 Core/HW/GCMemcard/GCMemcardDirectory.cpp:676 I[EXI]: Flushing savedata to disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+52:06:473 Core/Core.cpp:521 I[CONSOLE]: Stop [Video Thread 0]	HW shutdown
+52:06:489 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+52:06:516 AudioCommon/AudioCommon.cpp:88 I[Audio]: Shutting down sound stream
+52:06:520 AudioCommon/AudioCommon.cpp:96 I[Audio]: Done shutting down sound stream
+52:07:308 Core/Core.cpp:462 I[CONSOLE]: Stop		---- Shutdown complete ----
+52:07:357 InputCommon/ControllerInterface/evdev/evdev.cpp:356 N[CI]: evdev hotplug thread stopped
+52:07:424 Core/HW/WiimoteReal/WiimoteReal.cpp:755 N[Wiimote]: Wiimote scanning thread has stopped.
+52:07:424 Core/HW/WiimoteReal/WiimoteReal.cpp:884 N[Wiimote]: WiimoteReal::Shutdown
