@@ -141,8 +141,10 @@ void dvd_removeFile(HackDvdOpenFile* file);
 //exception.c
 void OSExceptionInit_hook();
 void exceptionHook(u32 *exc_gpr, int code);
-void gameExceptionHook(int exceptionCode, OSContext *ctx,
-    uint cause, void *addr);
+void gameExceptionInit();
+//void gameExceptionHook(int exceptionCode, OSContext *ctx,
+//    uint cause, void *addr);
+void gameExceptionHook();
 
 //exi.c
 void exiPuts(const char *str);

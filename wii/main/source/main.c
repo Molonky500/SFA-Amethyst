@@ -6,7 +6,7 @@ char gameRootDir[512] = "*** GAME ROOT DIR ***";
 
 
 int main(int argc, char **argv) {
-    SET_SCREEN_SOLID_YUV(76, 84, 255); //red
+    SET_SCREEN_SOLID_YUV(255, 128, 128); //white
     exiPrintInit();
     exiPrintf("loader2 start\n");
 

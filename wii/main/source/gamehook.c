@@ -29,4 +29,5 @@ void initGameHooks() {
     while(!dvdThreadReady) OSYieldThread();
     DVD_DPRINT("DVD READY\n");
     SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
+    gameExceptionInit();
 }

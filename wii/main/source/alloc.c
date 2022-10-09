@@ -3,14 +3,14 @@
 GameHeap *gameHeaps = (GameHeap*)0x80340698;
 
 void dumpGameHeaps() {
-    exiPuts("H#|Entry|U| Address|    Size| EndAddr|AllocTag|      LR\n");
     for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+        exiPuts("H#|Entry|U| Address|    Size| EndAddr|AllocTag|      LR\n");
         GameHeap *heap = &gameHeaps[iHeap];
         for(int iEntry=0; iEntry<heap->avail; iEntry++) {
             GameHeapEntry *entry = &heap->data[iEntry];
             if(entry->size) { //ignore empty entries
                 //size is not zero-padded
-                exiPrintf("%2d|%5d|%c|%08X|%8X|%08X|%08X|%08X\n",
+                printf("%2d|%5d|%c|%08X|%8X|%08X|%08X|%08X\n",
                     iHeap, iEntry,
                     entry->type == HEAP_ENTRY_TYPE_FREE ? ' ' : '*',
                     entry->loc, entry->size, entry->loc+entry->size,
@@ -18,6 +18,7 @@ void dumpGameHeaps() {
             }
         }
     }
+    exiPuts("--- END OF HEAP DUMP ---\n");
 }
 
 bool checkAddrInheap(void *addr, u32 len) {

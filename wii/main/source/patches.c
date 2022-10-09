@@ -96,7 +96,8 @@ void doPatches() {
     hookBranch(0x80246e04, osPrintHook, 0, 0);
     hookBranch(0x802510cc, osPrintHook, 0, 0);
     hookBranch(0x8024091c, OSExceptionInit_hook, 0, 0);
-    hookBranch(0x80242a10, gameExceptionHook, 0, 0);
+    //hookBranch(0x80242a10, gameExceptionHook, 0, 0);
+    hookBranch(0x80137df8, gameExceptionHook, 0, 0);
     hookBranch(0x802406c0, __OSInterruptInit_hook, 1, 0);
     hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0, 0);
     hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0, 0);
