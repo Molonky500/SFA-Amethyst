@@ -32,7 +32,8 @@ int initVideo() {
 	rmode = VIDEO_GetPreferredMode(NULL);
 
     // Allocate memory for the display in the uncached region
-	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+	//xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+	xfb = MEM_K0_TO_K1(0x8048e480);
 
     // Initialise the console, required for printf
 	console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
@@ -253,6 +254,13 @@ __attribute__((noreturn)) void loadAppDol() {
     /** Load the second stage bootloader DOL.
      */
     char path[4096];
+    snprintf(path, sizeof(path), "%s/files/splashScreen.bin", gameRootDir);
+    FILE *splash = fopen(path, "rb");
+    if(splash) {
+        fread(xfb, 2, 640*480, splash);
+        fclose(splash);
+    }
+
     snprintf(path, sizeof(path), "%s/main.dol", gameRootDir);
     FILE *dol = fopen(path, "rb");
     if(!dol) {
@@ -300,6 +308,7 @@ __attribute__((noreturn)) void loadAppDol() {
         if(buttons & PAD_BUTTON_B) exit(0);
         if(buttons & (PAD_BUTTON_START|PAD_BUTTON_A)) break;
     }*/
+    VIDEO_SetBlack(TRUE);
     void (*boot)(void) = (void (*)())header.entryPoint;
     IRQ_Disable();
     boot(); //shouldn't return

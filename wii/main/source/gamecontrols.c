@@ -149,9 +149,20 @@ void displayControllerState(int iPad, GameControllerState *cnt) {
     WPADData *wp = wpads[iPad];
     //84=enter fixed-width mode; 85=leave fixed-width mode
     //both = somehow crash
-    debugPrintf("%s %3d %3d C%3d %3d X%d\n", msg,
-        cnt->stickX, cnt->stickY, cnt->cX, cnt->cY,
-        wp ? wp->exp.type : 42069);
+    debugPrintf("%s %3d %3d C%3d %3d", msg,
+        cnt->stickX, cnt->stickY, cnt->cX, cnt->cY);
+    if(wp) {
+        debugPrintf(" B%3d%% IR%d, %d, %dcm ang%d",
+            (int)(((float)wp->battery_level / 255.0f) * 100.0f),
+            (int)wp->ir.sx,
+            (int)wp->ir.sy,
+            (int)(wp->ir.z * 100.0f),
+            (int)(wp->ir.angle));
+        //vec3w_t accel (x, y, z)
+        //orient_t orient (yaw, pitch, roll)
+        //gforce_t gforce (x, y, z)
+    }
+    debugPrintf("\n");
 }
 
 static int prevState = -1;
