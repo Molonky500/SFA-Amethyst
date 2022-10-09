@@ -10,6 +10,8 @@
 #include <stdarg.h>
 #include "gcc-macros.h"
 
+#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)
+#define SET_DISC_LED(on) _ipcReg[30] = ((on) ? (_ipcReg[30] | 0x20) : (_ipcReg[30] & ~0x20))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define PANIC(msg) do { \

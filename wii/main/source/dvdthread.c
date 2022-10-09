@@ -202,8 +202,10 @@ void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
 void dvdIdle() {
     int wasBusy = DVD_BUSY;
     DVD_BUSY = 0;
+    SET_DISC_LED(0);
     OSYieldThread();
     DVD_BUSY = wasBusy;
+    SET_DISC_LED(wasBusy);
 }
 
 void* hackDvdThreadMain(void *param) {
@@ -231,6 +233,7 @@ void* hackDvdThreadMain(void *param) {
             #if DVD_DEBUG
                 //exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
+            SET_DISC_LED(0);
             DVD_BUSY = 0;
             dvdIdle();
             OSSleepThread(&dvdThreadQueue);
@@ -241,6 +244,7 @@ void* hackDvdThreadMain(void *param) {
             #endif
         }
 
+        SET_DISC_LED(1);
         DVD_BUSY = 1; //DVD drive is busy
         DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\n", msg->cmd, msg->id);
 

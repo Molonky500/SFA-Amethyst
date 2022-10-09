@@ -121,7 +121,7 @@ void doPatches() {
         0x80000008, 0x01000000,
         0x800000f0, 0x01800000,
 
-        0x80245980, 0x4E800020, //OSSetWirelessID
+        //0x80245980, 0x4E800020, //OSSetWirelessID
 
         //don't call __check_pad3 since it's not there anymore
         0x80003260, 0x60000000,

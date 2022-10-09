@@ -4,6 +4,7 @@ void initGameHooks() {
     //memset(0x90000000, 0, 16*1024*1024);
     //_dspReg[5] = 0x801; //DSP reset
 
+    SET_SCREEN_SOLID_YUV(255, 0, 148); //yellow
     initAlloc();
     exiPuts("loader2 alloc init OK\n");
     initLibc();
@@ -22,8 +23,10 @@ void initGameHooks() {
     __IOS_InitializeSubsystems();
     exiPuts("loader2 IPC init OK\n");
 
+    SET_SCREEN_SOLID_YUV(150, 42, 202); //orange
     initDvdHack();
     exiPuts("initDvdHack: OK; wait for DVD...\n");
     while(!dvdThreadReady) OSYieldThread();
     DVD_DPRINT("DVD READY\n");
+    SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
 }

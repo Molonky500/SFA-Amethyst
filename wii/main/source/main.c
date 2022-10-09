@@ -6,8 +6,7 @@ char gameRootDir[512] = "*** GAME ROOT DIR ***";
 
 
 int main(int argc, char **argv) {
-    //_ipcReg[9] = (y << 8) | (v << 16) | (u << 24) | 1;
-    _ipcReg[9] = (76 << 8) | (255 << 16) | (84 << 24) | 1;
+    SET_SCREEN_SOLID_YUV(76, 84, 255); //red
     exiPrintInit();
     exiPrintf("loader2 start\n");
 
@@ -27,7 +26,7 @@ int main(int argc, char **argv) {
     doPatches();
 
     exiPuts("boot game\n");
-    _ipcReg[9] = (149 << 8) | (21 << 16) | (43 << 24) | 1;
+    SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
     bootGame(header);
 
     while(1);
