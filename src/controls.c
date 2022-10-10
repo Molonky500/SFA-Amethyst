@@ -77,7 +77,7 @@ void displayWiimoteState(GameWiimoteState *wp) {
     debugPrintf("\n" DPRINT_NOFIXED);
 }
 
-void adjustPlayerRotation(s16 x, s16 y) {
+void adjustPlayerRotation(s16 x, s16 y, PADStatus *pad) {
     pPlayer->pos.rotation.x -= x;
     pPlayer->pos.rotation.y -= y;
     *(s16*)(pPlayer->state + 0x01A) -= x;
@@ -88,13 +88,22 @@ void adjustPlayerRotation(s16 x, s16 y) {
     *(s32*)(pPlayer->state + 0x5C0) -= x;
     ObjInstance *ride = *(ObjInstance**)(pPlayer->state + 0x7F0);
     if(ride) {
+        void *rState = ride->state;
         ride->pos.rotation.x -= x;
         ride->pos.rotation.y -= y;
         if(ride->catId == 0x2E) { //bike
-            void *rState = ride->state;
             *(s16*)(rState+0x40C) -= x;
             *(s16*)(rState+0x40E) -= x;
             *(s16*)(rState+0x41C) -= y;
+        }
+        else if(ride->catId == 0x30) { //cloudrunner
+            *(s16*)(rState+0x2C) -= x / 2;
+            *(s16*)(rState+0x2E) -= y / 2;
+            *(s32*)(rState+0x70) -= x / 2;
+            *(s32*)(rState+0x74) -= y / 2;
+            //pad->stickX += x;
+            //pad->stickY += y;
+            //XXX IR aiming
         }
     }
 }
@@ -208,7 +217,7 @@ void applyJoystickInputs(GameWiimoteState *wp, PADStatus *pad) {
     }
 }
 
-void doSwingGestures(GameWiimoteState *wp, u32 *bDown) {
+void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
     s16 stateNo = *(s16*)(pPlayer->state+0x274);
 
     //swing to roll
@@ -234,14 +243,21 @@ void doSwingGestures(GameWiimoteState *wp, u32 *bDown) {
             }
             break;
         }
-        case 0x18: { //riding a bike
+        case 0x18: { //riding a bike/CloudRunner
             if(wp->expType == WPAD_EXP_NUNCHUK) {
                 //XXX is the orientation sensor broken
                 //or is it normal that X is always 0?
                 adjustPlayerRotation(
                     wp->exp.nunchuk.orient[2] * 12,
-                    wp->exp.nunchuk.orient[1] * 10);
+                    wp->exp.nunchuk.orient[1] * 10, pad);
                 //maybe forward tilt can be accel/brake instead
+            }
+            break;
+        }
+        case 0x1A: { //riding CloudRunner (DragRock?)
+            if(wp->expType == WPAD_EXP_NUNCHUK) {
+                pad->stickX += wp->exp.nunchuk.orient[2];
+                pad->stickY += wp->exp.nunchuk.orient[1];
             }
             break;
         }
@@ -264,7 +280,7 @@ void doAimControls(PADStatus *pad) {
         ObjInstance *player, void *state) = 0x802a514c;
     func(pPlayer, pPlayer->state);*/
 
-    adjustPlayerRotation(pad->stickX * 16, pad->stickY * 16);
+    adjustPlayerRotation(pad->stickX * 16, pad->stickY * 16, pad);
 }
 
 static u8 prevWiimoteFlags[4];
@@ -305,9 +321,9 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
         WRITE32(0x8029b270, 0x60000000);
         WRITE32(0x8029b238, 0x60000000);
     }
-    displayWiimoteState(wp);
-    doSwingGestures(wp, &bDown);
+    doSwingGestures(wp, state, &bDown);
     if(isAim) doAimControls(state);
+    displayWiimoteState(wp);
     state->button = bHeld | bDown;
 }
 
