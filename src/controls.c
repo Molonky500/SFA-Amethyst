@@ -151,8 +151,12 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
         (int)wp->accel[0], (int)wp->accel[1], (int)wp->accel[2]);
     debugPrintf("O %3d,%3d,%3d ",
         (int)wp->orient[0], (int)wp->orient[1], (int)wp->orient[2]);
-    debugPrintf("G %3d,%3d,%3d ",
-        (int)wp->gforce[0], (int)wp->gforce[1], (int)wp->gforce[2]);
+    debugPrintf("G %3d,%3d,%3d = %d ",
+        (int)wp->gforce[0], (int)wp->gforce[1], (int)wp->gforce[2],
+        (int)(ABS(wp->gforce[0])+
+            ABS(wp->gforce[1])+
+            ABS(wp->gforce[2]))
+        );
 
     //joystick inputs
     switch(wp->expType) {
@@ -167,12 +171,24 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
                 (int)wp->exp.nunchuk.orient[0],
                 (int)wp->exp.nunchuk.orient[1],
                 (int)wp->exp.nunchuk.orient[2]);
-            debugPrintf("G %3d,%3d,%3d\n",
+            debugPrintf("G %3d,%3d,%3d = %d\n",
                 (int)(wp->exp.nunchuk.gforce[0] * 100.0f),
                 (int)(wp->exp.nunchuk.gforce[1] * 100.0f),
-                (int)(wp->exp.nunchuk.gforce[2] * 100.0f));
+                (int)(wp->exp.nunchuk.gforce[2] * 100.0f),
+                (int)(ABS(wp->exp.nunchuk.gforce[0])+
+                    ABS(wp->exp.nunchuk.gforce[1])+
+                    ABS(wp->exp.nunchuk.gforce[2]))
+                );
                 state->stickX = wp->exp.nunchuk.joystick[0];
                 state->stickY = wp->exp.nunchuk.joystick[1];
+
+            //swing to roll
+            if(ABS(wp->exp.nunchuk.gforce[0]) +
+               ABS(wp->exp.nunchuk.gforce[1]) +
+               ABS(wp->exp.nunchuk.gforce[2]) >= 1.5f) {
+                OSReport("rollin' rollin' rollin'\n");
+                bDown |= PAD_BUTTON_X;
+            }
             break;
         }
         case WPAD_EXP_CLASSIC: {
@@ -195,7 +211,23 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
             break;
     }
     debugPrintf("\n" DPRINT_NOFIXED);
-    state->button = bHeld | bDown;
+
+    s16 stateNo = *(s16*)(pPlayer->state+0x274);
+    switch(stateNo) {
+        case 0x01: //idle
+        case 0x02: { //moving
+            if(*(u8*)(pPlayer->state+0x8B3) != 0) { //staff in hand
+                if(ABS(wp->gforce[0]) +
+                ABS(wp->gforce[1]) +
+                ABS(wp->gforce[2]) >= 8.0f) {
+                    OSReport("swing it!\n");
+                    bDown |= PAD_BUTTON_A;
+                }
+            }
+            break;
+        }
+        default: break;
+    }
 
     if(isAim) {
         //try to let player walk around in this state.
@@ -221,6 +253,7 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
         *(s16*)(pPlayer->state + 0x494) -= state->stickX * 16;
         *(s32*)(pPlayer->state + 0x5C0) -= state->stickX * 16;
     }
+    state->button = bHeld | bDown;
 }
 
 u32 padUpdate_hook(PADStatus *state) {
