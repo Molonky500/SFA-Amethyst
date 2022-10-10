@@ -28,7 +28,5 @@ void wiiHooksInit() {
     WRITE_BLR(0x80250218); //__ARCheckSize
     WRITE32(0x803de01c, 0x01000000); //__ARSize
 
-    //u32 size = 0xAAAAAAAA;
-    //void *test = loadFileByPath("/GAMETEXT.bin", &size);
-    //OSReport("GAMETEXT: %08X size %08X\n", test, size);
+    hookBranch(0x80014f90, padUpdate_hook, 1);
 }

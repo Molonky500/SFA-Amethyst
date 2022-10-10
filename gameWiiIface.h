@@ -48,6 +48,9 @@ typedef struct {
 typedef struct {
     u32 magic;
     GameWiimoteState wiimote[GAME_MAX_WIIMOTES];
+
+    //function pointers filled in by loader for game to use.
+    void (*updateWiimotes)(void);
 } GameWiiInterface;
 
 //we store the pointer here in a place that's normally

@@ -75,93 +75,6 @@ void initWiimote() {
     isWiimoteInit = true;
 }
 
-u32 mapWiimoteButtons(WPADData *wp, u32 btns) {
-    //generate GC button mask corresponding to Wii button
-    //state on given pad.
-    //mapping chosen arbitrarily to fit the game.
-    u32 result = 0;
-    switch(wp->exp.type) {
-        case WPAD_EXP_NUNCHUK: {
-                if(btns & WPAD_NUNCHUK_BUTTON_Z)
-                    result |= PAD_TRIGGER_L;
-                if(btns & WPAD_NUNCHUK_BUTTON_C)
-                    result |= PAD_BUTTON_Y;
-                break;
-            break;
-        }
-        default: break;
-    }
-    if(btns & WPAD_BUTTON_A)     result |= PAD_BUTTON_A;
-    if(btns & WPAD_BUTTON_B)     result |= PAD_BUTTON_B;
-    if(btns & WPAD_BUTTON_1)     result |= PAD_BUTTON_X;
-    if(btns & WPAD_BUTTON_2)     result |= PAD_BUTTON_Y;
-    if(btns & WPAD_BUTTON_MINUS) result |= PAD_TRIGGER_Z;
-    if(btns & WPAD_BUTTON_PLUS)  result |= PAD_BUTTON_START;
-    if(btns & WPAD_BUTTON_HOME)  result |= PAD_BUTTON_START;
-    if(btns & WPAD_BUTTON_UP)    result |= PAD_BUTTON_UP;
-    if(btns & WPAD_BUTTON_DOWN)  result |= PAD_BUTTON_DOWN;
-    if(btns & WPAD_BUTTON_LEFT)  result |= PAD_BUTTON_LEFT;
-    if(btns & WPAD_BUTTON_RIGHT) result |= PAD_BUTTON_RIGHT;
-    return result;
-}
-
-void applyWiimoteInputs(int iPad, GameControllerState *state) {
-    //only called when the Wiimote is connected.
-    //overrides the GC controller state.
-    WPADData *wp = wpads[iPad];
-    u32 bHeld = mapWiimoteButtons(wp, wp->btns_h);
-    u32 bDown = mapWiimoteButtons(wp, wp->btns_d);
-    u32 bUp   = mapWiimoteButtons(wp, wp->btns_u);
-    state->buttons = bHeld | bDown;
-
-    //joystick inputs
-    switch(wp->exp.type) {
-        case WPAD_EXP_NUNCHUK: {
-            state->stickX = wp->exp.nunchuk.js.pos.x + 128;
-            state->stickY = wp->exp.nunchuk.js.pos.y + 128;
-            break;
-        }
-        default: break;
-    }
-}
-
-void displayControllerState(int iPad, GameControllerState *cnt) {
-    //display input for debug
-    char msg[64];
-    char *m = msg;
-    *(m++) = (cnt->buttons & PAD_BUTTON_A)     ? 'A' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_B)     ? 'B' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_X)     ? 'X' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_Y)     ? 'Y' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_START) ? 'S' : '.';
-    *(m++) = (cnt->buttons & PAD_TRIGGER_L)    ? 'L' : '.';
-    *(m++) = (cnt->buttons & PAD_TRIGGER_R)    ? 'R' : '.';
-    *(m++) = (cnt->buttons & PAD_TRIGGER_Z)    ? 'Z' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_UP)    ? '^' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_RIGHT) ? '>' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_DOWN)  ? 'V' : '.';
-    *(m++) = (cnt->buttons & PAD_BUTTON_LEFT)  ? '<' : '.';
-    *(m++) = 0;
-
-    WPADData *wp = wpads[iPad];
-    //84=enter fixed-width mode; 85=leave fixed-width mode
-    //both = somehow crash
-    debugPrintf("%s %3d %3d C%3d %3d", msg,
-        cnt->stickX, cnt->stickY, cnt->cX, cnt->cY);
-    if(wp) {
-        debugPrintf(" B%3d%% IR%d, %d, %dcm ang%d",
-            (int)(((float)wp->battery_level / 255.0f) * 100.0f),
-            (int)wp->ir.sx,
-            (int)wp->ir.sy,
-            (int)(wp->ir.z * 100.0f),
-            (int)(wp->ir.angle));
-        //vec3w_t accel (x, y, z)
-        //orient_t orient (yaw, pitch, roll)
-        //gforce_t gforce (x, y, z)
-    }
-    debugPrintf("\n");
-}
-
 static int prevState = -1;
 static bool checkWpads() {
     initWiimote();
@@ -197,9 +110,7 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
     //WPAD_SetLeds(iPad, state->flags & WM_FLAG_LED_MASK);
     //inexplicably causes constant flashing
 
-    //XXX separate present/working flags, MotionPlus
-    state->flags = (state->flags & ~WM_FLAG_GC_CONTROLLED_MASK)
-        | WM_FLAG_PRESENT | WM_FLAG_WORKING;
+    //XXX MotionPlus
     state->battery = pad->battery_level;
     state->btnsDown= pad->btns_d;
     state->btnsHeld= pad->btns_h;
@@ -261,37 +172,28 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
     }
 }
 
-void updateWiimote(GameControllerState *state) {
-    if(!checkWpads()) return;
+void updateWiimotes() {
     for(int iPad=0; iPad < GAME_MAX_WIIMOTES; iPad++) {
+        GameWiimoteState *state = &wiiIface.wiimote[iPad];
+        state->flags &= ~(WM_FLAG_PRESENT | WM_FLAG_WORKING);
+    }
+    if(!checkWpads()) return;
+
+    for(int iPad=0; iPad < GAME_MAX_WIIMOTES; iPad++) {
+        GameWiimoteState *state = &wiiIface.wiimote[iPad];
         int err = WPAD_Probe(iPad, NULL);
         if(err == WPAD_ERR_NONE) {
+            state->flags |= WM_FLAG_PRESENT | WM_FLAG_WORKING;
             debugPrintf("WP%d OK\n", iPad);
 			wpads[iPad] = WPAD_Data(iPad);
-            applyWiimoteInputs(iPad, &state[iPad]);
             updateGameWiimoteIface(wpads[iPad], iPad);
-		} else {
+        } else if(err == -1) {
+            //not connected; nothing to do here
+		} else { //not ready
+            state->flags |= WM_FLAG_PRESENT;
             debugPrintf("WP%d err %d\n", iPad, err);
 			wpads[iPad] = NULL;
             wiiIface.wiimote[iPad].flags = 0;
 		}
     }
-}
-
-u32 padUpdate_hook(GameControllerState *state) {
-    //replaces call to padReadControllers()
-
-    //call original method
-    u32 (*padReadControllers)(GameControllerState*) = 0x8024e864;
-    u32 result = padReadControllers(state);
-    state->state = 0; //present
-
-    //avoid flooding dprint buf
-    //u32 debugLogEnd = *(u32*)0x803dbc14;
-    //if(debugLogEnd - 0x803aa018 > 3000) debugLogEnd = 0x803aa018;
-
-    updateWiimote(state);
-    displayControllerState(0, state);
-
-    return result;
 }

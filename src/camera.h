@@ -28,10 +28,6 @@ typedef enum {
 extern u8 cameraFlags; //CameraFlags
 extern s8 debugCameraMode; //CameraMode
 void cameraUpdateHook();
-int padGetCxHook(int pad);
-int padGetCyHook(int pad);
-int padGetStickXHook(int pad);
-int padGetStickYHook(int pad);
 u32 minimapButtonHeldHook(int pad);
 u32 minimapButtonPressedHook(int pad);
 int viewFinderZoomHook(int pad);

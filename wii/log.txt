@@ -1,18 +1,1477 @@
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
-make[1]: Warning: File 'main.d' has modification time 30 s in the future
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build/exi.d -g -O2 -Wall -fPIC -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/exi.c -o exi.o 
 powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build/main.d -g -O2 -Wall -fPIC -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c -o main.o 
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c: In function '_scanForGameFiles':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c:131:9: warning: implicit declaration of function 'checkForExitButton' [-Wimplicit-function-declaration]
-  131 |         checkForExitButton();
-      |         ^~~~~~~~~~~~~~~~~~
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c: In function 'loadAppDol':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c:294:58: warning: argument to 'sizeof' in 'strncpy' call is the same expression as the source; did you mean to use the size of the destination? [-Wsizeof-pointer-memaccess]
-  294 |                     strncpy((char*)j, gameRootDir, sizeof(gameRootDir));
-      |                                                          ^
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c: In function 'initGameFiles':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c:175:9: warning: 'strncpy' specified bound 512 equals destination size [-Wstringop-truncation]
+  175 |         strncpy(gameRootDir, appPath, sizeof(gameRootDir));
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 powerpc-eabi-gcc  exi.o main.o -g -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -Wl,-Map,boot.elf.map -L/opt/devkitpro/libogc/lib/wii  -lfat -logc -lm -o /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf
-/opt/devkitpro/devkitPPC/bin/../lib/gcc/powerpc-eabi/12.1.0/../../../../powerpc-eabi/bin/ld: main.o: in function `_scanForGameFiles':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c:131: undefined reference to `checkForExitButton'
-collect2: error: ld returned 1 exit status
-make[1]: *** [/opt/devkitpro/devkitPPC//wii_rules:30: /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf] Error 1
-make: *** [Makefile:99: build] Error 2
+elf2dol /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.dol
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/alloc.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c -o alloc.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c: In function 'dumpGameHeaps':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c:13:39: warning: format '%X' expects argument of type 'unsigned int', but argument 5 has type 'void *' [-Wformat=]
+   13 |                 printf("%2d|%5d|%c|%08X|%8X|%08X|%08X|%08X\n",
+      |                                    ~~~^
+      |                                       |
+      |                                       unsigned int
+      |                                    %08p
+......
+   16 |                     entry->loc, entry->size, entry->loc+entry->size,
+      |                     ~~~~~~~~~~         
+      |                          |
+      |                          void *
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c:13:48: warning: format '%X' expects argument of type 'unsigned int', but argument 7 has type 'void *' [-Wformat=]
+   13 |                 printf("%2d|%5d|%c|%08X|%8X|%08X|%08X|%08X\n",
+      |                                             ~~~^
+      |                                                |
+      |                                                unsigned int
+      |                                             %08p
+......
+   16 |                     entry->loc, entry->size, entry->loc+entry->size,
+      |                                              ~~~~~~~~~~~~~~~~~~~~~~
+      |                                                        |
+      |                                                        void *
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/argv.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/argv.c -o argv.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/audio.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audio.c -o audio.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audio.c: In function 'doDspPatch':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audio.c:94:18: warning: passing argument 1 of 'DCStoreRange' makes pointer from integer without a cast [-Wint-conversion]
+   94 |     DCStoreRange(0x80330840, 0x2000);
+      |                  ^~~~~~~~~~
+      |                  |
+      |                  unsigned int
+In file included from ../source/include/main.h:51,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audio.c:1:
+../source/include/cache.h:145:25: note: expected 'void *' but argument is of type 'unsigned int'
+  145 | void DCStoreRange(void *startaddress,u32 len);
+      |                   ~~~~~~^~~~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/cache.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/cache.c -o cache.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/checkthread.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/checkthread.c -o checkthread.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/conf.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/conf.c -o conf.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/debugprint.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/debugprint.c -o debugprint.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dol.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dol.c -o dol.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dvd.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvd.c -o dvd.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dvdhook.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c -o dvdhook.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c: In function 'DVDCancelAsync_hook':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c:97:21: warning: passing argument 2 of 'callback' from incompatible pointer type [-Wincompatible-pointer-types]
+   97 |         callback(0, info);
+      |                     ^~~~
+      |                     |
+      |                     DVDFileInfo *
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c:97:21: note: expected 'DVDCommandBlock *' but argument is of type 'DVDFileInfo *'
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c: In function 'DVDReadAsyncPrio_hook':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdhook.c:142:25: warning: assignment to 'DVDCBCallback' {aka 'void (*)(int,  DVDCommandBlock *)'} from incompatible pointer type 'DVDCallback' {aka 'void (*)(int,  void *)'} [-Wincompatible-pointer-types]
+  142 |     (info->cb).callback = callback;
+      |                         ^
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dvdthread.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/dvdthread.c -o dvdthread.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/es.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/es.c -o es.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/es.c: In function '__ES_Init':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/es.c:130:25: warning: implicit declaration of function 'exiPrintf'; did you mean 'vsiprintf'? [-Wimplicit-function-declaration]
+  130 |                         exiPrintf(" *** ERROR *** %s heap create failed: %d\n",
+      |                         ^~~~~~~~~
+      |                         vsiprintf
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/exception.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/exception.c -o exception.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/exi.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/exi.c -o exi.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/fatlock.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/fatlock.c -o fatlock.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/gameboot.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gameboot.c -o gameboot.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/gamecontrols.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamecontrols.c -o gamecontrols.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/gamefuncs.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c -o gamefuncs.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:4:50: warning: initialization of 'void (*)(const char *, ...)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    4 | void      (*debugPrintf)(const char *fmt, ...) = 0x801378a8;
+      |                                                  ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:5:63: warning: initialization of 'void * (*)(u32,  u32,  const char *)' {aka 'void * (*)(unsigned int,  unsigned int,  const char *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    5 | void*     (*gameAlloc)(u32 size, u32 tag, const char *name) = 0x80023cc8;
+      |                                                               ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:6:37: warning: initialization of 'void (*)(void *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    6 | void      (*gameFree)(void *addr) = 0x800233e8;
+      |                                     ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:7:81: warning: initialization of 'void (*)(OSAlarm *, OSTime,  void (*)(OSAlarm *, OSContext *))' {aka 'void (*)(OSAlarm *, long long int,  void (*)(OSAlarm *, OSContext *))'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    7 | void      (*InsertAlarm)(OSAlarm *alarm, OSTime time, OSAlarmHandler handler) = 0x80240d8c;
+      |                                                                                 ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:8:46: warning: initialization of 'void (*)(OSAlarm *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    8 | void      (*OSCancelAlarm)(OSAlarm *alarm) = 0x80241044;
+      |                                              ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:9:46: warning: initialization of 'void (*)(OSAlarm *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+    9 | void      (*OSCreateAlarm)(OSAlarm *alarm) = 0x80240d80;
+      |                                              ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:10:152: warning: initialization of 'BOOL (*)(OSThread *, void * (*)(void *), void *, void *, u32,  OSPriority,  u16)' {aka 'unsigned int (*)(OSThread *, void * (*)(void *), void *, void *, unsigned int,  int,  short unsigned int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   10 | BOOL      (*OSCreateThread)(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute) = 0x802462a8;
+      |                                                                                                                                                        ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:11:42: warning: initialization of 'int (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   11 | int       (*OSDisableInterrupts)(void) = 0x8024377c;
+      |                                          ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:12:41: warning: initialization of 'int (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   12 | int       (*OSDisableScheduler)(void) = 0x80245d94;
+      |                                         ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:13:55: warning: initialization of 'void (*)(int,  OSContext *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   13 | void      (*__OSDispatchInterrupt)(int, OSContext*) = 0x80243c54;
+      |                                                       ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:14:41: warning: initialization of 'int (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   14 | int       (*OSEnableInterrupts)(void) = 0x80243790;
+      |                                         ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:15:40: warning: initialization of 'int (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   15 | int       (*OSEnableScheduler)(void) = 0x80245dd4;
+      |                                        ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:16:41: warning: initialization of 'OSThread * (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   16 | OSThread* (*OSGetCurrentThread)(void) = 0x80245d88;
+      |                                         ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:17:52: warning: initialization of 'int (*)(OSThread *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   17 | int       (*__OSGetEffectivePriority)(OSThread*) = 0x80245e7c;
+      |                                                    ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:18:90: warning: initialization of 'void (*)(OSMessageQueue *, void **, s32)' {aka 'void (*)(OSMessageQueue *, void **, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   18 | void      (*OSInitMessageQueue)(OSMessageQueue* mq, OSMessage* msgArray, s32 msgCount) = 0x80244000;
+      |                                                                                          ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:19:56: warning: initialization of 'void (*)(OSThreadQueue *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   19 | void      (*OSInitThreadQueue)(OSThreadQueue* queue) = 0x80245d78;
+      |                                                        ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:20:40: warning: initialization of 'void (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   20 | void      (*__OSInterruptInit)(void) = 0x802437f8;
+      |                                        ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:22:42: warning: initialization of 'void (*)(OSContext *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   22 | void      (*OSLoadContext)(OSContext*) = 0x80242394;
+      |                                          ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:23:80: warning: initialization of 'BOOL (*)(OSMessageQueue *, void **, s32)' {aka 'unsigned int (*)(OSMessageQueue *, void **, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   23 | BOOL      (*OSReceiveMessage)(OSMessageQueue *mq, OSMessage *msg, s32 flags) = 0x80244128;
+      |                                                                                ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:24:37: warning: initialization of 'void (*)(void)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   24 | void      (*__OSReschedule)(void) = 0x80246278;
+      |                                     ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:25:41: warning: initialization of 'int (*)(int)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   25 | int       (*OSRestoreInterrupts)(int) = 0x802437a4;
+      |                                         ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:26:49: warning: initialization of 's32 (*)(OSThread *)' {aka 'int (*)(OSThread *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   26 | s32       (*OSResumeThread)(OSThread* thread) = 0x80246668;
+      |                                                 ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:27:77: warning: initialization of 'BOOL (*)(OSMessageQueue *, void *, s32)' {aka 'unsigned int (*)(OSMessageQueue *, void *, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   27 | BOOL      (*OSSendMessage)( OSMessageQueue *mq, OSMessage msg, s32 flags) = 0x80244060;
+      |                                                                             ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:28:80: warning: initialization of 'void (*)(OSAlarm *, OSTime,  void (*)(OSAlarm *, OSContext *))' {aka 'void (*)(OSAlarm *, long long int,  void (*)(OSAlarm *, OSContext *))'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   28 | void      (*OSSetAlarm)(OSAlarm *alarm, OSTime tick, OSAlarmHandler handler) = 0x80240fdc;
+      |                                                                                ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:29:70: warning: initialization of 'u32 (*)(u32,  void *)' {aka 'unsigned int (*)(unsigned int,  void *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   29 | u32       (*__OSSetExceptionHandler)(u32 exception, void *handler) = 0x80240bc4;
+      |                                                                      ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:30:75: warning: initialization of 'BOOL (*)(OSThread *, OSPriority)' {aka 'unsigned int (*)(OSThread *, int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   30 | BOOL      (*OSSetThreadPriority)(OSThread* thread, OSPriority priority) = 0x80245eb8;
+      |                                                                           ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:31:52: warning: initialization of 'void (*)(OSThreadQueue *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   31 | void      (*OSSleepThread)(OSThreadQueue* queue) = 0x80246a60;
+      |                                                    ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:32:50: warning: initialization of 's32 (*)(OSThread *)' {aka 'int (*)(OSThread *)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   32 | s32       (*OSSuspendThread)(OSThread* thread) = 0x802468f0;
+      |                                                  ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:33:53: warning: initialization of 'void (*)(OSThreadQueue *)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   33 | void      (*OSWakeupThread)(OSThreadQueue* queue) = 0x80246b4c;
+      |                                                     ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:34:35: warning: initialization of 'void (*)(BOOL)' {aka 'void (*)(unsigned int)'} from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   34 | void      (*SelectThread)(BOOL) = 0x80246078;
+      |                                   ^~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamefuncs.c:35:53: warning: initialization of 'OSThread * (*)(OSThread *, int)' from 'unsigned int' makes pointer from integer without a cast [-Wint-conversion]
+   35 | OSThread* (*SetEffectivePriority)(OSThread*, int) = 0x80245eb8; //XXX same as OSSetThreadPriority
+      |                                                     ^~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/gamehook.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamehook.c -o gamehook.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamehook.c: In function 'initGameHooks':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/gamehook.c:22:5: warning: implicit declaration of function '__IPC_ClntInit' [-Wimplicit-function-declaration]
+   22 |     __IPC_ClntInit();
+      |     ^~~~~~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/ios.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/ios.c -o ios.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/ipc.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/ipc.c -o ipc.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/irq.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/irq.c -o irq.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/libc.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/libc.c -o libc.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/lwp_heap.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwp_heap.c -o lwp_heap.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/lwp_queue.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwp_queue.c -o lwp_queue.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/lwp_wkspace.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwp_wkspace.c -o lwp_wkspace.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwp_wkspace.c: In function '__lwp_wkspace_init':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwp_wkspace.c:44:24: warning: unused variable 'dsize' [-Wunused-variable]
+   44 |         u32 arLo,level,dsize;
+      |                        ^~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwp_wkspace.c:44:13: warning: unused variable 'arLo' [-Wunused-variable]
+   44 |         u32 arLo,level,dsize;
+      |             ^~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/main.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/main.c -o main.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/malloc.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/malloc.c -o malloc.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/osfont.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/osfont.c -o osfont.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/osmutex.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/osmutex.c -o osmutex.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/patches.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/patches.c -o patches.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/printf.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/printf.c -o printf.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/regs.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/regs.c -o regs.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/stm.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/stm.c -o stm.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/sys_alarm.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/sys_alarm.c -o sys_alarm.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/sys_alarm.c: In function 'SYS_CreateAlarm':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/sys_alarm.c:29:7: warning: 'alarm' may be used uninitialized [-Wmaybe-uninitialized]
+   29 |     if(!alarm) {
+      |       ^
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/sys_alarm.c:20:22: note: 'alarm' was declared here
+   20 |         SysDolAlarm *alarm;
+      |                      ^~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/sys_alarm.c:38:19: warning: 'idx' may be used uninitialized [-Wmaybe-uninitialized]
+   38 |         *thealarm = idx;
+      |         ~~~~~~~~~~^~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/sys_alarm.c:21:9: note: 'idx' was declared here
+   21 |     int idx;
+      |         ^~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/system.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/system.c -o system.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/thread.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/thread.c -o thread.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/timesupp.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/timesupp.c -o timesupp.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/usb.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/usb.c -o usb.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/wiisd.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiisd.c -o wiisd.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiisd.c:129:12: warning: 'hId' defined but not used [-Wunused-variable]
+  129 | static s32 hId = -1;
+      |            ^~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/classic.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/classic.c -o classic.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/dynamics.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/dynamics.c -o dynamics.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/events.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/events.c -o events.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/events.c: In function 'event_data_read':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/events.c:52:17: warning: implicit declaration of function '__lwp_queue_append' [-Wimplicit-function-declaration]
+   52 |                 __lwp_queue_append(&wm->cmdq,&cmd->node);
+      |                 ^~~~~~~~~~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/guitar_hero_3.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/guitar_hero_3.c -o guitar_hero_3.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/io.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/io.c -o io.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/io_wii.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/io_wii.c -o io_wii.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/io_wii.c: In function '__wiiuse_disconnected':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/io_wii.c:48:17: warning: implicit declaration of function '__lwp_queue_append' [-Wimplicit-function-declaration]
+   48 |                 __lwp_queue_append(&wm->cmdq,&wm->cmd_head->node);
+      |                 ^~~~~~~~~~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/io_wii.c: In function 'wiiuse_init_cmd_queue':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/io_wii.c:164:9: warning: implicit declaration of function '__lwp_queue_initialize'; did you mean '__IPC_Reinitialize'? [-Wimplicit-function-declaration]
+  164 |         __lwp_queue_initialize(&wm->cmdq,__queue_buffer[wm->unid],MAX_COMMANDS,sizeof(struct cmd_blk_t));
+      |         ^~~~~~~~~~~~~~~~~~~~~~
+      |         __IPC_Reinitialize
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/ir.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/ir.c -o ir.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/motion_plus.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/motion_plus.c -o motion_plus.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/nunchuk.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/nunchuk.c -o nunchuk.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/speaker.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/speaker.c -o speaker.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/wiiboard.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/wiiboard.c -o wiiboard.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/wiiuse.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/wiiuse.c -o wiiuse.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/wiiuse.c: In function 'wiiuse_read_data':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/wiiuse.c:249:34: warning: implicit declaration of function '__lwp_queue_get' [-Wimplicit-function-declaration]
+  249 |         cmd = (struct cmd_blk_t*)__lwp_queue_get(&wm->cmdq);
+      |                                  ^~~~~~~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/wpad.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/wpad.c -o wpad.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/wiiuse/wpad.c:122:12: warning: '__wpad_onreset' defined but not used [-Wunused-function]
+  122 | static s32 __wpad_onreset(s32 final)
+      |            ^~~~~~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/bte.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c -o bte.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c: In function 'bt_alarmhandler':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c:138:9: warning: implicit declaration of function 'SYS_SwitchFiber' [-Wimplicit-function-declaration]
+  138 |         SYS_SwitchFiber(0,0,0,0,(u32)l2cap_tmr,(u32)(&ppc_stack[STACKSIZE]));
+      |         ^~~~~~~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c: In function '__bte_waitcmdfinish':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c:144:13: warning: unused variable 'level' [-Wunused-variable]
+  144 |         u32 level;
+      |             ^~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c: In function '__bte_waitrequest':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c:181:13: warning: unused variable 'level' [-Wunused-variable]
+  181 |         u32 level;
+      |             ^~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c: In function 'BTE_Init':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c:417:17: warning: passing argument 4 of 'OSSetPeriodicAlarm' from incompatible pointer type [-Wincompatible-pointer-types]
+  417 |                 bt_alarmhandler);
+      |                 ^~~~~~~~~~~~~~~
+      |                 |
+      |                 void (*)(OSAlarm *, void *)
+In file included from ../source/include/conf.h:34,
+                 from ../source/include/main.h:71,
+                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/bte.c:9:
+../source/include/main.h:228:31: note: expected 'OSAlarmHandler' {aka 'void (*)(OSAlarm *, OSContext *)'} but argument is of type 'void (*)(OSAlarm *, void *)'
+  228 | OSTime period, OSAlarmHandler handler);
+      |                ~~~~~~~~~~~~~~~^~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/btmemb.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/btmemb.c -o btmemb.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/btmemr.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/btmemr.c -o btmemr.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/btpbuf.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/btpbuf.c -o btpbuf.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/hci.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/hci.c -o hci.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/l2cap.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.c -o l2cap.o 
+In file included from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.c:10:
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.c: In function 'l2cap_close':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.c:973:27: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  973 |                 L2CAP_RMV((struct l2cap_pcb**)((void*)&(l2cap_listen_pcbs)), pcb);
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.h:294:33: note: in definition of macro 'L2CAP_RMV'
+  294 |                             if(*pcbs == npcb) { \
+      |                                 ^~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.c:973:27: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  973 |                 L2CAP_RMV((struct l2cap_pcb**)((void*)&(l2cap_listen_pcbs)), pcb);
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.h:295:33: note: in definition of macro 'L2CAP_RMV'
+  295 |                                *pcbs = (*pcbs)->next; \
+      |                                 ^~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.c:973:27: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  973 |                 L2CAP_RMV((struct l2cap_pcb**)((void*)&(l2cap_listen_pcbs)), pcb);
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.h:295:42: note: in definition of macro 'L2CAP_RMV'
+  295 |                                *pcbs = (*pcbs)->next; \
+      |                                          ^~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.c:973:27: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  973 |                 L2CAP_RMV((struct l2cap_pcb**)((void*)&(l2cap_listen_pcbs)), pcb);
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/l2cap.h:296:57: note: in definition of macro 'L2CAP_RMV'
+  296 |                             } else for(l2cap_tmp_pcb = *pcbs; l2cap_tmp_pcb != NULL; l2cap_tmp_pcb = l2cap_tmp_pcb->next) { \
+      |                                                         ^~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/physbusif.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/physbusif.c -o physbusif.o 
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/physbusif.c: In function '__readbulkdataCB':
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/lwbt/physbusif.c:91:25: warning: implicit declaration of function 'SYS_SwitchFiber' [-Wimplicit-function-declaration]
+   91 |                         SYS_SwitchFiber((u32)p,0,0,0,(u32)hci_acldata_handler,(u32)(&__ppc_btstack2[STACKSIZE]));
+      |                         ^~~~~~~~~~~~~~~
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/cache_asm.d -x assembler-with-cpp -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -mregnames -D_LANGUAGE_ASSEMBLY -I../source/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/cache_asm.S -o cache_asm.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/crt0.d -x assembler-with-cpp -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -mregnames -D_LANGUAGE_ASSEMBLY -I../source/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/crt0.S -o crt0.o 
+powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/system_asm.d -x assembler-with-cpp -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -mregnames -D_LANGUAGE_ASSEMBLY -I../source/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/system_asm.S -o system_asm.o 
+powerpc-eabi-gcc  alloc.o argv.o audio.o cache.o checkthread.o conf.o debugprint.o dol.o dvd.o dvdhook.o dvdthread.o es.o exception.o exi.o fatlock.o gameboot.o gamecontrols.o gamefuncs.o gamehook.o ios.o ipc.o irq.o libc.o lwp_heap.o lwp_queue.o lwp_wkspace.o main.o malloc.o osfont.o osmutex.o patches.o printf.o regs.o stm.o sys_alarm.o system.o thread.o timesupp.o usb.o wiisd.o classic.o dynamics.o events.o guitar_hero_3.o io.o io_wii.o ir.o motion_plus.o nunchuk.o speaker.o wiiboard.o wiiuse.o wpad.o bte.o btmemb.o btmemr.o btpbuf.o hci.o l2cap.o physbusif.o cache_asm.o crt0.o system_asm.o -L../lib -g -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -Wl,-Map,main.elf.map -Wl,--section-start,.stub=0x91000000 -Wl,--section-start,.sbss=0x91400000 -Wl,--section-start,.init=0x91800000 -Wl,--section-start,.data=0x91C00000 -L/opt/devkitpro/libogc/lib/wii  -lfatx -lm -o /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.elf
+elf2dol /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.elf /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.dol
+/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.333: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.334: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.334: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.334: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.335: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.335: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.335: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.336: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.336: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.336: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.339: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.339: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.339: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.339: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.339: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.339: Unable to locate theme engine in module_path: "adwaita",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.340: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.340: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.340: Unable to locate theme engine in module_path: "murrine",
+
+(dolphin-emu:22317): Gtk-WARNING **: 10:02:58.340: Unable to locate theme engine in module_path: "murrine",
+QApplication: invalid style override 'gtk' passed, ignoring it.
+	Available styles: bb10dark, bb10bright, cleanlooks, gtk2, cde, motif, plastique, Windows, Fusion
+02:58:398 InputCommon/ControllerInterface/evdev/evdev.cpp:294 N[CI]: evdev hotplug thread started
+02:58:412 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+02:58:417 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
+02:58:556 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
+02:58:643 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+02:58:680 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+02:58:680 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+02:58:681 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+02:58:681 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+02:58:681 Core/HW/WiimoteEmu/WiimoteEmu.cpp:734 I[Wiimote]: SetRumble: false
+02:58:698 Core/HW/WiimoteReal/WiimoteReal.cpp:865 N[Wiimote]: WiimoteReal::Initialize
+02:58:698 Core/HW/WiimoteReal/WiimoteReal.cpp:665 N[Wiimote]: Wiimote scanning thread has started.
+02:59:023 Core/ConfigManager.cpp:178 N[CORE]: Active title: 
+02:59:027 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+02:59:028 Core/Core.cpp:237 I[BOOT]: Starting core = Wii mode
+02:59:028 Core/Core.cpp:238 I[BOOT]: CPU Thread separate = No
+03:00:291 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: XInput2/0/Virtual core pointer
+03:00:301 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Rock Candy Gamepad Wired Controller
+03:00:436 InputCommon/ControllerInterface/ControllerInterface.cpp:326 N[CI]: Added device: evdev/0/Segment 6 Motion Controller
+03:00:493 InputCommon/ControllerInterface/DualShockUDPClient/DualShockUDPClient.cpp:468 I[CI]: DualShockUDPClient PopulateDevices
+03:01:637 Core/HW/GCMemcard/GCMemcardRaw.cpp:51 I[EXI]: Reading memory card /home/rena/.local/share/dolphin-emu/GC/MemoryCardA.USA.raw
+03:01:649 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 0 to type 1 (notify software: true)
+03:01:649 Core/HW/GCMemcard/GCIFile.cpp:22 I[EXI]: Reading header from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+03:01:649 Core/HW/GCMemcard/GCIFile.cpp:43 I[EXI]: Reading savedata from disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+03:01:649 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 1, device 0 to type 8 (notify software: true)
+03:01:651 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Shift JIS font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+03:01:651 Core/HW/EXI/EXI_DeviceIPL.cpp:234 I[BOOT]: Found IPL dump, loading Windows-1252 font from /home/rena/.local/share/dolphin-emu/GC//USA/IPL.bin
+03:01:651 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 1 to type 2 (notify software: true)
+03:01:651 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 0, device 2 to type 5 (notify software: true)
+03:01:651 Core/HW/EXI/EXI_Channel.cpp:181 I[EXI]: Changing EXI channel 2, device 0 to type 3 (notify software: true)
+03:02:486 Core/Boot/Boot.cpp:538 N[BOOT]: Booting from executable: ./app/boot.dol
+03:02:492 Core/Boot/Boot_BS2Emu.cpp:394 I[BOOT]: Using serial number: 216174744
+03:02:492 Core/Boot/Boot_BS2Emu.cpp:418 I[BOOT]: Setup Wii Memory...
+03:02:696 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
+03:02:924 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+03:02:926 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 0 set to mode 3
+03:02:966 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Found game files:
+03:02:966 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: "sd:/apps/SFA/"
+03:03:028 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
+03:03:042 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data0...
+03:03:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
+03:06:003 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Exec...
+03:06:048 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: EXI init OK
+03:06:053 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 start
+03:06:055 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Sect## Offset Address  EndAddr  Size
+03:06:072 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 0 0001A0 80600000 80602480 00002480
+03:06:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 1 002620 800066E0 802C1880 002BB1A0
+03:06:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 2 33DD40 803FA480 804220A0 00027C20
+03:06:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 3 000000 00000000 00000000 00000000
+03:06:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 4 000000 00000000 00000000 00000000
+03:06:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 5 000000 00000000 00000000 00000000
+03:06:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: text 6 000000 00000000 00000000 00000000
+03:06:077 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 0 2BD7C0 80005620 80005CC0 000006A0
+03:06:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 1 2BDE60 80005CC0 800066E0 00000A20
+03:06:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 2 2BE880 802C1880 802C18A0 00000020
+03:06:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 3 2BE8A0 802C18A0 802C18C0 00000020
+03:06:078 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 4 2BE8C0 802C18C0 802C2D60 000014A0
+03:06:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 5 2BFD60 802C2D60 80335840 00072AE0
+03:06:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 6 332840 803DB1E0 803DC7A0 000015C0
+03:06:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 7 333E00 803DE500 803E8440 00009F40
+03:06:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 8 000000 00000000 00000000 00000000
+03:06:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data 9 000000 00000000 00000000 00000000
+03:06:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: data10 000000 00000000 00000000 00000000
+03:06:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: bss    ------ 80335840 803E8478 000B2C38
+03:06:080 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Entry  ------ 803FA480 -------- --------
+03:06:081 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init bss...
+03:06:083 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text0...
+03:06:086 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text1...
+03:06:095 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading text2...
+03:06:096 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data0...
+03:06:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data1...
+03:06:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data2...
+03:06:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data3...
+03:06:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data4...
+03:06:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data5...
+03:06:100 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data6...
+03:06:100 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading data7...
+03:06:101 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DOL load OK
+03:06:101 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: game loader start; argc=0
+03:06:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Running on IOS58 v24.32
+03:06:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: apply patches
+03:06:105 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8007D6DC (bl=0)
+03:06:106 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80246E04 (bl=0)
+03:06:106 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802510CC (bl=0)
+03:06:107 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024091C (bl=0)
+03:06:107 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80137DF8 (bl=0)
+03:06:108 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 802406C0 -> 80000200 op 48003139 -> 4BDBFB41 (bl=1)
+03:06:109 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243B44 (bl=0)
+03:06:110 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80243BCC (bl=0)
+03:06:110 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: trampoline at 80243FE4 -> 80000210 op 4BFFFC70 -> 4BDBC22C (bl=0)
+03:06:110 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248870 (bl=0)
+03:06:111 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248B9C (bl=0)
+03:06:111 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80015850 (bl=0)
+03:06:112 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248F9C (bl=0)
+03:06:112 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024B428 (bl=0)
+03:06:113 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 80248EAC (bl=0)
+03:06:113 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 802490D8 (bl=0)
+03:06:114 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: direct long jump at 8024AFD8 (bl=0)
+03:06:119 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: boot game
+03:06:133 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Locked cache machine check handler installed
+03:06:149 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: FPU-unavailable handler installed
+03:06:149 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Locked cache machine check handler installed
+03:06:226 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 
+03:06:226 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Dolphin OS $Revision: 54 $.
+03:06:230 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Kernel built : Jun  5 2002 02:09:12
+03:06:231 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Console Type : 
+03:06:243 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Development HW3
+03:06:243 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Memory 24 MB
+03:06:248 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Arena : 0x804220a0 - 0x817fec60
+03:06:282 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Patch running!
+03:06:285 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021320 op 0x483DEE99 (bl=1)
+03:06:287 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80037944 op 0x483C94F4 (bl=0)
+03:06:288 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80013EC8 op 0x483F09D0 (bl=0)
+03:06:288 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80020F2C op 0x483FA4D1 (bl=1)
+03:06:288 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021250 op 0x483FA329 (bl=1)
+03:06:288 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80020D4C op 0x483E89F1 (bl=1)
+03:06:288 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005C45C op 0x483BF79D (bl=1)
+03:06:288 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800D9E2C op 0x48341EAD (bl=1)
+03:06:290 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80023CC8 op 0x483DBDD8 (bl=0)
+03:06:290 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800233E8 op 0x483DBE24 (bl=0)
+03:06:290 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8001F5F4 op 0x483DFB49 (bl=1)
+03:06:290 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80029608 op 0x483D5B35 (bl=1)
+03:06:290 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80056F00 op 0x483A823D (bl=1)
+03:06:290 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80062938 op 0x4839C805 (bl=1)
+03:06:290 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016F118 op 0x48290025 (bl=1)
+03:06:291 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x802BC0B4 op 0x48143089 (bl=1)
+03:06:291 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80292DC0 op 0x4818756C (bl=0)
+03:06:291 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80292DE4 op 0x4818778C (bl=0)
+03:06:291 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800221A0 op 0x483F8284 (bl=0)
+03:06:292 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80105DF8 op 0x48313F1D (bl=1)
+03:06:292 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133A54 op 0x482D5CAC (bl=0)
+03:06:293 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8020D31C op 0x4820F5A9 (bl=1)
+03:06:293 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800453E0 op 0x483C3DCD (bl=1)
+03:06:293 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80043D7C op 0x483C51A8 (bl=0)
+03:06:293 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80046164 op 0x483C30F1 (bl=1)
+03:06:293 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80043DB8 op 0x483C51A8 (bl=0)
+03:06:294 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80087050 op 0x48381F2C (bl=0)
+03:06:294 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002CB20 op 0x483DCA39 (bl=1)
+03:06:294 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002D5DC op 0x483DB9E5 (bl=1)
+03:06:294 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x801032B8 op 0x482FEDB9 (bl=1)
+03:06:294 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014C18 op 0x483EDB30 (bl=0)
+03:06:295 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014BC4 op 0x483EDC30 (bl=0)
+03:06:295 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014CC0 op 0x483EDBE4 (bl=0)
+03:06:295 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014C6C op 0x483EDD14 (bl=0)
+03:06:295 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133AF0 op 0x482CE6A9 (bl=1)
+03:06:295 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80133AFC op 0x482CE6ED (bl=1)
+03:06:295 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80108758 op 0x482F9AE1 (bl=1)
+03:06:296 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80021078 op 0x483F8A8D (bl=1)
+03:06:296 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8002010C op 0x483E7C91 (bl=1)
+03:06:296 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005B6F8 op 0x483A741D (bl=1)
+03:06:299 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Install title hook...
+03:06:300 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8011AF00 op 0x48300891 (bl=1)
+03:06:300 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8005C72C op 0x483AC48D (bl=1)
+03:06:300 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016DE64 op 0x482AD331 (bl=1)
+03:06:301 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x8016DE68 op 0x48000120 (bl=0)
+03:06:304 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80137948 op 0x482E521C (bl=0)
+03:06:305 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80008CFC op 0x483FEA81 (bl=1)
+03:06:305 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80008BB4 op 0x483FEBC9 (bl=1)
+03:06:305 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80080E14 op 0x4839A038 (bl=0)
+03:06:305 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80080C2C op 0x4839A260 (bl=0)
+03:06:306 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80081980 op 0x4839954C (bl=0)
+03:06:306 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x800175BC op 0x484040A5 (bl=1)
+03:06:306 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Booting in Wii mode
+03:06:307 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: reached __DVDFSInit_hook
+03:06:317 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 alloc init OK
+03:06:317 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 libc init OK
+03:06:324 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803AD848
+03:06:324 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803AB118
+03:06:324 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A54A0
+03:06:325 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A6F08
+03:06:325 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 803A8348
+03:06:343 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: checkThread online (91407200, stack 91405200)
+03:06:345 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 91407200
+03:06:363 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: loader2 IPC init OK
+03:06:364 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: init (r2=803E6500 r13=803E31E0)
+03:06:367 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create alarm
+03:06:367 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create threadQ
+03:06:368 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create msgQ in
+03:06:369 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create msgQ out
+03:06:369 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create DVD thread
+03:06:370 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread is 9142FEE8, queue=9142FEB0, 9142FE90, buf=91424E90, 9141BE90
+03:06:371 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: create DVD thread alarm
+03:06:373 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread setup OK, 9142FEE8, alarm=9141BE60
+03:06:374 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD thread online
+03:06:374 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: New thread 9142FEE8
+03:06:379 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: fatMount(sd iface=91C00360 start=00000000 cache=00000004 page=00000040)
+03:06:380 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: sdio_Startup call open
+03:06:381 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: OSResumeThread OK for DVD
+03:06:381 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: initDvdHack: OK; wait for DVD...
+03:06:383 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: sdio_Startup open done
+03:06:413 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __sd0_initio OK
+03:06:444 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mount(sd) OK
+03:06:459 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVD FAT init OK
+03:06:507 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Opened crashlog file OK
+03:06:510 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Opened crashdump file OK
+03:06:516 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: app booted from bootrom
+03:06:516 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: patch short jump at 0x80014F90 op 0x483ED701 (bl=1)
+03:06:516 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Hooks installed!
+03:06:532 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+03:06:538 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 0 set to mode 3
+03:06:820 Core/HW/SI/SI_DeviceGCController.cpp:98 I[SI]: PAD - Recalibrate
+03:06:829 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 0 set to mode 3
+03:06:838 Core/HW/SI/SI_DeviceGCController.cpp:85 I[SI]: PAD - Get Origin
+03:06:839 Core/HW/SI/SI_DeviceGCController.cpp:321 I[SI]: PAD 0 set to mode 3
+03:06:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: mem 0k/12518528k 0k/1835008k 288k/655264k 2080k/4587424k
+03:06:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 	slot 4/250 1/850 2/850 3/580	
+03:06:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]:  
+03:06:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:06:917 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: 
+03:06:917 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: CONF_Init: 0
+03:07:094 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD_Init: 0
+03:07:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD: initWiimote OK
+03:07:151 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSPInit(): Build Date: Dec 17 2001 18:25:00
+03:07:191 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSP is booting task: 0x803D4880
+03:07:191 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM MMEM ADDR: 0x80330840
+03:07:193 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM DSP ADDR : 0x00000000
+03:07:193 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : IRAM LENGTH   : 0x000019E0
+03:07:193 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : DRAM MMEM ADDR: 0x00002000
+03:07:193 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: __DSP_boot_task()  : Start Vector  : 0x00000010
+03:07:380 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Music.bin", 81304AE0) => 92000770, size 000009F0
+03:07:451 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c17487c - bug in JIT?
+03:07:486 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c188987 - bug in JIT?
+03:07:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Sfx.bin", 81304B20) => 920007E0, size 000096A0
+03:07:515 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/data/Streams.bin", 81304AE0) => 92000770, size 00004DD0
+03:07:521 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.poo", 81304B20) => 920007E0, size 0000EE60
+03:07:525 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.pro", 81304AE0) => 92000770, size 00001B4C
+03:07:528 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.sdi", 81304B20) => 920007E0, size 0000A714
+03:07:537 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxm.sam", 81304AE0) => 92000770, size 00514F60
+03:08:175 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:175 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: WPAD: init OK
+03:08:266 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.poo", 813049C0) => 92000770, size 00010B30
+03:08:269 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.pro", 81304A00) => 920007E0, size 00005B90
+03:08:271 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.sdi", 813049C0) => 92000770, size 0000F6F4
+03:08:274 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("/audio/starfoxs.sam", 81304A00) => 920007E0, size 00977920
+03:08:276 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:277 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:283 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:284 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:289 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:301 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:312 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:324 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:335 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:460 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("audio/midi.wad", 813049C0) => 92000770, size 00136DC0
+03:08:462 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:463 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:463 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:472 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:511 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("CAMACTIO.bin", 813EE260) => 92000770, size 00000800
+03:08:517 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ2C.tab", 813EE2A0) => 920007E0, size 00000BA0
+03:08:519 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("globalma.bin", 813EE260) => 92000770, size 00000300
+03:08:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TABLES.bin", 813EE2A0) => 920007E0, size 000002E0
+03:08:520 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TABLES.tab", 813EE260) => 92000770, size 00000060
+03:08:522 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("WARPTAB.bin", 813EE2A0) => 920007E0, size 00000800
+03:08:523 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPS.bin", 813EE260) => 92000770, size 0001B420
+03:08:525 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPS.tab", 813EE2A0) => 920007E0, size 00000CE0
+03:08:527 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MAPINFO.bin", 813EE260) => 92000770, size 00000EA0
+03:08:528 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODANIM.TAB", 813EE2A0) => 920007E0, size 000009E0
+03:08:530 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODANIM.BIN", 813EE260) => 92000770, size 00002BE0
+03:08:533 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("AMAP.TAB", 813EE2A0) => 920007E0, size 000013C0
+03:08:536 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("AMAP.BIN", 813EE260) => 92000770, size 000325A0
+03:08:541 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("BITTABLE.bin", 813EE2A0) => 920007E0, size 00003D40
+03:08:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("WEAPONDA.bin", 813EE260) => 92000770, size 0000C840
+03:08:545 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODLINES.bin", 813EE2A0) => 920007E0, size 00001D00
+03:08:547 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODLINES.tab", 813EE260) => 92000770, size 000000C0
+03:08:549 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ.bin", 813EE2A0) => 920007E0, size 000070A0
+03:08:551 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJSEQ.tab", 813EE260) => 92000770, size 00000BA0
+03:08:553 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJECTS.tab", 813EE2A0) => 920007E0, size 00001720
+03:08:556 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJECTS.bin", 813EE260) => 92000770, size 00049A80
+03:08:561 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJINDEX.bin", 813EE2A0) => 920007E0, size 00001120
+03:08:565 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJEVENT.bin", 813EE260) => 92000770, size 00002560
+03:08:566 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("OBJHITS.bin", 813EE2A0) => 920007E0, size 00006BC0
+03:08:568 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXPRE.bin", 813EE260) => 92000770, size 00075B00
+03:08:576 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXPRE.tab", 813EE2A0) => 920007E0, size 00000340
+03:08:579 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("PREANIM.bin", 813EE260) => 92000770, size 000E72C0
+03:08:591 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("PREANIM.tab", 813EE2A0) => 920007E0, size 000028A0
+03:08:593 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("ENVFXACT.bin", 813EE260) => 92000770, size 00018000
+03:08:594 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:595 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:596 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:613 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.bin", 813EE260) => 92000770, size 000323A0
+03:08:619 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("animtest/TEX0.tab", 813EE2A0) => 920007E0, size 00000DA0
+03:08:621 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:08:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TEXTABLE.bin", 803F83A8) => 92000770, size 00001960
+03:08:674 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("HITS.tab", 803F83A8) => 92000770, size 00001900
+03:08:677 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("TRKBLK.tab", 803F83A8) => 92000770, size 000000A0
+03:08:684 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01C4, 0)
+03:08:695 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/Link/English.bin", 8033AFE0) => 92000770, size 000080C4
+03:08:700 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gametext/FrontEnd/English.bin", 8033B02C) => 920007E0, size 000364CC
+03:08:706 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x025D, 0)
+03:08:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0001, 0)
+03:08:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0002, 0)
+03:08:752 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05B0, 0)
+03:08:752 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0600, 0)
+03:08:753 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C18, 0)
+03:08:786 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0019, 0)
+03:08:787 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0018, 0)
+03:08:787 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x001A, 0)
+03:08:788 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0646, 0)
+03:08:789 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DSPInit(): Build Date: Dec 17 2001 18:25:00
+03:08:803 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0000, 0x000F)
+03:08:804 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC4, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC5, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC8, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC9, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCA, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCB, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCC, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDE, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDF, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF5, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C24, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C25, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C26, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C27, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFE, 0)
+03:08:805 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFF, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C00, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C01, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCD, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCE, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BCF, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD0, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD1, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF1, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE0, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE1, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE2, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE3, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C70, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE4, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD2, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01D2, 0)
+03:08:806 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC7, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C92, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C02, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C03, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C04, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF0, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C72, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BC6, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD3, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD4, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD5, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD6, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD7, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEB, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF2, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF3, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF4, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEC, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BED, 0)
+03:08:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEE, 0)
+03:08:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03F5, 0)
+03:08:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FA, 0)
+03:08:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FB, 0)
+03:08:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FC, 0)
+03:08:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FD, 0)
+03:08:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x03FE, 0)
+03:08:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0400, 0)
+03:08:810 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0401, 0)
+03:08:811 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0458, 0)
+03:08:811 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05A7, 0)
+03:08:811 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x01A5, 0)
+03:08:811 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0435, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0436, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0438, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0275, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0268, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF9, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFA, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFB, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BFC, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE8, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE6, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE9, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BEA, 0)
+03:08:812 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2B, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C0C, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C20, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059A, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059B, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059C, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059D, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x059E, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05AD, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDB, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDC, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDD, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD8, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BD9, 0)
+03:08:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BDA, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0307, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF6, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF7, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BF8, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D4, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D3, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05D2, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1E, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1C, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C1D, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C71, 0)
+03:08:814 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0500, 0)
+03:08:815 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0001, 0x0017)
+03:08:818 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("VOXOBJ.tab", 803F8360) => 92000A88, size 00000020
+03:08:820 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0012, 0x0008)
+03:08:820 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000F, 0x0016)
+03:08:820 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0002, 0x001D)
+03:08:826 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0016, 0x0004)
+03:08:827 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0005, 0x000F)
+03:08:827 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0006, 0x000C)
+03:08:827 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0007, 0x0008)
+03:08:827 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0009, 0x000A)
+03:08:828 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0003, 0x000D)
+03:08:828 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0004, 0x0024)
+03:08:828 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000A, 0x000A)
+03:08:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000B, 0x000C)
+03:08:832 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000C, 0x0008)
+03:08:832 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000D, 0x0003)
+03:08:832 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x000E, 0x0002)
+03:08:832 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0011, 0x0003)
+03:08:832 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0013, 0x0007)
+03:08:833 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0056, 0)
+03:08:833 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2A, 0)
+03:08:834 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2C, 0)
+03:08:834 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C2D, 0)
+03:08:855 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0014, 0x0026)
+03:08:855 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x003C, 0x0007)
+03:08:855 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0314, 0)
+03:08:856 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0315, 0)
+03:08:856 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0317, 0)
+03:08:856 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0319, 0)
+03:08:856 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0318, 0)
+03:08:857 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x031A, 0)
+03:08:857 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043B, 0)
+03:08:857 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043E, 0)
+03:08:857 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x043D, 0)
+03:08:858 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0015, 0x0009)
+03:08:858 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0017, 0x0024)
+03:08:860 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0018, 0x0006)
+03:08:860 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x016B, 0)
+03:08:861 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0201, 0)
+03:08:863 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0019, 0x0016)
+03:08:863 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0031, 0x0002)
+03:08:863 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0BE5, 0)
+03:08:864 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x002F, 0x000C)
+03:08:864 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x003D, 0x000A)
+03:08:868 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05DC, 0)
+03:08:870 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0032, 0x0001)
+03:08:882 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX1.bin", 813EE2A0) => 92000A88, size 000C9AA0
+03:08:882 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Krystal texture not loaded
+03:08:892 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX1.tab", 813EE2A0) => 92000A88, size 00002400
+03:08:895 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX0.bin", 813EE2A0) => 92000A88, size 0004F360
+03:08:899 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/TEX0.tab", 813EE2A0) => 92000A88, size 00000DA0
+03:08:904 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/ANIM.BIN", 813EE2A0) => 92000A88, size 000C30A0
+03:08:912 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/ANIM.TAB", 813EE2A0) => 92000A88, size 000028A0
+03:08:918 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/MODELS.bin", 813EE2A0) => 92000A88, size 00079FC0
+03:08:918 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Krystal model not loaded
+03:08:926 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/MODELS.tab", 813EE2A0) => 92000A88, size 000013C0
+03:08:931 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront.romlist.zlb", 813EE2A0) => 92000A88, size 00000420
+03:08:934 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/mod62.tab", 813EE260) => 92000AF8, size 00001800
+03:08:939 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/mod62.zlb.bin", 813EE260) => 92000A88, size 0000F020
+03:08:944 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/voxmap.tab", 813EE260) => 92000A88, size 00001900
+03:08:950 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/voxmap.bin", 813EE260) => 92000A88, size 00000000
+03:08:953 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("warlock/voxmap.bin", 813EE260) => 92000A88, size 00006520
+03:08:958 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/animcurv.tab", 813EE260) => 92000A88, size 000062C0
+03:08:965 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("gamefront/animcurv.bin", 813EE260) => 92000A88, size 00007860
+03:08:993 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x860E, 1)
+03:09:022 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYSun
+03:09:023 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8609, 1)
+03:09:023 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYMoon
+03:09:027 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A4, 1)
+03:09:033 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A5, 1)
+03:09:033 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88A6, 1)
+03:09:036 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+03:09:037 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87C4, 1)
+03:09:037 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+03:09:038 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+03:09:038 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+03:09:038 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+03:09:038 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CommandMenu
+03:09:038 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:039 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85C1, 1)
+03:09:045 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT communicato
+03:09:046 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:046 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8752, 1)
+03:09:046 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT WORLDcomm
+03:09:047 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:047 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8663, 1)
+03:09:048 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commCube
+03:09:048 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:048 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commCubeFro
+03:09:049 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:049 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D4, 1)
+03:09:051 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commQuitObj
+03:09:052 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:052 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x875B, 1)
+03:09:052 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT commMemoryC
+03:09:052 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00E3, 0x0006)
+03:09:053 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8815, 1)
+03:09:056 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8561, 1)
+03:09:056 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D7, 1)
+03:09:067 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT projball
+03:09:068 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87D8, 1)
+03:09:068 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C9, 1)
+03:09:068 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x83F5, 1)
+03:09:069 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F5, 1)
+03:09:069 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x83F5, 1)
+03:09:069 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LockIcon
+03:09:092 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Init done; bytes used 3484440/15008800, blocks 508/2530, took %f sec
+03:09:093 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:09:098 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0034, 0x0001)
+03:09:116 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("starfox.thp", 803A5D60) => 92000A88, size 02EAA1F8
+03:09:321 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0136)
+03:09:325 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0137)
+03:09:325 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0143)
+03:09:408 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x016A, 0)
+03:09:408 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05DA, 0)
+03:09:408 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x063F, 0)
+03:09:409 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0640, 0)
+03:09:410 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0641, 0)
+03:09:410 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0151, 0)
+03:09:425 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x0009)
+03:09:454 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+03:09:455 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+03:09:483 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05FA, 0)
+03:09:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: main loop hook OK
+03:09:637 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x81EF, 0)
+03:09:638 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A9, 0)
+03:09:639 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A4, 0)
+03:09:639 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AD, 0)
+03:09:639 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A6, 0)
+03:09:640 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829E, 0)
+03:09:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A8, 0)
+03:09:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829F, 0)
+03:09:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A3, 0)
+03:09:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A1, 0)
+03:09:642 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829B, 0)
+03:09:642 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A0, 0)
+03:09:642 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82B1, 0)
+03:09:642 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AF, 0)
+03:09:645 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82B0, 0)
+03:09:645 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AC, 0)
+03:09:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x81F0, 0)
+03:09:646 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AE, 0)
+03:09:647 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829C, 0)
+03:09:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00F0, 0x0006)
+03:09:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85FD, 1)
+03:09:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x861A, 1)
+03:09:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85F8, 1)
+03:09:661 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x879F, 1)
+03:09:663 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT WarpPoint
+03:09:664 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C8, 0x0006)
+03:09:664 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87A0, 1)
+03:09:664 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DepthOfFiel
+03:09:664 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:665 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x00C5, 0)
+03:09:666 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060B, 0)
+03:09:667 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060C, 0)
+03:09:667 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060D, 0)
+03:09:667 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060E, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x060F, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0610, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0611, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0612, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0619, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061A, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061B, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061C, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061D, 0)
+03:09:668 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0620, 0)
+03:09:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0621, 0)
+03:09:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0622, 0)
+03:09:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061E, 0)
+03:09:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x061F, 0)
+03:09:669 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0618, 0)
+03:09:670 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C5, 1)
+03:09:670 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C4, 1)
+03:09:671 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B1, 1)
+03:09:671 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8888, 1)
+03:09:671 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8731, 1)
+03:09:676 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86F8, 1)
+03:09:682 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+03:09:682 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:704 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:704 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:706 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:706 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:707 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:707 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:707 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:707 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
+03:09:709 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 92000AF8, size 00000EC0
+03:09:711 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8000, 1)
+03:09:718 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
+03:09:718 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x012E, 0x0006)
+03:09:718 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AA, 1)
+03:09:719 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82AB, 1)
+03:09:720 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_JukeBox
+03:09:720 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:721 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:721 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:721 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:721 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0605, 0)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:722 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+03:09:723 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:723 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+03:09:723 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:726 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865D, 1)
+03:09:728 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8665, 1)
+03:09:728 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x865E, 1)
+03:09:729 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8661, 1)
+03:09:729 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8660, 1)
+03:09:735 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontFox
+03:09:736 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:737 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x868D, 1)
+03:09:738 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x884B, 1)
+03:09:739 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x857A, 1)
+03:09:741 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontSlippy
+03:09:741 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:743 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86D2, 1)
+03:09:743 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87BC, 1)
+03:09:745 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8895, 1)
+03:09:745 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87B8, 1)
+03:09:745 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x87BA, 1)
+03:09:746 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPeppy
+03:09:746 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:748 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x828B, 1)
+03:09:750 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x828E, 1)
+03:09:750 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontRob
+03:09:750 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02A9, 0x0006)
+03:09:750 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT LGTPointLig
+03:09:750 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:751 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C5, 1)
+03:09:751 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86C4, 1)
+03:09:751 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B1, 1)
+03:09:751 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8887, 1)
+03:09:751 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x86F9, 1)
+03:09:752 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPilots
+03:09:752 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02C0, 0x0006)
+03:09:753 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F0, 1)
+03:09:755 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontPlanet
+03:09:755 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8080, 1)
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT TailLightSo
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0134, 0x0006)
+03:09:756 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8899, 1)
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT texscroll2
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B2, 0x0006)
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT DustMoteSou
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0110, 0x0006)
+03:09:762 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A5, 1)
+03:09:764 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A7, 1)
+03:09:764 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A2, 1)
+03:09:764 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829D, 1)
+03:09:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorLeft
+03:09:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0110, 0x0006)
+03:09:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorLeft
+03:09:766 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
+03:09:768 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 92000AF8, size 00000EC0
+03:09:768 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
+03:09:768 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x02B1, 0x0006)
+03:09:770 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("MODELIND.bin", 803F75A8) => 92000AF8, size 00000EC0
+03:09:770 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT CmbSrc
+03:09:770 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0112, 0x0006)
+03:09:770 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x88F4, 1)
+03:09:770 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x85B4, 1)
+03:09:771 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT FrontSeq
+03:09:791 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+03:09:791 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C38, 0)
+03:09:792 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x05FA, 0)
+03:09:793 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0019, 0)
+03:09:793 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0018, 0)
+03:09:793 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x001A, 0)
+03:09:793 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0646, 0)
+03:09:794 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:09:795 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading km0
+03:09:796 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("km0", 803F83A0) => 92000AF8, size 00012B40
+03:09:798 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loaded km0 @0x80F19D20 size 0x00012B40
+03:09:798 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loading kt0
+03:09:799 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: DVDOpen("kt0", 803F83A0) => 92000AF8, size 0001B0C0
+03:09:800 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Loaded kt0 @0x80EFEC60 size 0x0001B0C0
+03:09:820 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: objRunSeq(0x0, 0x81311520 "GF_DoorLeft", 0xFFFFFFFF)
+03:09:830 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:834 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT Override
+03:09:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A5, 1)
+03:09:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A7, 1)
+03:09:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x82A2, 1)
+03:09:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x829D, 1)
+03:09:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorRigh
+03:09:847 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: objRunSeq(0x0, 0x81311240 "GF_DoorLeft", 0xFFFFFFFF)
+03:09:848 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:848 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT Override
+03:09:848 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x00C6, 0x0006)
+03:09:848 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT GF_DoorRigh
+03:09:856 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x002D, 0x0002)
+03:09:869 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x00DF, 0)
+03:09:889 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: GetEnvFxAct(0x021F)
+03:09:890 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8780, 1)
+03:09:890 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x8781, 1)
+03:09:891 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x877F, 1)
+03:09:891 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: LOADED OBJECT SKYScapeSpa
+03:09:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0616, 0)
+03:09:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0615, 0)
+03:09:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0309, 0)
+03:09:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030A, 0)
+03:09:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030B, 0)
+03:09:896 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x030C, 0)
+03:09:931 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C10, 0)
+03:10:006 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6500 "Override")
+03:10:032 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6900 "GF_DoorRigh")
+03:10:034 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D4F00 "Override")
+03:10:034 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D60E0 "GF_DoorRigh")
+03:10:040 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: dll_load(0x0057, 0x0004)
+03:10:771 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:10:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C75, 0)
+03:10:808 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C77, 0)
+03:10:927 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:10:929 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6900 "GF_DoorRigh")
+03:10:930 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D6500 "Override")
+03:10:930 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D60E0 "GF_DoorRigh")
+03:10:930 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: seqFn0D(0x811D4F00 "Override")
+03:10:970 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:001 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:036 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:076 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:109 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:146 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:149 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: No args file
+03:11:182 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:219 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:289 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:322 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:360 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:393 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:430 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:462 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:499 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:567 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:600 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:638 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:670 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:671 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: textureLoad(0x0C76, 0)
+03:11:707 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:739 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:777 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:809 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:846 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:879 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:930 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:11:962 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:000 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:032 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:073 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:106 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:142 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:174 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:210 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:241 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:278 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:310 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:347 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:379 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:415 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:447 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:484 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:516 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:553 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:585 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:621 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:653 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:689 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:721 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:760 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:793 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:829 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:861 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:900 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:932 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:12:995 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:040 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:079 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:126 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:166 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:212 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:217 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Wiimote connected
+03:13:260 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:292 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:328 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:360 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:396 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:430 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:468 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:501 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:538 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:571 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:614 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:665 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:702 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:735 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:772 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:817 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:830 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:13:874 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:018 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1971dd - bug in JIT?
+03:14:018 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1973ac - bug in JIT?
+03:14:019 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c198817 - bug in JIT?
+03:14:020 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c198a8d - bug in JIT?
+03:14:020 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c198c52 - bug in JIT?
+03:14:024 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19cb30 - bug in JIT?
+03:14:024 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19cd51 - bug in JIT?
+03:14:024 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19cf72 - bug in JIT?
+03:14:024 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19d244 - bug in JIT?
+03:14:024 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19d458 - bug in JIT?
+03:14:024 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19d66c - bug in JIT?
+03:14:024 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19d885 - bug in JIT?
+03:14:025 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19e106 - bug in JIT?
+03:14:025 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c19e50c - bug in JIT?
+03:14:046 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:070 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:076 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1d7e53 - bug in JIT?
+03:14:077 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1d9760 - bug in JIT?
+03:14:081 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1dc655 - bug in JIT?
+03:14:081 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1ddb56 - bug in JIT?
+03:14:082 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1dec6d - bug in JIT?
+03:14:082 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1dedc8 - bug in JIT?
+03:14:082 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1dee9b - bug in JIT?
+03:14:082 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1def5b - bug in JIT?
+03:14:095 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:103 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:116 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:122 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:137 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:151 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:169 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:178 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:198 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:214 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:230 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:242 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:263 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:277 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:297 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:309 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:319 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1e2133 - bug in JIT?
+03:14:319 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1e22d0 - bug in JIT?
+03:14:331 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:343 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:363 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:377 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:396 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:408 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:430 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:442 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:464 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:476 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:497 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:508 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:532 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:543 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:563 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:577 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:597 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:608 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:630 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:642 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:664 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:677 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:697 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:710 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:730 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:742 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:765 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:777 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:797 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:809 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:831 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:843 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:865 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:877 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:897 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:909 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:930 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:943 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:965 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:14:978 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:045 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 0
+03:15:057 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 1
+03:15:064 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 2
+03:15:071 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 3
+03:15:079 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 4
+03:15:135 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 26
+03:15:147 Core/HW/EXI/EXI_DeviceMemoryCard.cpp:526 I[EXI]: reading from block: 25
+03:15:224 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:260 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:287 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1e34cc - bug in JIT?
+03:15:296 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1f9fd5 - bug in JIT?
+03:15:296 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1fa9ab - bug in JIT?
+03:15:296 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c1fad1c - bug in JIT?
+03:15:311 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:342 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:386 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:428 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:470 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:504 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:545 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:579 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:621 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:658 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:700 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:734 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:773 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:807 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:847 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:883 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:923 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:956 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:15:995 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:029 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:067 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:104 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:147 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:181 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:221 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:257 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:300 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:335 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:379 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:413 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:454 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:531 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:565 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:607 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:681 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:717 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:757 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:791 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:834 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:871 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:912 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:947 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:16:988 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:023 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:065 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:099 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:143 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:179 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:218 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:252 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:295 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:328 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:371 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:406 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:447 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:482 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:524 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:557 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:597 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:630 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:671 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:705 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:746 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:780 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:821 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:855 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:897 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:932 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:17:974 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:007 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:049 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:082 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:121 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:155 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:196 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:227 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:268 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:300 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:340 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:372 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:412 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:444 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:486 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:518 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:558 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:590 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:631 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:663 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:705 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:738 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:778 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:813 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:855 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:891 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:932 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:18:966 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:010 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:043 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:084 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:116 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:158 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:190 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:230 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:263 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:305 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:337 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:383 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:417 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:462 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:495 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:496 Common/x64Emitter.cpp:1649 E[JIT]: Redundant MOV @ 0x7f1f7c215ad1 - bug in JIT?
+03:19:537 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:568 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:610 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:641 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:684 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:715 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:755 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:787 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:827 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:858 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:898 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:931 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:19:970 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:002 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:044 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:074 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:112 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:146 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:188 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:221 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:266 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:299 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:340 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:373 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:415 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:448 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:491 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:524 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:565 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:600 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:638 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:674 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:717 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:749 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:788 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:822 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:880 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:911 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:950 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:20:982 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:022 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:056 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:095 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:128 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:169 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:200 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:240 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:274 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:313 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:345 Core/HW/EXI/EXI_DeviceIPL.cpp:305 N[OSREPORT]: Update Wiimotes...
+03:21:376 Core/Core.cpp:282 I[CONSOLE]: Stop [Main Thread]		---- Shutting down ----
+03:21:376 Core/Core.cpp:285 I[CONSOLE]: Stop [Main Thread 0]	Stop CPU
+03:21:376 Core/Core.cpp:643 I[CONSOLE]: Stop [Main Thread 0]	Stopping GDB ...
+03:21:377 Core/Core.cpp:645 I[CONSOLE]: Stop [Main Thread 0]	GDB stopped.
+03:21:444 Core/Core.cpp:519 I[CONSOLE]: Stop [Video Thread 0]	Shutting down HW
+03:21:671 Core/HW/GCMemcard/GCMemcardDirectory.cpp:676 I[EXI]: Flushing savedata to disk for /home/rena/.local/share/dolphin-emu/GC/USA/Card B/01-GSAE-Poop Fox Adventures.gci
+03:21:671 Core/Core.cpp:521 I[CONSOLE]: Stop [Video Thread 0]	HW shutdown
+03:21:686 Core/ConfigLoaders/BaseConfigLoader.cpp:81 N[CORE]: Disabling WC24 'standby' (shutdown to idle) to avoid hanging on shutdown
+03:21:724 Core/Core.cpp:462 I[CONSOLE]: Stop		---- Shutdown complete ----
+03:21:773 InputCommon/ControllerInterface/evdev/evdev.cpp:356 N[CI]: evdev hotplug thread stopped
+03:21:948 Core/HW/WiimoteReal/WiimoteReal.cpp:755 N[Wiimote]: Wiimote scanning thread has stopped.
+03:21:948 Core/HW/WiimoteReal/WiimoteReal.cpp:884 N[Wiimote]: WiimoteReal::Shutdown

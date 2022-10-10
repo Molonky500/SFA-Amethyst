@@ -30,4 +30,8 @@ void initGameHooks() {
     DVD_DPRINT("DVD READY\n");
     SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
     gameExceptionInit();
+
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    wii->updateWiimotes = updateWiimotes;
+    wii->magic = WII_IFACE_MAGIC;
 }

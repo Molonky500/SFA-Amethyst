@@ -45,6 +45,8 @@ extern volatile u32 *_ipcReg;
 extern volatile u32 *_exiReg;
 extern volatile u32 *_aiReg;
 
+#include "../gameWiiIface.h"
+#include "wpad.h"
 #include "alloc.h"
 #include "args.h"
 #include "camera.h"
@@ -100,6 +102,13 @@ void bsodHook(void);
 
 //bugfixes.c
 void initBugFixes();
+
+//controls.c
+u32 padUpdate_hook(PADStatus *state);
+int padGetCxHook(int pad);
+int padGetCyHook(int pad);
+int padGetStickXHook(int pad);
+int padGetStickYHook(int pad);
 
 //dll.c
 void dllHooksInit();

@@ -158,7 +158,7 @@ void bootGame(DolHeader *header);
 
 //gamecontrols.c
 void initWiimote();
-u32 padUpdate_hook(GameControllerState *state);
+void updateWiimotes();
 
 //gamehook.c
 void initGameHooks();

@@ -363,6 +363,7 @@ void _start(void) {
 
     //Install hooks
     if(!IS_WII) hookBranch(0x80137df8, bsodHook, 1);
+    //XXX integrate nicely
     initBootHacks();
     initBugFixes();
     dllHooksInit();
