@@ -22,6 +22,7 @@ void jumpToGame() {
     boot->version                 = 1;
     boot->memorySize              = 0x01800000;
     boot->consoleType             = 0x10000006;
+    boot->arenaHi                 = 0x81800000;
 
     SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
     gameEntry();

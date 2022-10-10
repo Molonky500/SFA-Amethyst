@@ -145,6 +145,9 @@ int drawText(const char *str, int x, int y, int *outX, int *outY, u32 flags, Col
 int drawColorText(const char *str, int x, int y, Color4b color);
 int drawSimpleText(const char *str, int x, int y);
 
+//drawWii.c
+void drawWiiInputs();
+
 //env.c
 void envHooksInit();
 

@@ -614,6 +614,7 @@ void mainLoopDebugPrint() {
     if(debugRenderFlags & DEBUGRENDER_PERF_METERS) renderPerfMeters();
     if(debugRenderFlags & DEBUGRENDER_RNG) drawRNG();
     if(debugRenderFlags & DEBUGRENDER_WORLD_MAP) drawMapGrid();
+    //drawWiiInputs();
 
     if(!enableDebugText) {
         //WRITE32(0x800559C8, 0x4082000C); //turn off logging object loads

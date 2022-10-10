@@ -131,6 +131,11 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
     u32 bDown = mapWiimoteButtons(wp, wp->btnsDown);
     u32 bUp   = mapWiimoteButtons(wp, wp->btnsUp);
 
+    if((bHeld | bDown) & PAD_TRIGGER_R) {
+        //the digital input doesn't trigger the shield
+        state->triggerRight = 255;
+    }
+
     if(isAim) {
         //HACK: don't calculate staff aim coordinates
         WRITE32(0x8029b1fc, 0x60000000);
@@ -138,17 +143,34 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
         WRITE32(0x8029b238, 0x60000000);
     }
 
-    debugPrintf(" B%3d%% IR%d, %d, %dcm ang%d ",
+    debugPrintf(DPRINT_FIXED " B%3d%% IR%d, %d, %dcm ang%d ",
         (int)(((float)wp->battery / 255.0f) * 100.0f),
         (int)wp->ir[0], (int)wp->ir[1], (int)(wp->ir[2] * 100.0f),
         (int)(wp->irAngle));
+    debugPrintf("A %3d,%3d,%3d ",
+        (int)wp->accel[0], (int)wp->accel[1], (int)wp->accel[2]);
+    debugPrintf("O %3d,%3d,%3d ",
+        (int)wp->orient[0], (int)wp->orient[1], (int)wp->orient[2]);
+    debugPrintf("G %3d,%3d,%3d ",
+        (int)wp->gforce[0], (int)wp->gforce[1], (int)wp->gforce[2]);
 
     //joystick inputs
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            debugPrintf("J %3d,%3d\n",
+            debugPrintf("\nNC: J %3d,%3d A %3d,%3d,%3d ",
                 wp->exp.nunchuk.joystick[0],
-                wp->exp.nunchuk.joystick[1]);
+                wp->exp.nunchuk.joystick[1],
+                (int)wp->exp.nunchuk.accel[0],
+                (int)wp->exp.nunchuk.accel[1],
+                (int)wp->exp.nunchuk.accel[2]);
+            debugPrintf("O %3d,%3d,%3d ",
+                (int)wp->exp.nunchuk.orient[0],
+                (int)wp->exp.nunchuk.orient[1],
+                (int)wp->exp.nunchuk.orient[2]);
+            debugPrintf("G %3d,%3d,%3d\n",
+                (int)(wp->exp.nunchuk.gforce[0] * 100.0f),
+                (int)(wp->exp.nunchuk.gforce[1] * 100.0f),
+                (int)(wp->exp.nunchuk.gforce[2] * 100.0f));
                 state->stickX = wp->exp.nunchuk.joystick[0];
                 state->stickY = wp->exp.nunchuk.joystick[1];
             break;
@@ -170,9 +192,9 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
             break;
         }
         default:
-            debugPrintf("\n");
             break;
     }
+    debugPrintf("\n" DPRINT_NOFIXED);
     state->button = bHeld | bDown;
 
     if(isAim) {
