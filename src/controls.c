@@ -58,7 +58,7 @@ u32 mapWiimoteButtons(GameWiimoteState *wp, u32 btns) {
     if(btns & WPAD_BUTTON_A)     result |= PAD_BUTTON_A;
     if(btns & WPAD_BUTTON_B)     result |= PAD_BUTTON_B;
     if(btns & WPAD_BUTTON_1)     result |= PAD_BUTTON_X;
-    if(btns & WPAD_BUTTON_2)     result |= PAD_BUTTON_Y;
+    if(btns & WPAD_BUTTON_2)     result |= PAD_TRIGGER_R;
     if(btns & WPAD_BUTTON_MINUS) result |= PAD_TRIGGER_Z;
     if(btns & WPAD_BUTTON_PLUS)  result |= PAD_BUTTON_START;
     if(btns & WPAD_BUTTON_HOME)  result |= PAD_BUTTON_START;
@@ -67,6 +67,41 @@ u32 mapWiimoteButtons(GameWiimoteState *wp, u32 btns) {
     if(btns & WPAD_BUTTON_LEFT)  result |= PAD_BUTTON_LEFT;
     if(btns & WPAD_BUTTON_RIGHT) result |= PAD_BUTTON_RIGHT;
     return result;
+}
+
+static float prevAimX=0, prevAimY=0;
+bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
+    if(!pPlayer) return false;
+    //don't apply to title screen Fox, Arwing, etc
+    if(pPlayer->catId != ObjCatId_Player) return false;
+    void *state = pPlayer->state;
+    if(!state) return false;
+
+    float x = wp->ir[0];
+    float y = wp->ir[1];
+    x = (x + prevAimX) / 2.0f; //smoothing
+    y = (y + prevAimY) / 2.0f;
+    prevAimX = x;
+    prevAimY = y;
+
+    s16 stateNo = *(s16*)(state+0x274);
+    switch(stateNo) {
+        case 0x2C: { //aiming
+            //set the staff aim coordinates
+            *(float*)(state+0x788) = x;
+            *(float*)(state+0x78C) = y;
+            //adjust the physical staff motion
+            *(float*)(state+0x7B8) = MIN(1.0f, MAX(-1.0f, (x/640.0f)));
+            *(float*)(state+0x7BC) = MIN(1.0f, MAX(-1.0f, (y/480.0f)));
+            return true; //we are in an aiming state
+        }
+        default: {
+            //adjust the physical staff motion
+            *(float*)(state+0x7B8) = MIN(1.0f, MAX(-1.0f, (x/640.0f)));
+            *(float*)(state+0x7BC) = MIN(1.0f, MAX(-1.0f, (y/480.0f)));
+            return false;
+        }
+    }
 }
 
 static u8 prevWiimoteFlags[4];
@@ -91,9 +126,17 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
     }
     if(!(nowFlags & WM_FLAG_WORKING)) return;
 
+    bool isAim = applyAimToStaff(wp, state);
     u32 bHeld = mapWiimoteButtons(wp, wp->btnsHeld);
     u32 bDown = mapWiimoteButtons(wp, wp->btnsDown);
     u32 bUp   = mapWiimoteButtons(wp, wp->btnsUp);
+
+    if(isAim) {
+        //HACK: don't calculate staff aim coordinates
+        WRITE32(0x8029b1fc, 0x60000000);
+        WRITE32(0x8029b270, 0x60000000);
+        WRITE32(0x8029b238, 0x60000000);
+    }
 
     debugPrintf(" B%3d%% IR%d, %d, %dcm ang%d ",
         (int)(((float)wp->battery / 255.0f) * 100.0f),
@@ -106,8 +149,8 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
             debugPrintf("J %3d,%3d\n",
                 wp->exp.nunchuk.joystick[0],
                 wp->exp.nunchuk.joystick[1]);
-            state->stickX = wp->exp.nunchuk.joystick[0];
-            state->stickY = wp->exp.nunchuk.joystick[1];
+                state->stickX = wp->exp.nunchuk.joystick[0];
+                state->stickY = wp->exp.nunchuk.joystick[1];
             break;
         }
         case WPAD_EXP_CLASSIC: {
@@ -130,17 +173,42 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
             debugPrintf("\n");
             break;
     }
-
-
-    //vec3w_t accel (x, y, z)
-    //orient_t orient (yaw, pitch, roll)
-    //gforce_t gforce (x, y, z)
-
     state->button = bHeld | bDown;
+
+    if(isAim) {
+        //try to let player walk around in this state.
+        //this doesn't work...
+
+        //clear flags that don't allow player to move
+        /*(*(u32*)(pPlayer->state + 0)) = 0;
+        (*(u8*) (pPlayer->state + 0x34C)) = 0;
+        (*(u8*) (pPlayer->state + 0x360)) = 0;
+        //void (*func)(
+        //    ObjInstance *player, void *state, void *state2) = 0x802b0ea4;
+        //func(pPlayer, pPlayer->state, pPlayer->state);
+        void (*func)(
+            ObjInstance *player, void *state) = 0x802a514c;
+        func(pPlayer, pPlayer->state);*/
+
+        //pPlayer->pos.rotation.x += state->stickX;
+        pPlayer->pos.rotation.y -= state->stickY * 16;
+        *(s16*)(pPlayer->state + 0x01A) -= state->stickX * 16;
+        *(s16*)(pPlayer->state + 0x478) -= state->stickX * 16;
+        *(s16*)(pPlayer->state + 0x484) -= state->stickX * 16;
+        *(s16*)(pPlayer->state + 0x492) -= state->stickX * 16;
+        *(s16*)(pPlayer->state + 0x494) -= state->stickX * 16;
+        *(s32*)(pPlayer->state + 0x5C0) -= state->stickX * 16;
+    }
 }
 
 u32 padUpdate_hook(PADStatus *state) {
     //replaces call to padReadControllers()
+
+    //HACK: restore aiming calculations.
+    //will be NOP'd if we're using Wiimote aiming.
+    WRITE32(0x8029b1fc, 0xd01f0788);
+    WRITE32(0x8029b270, 0xd01f078c);
+    WRITE32(0x8029b238, 0xd01f078c);
 
     //call original method
     u32 (*padReadControllers)(PADStatus*) = 0x8024e864;
@@ -158,7 +226,6 @@ u32 padUpdate_hook(PADStatus *state) {
     wii->updateWiimotes();
     applyWiimoteInputs(0, state);
     displayControllerState(0, state);
-
     return result;
 }
 

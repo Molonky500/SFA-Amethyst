@@ -25,7 +25,13 @@ WPADData *wpads[GAME_MAX_WIIMOTES];
 
 void __Wpad_PowerCallback(s32 chan) {
     exiPrintf("%s(%d)\n", __FUNCTION__, chan);
-    exit(0); //return to loader
+    //do nothing. just let the Wiimote turn off.
+    //the "correct" thing to do here is to shut off the system.
+    //but since this game supports GC controllers too, we
+    //want a way to shut off the Wiimote and use those.
+    //to actually shut down the system we can use the power
+    //button on the system itself, or eventually I'll add
+    //an in-game menu option for it.
 }
 
 void resetBluetooth() {
