@@ -21,10 +21,7 @@
 
 bool isWiimoteInit = false;
 bool triedWiimoteInit = false;
-WPADData *wpads[WPAD_MAX_WIIMOTES];
-
-//XXX properly integrate with OG code
-void *pPlayer = (void*)0x803428f8;
+WPADData *wpads[GAME_MAX_WIIMOTES];
 
 void __Wpad_PowerCallback(s32 chan) {
     exiPrintf("%s(%d)\n", __FUNCTION__, chan);
@@ -193,17 +190,90 @@ static bool checkWpads() {
     return true;
 }
 
+void updateGameWiimoteIface(WPADData *pad, int iPad) {
+    GameWiimoteState *state = &wiiIface.wiimote[iPad];
+    //update the GC-controlled flags
+    WPAD_Rumble (iPad, state->flags & WM_FLAG_RUMBLE);
+    //WPAD_SetLeds(iPad, state->flags & WM_FLAG_LED_MASK);
+    //inexplicably causes constant flashing
+
+    //XXX separate present/working flags, MotionPlus
+    state->flags = (state->flags & ~WM_FLAG_GC_CONTROLLED_MASK)
+        | WM_FLAG_PRESENT | WM_FLAG_WORKING;
+    state->battery = pad->battery_level;
+    state->btnsDown= pad->btns_d;
+    state->btnsHeld= pad->btns_h;
+    state->btnsUp  = pad->btns_u;
+    state->accel [0] = pad->accel.x;
+    state->accel [1] = pad->accel.y;
+    state->accel [2] = pad->accel.z;
+    state->orient[0] = pad->orient.yaw;
+    state->orient[1] = pad->orient.pitch;
+    state->orient[2] = pad->orient.roll;
+    state->gforce[0] = pad->gforce.x;
+    state->gforce[1] = pad->gforce.y;
+    state->gforce[2] = pad->gforce.z;
+    if(pad->ir.smooth_valid) {
+        state->ir[0] = pad->ir.sx;
+        state->ir[1] = pad->ir.sy;
+    }
+    else if(pad->ir.raw_valid) {
+        state->ir[0] = pad->ir.ax;
+        state->ir[1] = pad->ir.ay;
+    }
+    state->ir[2] = pad->ir.z;
+    state->irAngle = pad->ir.angle;
+
+    state->expType = pad->exp.type;
+    switch(state->expType) {
+        case WPAD_EXP_NUNCHUK: {
+            state->exp.nunchuk.btnsDown = pad->exp.nunchuk.btns;
+            state->exp.nunchuk.btnsHeld = pad->exp.nunchuk.btns_held;
+            state->exp.nunchuk.btnsUp   = pad->exp.nunchuk.btns_released;
+            state->exp.nunchuk.joystick[0] = pad->exp.nunchuk.js.pos.x;
+            state->exp.nunchuk.joystick[1] = pad->exp.nunchuk.js.pos.y;
+            state->exp.nunchuk.accel[0] = pad->exp.nunchuk.accel.x;
+            state->exp.nunchuk.accel[1] = pad->exp.nunchuk.accel.y;
+            state->exp.nunchuk.accel[2] = pad->exp.nunchuk.accel.z;
+            state->exp.nunchuk.orient[0] = pad->exp.nunchuk.orient.yaw;
+            state->exp.nunchuk.orient[1] = pad->exp.nunchuk.orient.pitch;
+            state->exp.nunchuk.orient[2] = pad->exp.nunchuk.orient.roll;
+            state->exp.nunchuk.gforce[0] = pad->exp.nunchuk.gforce.x;
+            state->exp.nunchuk.gforce[1] = pad->exp.nunchuk.gforce.y;
+            state->exp.nunchuk.gforce[2] = pad->exp.nunchuk.gforce.z;
+            break;
+        }
+
+        case WPAD_EXP_CLASSIC: {
+            state->exp.classic.lStick[0] = pad->exp.classic.ljs.pos.x;
+            state->exp.classic.lStick[1] = pad->exp.classic.ljs.pos.y;
+            state->exp.classic.rStick[0] = pad->exp.classic.rjs.pos.x;
+            state->exp.classic.rStick[1] = pad->exp.classic.rjs.pos.y;
+            state->exp.classic.btnsDown = pad->exp.classic.btns;
+            state->exp.classic.btnsHeld = pad->exp.classic.btns_held;
+            state->exp.classic.btnsUp = pad->exp.classic.btns_released;
+            state->exp.classic.lTrig = pad->exp.classic.l_shoulder;
+            state->exp.classic.rTrig = pad->exp.classic.r_shoulder;
+            break;
+        }
+
+        default: break;
+    }
+}
+
 void updateWiimote(GameControllerState *state) {
     if(!checkWpads()) return;
-    for(int iPad=0; iPad < WPAD_MAX_WIIMOTES; iPad++) {
+    for(int iPad=0; iPad < GAME_MAX_WIIMOTES; iPad++) {
         int err = WPAD_Probe(iPad, NULL);
         if(err == WPAD_ERR_NONE) {
             debugPrintf("WP%d OK\n", iPad);
 			wpads[iPad] = WPAD_Data(iPad);
             applyWiimoteInputs(iPad, &state[iPad]);
+            updateGameWiimoteIface(wpads[iPad], iPad);
 		} else {
             debugPrintf("WP%d err %d\n", iPad, err);
 			wpads[iPad] = NULL;
+            wiiIface.wiimote[iPad].flags = 0;
 		}
     }
 }

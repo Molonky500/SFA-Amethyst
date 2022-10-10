@@ -26,6 +26,7 @@ void bootGame(DolHeader *header) {
 
     //__MaskIrq(0xFFFFFFFF);
     void (*gameEntry)(void) = (void(*)(void))header->entryPoint;
+    SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
     gameEntry();
     while(1);
 

@@ -70,6 +70,7 @@ extern int _argc;
 #include "bte.h"
 #include "conf.h"
 #include "pad.h"
+#include "../../../../gameWiiIface.h" //oh god
 #include "gamecontrols.h"
 
 int fatInitDefault();
@@ -188,6 +189,7 @@ void initLibc();
 
 //main.c
 extern char gameRootDir[512];
+extern GameWiiInterface wiiIface;
 
 //malloc.c
 extern u8 *heapCanaryTop, *heapCanaryBottom;

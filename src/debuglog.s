@@ -42,6 +42,10 @@ LAB_80137970:
 
     # prepare params for sprintf
     LOADW   r3,  debugLogEnd
+    LOAD    r4,  debugLogBuffer
+    sub     r4,  r3,  r4
+    cmpwi   r4,  4000
+    bge     .debugTextDisabled # buffer full
     lwz     r4,  0x08(r1) # must shift all params up one register
     lwz     r5,  0x0C(r1)
     lwz     r6,  0x10(r1)

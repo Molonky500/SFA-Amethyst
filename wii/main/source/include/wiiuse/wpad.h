@@ -35,7 +35,7 @@ distribution.
 #include <wiiuse/wiiuse.h>
 
 #define WPAD_MAX_IR_DOTS						4
-											
+
 enum {
 	WPAD_CHAN_ALL = -1,
 	WPAD_CHAN_0,
@@ -45,7 +45,7 @@ enum {
 	WPAD_BALANCE_BOARD,
 	WPAD_MAX_WIIMOTES,
 };
-											
+
 #define WPAD_BUTTON_2							0x0001
 #define WPAD_BUTTON_1							0x0002
 #define WPAD_BUTTON_B							0x0004
@@ -57,10 +57,10 @@ enum {
 #define WPAD_BUTTON_DOWN						0x0400
 #define WPAD_BUTTON_UP							0x0800
 #define WPAD_BUTTON_PLUS						0x1000
-											
+
 #define WPAD_NUNCHUK_BUTTON_Z					(0x0001<<16)
 #define WPAD_NUNCHUK_BUTTON_C					(0x0002<<16)
-											
+
 #define WPAD_CLASSIC_BUTTON_UP					(0x0001u<<16)
 #define WPAD_CLASSIC_BUTTON_LEFT				(0x0002u<<16)
 #define WPAD_CLASSIC_BUTTON_ZR					(0x0004u<<16)
@@ -188,6 +188,7 @@ void WPAD_SetPowerButtonCallback(WPADShutdownCallback cb);
 void WPAD_SetBatteryDeadCallback(WPADShutdownCallback cb);
 s32 WPAD_ScanPads(void);
 s32 WPAD_Rumble(s32 chan, int status);
+s32 WPAD_SetLeds(s32 chan, u8 leds);
 s32 WPAD_SetIdleThresholds(s32 chan, s32 btns, s32 ir, s32 accel, s32 js, s32 wb, s32 mp);
 void WPAD_EncodeData(WPADEncStatus *info,u32 flag,const s16 *pcmSamples,s32 numSamples,u8 *encData);
 WPADData *WPAD_Data(int chan);

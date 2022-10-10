@@ -1185,6 +1185,14 @@ s32 WPAD_Rumble(s32 chan, int status)
 	return WPAD_ERR_NONE;
 }
 
+//added by Rena 2022 Oct 09
+s32 WPAD_SetLeds(s32 chan, u8 leds) {
+	if(__wpads[chan]!=NULL) {
+		wiiuse_set_leds(__wpads[chan], leds, NULL);
+	}
+	return WPAD_ERR_NONE;
+}
+
 s32 WPAD_SetIdleThresholds(s32 chan, s32 btns, s32 ir, s32 accel, s32 js, s32 wb, s32 mp)
 {
 	int i;

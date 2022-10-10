@@ -8,6 +8,7 @@ void OSExceptionInit_hook() {
     //the game's original method and install them ourselves.
     //exiPrintf("%s\n", __FUNCTION__);
 
+    SET_SCREEN_SOLID_YUV(105, 212, 134); //magenta
     *(u32*)0x803dddec = 0x80003000; //set exception handler table
     // *(u32*)0x803dde38 = 0x80003040; //set IRQ handler table
 

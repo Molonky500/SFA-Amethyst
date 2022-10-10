@@ -36,6 +36,15 @@
 //than retail consoles.
 #define IS_WII (*((u32*)0x80003118) >= 0x04000000)
 
+//main.c
+extern volatile u16 *_viReg;
+extern volatile u32 *_piReg;
+extern volatile u16 *_memReg;
+extern volatile u16 *_dspReg;
+extern volatile u32 *_ipcReg;
+extern volatile u32 *_exiReg;
+extern volatile u32 *_aiReg;
+
 #include "alloc.h"
 #include "args.h"
 #include "camera.h"

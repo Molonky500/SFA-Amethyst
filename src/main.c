@@ -7,6 +7,15 @@
 //hack to ensure nothing is at offset 0 because that makes relocation difficult.
 int fart __attribute__((section(".offsetzero"))) = 0x52656E61;
 
+//GC regs. some will change if we're in Wii mode.
+volatile u16 *_viReg  = (volatile u16*)0xCC002000;
+volatile u32 *_piReg  = (volatile u32*)0xCC003000;
+volatile u16 *_memReg = (volatile u16*)0xCC004000;
+volatile u16 *_dspReg = (volatile u16*)0xCC005000;
+volatile u32 *_ipcReg = (volatile u32*)0xCC000000; //these three
+volatile u32 *_exiReg = (volatile u32*)0xCC006800; //will change
+volatile u32 *_aiReg  = (volatile u32*)0xCC006C00; //for Wii
+
 u64 tBootStart;
 u32 debugCheats = 0; //DebugCheat
 s16 overrideColorScale = -1;
@@ -338,6 +347,14 @@ void _start(void) {
     tBootStart = __OSGetSystemTime();
     DPRINT("Patch running!");
 
+    if(IS_WII) { //these regs have different addrs.
+        //the loader patches the accesses in the original
+        //game code but we need to do this part ourselves.
+        _ipcReg = (u32*)0xCD000000;
+        _exiReg = (u32*)0xCD006800;
+        _aiReg  = (u32*)0xCD006C00;
+    }
+
     //make staff swipe effect use less memory. XXX investigate how much is actually needed.
     //seems like it wants enough for 3000 swipes which is insane...
     //but with this amount we get some glitching. maybe it really does need this!?
@@ -345,7 +362,7 @@ void _start(void) {
     //WRITE32(0x8016ef4c, 0x38602710);
 
     //Install hooks
-    hookBranch(0x80137df8, bsodHook, 1);
+    if(!IS_WII) hookBranch(0x80137df8, bsodHook, 1);
     initBootHacks();
     initBugFixes();
     dllHooksInit();

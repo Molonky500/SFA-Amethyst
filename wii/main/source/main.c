@@ -4,6 +4,7 @@
 //in memory with the actual root directory.
 char gameRootDir[512] = "*** GAME ROOT DIR ***";
 
+GameWiiInterface wiiIface;
 
 int main(int argc, char **argv) {
     SET_SCREEN_SOLID_YUV(255, 128, 128); //white
@@ -25,8 +26,10 @@ int main(int argc, char **argv) {
     exiPuts("apply patches\n");
     doPatches();
 
+    wiiIface.magic = WII_IFACE_MAGIC;
+    WII_IFACE_PTR = &wiiIface;
+
     exiPuts("boot game\n");
-    SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
     bootGame(header);
 
     while(1);

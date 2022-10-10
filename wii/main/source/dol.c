@@ -37,6 +37,8 @@ void loadDolFromMemory(DolHeader *header) {
             memcpy((void*)header->textAddr[i],
                 data + header->textOffset[i],
                 header->textSize[i]);
+            DCStoreRange((void*)header->textAddr[i], header->textSize[i]);
+            ICInvalidateRange((void*)header->textAddr[i], header->textSize[i]);
         }
     }
     for(int i=0; i<DOL_NUM_DATA_SECTIONS; i++) {
@@ -45,7 +47,10 @@ void loadDolFromMemory(DolHeader *header) {
             memcpy((void*)header->dataAddr[i],
                 data + header->dataOffset[i],
                 header->dataSize[i]);
+            DCStoreRange((void*)header->dataAddr[i], header->dataSize[i]);
+            ICInvalidateRange((void*)header->dataAddr[i], header->dataSize[i]);
         }
     }
     exiPuts("DOL load OK\n");
+    _sync();
 }
