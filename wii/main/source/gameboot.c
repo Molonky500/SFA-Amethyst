@@ -2,11 +2,10 @@
 
 //extern DISC_INTERFACE __io_wiisd;
 
-void bootGame(DolHeader *header) {
-    //protect ARAM area from accidental accesses
-    //SYS_ProtectRange(SYS_PROTECTCHAN0,
-    //    (void*)0x90000000, 0x01000000, SYS_PROTECTNONE);
+//save this for resets
+void (*gameEntry)(void);
 
+void jumpToGame() {
     //set up some bootinfo fields.
     OSBootInfo *boot = (OSBootInfo*)0x80000000;
     boot->diskId.gameName[0]      = 'G';
@@ -24,12 +23,19 @@ void bootGame(DolHeader *header) {
     boot->memorySize              = 0x01800000;
     boot->consoleType             = 0x10000006;
 
-    //__MaskIrq(0xFFFFFFFF);
-    void (*gameEntry)(void) = (void(*)(void))header->entryPoint;
     SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
     gameEntry();
     while(1);
 
     //tell the compiler we're not coming back from this one.
     __builtin_unreachable();
+}
+
+void bootGame(DolHeader *header) {
+    //protect ARAM area from accidental accesses
+    //SYS_ProtectRange(SYS_PROTECTCHAN0,
+    //    (void*)0x90000000, 0x01000000, SYS_PROTECTNONE);
+    //__MaskIrq(0xFFFFFFFF);
+    gameEntry = (void(*)(void))header->entryPoint;
+    jumpToGame();
 }

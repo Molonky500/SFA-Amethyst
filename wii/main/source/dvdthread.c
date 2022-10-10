@@ -226,7 +226,7 @@ void* hackDvdThreadMain(void *param) {
 
     int err = 0;
     bool run = true;
-    while(run) {
+    while(run && !gIsSystemShuttingDown) {
         HackDvdMsg *msg = NULL;
 
         while(true) {
@@ -314,8 +314,10 @@ void* hackDvdThreadMain(void *param) {
         //free(msg);
     }
     exiPuts("DVD thread shutdown\n");
-    HackDvdMsg mShutdown;
-    mShutdown.cmd = DVDCMD_SHUTDOWN;
-    sendFromDvdThread(&mShutdown);
+    if(!gIsSystemShuttingDown) {
+        HackDvdMsg mShutdown;
+        mShutdown.cmd = DVDCMD_SHUTDOWN;
+        sendFromDvdThread(&mShutdown);
+    }
     return NULL;
 }

@@ -25,6 +25,7 @@ WPADData *wpads[GAME_MAX_WIIMOTES];
 
 void __Wpad_PowerCallback(s32 chan) {
     exiPrintf("%s(%d)\n", __FUNCTION__, chan);
+    exit(0); //return to loader
 }
 
 void resetBluetooth() {

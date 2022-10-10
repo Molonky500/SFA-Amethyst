@@ -69,12 +69,12 @@ void gameExceptionInit() {
 }
 
 static const char *excNames[] = {
-    "Reset", "MachineCheck", "DSI",
-    "ISI", "External", "Alignment", "Program",
-    "FPUnavail", "Decrementer", "Rsvd0A", "Rsvd0B",
-    "Syscall", "Trace", "Rsvd0E", "Perfmon",
-    "Rsvd10", "Rsvd11", "Rsvd12", "Breakpoint",
-    "Rsvd14", "Rsvd15", "Rsvd16", "Thermal",
+    /* none, */   "Reset",       "MachineCheck", "DSI",
+    "ISI",        "External",    "Alignment",    "Program",
+    "FPUnavail",  "Decrementer", "Rsvd0A",       "Rsvd0B",
+    "Syscall",    "Trace",       "Rsvd0E",       "Perfmon",
+    "Rsvd10",     "Rsvd11",      "Rsvd12",       "Breakpoint",
+    "Rsvd14",     "Rsvd15",      "Rsvd16",       "Thermal",
 };
 
 void flashDiscLedForever() {

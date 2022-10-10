@@ -62,6 +62,7 @@ extern int _argc;
 #include "lwp_heap.h"
 #include "lwp_wkspace.h"
 #include "sys_alarm.h"
+#include "stm.h"
 #include "ipc.h"
 #include "ios.h"
 #include "disc_io.h"
@@ -153,7 +154,8 @@ void exiPrintf(const char *fmt, ...);
 void exiPrintInit();
 
 //gameboot.c
-extern void *acrIrq;
+extern void (*gameEntry)(void);
+void jumpToGame();
 void bootGame(DolHeader *header);
 
 //gamecontrols.c
@@ -189,7 +191,12 @@ void initLibc();
 
 //main.c
 extern char gameRootDir[512];
+extern u8 loaderRebootCode[6144];
+extern bool gIsSystemShuttingDown;
 extern GameWiiInterface wiiIface;
+int main(int argc, char **argv);
+void MyStmHandler(u32 event);
+void OSRebootHook();
 
 //malloc.c
 extern u8 *heapCanaryTop, *heapCanaryBottom;

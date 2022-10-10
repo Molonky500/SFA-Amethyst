@@ -144,8 +144,9 @@ void* checkThreadMain(void *param) {
     exiPrintf("checkThread online (%08X, stack %08X)\n",
         (u32)&checkThread, (u32)checkThreadStack);
     registerThreadForDebug(OSGetCurrentThread(), "check");
-    while(1) {
+    while(!gIsSystemShuttingDown) {
         OSYieldThread();
         checkIntegrity();
     }
+    exiPuts("checkThread shutting down\n");
 }

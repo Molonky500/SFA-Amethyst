@@ -31,6 +31,8 @@ void initGameHooks() {
     SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
     gameExceptionInit();
 
+    memcpy((void*)0x80001800, loaderRebootCode, 6144);
+
     GameWiiInterface *wii = WII_IFACE_PTR;
     wii->updateWiimotes = updateWiimotes;
     wii->magic = WII_IFACE_MAGIC;

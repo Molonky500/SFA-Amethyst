@@ -111,6 +111,7 @@ void doPatches() {
     hookBranch(0x80248eac, DVDReadAsyncPrio_hook, 0, 0);
     hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0, 0);
     hookBranch(0x8024afd8, DVDCancelStreamAsync_hook, 0, 0);
+    hookBranch(0x80244a58, OSRebootHook, 1, 0);
     doDspPatch();
 
     static const u32 patches[] = {

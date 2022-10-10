@@ -6,6 +6,7 @@ extern void*     (*gameAlloc)(u32 size, u32 tag, const char *name);
 extern void      (*gameFree)(void *addr);
 extern void      (*InsertAlarm)(OSAlarm *alarm, OSTime time, OSAlarmHandler handler);
 extern void      (*OSCancelAlarm)(OSAlarm *alarm);
+extern void      (*OSCancelThread)(OSThread *thread);
 extern void      (*OSCreateAlarm)(OSAlarm *alarm);
 extern BOOL      (*OSCreateThread)(OSThread *thread, void *(*func)(void*), void *param, void *stackBase, u32 stackSize, OSPriority priority, u16 attribute);
 extern int       (*OSDisableInterrupts)(void);
