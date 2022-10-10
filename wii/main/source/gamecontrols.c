@@ -103,6 +103,13 @@ static bool checkWpads() {
     return true;
 }
 
+void mapJoystick(joystick_t *js, s8 *out) {
+    out[0] = (s8)(((float)(js->pos.x - js->center.x) /
+        (float)(js->max.x - js->min.x)) * 127.0f);
+    out[1] = (s8)(((float)(js->pos.y - js->center.y) /
+        (float)(js->max.y - js->min.y)) * 127.0f);
+}
+
 void updateGameWiimoteIface(WPADData *pad, int iPad) {
     GameWiimoteState *state = &wiiIface.wiimote[iPad];
     //update the GC-controlled flags
@@ -141,8 +148,7 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
             state->exp.nunchuk.btnsDown = pad->exp.nunchuk.btns;
             state->exp.nunchuk.btnsHeld = pad->exp.nunchuk.btns_held;
             state->exp.nunchuk.btnsUp   = pad->exp.nunchuk.btns_released;
-            state->exp.nunchuk.joystick[0] = pad->exp.nunchuk.js.pos.x;
-            state->exp.nunchuk.joystick[1] = pad->exp.nunchuk.js.pos.y;
+            mapJoystick(&pad->exp.nunchuk.js, state->exp.nunchuk.joystick);
             state->exp.nunchuk.accel[0] = pad->exp.nunchuk.accel.x;
             state->exp.nunchuk.accel[1] = pad->exp.nunchuk.accel.y;
             state->exp.nunchuk.accel[2] = pad->exp.nunchuk.accel.z;
@@ -154,20 +160,16 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
             state->exp.nunchuk.gforce[2] = pad->exp.nunchuk.gforce.z;
             break;
         }
-
         case WPAD_EXP_CLASSIC: {
-            state->exp.classic.lStick[0] = pad->exp.classic.ljs.pos.x;
-            state->exp.classic.lStick[1] = pad->exp.classic.ljs.pos.y;
-            state->exp.classic.rStick[0] = pad->exp.classic.rjs.pos.x;
-            state->exp.classic.rStick[1] = pad->exp.classic.rjs.pos.y;
+            mapJoystick(&pad->exp.classic.ljs, state->exp.classic.lStick);
+            mapJoystick(&pad->exp.classic.rjs, state->exp.classic.rStick);
             state->exp.classic.btnsDown = pad->exp.classic.btns;
             state->exp.classic.btnsHeld = pad->exp.classic.btns_held;
             state->exp.classic.btnsUp = pad->exp.classic.btns_released;
-            state->exp.classic.lTrig = pad->exp.classic.l_shoulder;
-            state->exp.classic.rTrig = pad->exp.classic.r_shoulder;
+            state->exp.classic.lTrig = (u8)(pad->exp.classic.l_shoulder * 255.0f);
+            state->exp.classic.rTrig = (u8)(pad->exp.classic.r_shoulder * 255.0f);
             break;
         }
-
         default: break;
     }
 }

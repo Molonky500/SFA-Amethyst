@@ -1,40 +1,27 @@
 #include "main.h"
 
-void displayControllerState(int iPad, PADStatus *cnt) {
+void displayControllerState(int iPad, PADStatus *pad) {
     //display input for debug
     char msg[64];
     char *m = msg;
-    *(m++) = (cnt->button & PAD_BUTTON_A)     ? 'A' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_B)     ? 'B' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_X)     ? 'X' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_Y)     ? 'Y' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_START) ? 'S' : '.';
-    *(m++) = (cnt->button & PAD_TRIGGER_L)    ? 'L' : '.';
-    *(m++) = (cnt->button & PAD_TRIGGER_R)    ? 'R' : '.';
-    *(m++) = (cnt->button & PAD_TRIGGER_Z)    ? 'Z' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_UP)    ? '^' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_RIGHT) ? '>' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_DOWN)  ? 'V' : '.';
-    *(m++) = (cnt->button & PAD_BUTTON_LEFT)  ? '<' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_A)     ? 'A' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_B)     ? 'B' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_X)     ? 'X' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_Y)     ? 'Y' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_START) ? 'S' : '.';
+    *(m++) = (pad->button & PAD_TRIGGER_L)    ? 'L' : '.';
+    *(m++) = (pad->button & PAD_TRIGGER_R)    ? 'R' : '.';
+    *(m++) = (pad->button & PAD_TRIGGER_Z)    ? 'Z' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_UP)    ? '^' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_RIGHT) ? '>' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_DOWN)  ? 'V' : '.';
+    *(m++) = (pad->button & PAD_BUTTON_LEFT)  ? '<' : '.';
     *(m++) = 0;
 
-    /*WPADData *wp = wpads[iPad];
-    //84=enter fixed-width mode; 85=leave fixed-width mode
-    //both = somehow crash
-    debugPrintf("%s %3d %3d C%3d %3d", msg,
-        cnt->stickX, cnt->stickY, cnt->substickX, cnt->substickY);
-    if(wp) {
-        debugPrintf(" B%3d%% IR%d, %d, %dcm ang%d",
-            (int)(((float)wp->battery_level / 255.0f) * 100.0f),
-            (int)wp->ir.sx,
-            (int)wp->ir.sy,
-            (int)(wp->ir.z * 100.0f),
-            (int)(wp->ir.angle));
-        //vec3w_t accel (x, y, z)
-        //orient_t orient (yaw, pitch, roll)
-        //gforce_t gforce (x, y, z)
-    }*/
-    debugPrintf("%s\n", msg);
+    debugPrintf("%s J %3d,%3d C %3d,%3d", msg,
+        pad->stickX, pad->stickY, pad->substickX, pad->substickY);
+    //split up because of sprintf bug
+    debugPrintf("L%3d R%3d\n", pad->triggerLeft, pad->triggerRight);
 }
 
 u32 mapWiimoteButtons(GameWiimoteState *wp, u32 btns) {
@@ -108,14 +95,29 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
     u32 bDown = mapWiimoteButtons(wp, wp->btnsDown);
     u32 bUp   = mapWiimoteButtons(wp, wp->btnsUp);
 
+    debugPrintf(" B%3d%% IR%d, %d, %dcm ang%d ",
+        (int)(((float)wp->battery / 255.0f) * 100.0f),
+        (int)wp->ir[0], (int)wp->ir[1], (int)(wp->ir[2] * 100.0f),
+        (int)(wp->irAngle));
+
     //joystick inputs
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            state->stickX = wp->exp.nunchuk.joystick[0] + 128;
-            state->stickY = wp->exp.nunchuk.joystick[1] + 128;
+            debugPrintf("J %3d,%3d\n",
+                wp->exp.nunchuk.joystick[0],
+                wp->exp.nunchuk.joystick[1]);
+            state->stickX = wp->exp.nunchuk.joystick[0];
+            state->stickY = wp->exp.nunchuk.joystick[1];
             break;
         }
         case WPAD_EXP_CLASSIC: {
+            debugPrintf("JL %3d,%3d JR %3d,%3d L%3d R%3d\n",
+                wp->exp.classic.lStick[0],
+                wp->exp.classic.lStick[1],
+                wp->exp.classic.rStick[0],
+                wp->exp.classic.rStick[1],
+                wp->exp.classic.lTrig,
+                wp->exp.classic.rTrig);
             state->stickX       = wp->exp.classic.lStick[0];
             state->stickY       = wp->exp.classic.lStick[1];
             state->substickX    = wp->exp.classic.rStick[0];
@@ -124,8 +126,15 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
             state->triggerRight = wp->exp.classic.rTrig;
             break;
         }
-        default: break;
+        default:
+            debugPrintf("\n");
+            break;
     }
+
+
+    //vec3w_t accel (x, y, z)
+    //orient_t orient (yaw, pitch, roll)
+    //gforce_t gforce (x, y, z)
 
     state->button = bHeld | bDown;
 }
