@@ -105,10 +105,13 @@ void initBugFixes();
 
 //controls.c
 u32 padUpdate_hook(PADStatus *state);
+s8 arwingGetStickXHook(int whichPad);
+s8 arwingGetStickYHook(int whichPad);
 int padGetCxHook(int pad);
 int padGetCyHook(int pad);
 int padGetStickXHook(int pad);
 int padGetStickYHook(int pad);
+void wiiControlsInit();
 
 //dll.c
 void dllHooksInit();

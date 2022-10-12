@@ -28,5 +28,5 @@ void wiiHooksInit() {
     WRITE_BLR(0x80250218); //__ARCheckSize
     WRITE32(0x803de01c, 0x01000000); //__ARSize
 
-    hookBranch(0x80014f90, padUpdate_hook, 1);
+    wiiControlsInit();
 }

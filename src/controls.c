@@ -283,8 +283,103 @@ void doAimControls(PADStatus *pad) {
     adjustPlayerRotation(pad->stickX * 16, pad->stickY * 16, pad);
 }
 
+void applyWiimoteToArwing(ObjInstance *arwing,
+GameWiimoteState *wp, PADStatus *pad,
+u32 *bHeld, u32 *bDown, u32 *bUp) {
+    void *state = arwing->state;
+
+    *bHeld = mapWiimoteButtons(wp, wp->btnsHeld);
+    *bDown = mapWiimoteButtons(wp, wp->btnsDown);
+    *bUp   = mapWiimoteButtons(wp, wp->btnsUp);
+    applyJoystickInputs(wp, pad);
+
+    static float prevTilt = 0;
+    float tilt =  (wp->orient[2]+prevTilt) / 2.0f;
+    prevTilt = tilt;
+    tilt *= 2.0f;
+    if(ABS(tilt) > 8.0f) {
+        if(tilt > 0.0f) pad->triggerRight = MAX(0, MIN(255, tilt));
+        else pad->triggerLeft = MAX(0, MIN(255, -tilt));
+    }
+    if(wp->expType == WPAD_EXP_NUNCHUK && (
+    ABS(wp->exp.nunchuk.gforce[0]) +
+    ABS(wp->exp.nunchuk.gforce[1]) +
+    ABS(wp->exp.nunchuk.gforce[2]) >= 1.1f)) {
+        //do a barrel roll! (but actually an aileron roll)
+        if(tilt > 0) *bDown |= PAD_TRIGGER_L;
+        else *bDown |= PAD_TRIGGER_R;
+    }
+
+    *(float*)(state+0x328) = -69.0f; //disable steering inertia
+
+    //XXX IR aiming; be able to use joystick instead of gyro
+}
+
+s8 arwingGetStickXHook(int whichPad) {
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    if(!wii) return padGetStickX(whichPad);
+    GameWiimoteState *wp = &wii->wiimote[whichPad];
+    if(!(wp->flags & WM_FLAG_WORKING)) {
+        return padGetStickX(whichPad);
+    }
+
+    static float prevTilt = 0;
+    switch(wp->expType) {
+        case WPAD_EXP_NUNCHUK: {
+            float tilt = (wp->exp.nunchuk.orient[2]+prevTilt) / 2.0f;
+            //float tilt = wp->exp.nunchuk.orient[2];
+            prevTilt = tilt;
+            return MAX(-127, MIN(127, tilt * 2.0f));
+        }
+        default: return padGetStickX(whichPad);
+    }
+}
+s8 arwingGetStickYHook(int whichPad) {
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    if(!wii) return padGetStickY(whichPad);
+    GameWiimoteState *wp = &wii->wiimote[whichPad];
+    if(!(wp->flags & WM_FLAG_WORKING)) {
+        return padGetStickY(whichPad);
+    }
+
+    static float prevTilt = 0;
+    switch(wp->expType) {
+        case WPAD_EXP_NUNCHUK: {
+            float tilt = (wp->exp.nunchuk.orient[1]+prevTilt) / 2.0f;
+            //float tilt = wp->exp.nunchuk.orient[1];
+            prevTilt = tilt;
+            return MAX(-127, MIN(127, tilt * 2.0f));
+        }
+        default: return padGetStickY(whichPad);
+    }
+}
+
+void applyWiimoteToPlayer(GameWiimoteState *wp, PADStatus *pad,
+u32 *bHeld, u32 *bDown, u32 *bUp) {
+    bool isAim = applyAimToStaff(wp, pad);
+
+    *bHeld = mapWiimoteButtons(wp, wp->btnsHeld);
+    *bDown = mapWiimoteButtons(wp, wp->btnsDown);
+    *bUp   = mapWiimoteButtons(wp, wp->btnsUp);
+
+    if((*bHeld | *bDown) & PAD_TRIGGER_R) {
+        //the digital input doesn't trigger the shield
+        pad->triggerRight = 255;
+    }
+    applyJoystickInputs(wp, pad);
+    if(isAim) {
+        //HACK: don't calculate staff aim coordinates
+        WRITE32(0x8029b1fc, 0x60000000);
+        WRITE32(0x8029b270, 0x60000000);
+        WRITE32(0x8029b238, 0x60000000);
+    }
+    doSwingGestures(wp, pad, &bDown);
+    if(isAim) doAimControls(pad);
+
+}
+
 static u8 prevWiimoteFlags[4];
-void applyWiimoteInputs(int iPad, PADStatus *state) {
+void applyWiimoteInputs(int iPad, PADStatus *pad) {
     //only called when the Wiimote is connected.
     //overrides the GC controller state.
     GameWiiInterface *wii = WII_IFACE_PTR;
@@ -305,26 +400,17 @@ void applyWiimoteInputs(int iPad, PADStatus *state) {
     }
     if(!(nowFlags & WM_FLAG_WORKING)) return;
 
-    bool isAim = applyAimToStaff(wp, state);
-    u32 bHeld = mapWiimoteButtons(wp, wp->btnsHeld);
-    u32 bDown = mapWiimoteButtons(wp, wp->btnsDown);
-    u32 bUp   = mapWiimoteButtons(wp, wp->btnsUp);
+    u32 bHeld = pad->button;
+    u32 bDown = pad->button;
+    u32 bUp   = 0;
 
-    if((bHeld | bDown) & PAD_TRIGGER_R) {
-        //the digital input doesn't trigger the shield
-        state->triggerRight = 255;
-    }
-    applyJoystickInputs(wp, state);
-    if(isAim) {
-        //HACK: don't calculate staff aim coordinates
-        WRITE32(0x8029b1fc, 0x60000000);
-        WRITE32(0x8029b270, 0x60000000);
-        WRITE32(0x8029b238, 0x60000000);
-    }
-    doSwingGestures(wp, state, &bDown);
-    if(isAim) doAimControls(state);
+    ObjInstance *arwing = getArwing();
+    if(arwing) applyWiimoteToArwing(arwing, wp, pad,
+        &bHeld, &bDown, &bUp);
+    else applyWiimoteToPlayer(wp, pad, &bHeld, &bDown, &bUp);
+
     displayWiimoteState(wp);
-    state->button = bHeld | bDown;
+    pad->button = bHeld | bDown;
 }
 
 u32 padUpdate_hook(PADStatus *state) {
@@ -427,3 +513,8 @@ int padGetStickYHook(int pad) {
     return result;
 }
 
+void wiiControlsInit() {
+    hookBranch(0x80014f90, padUpdate_hook, 1);
+    hookBranch(0x8022a6bc, arwingGetStickXHook, 1);
+    hookBranch(0x8022a6f0, arwingGetStickYHook, 1);
+}
