@@ -309,6 +309,10 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
         if(tilt > 0) *bDown |= PAD_TRIGGER_L;
         else *bDown |= PAD_TRIGGER_R;
     }
+    /*if(wp->expType == WPAD_EXP_NUNCHUK) {
+        *(s16*)(state+0x33A) = wp->exp.nunchuk.orient[2];
+        *(s16*)(state+0x33C) = wp->exp.nunchuk.orient[1];
+    }*/
 
     *(float*)(state+0x328) = -69.0f; //disable steering inertia
 
@@ -316,6 +320,7 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
 }
 
 s8 arwingGetStickXHook(int whichPad) {
+    //return padGetStickX(whichPad);
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!wii) return padGetStickX(whichPad);
     GameWiimoteState *wp = &wii->wiimote[whichPad];
@@ -326,8 +331,8 @@ s8 arwingGetStickXHook(int whichPad) {
     static float prevTilt = 0;
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            float tilt = (wp->exp.nunchuk.orient[2]+prevTilt) / 2.0f;
-            //float tilt = wp->exp.nunchuk.orient[2];
+            //float tilt = (wp->exp.nunchuk.orient[2]+prevTilt) / 2.0f;
+            float tilt = wp->exp.nunchuk.orient[2];
             prevTilt = tilt;
             return MAX(-127, MIN(127, tilt * 2.0f));
         }
@@ -335,6 +340,7 @@ s8 arwingGetStickXHook(int whichPad) {
     }
 }
 s8 arwingGetStickYHook(int whichPad) {
+    //return padGetStickY(whichPad);
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!wii) return padGetStickY(whichPad);
     GameWiimoteState *wp = &wii->wiimote[whichPad];
@@ -345,8 +351,8 @@ s8 arwingGetStickYHook(int whichPad) {
     static float prevTilt = 0;
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            float tilt = (wp->exp.nunchuk.orient[1]+prevTilt) / 2.0f;
-            //float tilt = wp->exp.nunchuk.orient[1];
+            //float tilt = (wp->exp.nunchuk.orient[1]+prevTilt) / 2.0f;
+            float tilt = wp->exp.nunchuk.orient[1];
             prevTilt = tilt;
             return MAX(-127, MIN(127, tilt * 2.0f));
         }
