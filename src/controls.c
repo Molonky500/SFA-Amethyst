@@ -379,7 +379,7 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
         WRITE32(0x8029b270, 0x60000000);
         WRITE32(0x8029b238, 0x60000000);
     }
-    doSwingGestures(wp, pad, &bDown);
+    doSwingGestures(wp, pad, bDown);
     if(isAim) doAimControls(pad);
 
 }
