@@ -146,6 +146,8 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
         state->ir[0] = pad->ir.ax;
         state->ir[1] = pad->ir.ay;
     }
+    if(pad->ir.num_dots > 1) state->flags |= WM_FLAG_IR_VALID;
+    else state->flags &= ~WM_FLAG_IR_VALID;
     state->ir[2] = pad->ir.z;
     state->irAngle = pad->ir.angle;
 
@@ -202,7 +204,7 @@ void updateWiimotes() {
             state->flags |= WM_FLAG_PRESENT;
             debugPrintf("WP%d err %d\n", iPad, err);
 			wpads[iPad] = NULL;
-            wiiIface.wiimote[iPad].flags = 0;
+            //wiiIface.wiimote[iPad].flags = 0;
 		}
     }
 }

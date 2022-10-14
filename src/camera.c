@@ -44,8 +44,13 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
     if(outX) *outX = stickX;
     if(outY) *outY = stickY;
 
-    //extremely jittery
-    #if 0
+    //extremely jittery when axis=camera.
+    #if 1
+    if(getArwing()) return;
+    void *pState = (pPlayer && pPlayer->catId == 1) ? pPlayer->state : NULL;
+    u16 stateId = pState ? *(u16*)((u32)pState + 0x274) : 0;
+    if(stateId == 24) return; //riding bike
+
     if(!IS_WII) return;
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!(wii && wii->magic == WII_IFACE_MAGIC)) return;

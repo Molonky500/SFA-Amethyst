@@ -15,13 +15,14 @@
 #define WM_FLAG_LED3    0x40 //LED 4 is on
 #define WM_FLAG_LED4    0x80 //LED 8 is on
 #define WM_FLAG_LED_MASK 0xF0
+#define WM_FLAG_IR_VALID 0x100
 #define WM_FLAG_GC_CONTROLLED_MASK (WM_FLAG_RUMBLE | WM_FLAG_LED_MASK)
 #define GAME_MAX_WIIMOTES 4
 
 typedef struct {
     //readable - the Wiimote itself
-    u8 flags; //WM_FLAG_*
-    u8 battery; //0-255
+    u16 flags; //WM_FLAG_*
+    u8  battery; //0-255
     u32 btnsDown, btnsHeld, btnsUp;
     float accel[3], orient[3], gforce[3];
     float ir[3], irAngle;

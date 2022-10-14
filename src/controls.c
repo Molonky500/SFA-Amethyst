@@ -162,7 +162,8 @@ u32 mapWiimoteButtons(GameWiimoteState *wp, u32 btns) {
     return result;
 }
 
-static float prevAimX=0, prevAimY=0;
+static float prevAimX = SCREEN_WIDTH  / 2.0f;
+static float prevAimY = SCREEN_HEIGHT / 2.0f;
 bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
     if(!pPlayer) return false;
     //don't apply to title screen Fox, Arwing, etc
@@ -172,6 +173,12 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
 
     float x = wp->ir[0];
     float y = wp->ir[1];
+    debugPrintf("IR AIM: %f, %f (%f, %f) %04X\n", x, y,
+        prevAimX, prevAimY, wp->flags);
+    if(!(wp->flags & WM_FLAG_IR_VALID)) {
+        x = prevAimX;
+        y = prevAimY;
+    }
     x = (x + prevAimX) / 2.0f; //smoothing
     y = (y + prevAimY) / 2.0f;
     prevAimX = x;
@@ -268,6 +275,8 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
 void doAimControls(PADStatus *pad) {
     //try to let player walk around in this state.
     //this doesn't work...
+    //can we instead put them in "holding L" state
+    //but still have them use spells instead of swinging?
 
     //clear flags that don't allow player to move
     /*(*(u32*)(pPlayer->state + 0)) = 0;
@@ -280,6 +289,7 @@ void doAimControls(PADStatus *pad) {
         ObjInstance *player, void *state) = 0x802a514c;
     func(pPlayer, pPlayer->state);*/
 
+    //XXX this should also tilt the camera up/down
     adjustPlayerRotation(pad->stickX * 16, pad->stickY * 16, pad);
 }
 
