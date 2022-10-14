@@ -184,14 +184,14 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
             *(float*)(state+0x788) = x;
             *(float*)(state+0x78C) = y;
             //adjust the physical staff motion
-            *(float*)(state+0x7B8) = MIN(1.0f, MAX(-1.0f, (x/640.0f)));
-            *(float*)(state+0x7BC) = MIN(1.0f, MAX(-1.0f, (y/480.0f)));
+            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -1.0f, 1.0f);
+            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -1.0f, 1.0f);
             return true; //we are in an aiming state
         }
         default: {
             //adjust the physical staff motion
-            *(float*)(state+0x7B8) = MIN(1.0f, MAX(-1.0f, (x/640.0f)));
-            *(float*)(state+0x7BC) = MIN(1.0f, MAX(-1.0f, (y/480.0f)));
+            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -1.0f, 1.0f);
+            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -1.0f, 1.0f);
             return false;
         }
     }
@@ -200,8 +200,8 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
 void applyJoystickInputs(GameWiimoteState *wp, PADStatus *pad) {
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            pad->stickX = wp->exp.nunchuk.joystick[0];
-            pad->stickY = wp->exp.nunchuk.joystick[1];
+            pad->stickX = CLAMP(wp->exp.nunchuk.joystick[0] * 2, -127, 127);
+            pad->stickY = CLAMP(wp->exp.nunchuk.joystick[1] * 2, -127, 127);
             break;
         }
         case WPAD_EXP_CLASSIC: {
@@ -298,8 +298,8 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
     prevTilt = tilt;
     tilt *= 2.0f;
     if(ABS(tilt) > 8.0f) {
-        if(tilt > 0.0f) pad->triggerRight = MAX(0, MIN(255, tilt));
-        else pad->triggerLeft = MAX(0, MIN(255, -tilt));
+        if(tilt > 0.0f) pad->triggerRight = CLAMP(tilt, 0, 255);
+        else pad->triggerLeft = CLAMP(-tilt, 0, 255);
     }
     if(wp->expType == WPAD_EXP_NUNCHUK && (
     ABS(wp->exp.nunchuk.gforce[0]) +
@@ -334,7 +334,7 @@ s8 arwingGetStickXHook(int whichPad) {
             //float tilt = (wp->exp.nunchuk.orient[2]+prevTilt) / 2.0f;
             float tilt = wp->exp.nunchuk.orient[2];
             prevTilt = tilt;
-            return MAX(-127, MIN(127, tilt * 2.0f));
+            return CLAMP(tilt * 2.0f, -127, 127);
         }
         default: return padGetStickX(whichPad);
     }
@@ -354,7 +354,7 @@ s8 arwingGetStickYHook(int whichPad) {
             //float tilt = (wp->exp.nunchuk.orient[1]+prevTilt) / 2.0f;
             float tilt = wp->exp.nunchuk.orient[1];
             prevTilt = tilt;
-            return MAX(-127, MIN(127, tilt * 2.0f));
+            return CLAMP(tilt * 2.0f, -127, 127);
         }
         default: return padGetStickY(whichPad);
     }
@@ -477,7 +477,7 @@ int padGetCyHook(int pad) {
 int padGetStickXHook(int pad) {
     //replaces the body of padGetStickX().
     if(joypadDisable || isDvdDriveBusy) return 0;
-    int result = controllerStates[pad + (whichControllerFrame * 4)].stickX;
+    int result  = controllerStates[pad + (whichControllerFrame * 4)].stickX;
     u16 buttons = controllerStates[pad + (whichControllerFrame * 4)].button;
 
     //mode 0x52 is both holding L button and aiming with staff,
@@ -500,7 +500,7 @@ int padGetStickXHook(int pad) {
 int padGetStickYHook(int pad) {
     //replaces the body of padGetStickY().
     if(joypadDisable || isDvdDriveBusy) return 0;
-    int result = controllerStates[pad + (whichControllerFrame * 4)].stickY;
+    int result  = controllerStates[pad + (whichControllerFrame * 4)].stickY;
     u16 buttons = controllerStates[pad + (whichControllerFrame * 4)].button;
 
     void *pState = pPlayer ? pPlayer->state : NULL;

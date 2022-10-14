@@ -43,6 +43,38 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
 
     if(outX) *outX = stickX;
     if(outY) *outY = stickY;
+
+    //extremely jittery
+    #if 0
+    if(!IS_WII) return;
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    if(!(wii && wii->magic == WII_IFACE_MAGIC)) return;
+    GameWiimoteState *wp = &wii->wiimote[0];
+    if(!(wp->flags & WM_FLAG_WORKING)) return;
+    switch(wp->expType) {
+        case WPAD_EXP_NUNCHUK: {
+            static float prevX=0, prevY=0;
+            float x = wp->exp.nunchuk.orient[2];
+            float y = wp->exp.nunchuk.orient[1];
+            //x = (float)(((int)x) & ~7);
+            //y = (float)(((int)y) & ~7);
+            float sx = (x+prevX) / 2.0f;
+            float sy = (y+prevY) / 2.0f;
+            s32 ox = (outX ? *outX : 0) + sx;
+            s32 oy = (outY ? *outY : 0) + sy;
+            if(ox < -127) ox = -127;
+            if(ox >  127) ox =  127;
+            if(oy < -127) oy = -127;
+            if(oy >  127) oy =  127;
+            if(outX) *outX = ox;
+            if(outY) *outY = oy;
+            prevX = ox;
+            prevY = oy;
+            break;
+        }
+        default: break;
+    }
+    #endif
 }
 
 void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {

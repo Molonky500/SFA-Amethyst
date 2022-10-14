@@ -29,6 +29,7 @@
 #define ABS(n) \
     ({ __typeof__ (n) _n = (n); \
         _n < 0 ? -_n : _n; })
+#define CLAMP(x, min, max) MAX((min), MIN((max), (x)))
 
 //if we're on Wii, MEM2 physical size isn't zero.
 //we do >= because Dolphin (and devkits, if someone were
