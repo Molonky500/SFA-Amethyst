@@ -84,6 +84,7 @@ static void printObjName(const char *fmt, ObjInstance *obj) {
 static void printBaddieInfo(ObjInstance *target) {
     char name[16];
     void *state = (void*)target->state;
+    if(!state) return;
     debugPrintf("  baddie state@" DPRINT_FIXED "%08X" DPRINT_NOFIXED
         "; HP: " DPRINT_FIXED "%3d" DPRINT_NOFIXED "; ", state,
         *(s16*)(state+0x2B0));
@@ -289,7 +290,7 @@ static void printHeapInfo() {
 
 static void printTarget() {
     //Display target that player is focused on
-    if(pCamera && pCamera->target) {
+    if(pCamera && pCamera->target && pCamera->focus) {
         debugPrintf("Target: " DPRINT_FIXED "%08X %08X %04X %04X " DPRINT_NOFIXED,
             pCamera->target,
             pCamera->target->objDef->id,
@@ -311,7 +312,7 @@ static void printTarget() {
 
 static void printHeldObj() {
     //Display object that player is carrying
-    if(pCamera && pCamera->target) {
+    if(pCamera && pCamera->target && pCamera->focus) {
         debugPrintf("Held: " DPRINT_FIXED "%08X %08X %04X " DPRINT_NOFIXED,
             pCamera->target,
             pCamera->target->objDef->id,
