@@ -1,6 +1,6 @@
 #include "main.h"
 
-u8 cameraFlags = 0; //CameraFlags
+u8 cameraFlags = CAM_FLAG_PLAYER_AXIS; //CameraFlags
 s8 debugCameraMode = CAM_MODE_NORMAL; //CameraMode
 
 //static void (*origFunc)(Camera *self);
@@ -58,13 +58,22 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
     if(!(wp->flags & WM_FLAG_WORKING)) return;
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            static float prevX=0, prevY=0;
+            static float prevX[4] = {0};
+            static float prevY[4] = {0};
             float x = wp->exp.nunchuk.orient[2];
             float y = wp->exp.nunchuk.orient[1];
-            //x = (float)(((int)x) & ~7);
-            //y = (float)(((int)y) & ~7);
-            float sx = (x+prevX) / 2.0f;
-            float sy = (y+prevY) / 2.0f;
+            x = (float)(((int)x) & ~15);
+            y = (float)(((int)y) & ~15);
+            prevX[0] = prevX[1];
+            prevX[1] = prevX[2];
+            prevX[2] = prevX[3];
+            prevX[3] = x;
+            prevY[0] = prevY[1];
+            prevY[1] = prevY[2];
+            prevY[2] = prevY[3];
+            prevY[3] = y;
+            float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
+            float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
             s32 ox = (outX ? *outX : 0) + sx;
             s32 oy = (outY ? *outY : 0) + sy;
             if(ox < -127) ox = -127;
@@ -73,8 +82,6 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
             if(oy >  127) oy =  127;
             if(outX) *outX = ox;
             if(outY) *outY = oy;
-            prevX = ox;
-            prevY = oy;
             break;
         }
         default: break;
@@ -120,6 +127,8 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
     //if(dxz < 30.0) dxz = 30.0;
     //this is better but still a hack
     dxz = prevDistance;
+    if(dxz <  60.0f) dxz =  60.0f;
+    if(dxz > 120.0f) dxz = 120.0f;
 
     float cosx, cosy, sinx, siny;
     sinx = sinf(pi * (rx - 0x4000) / 32768.0);
@@ -408,6 +417,14 @@ void _doOrbit(u32 bHeld, u32 bPressed) {
 void cameraUpdateHook() {
     //r12 is the address it was about to jump to, which depends on the mode.
     //GET_REGISTER(12, origFunc);
+    if((!pPlayer) || pPlayer->catId != ObjCatId_Player) {
+        //XXX make camera not go nuts on title screen with Wiimote
+        cameraUpdateViewMtx(pCamera);
+        //updateViewMatrix();
+        _drawDebugInfo();
+        _updateOverride();
+        return;
+    }
 
     //do this in all modes so that we don't carry over stale button states
     //when changing modes

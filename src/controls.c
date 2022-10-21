@@ -171,14 +171,14 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
     void *state = pPlayer->state;
     if(!state) return false;
 
-    float x = wp->ir[0];
-    float y = wp->ir[1];
+    float x = wp->ir[0] - 320.0f;
+    float y = wp->ir[1] - 240.0f;
     debugPrintf("IR AIM: %f, %f (%f, %f) %04X\n", x, y,
         prevAimX, prevAimY, wp->flags);
-    if(!(wp->flags & WM_FLAG_IR_VALID)) {
+    /*if(!(wp->flags & WM_FLAG_IR_VALID)) {
         x = prevAimX;
         y = prevAimY;
-    }
+    }*/
     x = (x + prevAimX) / 2.0f; //smoothing
     y = (y + prevAimY) / 2.0f;
     prevAimX = x;
@@ -191,14 +191,17 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
             *(float*)(state+0x788) = x;
             *(float*)(state+0x78C) = y;
             //adjust the physical staff motion
-            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -1.0f, 1.0f);
-            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -1.0f, 1.0f);
+            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -2.0f, 2.0f);
+            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -2.0f, 2.0f);
             return true; //we are in an aiming state
         }
         default: {
             //adjust the physical staff motion
-            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -1.0f, 1.0f);
-            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -1.0f, 1.0f);
+            //this also affects the camera...
+            // *(float*)(state+0x7B8) = CLAMP(((x/640.0f)-0.75f)*2.0f, -1.0f, 1.0f);
+            // *(float*)(state+0x7BC) = CLAMP((y/480.0f)-0.5f, -1.0f, 1.0f);
+            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -2.0f, 2.0f);
+            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -2.0f, 2.0f);
             return false;
         }
     }
@@ -225,6 +228,7 @@ void applyJoystickInputs(GameWiimoteState *wp, PADStatus *pad) {
 }
 
 void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
+    if((!pPlayer) || pPlayer->catId != ObjCatId_Player) return;
     s16 stateNo = *(s16*)(pPlayer->state+0x274);
 
     //swing to roll
@@ -273,6 +277,7 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
 }
 
 void doAimControls(PADStatus *pad) {
+    if((!pPlayer) || pPlayer->catId != ObjCatId_Player) return;
     //try to let player walk around in this state.
     //this doesn't work...
     //can we instead put them in "holding L" state
