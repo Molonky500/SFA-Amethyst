@@ -42,6 +42,7 @@ const char *strings_English[] = {
     "CATID", //category ID
     "Cheats", //cheat functions
     "CHILD", //child object
+    "Clear Invalid ObjTracks", //clear invalid entries from object track list
     "Clear Restart Point", //clear the "restart point"
     "Color Filter", //change color filtering
     "Color Scale", //change color scaling
@@ -233,6 +234,7 @@ const char *strings_English[] = {
     "T", //1-letter abbreviation for Table
     "Table", //database table
     "Time", //time of day
+    "Track", //follow something
     "Tricky", //the character named Tricky
     "UniqueID", //unique ID
     "Unk07", //unknown field 7
@@ -245,6 +247,7 @@ const char *strings_English[] = {
     "View Textures", //show all textures
     "Warp", //warp to another map
     "Widescreen", //enable widescreen display
+    "Wii Remote", //Wii Remote controller
     "Zero", //always zero
     NULL
 };

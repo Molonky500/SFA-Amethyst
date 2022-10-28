@@ -30,6 +30,7 @@ const char *strings_Japanese[] = {
     "カテゴリー", //category ID
     "チート", //cheat functions
     "CHILD", //child object
+    "無効なオブジェクト トラックをクリアする", //clear invalid entries from object track list
     "リスタートポイント解除", //clear the "restart point"
     "カラーフィルター", //change color filtering
     "コントロー尺度", //change color scaling
@@ -221,6 +222,7 @@ const char *strings_Japanese[] = {
     "源", //1-letter abbreviation for Table
     "目録", //database table
     "時間", //time of day
+    "追跡します", //follow something
     "トリッキー", //the character named Tricky
     "一意のID", //unique ID
     "わからない07", //unknown field 7
@@ -233,6 +235,7 @@ const char *strings_Japanese[] = {
     "テクスチャ表示", //show all textures
     "ワープ", //warp to another map
     "ワイドスクリーン", //enable widescreen display
+    "Wiiリモコン", //Wii Remote controller
     "零", //always zero
     NULL
 };
