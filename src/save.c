@@ -1,5 +1,7 @@
 #include "main.h"
 #include "revolution/os.h"
+//XXX make time configurable
+static const double tAutoSave = 600.0;
 bool bAutoSave = false;
 static u8 autoSaveMsgTimer = 0;
 static double tLastSave = 0;
@@ -145,8 +147,6 @@ void saveUpdateHook() {
     }
     //do not autosave on title screen
     else if(bAutoSave && tLastSave && curMapId != 0x3F) {
-        //XXX make time configurable
-        static const double tAutoSave = 60.0;
         double dt = getSystemTimeSecs() - tLastSave;
         if(dt >= tAutoSave) doAutoSave();
         else if(dt >= (tAutoSave-5)) {
@@ -159,8 +159,9 @@ void saveUpdateHook() {
     //if disabled, reset timer to right now
     //so that enabling it doesn't instantly trigger save
     else tLastSave = getSystemTimeSecs();
-    debugPrintf("tLastSave=%f dt=%f\n", tLastSave,
-        getSystemTimeSecs() - tLastSave);
+    //debugPrintf("tLastSave=%f dt=%f slot=%d stat=%d\n", tLastSave,
+    //    getSystemTimeSecs() - tLastSave,
+    //    curSaveSlot, saveStatus);
 }
 
 void doAutoSave() {
@@ -173,10 +174,13 @@ void doAutoSave() {
         case 0x47: //test of strength
         case 0x4C: //cutscene
         case 0x4D: //speaking to NPC
+        case 0x57: //title screen
             return;
     }
     if(curSaveSlot < 0) return; //no save slot
-    if(saveStatus != 1) return; //can't save
+    //if(saveStatus != 1) return; //can't save
+    //XXX why is status -1 when we skip title menu?
+    //it still lets us save...
     DPRINT("Saving...");
     saveGame_save();
     DPRINT("Save done.");
