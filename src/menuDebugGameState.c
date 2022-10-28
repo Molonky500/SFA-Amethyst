@@ -28,11 +28,18 @@ void menuDebugGameStateTricky_select(const MenuItem *self, int amount) {
     audioPlaySound(NULL, MENU_OPEN_SOUND);
 }
 
+void menuDebugGameStateObjSeq_select(const MenuItem *self, int amount) {
+    if(amount) return;
+    curMenu = &menuDebugObjSeq;
+    audioPlaySound(NULL, MENU_OPEN_SOUND);
+}
+
 Menu menuDebugGameState = {
     "Game State", 0,
     genericMenu_run, genericMenu_draw, debugSubMenu_close,
     "GameBits",          "%s", genericMenuItem_draw, menuDebugGameStateBits_select,
     "Edit Player State", "%s", genericMenuItem_draw, menuDebugGameStatePlayer_select,
     "Edit Tricky State", "%s", genericMenuItem_draw, menuDebugGameStateTricky_select,
+    "ObjSeq",            "%s", genericMenuItem_draw, menuDebugGameStateObjSeq_select,
     NULL,
 };

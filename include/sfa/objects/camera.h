@@ -45,12 +45,8 @@ typedef struct PACKED Camera {
 	vec3f               pos_0xa8;             //0xA8
 	float               fov;                  //0xB4
 	vec3f               prevPos2;             //0xB8
-	float               dist_0xc4;            //0xC4
-	float               unkC8;                //0xC8
-	float               unkCC;                //0xCC
-	float               unkD0;                //0xD0
-	float               unkD4;                //0xD4
-	float               dist_0xd8;            //0xD8
+	float               targetVel;            //0xC4
+	float               prevTargetVel[5];     //0xC8
 	vec3f               focusOverridePos;     //0xDC
     u32                 unkE8;                //0xE8
     u32                 unkEC;                //0xEC

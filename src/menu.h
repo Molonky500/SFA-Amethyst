@@ -119,6 +119,7 @@ extern Menu menuDebugMapStates;
 extern Menu menuDebugMisc;
 extern Menu menuDebugObjList;
 extern Menu menuDebugObjSelected;
+extern Menu menuDebugObjSeq;
 extern Menu menuDebugRender;
 extern Menu menuDebugRenderEffects;
 extern Menu menuDebugSpawnObj;

@@ -173,12 +173,17 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
 
     float x = wp->ir[0] - 320.0f;
     float y = wp->ir[1] - 240.0f;
-    debugPrintf("IR AIM: %f, %f (%f, %f) %04X\n", x, y,
-        prevAimX, prevAimY, wp->flags);
-    /*if(!(wp->flags & WM_FLAG_IR_VALID)) {
+    if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
+        debugPrintf("IR AIM: %f, %f (%f, %f) %04X\n", x, y,
+            prevAimX, prevAimY, wp->flags);
+    }
+    //XXX apparently this flag isn't set when aiming
+    //toward the right edge of the screen, even though
+    //it works just fine...
+    if(!(wp->flags & WM_FLAG_IR_VALID)) {
         x = prevAimX;
         y = prevAimY;
-    }*/
+    }
     x = (x + prevAimX) / 2.0f; //smoothing
     y = (y + prevAimY) / 2.0f;
     prevAimX = x;
@@ -430,7 +435,9 @@ void applyWiimoteInputs(int iPad, PADStatus *pad) {
         &bHeld, &bDown, &bUp);
     else applyWiimoteToPlayer(wp, pad, &bHeld, &bDown, &bUp);
 
-    displayWiimoteState(wp);
+    if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
+        displayWiimoteState(wp);
+    }
     pad->button = bHeld | bDown;
 }
 
@@ -458,7 +465,9 @@ u32 padUpdate_hook(PADStatus *state) {
     state->err = 0; //present, even if no GC pad connected
     wii->updateWiimotes();
     applyWiimoteInputs(0, state);
-    displayControllerState(0, state);
+    if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
+        displayControllerState(0, state);
+    }
     return result;
 }
 

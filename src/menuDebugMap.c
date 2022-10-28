@@ -117,6 +117,21 @@ void menuDebugMapLoad_select(const MenuItem *self, int amount) {
     }
 }
 
+void menuDebugMapClearTrack_select(const MenuItem *self, int amount) {
+    if(amount) return;
+    for(int i=0; i<MAX_DPRINT_OBJS; i++) {
+        ObjInstance *obj = dprintObjs[i];
+        if( PTR_VALID(dprintObjs[i])
+        && !PTR_VALID(dprintObjs[i]->file)) {
+            dprintObjs[i] = NULL;
+        }
+        else if(!PTR_VALID(dprintObjs[i])) {
+            //shouldn't happen, but just in case
+            dprintObjs[i] = NULL;
+        }
+    }
+}
+
 Menu menuDebugMap = {
     "Map", 0,
     debugMapMenu_run, genericMenu_draw, debugSubMenu_close,
@@ -132,5 +147,6 @@ Menu menuDebugMap = {
     "Map States",          "%s", genericMenuItem_draw, menuDebugMapStates_select,
     "Environment",         "%s", genericMenuItem_draw, menuDebugMapEnv_select,
     "Load Map",            "%s: %02X %s", menuDebugMapLoad_draw, menuDebugMapLoad_select,
+    "Clear Invalid ObjTracks", "%s", genericMenuItem_draw, menuDebugMapClearTrack_select,
     NULL,
 };

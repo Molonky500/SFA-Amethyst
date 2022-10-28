@@ -62,26 +62,28 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
             static float prevY[4] = {0};
             float x = wp->exp.nunchuk.orient[2];
             float y = wp->exp.nunchuk.orient[1];
-            x = (float)(((int)x) & ~15);
-            y = (float)(((int)y) & ~15);
-            prevX[0] = prevX[1];
-            prevX[1] = prevX[2];
-            prevX[2] = prevX[3];
-            prevX[3] = x;
-            prevY[0] = prevY[1];
-            prevY[1] = prevY[2];
-            prevY[2] = prevY[3];
-            prevY[3] = y;
-            float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
-            float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
-            s32 ox = (outX ? *outX : 0) + sx;
-            s32 oy = (outY ? *outY : 0) + sy;
-            if(ox < -127) ox = -127;
-            if(ox >  127) ox =  127;
-            if(oy < -127) oy = -127;
-            if(oy >  127) oy =  127;
-            if(outX) *outX = ox;
-            if(outY) *outY = oy;
+            if(ABS(x) >= 10.0f || ABS(y) >= 10.0f) {
+                //x = (float)(((int)x) & ~15);
+                //y = (float)(((int)y) & ~15);
+                prevX[0] = prevX[1];
+                prevX[1] = prevX[2];
+                prevX[2] = prevX[3];
+                prevX[3] = x;
+                prevY[0] = prevY[1];
+                prevY[1] = prevY[2];
+                prevY[2] = prevY[3];
+                prevY[3] = y;
+                float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
+                float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
+                s32 ox = (outX ? *outX : 0) + sx;
+                s32 oy = (outY ? *outY : 0) + sy;
+                if(ox < -127) ox = -127;
+                if(ox >  127) ox =  127;
+                if(oy < -127) oy = -127;
+                if(oy >  127) oy =  127;
+                if(outX) *outX = ox;
+                if(outY) *outY = oy;
+            }
             break;
         }
         default: break;
