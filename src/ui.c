@@ -41,8 +41,9 @@ static void drawPopupMessages() {
     for(int i=0; i<MAX_POPUP_MSGS; i++) {
         if(popupMsgs[i].time > 0.0f) {
             popupMsgs[i].time -= timeDelta;
-            Color4b color = {.r=255, .g=255, .b=255,
-                .a = (int)(MAX(popupMsgs[i].time, 1.0f) * 255.0f)};
+            float a = popupMsgs[i].time*180.0f;
+            Color4b color = {.r=255, .g=255, .b=255, .a=
+                MAX(0, MIN((int)a, 255))};
             drawColorText(popupMsgs[i].text, popupX, popupY, color);
             popupY -= LINE_HEIGHT;
         }
