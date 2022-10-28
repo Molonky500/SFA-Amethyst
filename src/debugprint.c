@@ -21,6 +21,8 @@ u32 debugTextFlags =
     //DEBUGTEXT_AUDIO_SFX |
     //DEBUGTEXT_ENVIRONMENT |
     DEBUGTEXT_OBJSEQ |
+    //DEBUGTEXT_WIIMOTE |
+    DEBUGTEXT_DPRINT_OBJS |
     0;
 u32 debugRenderFlags =
     //DEBUGRENDER_WORLD_MAP |
@@ -32,6 +34,8 @@ u32 debugRenderFlags =
     //DEBUGRENDER_FOCUS_POINTS |
     //DEBUGRENDER_UNK_POINTS |
     0;
+
+ObjInstance *dprintObjs[MAX_DPRINT_OBJS];
 
 
 void debugPrintSetPos(s16 x, s16 y) {
@@ -226,7 +230,7 @@ static void printCamera() {
             pCamera->pos.xf.pos.x, pCamera->pos.xf.pos.y, pCamera->pos.xf.pos.z);
         debugPrintf("C:" DPRINT_FIXED "%s M%02X", buf, cameraMode);
         int seq = READ32(0x803dd064);
-        if(seq) {
+        if(seq) { //sequence idx the camera is waiting on
             debugPrintf(DPRINT_NOFIXED " S:" DPRINT_FIXED "%02X", seq);
         }
         debugPrintf(DPRINT_NOFIXED "\n");
@@ -286,6 +290,45 @@ static void printHeapInfo() {
     }
     debugPrintf("Max blocks=%d/%d KBytes=%d/%d\n", maxBlocksUsed, totalBlocks,
         maxMemUsed / 1024, totalBytes / 1024);
+}
+
+static void printTrackedObjs() {
+    for(int i=0; i<MAX_DPRINT_OBJS; i++) {
+        //if any obj, print header
+        if(dprintObjs[i]) {
+            debugPrintf(DPRINT_FIXED
+                "ObjAddr  ObjName      StatePtr DLLAddr  XPos     YPos     ZPos     DistXZ DistY\n");
+            break;
+        }
+    }
+
+    float px = PTR_VALID(pPlayer) ? pPlayer->pos.pos.x : 0;
+    float py = PTR_VALID(pPlayer) ? pPlayer->pos.pos.y : 0;
+    float pz = PTR_VALID(pPlayer) ? pPlayer->pos.pos.z : 0;
+
+    for(int i=0; i<MAX_DPRINT_OBJS; i++) {
+        ObjInstance *obj = dprintObjs[i];
+        if(obj) {
+            debugPrintf(DPRINT_FIXED "%08X ", obj);
+            if(PTR_VALID(obj)) {
+                char name[16];
+                getObjName(name, obj);
+                char buf[1024];
+                float x = obj->pos.pos.x;
+                float y = obj->pos.pos.y;
+                float z = obj->pos.pos.z;
+                float dxz = sqrtf((x-px)*(x-px) + (z-pz)*(z-pz));
+                float dy  = ABS(y-py);
+                sprintf(buf,
+                    "%-12s %08X %08X %+7.2f %+7.2f %+7.2f %6.3f %6.3f\n",
+                    name, obj->state, obj->dll, obj->pos.pos.x,
+                    obj->pos.pos.y, obj->pos.pos.z, dxz, dy);
+                debugPrintf(buf);
+            }
+            else debugPrintf("(BAD PTR)\n");
+        }
+    }
+    debugPrintf(DPRINT_NOFIXED);
 }
 
 static void printTarget() {
@@ -569,9 +612,81 @@ static void printEnvironment() {
 
 static void printObjSeq() {
     if(curSeqNo) {
-        debugPrintf("Seq " DPRINT_FIXED "%02X" DPRINT_NOFIXED "\n",
-            curSeqNo);
+        debugPrintf("Seq " DPRINT_FIXED "%02X" DPRINT_NOFIXED
+            " %f\n",
+            curSeqNo, *(float*)0x803dd074);
     }
+    ObjInstance **seqObjs = (ObjInstance**)0x80396918;
+    s16 *seqIdxs = (s16*)0x8039a3b0;
+    s32 *seqObjIds = (s32*)0x80399cfc;
+    s16 *seqBgCmdParams = (s16*)0x80399398;
+    ObjSeqSubCmdStruct *seqActions = (ObjSeqSubCmdStruct*)0x8039944c;
+    s8 *seqVarC4C = (s8*)0x80399c4c;
+    s8 *timeCmdState = (s8*)0x80399ca4;
+    u8 *flags1 = (u8*)0x80399e50;
+    u8 *flags2 = (u8*)0x80399ea8;
+    s16 *xRot = (s16*)0x80399f00;
+    s16 *timeNext = (s16*)0x80399fac;
+    float *timeNextF = (float*)0x8039a058;
+    float *timeCurF = (float*)0x8039a1ac;
+    s8 *frame = (s8*)0x8039a300;
+    u8 *unk358 = (u8*)0x8039a358;
+    u8 *flags3 = (u8*)0x8039a45c;
+    u8 *unk4B4 = (u8*)0x8039a4b4;
+    u8 *nextState = (u8*)0x8039a50c;
+    u8 *curState = (u8*)0x8039a564;
+    ObjSeqCmd2 *cmds2 = (ObjSeqCmd2*)0x8039a5bc;
+    s8 *isPaused = (s8*)0x8039a60c;
+    ObjInstance **objPairs = (ObjInstance**)0x8039a664; //2 per seq
+
+    debugPrintf(DPRINT_FIXED
+        "SIdx Obj# S# BGCmds Actions  # Time S Flags  xRot TNxt TNxtF TCurF Frm ?      SNSCP");
+    for(int i=0; i<26; i++) {
+        s16 idx = seqIdxs[i];
+        if(idx || seqActions[i].nextTime) {
+            s32 objId = seqObjIds[i];
+            char floats[128];
+            sprintf(floats, "%5.1f %5.1f",
+                timeNextF[i], timeCurF[i]);
+
+            debugPrintf(
+                "\n%c%3d %4X %2d %3X%3X",
+                i+'A', idx, objId & 0xFFFF,
+                seqBgCmdParams[i*3],
+                seqBgCmdParams[(i*3)+1],
+                seqBgCmdParams[(i*3)+2]);
+            debugPrintf(" %8X %X %4d %X",
+                seqActions[i].actions, seqActions[i].nCmds,
+                seqActions[i].nextTime, timeCmdState[i]);
+            debugPrintf(" %02X%02X%02X",
+                flags1[i], flags2[i], flags3[i]);
+            debugPrintf(" %4X %4X %s %3d",
+                xRot[i] & 0xFFFF, timeNext[i], floats, frame[i]);
+            debugPrintf(" %02X%02X%02X",
+                unk358[i], unk4B4[i], seqVarC4C[i]);
+            debugPrintf(" %02X%02X%X",
+                nextState[i], curState[i], isPaused[i]);
+            //debugPrintf("%8X %s\n",
+            //    obj, name);
+
+        }
+    }
+    debugPrintf("\nSeq Objs");
+    for(int i=0; i<26; i++) {
+        if(seqIdxs[i] || seqActions[i].nextTime) {
+            ObjInstance *obj1 = seqObjs[i];
+            ObjInstance *obj2 = objPairs[i*2];
+            ObjInstance *obj3 = objPairs[(i*2)+1];
+            char name1[16], name2[16], name3[16];
+            getObjName(name1, obj1);
+            getObjName(name2, obj2);
+            getObjName(name3, obj3);
+            debugPrintf("\n%c %8X %12s %8X %12s ", i+'A',
+                obj1, name1, obj2, name2);
+            debugPrintf("%8X %12s", obj3, name3);
+        }
+    }
+    debugPrintf("\n" DPRINT_NOFIXED);
 }
 
 static void printTrickyInfo() {
@@ -611,6 +726,11 @@ static void printTrickyInfo() {
 }
 
 void mainLoopDebugPrint() {
+    static bool didInit = false;
+    if(!didInit) {
+        didInit = true;
+        memset(dprintObjs, 0, sizeof(dprintObjs));
+    }
     drawHeaps();
     if(debugRenderFlags & DEBUGRENDER_PERF_METERS) renderPerfMeters();
     if(debugRenderFlags & DEBUGRENDER_RNG) drawRNG();
@@ -635,6 +755,7 @@ void mainLoopDebugPrint() {
     if(debugTextFlags & DEBUGTEXT_RESTART_POINT)     printRestartPoint();
     if(debugTextFlags & DEBUGTEXT_MEMORY_INFO)     { printObjCount(); printMemory(); }
     if(debugTextFlags & DEBUGTEXT_HEAP_STATE)        printHeapInfo();
+    if(debugTextFlags & DEBUGTEXT_DPRINT_OBJS)       printTrackedObjs();
     if(debugTextFlags & DEBUGTEXT_INTERACT_OBJ_INFO) printTarget();
     if(debugTextFlags & DEBUGTEXT_RNG)               printRNG();
     if(debugTextFlags & DEBUGTEXT_PLAYER_STATE)      printPlayerState();

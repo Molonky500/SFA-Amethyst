@@ -1,7 +1,7 @@
 #include <sfa/sfa.h>
 
-#define MOD_VERSION_MAJOR 2
-#define MOD_VERSION_MINOR 4
+#define MOD_VERSION_MAJOR 3
+#define MOD_VERSION_MINOR 0
 #define MOD_VERSION_PATCH 0
 #define __STR(x) #x
 #define _STR(x) __STR(x)
@@ -9,6 +9,7 @@
 
 #define SCREEN_WIDTH  640
 #define SCREEN_HEIGHT 480
+#define MAX_POPUP_MSGS 8
 
 //text sizing
 #define LINE_HEIGHT 16
@@ -94,6 +95,11 @@ typedef enum { //for savedata (field unused01)
 } ExtraFeatureFlag;
 
 //see also CameraFlags in camera.h
+
+typedef struct {
+    float time; //ticks remaining
+    const char *text; //text
+} PopupMessage;
 
 //boot.c
 void initBootHacks();
@@ -294,7 +300,9 @@ void titleHooksInit();
 void tweaks_init();
 
 //ui.c
+extern PopupMessage popupMsgs[MAX_POPUP_MSGS];
 bool motionBlurHook();
+void showPopupMsg(const char *text, float time);
 void hudDrawHook(int p1, int p2, int p3);
 
 //util.c

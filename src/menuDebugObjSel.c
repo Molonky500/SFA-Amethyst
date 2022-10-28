@@ -18,6 +18,24 @@ void objSelMenu_draw(Menu *self) {
     drawColorText(title, OBJ_MENU_XPOS+MENU_PADDING+8, OBJ_MENU_YPOS+MENU_PADDING, color);
 }
 
+void menuObjSelTrack_select(const MenuItem *self, int amount) {
+    if(amount) return;
+    menuInputDelayTimer = MENU_INPUT_DELAY_SELECT;
+
+    for(int i=0; i < MAX_DPRINT_OBJS; i++) {
+        if(!dprintObjs[i]) {
+            dprintObjs[i] = objMenuSelected;
+            return;
+        }
+        else if(dprintObjs[i] == objMenuSelected) {
+            showPopupMsg("Removing from track list", 90.0f);
+            dprintObjs[i] = NULL;
+            return;
+        }
+    }
+    showPopupMsg("Already tracking max objects", 90.0f);
+}
+
 void menuObjSelFocus_select(const MenuItem *self, int amount) {
     if(amount) return;
     menuInputDelayTimer = MENU_INPUT_DELAY_SELECT;
@@ -155,6 +173,7 @@ void menuObjSelCallSeq_select(const MenuItem *self, int amount) {
 Menu menuDebugObjSelected = {
     "", 0, //blank title
     genericMenu_run, objSelMenu_draw, objListSubmenu_close,
+    "Track",              "%s", genericMenuItem_draw, menuObjSelTrack_select,
     "Set Camera Focus",   "%s", genericMenuItem_draw, menuObjSelFocus_select,
     "Go To",              "%s", genericMenuItem_draw, menuObjSelMovePlayer_select,
     "Bring To Player",    "%s", genericMenuItem_draw, menuObjSelSummon_select,

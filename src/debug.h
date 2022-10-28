@@ -18,6 +18,8 @@ typedef enum {
     DEBUGTEXT_AUDIO_SFX         = (1 << 13),
     DEBUGTEXT_ENVIRONMENT       = (1 << 14),
     DEBUGTEXT_OBJSEQ            = (1 << 15),
+    DEBUGTEXT_WIIMOTE           = (1 << 16),
+    DEBUGTEXT_DPRINT_OBJS       = (1 << 17),
 } DebugTextFlags;
 
 typedef enum {
@@ -55,6 +57,8 @@ enum RngMode {
     NUM_RNG_MODES
 };
 
+#define MAX_DPRINT_OBJS 8
+
 //debuglog.s
 void debugPrintfHook(const char *fmt, ...);
 
@@ -64,6 +68,7 @@ void debugObjsInit();
 //debugprint.c
 extern u32 debugTextFlags;
 extern u32 debugRenderFlags;
+extern ObjInstance *dprintObjs[MAX_DPRINT_OBJS];
 //debugPrintSetColor is already in the game
 void debugPrintSetPos(s16 x, s16 y);
 void debugPrintSetColor(u8 r, u8 g, u8 b, u8 a);
