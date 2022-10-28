@@ -2,6 +2,8 @@
 #include "revolution/os.h"
 bool bAutoSave = false;
 static u8 autoSaveMsgTimer = 0;
+static double tLastSave = 0;
+static char autoSaveCountdownMsg[64];
 
 /* # offsets into saveData
 .set SAVEDATA_EXTRA_OPTIONS,  0x01 # unused
@@ -27,6 +29,19 @@ static u8 autoSaveMsgTimer = 0;
 .set SAVEDATA_OPTION_PDA_MODE,0x0C
 .set SAVEDATA_OPTION_FUR_FX,  0x10
 .set SAVEDATA_OPTION_BACKPACK,0x60 */
+
+static double getSystemTimeSecs() {
+    u64 ticks = __OSGetSystemTime();
+    //this is necessary to make gcc not try to use soft float here.
+    u32 tHi = ticks >> 32;
+    u32 tLo = ticks & 0xFFFFFFFF;
+    double fTicks = (double)tLo + (double)(tHi * 4294967296.0);
+
+    //note timestamp here is seconds since 2000-01-01
+    //everything says this should be / 4 but I only get anything
+    //sensible with / 2.
+    return fTicks / ((double)__OSBusClock / 2.0);
+}
 
 void saveLoadHook() {
     DPRINT("Savedata loading");
@@ -70,6 +85,7 @@ void saveLoadHook() {
         gameTextLoadDir(dir); //then load current map's texts
     }
     else DPRINT("Savedata is clear");
+    tLastSave = getSystemTimeSecs();
 
     /* char str[1024];
     u8 *data = (u8*)save;
@@ -117,6 +133,7 @@ void updateSaveData() {
 
     //DPRINT("Update savedata: player=%d FOV=%d alpha=%d map=%d lang=%d\n",
     //    overridePlayerNo, overrideFov, overrideMinimapAlpha, minimapMode, curLanguage);
+    tLastSave = getSystemTimeSecs();
 }
 
 //Called from main loop.
@@ -126,6 +143,24 @@ void saveUpdateHook() {
         gameTextSetColor(0xFF, 0xFF, 0xFF, 0xFF);
         gameTextShowStr("Saving...", 0x0A, 0, 0);
     }
+    //do not autosave on title screen
+    else if(bAutoSave && tLastSave && curMapId != 0x3F) {
+        //XXX make time configurable
+        static const double tAutoSave = 600.0;
+        double dt = getSystemTimeSecs() - tLastSave;
+        if(dt >= tAutoSave) doAutoSave();
+        else if(dt >= (tAutoSave-5)) {
+            sprintf(autoSaveCountdownMsg,
+                "Autosave in %d", (int)(tAutoSave - dt)+1);
+            gameTextSetColor(0xFF, 0xFF, 0xFF, 0xBF);
+            gameTextShowStr(autoSaveCountdownMsg, 0x0A, 0, 0);
+        }
+    }
+    //if disabled, reset timer to right now
+    //so that enabling it doesn't instantly trigger save
+    else tLastSave = getSystemTimeSecs();
+    debugPrintf("tLastSave=%f dt=%f\n", tLastSave,
+        getSystemTimeSecs() - tLastSave);
 }
 
 void doAutoSave() {
@@ -154,7 +189,12 @@ void* saveMapLoadHook(MapDirIdx32 map, DataFileEnum file) {
     //replaces a call to mapLoadDataFile()
     //save immediately before loading a new map, since that's when we're
     //most likely to crash due to out of memory.
-    doAutoSave();
+    double now = getSystemTimeSecs();
+    double dt = now - tLastSave;
+    if(dt >= 60.0) {
+        //don't auto save if we already did within the past minute
+        doAutoSave();
+    }
     return mapLoadDataFile(map, file);
 }
 
@@ -162,5 +202,6 @@ void saveShowMsgHook(int param) {
     //replaces a call to cardShowLoadingMsg
     //replace it with just the popup message at the bottom
     autoSaveMsgTimer = 60;
+    tLastSave = getSystemTimeSecs();
     DPRINT("Trigger save msg");
 }
