@@ -13,6 +13,7 @@ const char *strings_Japanese[] = {
     "オーディオストリーミング", //change volume of streaming audio
     "オート", //automatic
     "オートセーブ", //save automatically
+    "%dで自動保存", //autosave will activate in %d seconds
     "バックパック", //whether player wears a backpack
     "戻る", //return to previous
     "大きい", //PDA map size: big

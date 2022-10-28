@@ -25,6 +25,7 @@ const char *strings_English[] = {
     "Audio Streams", //change volume of streaming audio
     "Auto", //automatic
     "Autosave", //save automatically
+    "Autosave in %d", //autosave will activate in %d seconds
     "Backpack", //whether player wears a backpack
     "Back", //return to previous
     "Big", //PDA map size: big

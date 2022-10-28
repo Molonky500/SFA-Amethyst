@@ -146,12 +146,12 @@ void saveUpdateHook() {
     //do not autosave on title screen
     else if(bAutoSave && tLastSave && curMapId != 0x3F) {
         //XXX make time configurable
-        static const double tAutoSave = 600.0;
+        static const double tAutoSave = 60.0;
         double dt = getSystemTimeSecs() - tLastSave;
         if(dt >= tAutoSave) doAutoSave();
         else if(dt >= (tAutoSave-5)) {
             sprintf(autoSaveCountdownMsg,
-                "Autosave in %d", (int)(tAutoSave - dt)+1);
+                T("Autosave in %d"), (int)(tAutoSave - dt)+1);
             gameTextSetColor(0xFF, 0xFF, 0xFF, 0xBF);
             gameTextShowStr(autoSaveCountdownMsg, 0x0A, 0, 0);
         }
