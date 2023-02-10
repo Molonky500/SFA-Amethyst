@@ -243,12 +243,12 @@ void _camDoCStick() {
         || (cameraMode == 0x45) //bike
         || (cameraMode == 0x49) //combat
         || (cameraMode == 0x4B) //climb
-        //|| (cameraMode == 0x4C) //cutscene
-        //|| (cameraMode == 0x4D) //speaking
-        //|| (cameraMode == 0x50) //crawling
+        || (cameraMode == 0x4C) //cutscene
+        || (cameraMode == 0x4D) //speaking
+        || (cameraMode == 0x50) //crawling
         || (cameraMode == 0x52) //aiming, holding L
-        //|| (cameraMode == 0x53) //Drakor, riding CloudRunner in DR
-        //|| (cameraMode == 0x56) //Arwing
+        || (cameraMode == 0x53) //Drakor, riding CloudRunner in DR
+        || (cameraMode == 0x56) //Arwing
         )) {
             _camDoRotateAroundPlayer(stickX, stickY);
         }
@@ -271,6 +271,9 @@ void _drawDebugInfo() {
 }
 
 void _applyOverride() {
+    debugPrintf("cam pos %f, %f, %f override %d\n",
+        camOverrideX, camOverrideY,
+        camOverrideZ, camOverrideValid);
     if(camOverrideValid) {
         pCamera->pos.xf.pos.x = camOverrideX;
         pCamera->pos.xf.pos.y = camOverrideY;
@@ -423,7 +426,7 @@ void cameraUpdateHook() {
         //XXX make camera not go nuts on title screen with Wiimote
         cameraUpdateViewMtx(pCamera);
         //updateViewMatrix();
-        _drawDebugInfo();
+        //_drawDebugInfo();
         _updateOverride();
         return;
     }
@@ -460,7 +463,7 @@ void cameraUpdateHook() {
         //origFunc(pCamera);
         _camDoCStick();
         cameraUpdateViewMtx(pCamera);
-        //updateViewMatrix();
+        updateViewMatrix();
         return;
     }
 
@@ -487,8 +490,15 @@ void cameraUpdateHook() {
     //    controllerStates[3].triggerLeft, controllerStates[3].triggerRight);
 
     //update camera
-    cameraUpdateViewMtx(pCamera);
-    //updateViewMatrix();
+    //this sometimes decides to just not use the position we give...
+    //cameraUpdateViewMtx(pCamera);
+
+    //and this doesn't apply the rotation...
+    void (*updateCamRot)(Camera*) = 0x8000dde8;
+    updateCamRot(pCamera); //no idea what this actually does
+        //just guessing at a name
+    updateViewMatrix();
+
     _drawDebugInfo();
     _updateOverride();
 }

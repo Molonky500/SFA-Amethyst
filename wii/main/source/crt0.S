@@ -147,6 +147,8 @@ _memset:
 
 	.section .bss
 	.balign 8
+.globl __crt0stack_end
+.globl __crt0stack
 __crt0stack_end:
 	.space 0x4000
 __crt0stack:

@@ -31,15 +31,18 @@ INCLUDES	:= -I../source/include
 # this must be at least 0x91000000 since before that is ARAM.
 # also, do not use r2 (TOC) and r13 (sdata) since the game
 # will clobber those.
+# these addresses also affect the size of the actual DOL file.
+# if you get errors about sections overlapping, you need to
+# increase some of these addresses to make more room.
 CFLAGS   = -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames \
 	$(MACHDEP) $(INCLUDES) -ffile-prefix-map=$(abspath $(CURDIR))=.
 CXXFLAGS = $(CFLAGS)
 LDFLAGS	 = -L../lib -g $(MACHDEP) \
 	-Wl,-Map,$(notdir $@).map \
 	-Wl,--section-start,.stub=0x91000000 \
-	-Wl,--section-start,.sbss=0x91400000 \
-	-Wl,--section-start,.init=0x91800000 \
-	-Wl,--section-start,.data=0x91C00000
+	-Wl,--section-start,.sbss=0x91080000 \
+	-Wl,--section-start,.init=0x91180000 \
+	-Wl,--section-start,.data=0x91200000
 ASFLAGS := $(MACHDEP) -mregnames -D_LANGUAGE_ASSEMBLY $(INCLUDES)
 
 #---------------------------------------------------------------------------------

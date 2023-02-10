@@ -44,7 +44,7 @@ clean:
 
 # build patch, and install files into discroot
 install: all
-	@echo "[*] Installing..."
+	@echo "[*] Installing to $(DISCROOT)..."
 	@./tools/elf2patch.py $(BUILDDIR)/src.elf $(BUILDDIR)/bootstrap.bin $(BUILDDIR)/patch.bin
 	@./tools/patchdol.py $(ORIGDOL) $(BUILDDIR)/patch.bin $(NEWDOL)
 	@./tools/makebitnames.py $(DATA)/U0/gamebits.xml $(DISCROOT)/bitnames.dat

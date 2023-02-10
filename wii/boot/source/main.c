@@ -35,10 +35,14 @@ int initVideo() {
 
     // Allocate memory for the display in the uncached region
 	//xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+    //this is the address the game uses.
+    //XXX this is probably unsafe...
 	xfb = MEM_K0_TO_K1(0x8048e480);
 
     // Initialise the console, required for printf
-	console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
+	console_init(xfb,20,20,
+        rmode->fbWidth,rmode->xfbHeight,
+        rmode->fbWidth*VI_DISPLAY_PIX_SZ);
 
     VIDEO_Configure(rmode); //set up selected video mode
 	VIDEO_SetNextFramebuffer(xfb); //tell GPU where our buffers are
@@ -47,8 +51,13 @@ int initVideo() {
     VIDEO_WaitVSync();
 	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
     gIsVideoInit = true;
+    printf("\r\nInit EXI...\r\n");
 
     return 0;
+}
+
+void delayFrames(int n) {
+    while(n--) VIDEO_WaitVSync();
 }
 
 void quit(const char *msg) {
@@ -67,14 +76,16 @@ void quit(const char *msg) {
 }
 
 void checkForExitButton() {
-    PAD_ScanPads();
-    if(PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_START) exit(0);
+    //PAD_ScanPads();
+    //if(PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_START) exit(0);
 }
 
 int initFilesystem() {
     /** Init FAT driver.
      *  @returns 0 on success, nonzero on failure.
      */
+    printf("Init FAT...\r\n");
+    //delayFrames(15);
     if(!fatInitDefault()) {
         printf("FAT init failed\n");
         return 1;
@@ -87,8 +98,8 @@ int init() {
      *  @returns 0 on success, nonzero on failure.
      */
     int err = 0;
-    exiPrintInit();
     initVideo();
+    exiPrintInit();
     if(!err) err = initFilesystem();
     return err;
 }
@@ -106,6 +117,7 @@ int _depth) {
      *    On failure, its contents are unspecified.
      */
     if(_depth > 10) return 0; //don't recurse forever
+    if(!path) return 0;
 
     DIR *pdir;
     struct dirent *pent;
@@ -123,43 +135,59 @@ int _depth) {
     //printf("\x1B[2;0H\x1B[2K"); //home, clear line
     //for(size_t i=0; i<pathEnd; i++) printf(".");
     //printf("\x1B[2;0HScanning: %s     ", path);
-    //printf("%s\n", path);
+    //printf("\"%s\"\r\n", path);
+    //delayFrames(20);
+
+    strncat(path, "/sfa_root.flag", pathLen);
+    if(!stat(path, &statbuf)) {
+        path[pathEnd+1] = 0; //undo appending the file name
+        return 1;
+    }
 
     pdir = opendir(path);
+    //printf("opendir OK\r\n");
     if(!pdir) {
         int err = errno;
         if(err == ENOTDIR) return 0;
-        //printf("Error opening path: %s\n", path);
+        printf("Error opening path: %s\n", path);
+        delayFrames(60);
         return -abs(err);
     }
     while((pent=readdir(pdir)) != NULL) {
+        //printf("readdir OK \"%s\"\r\n", pent->d_name); //delayFrames(60);
         checkForExitButton();
 
         if(strcmp(".",  pent->d_name) == 0
         || strcmp("..", pent->d_name) == 0) continue;
 
         snprintf(&path[pathEnd], pathLen-pathEnd, "/%s", pent->d_name);
+        //printf("stat...\r\n"); //delayFrames(15);
         if(stat(path, &statbuf)) {
             int err = errno;
-            //printf("stat(%s) err %d\n", path, err);
+            printf("stat(%s) err %d\n", path, err);
+            delayFrames(60);
             return -abs(err);
         }
 
-        //for(int i=0; i<5; i++) VIDEO_WaitVSync();
+        //delayFrames(5);
         if(S_ISDIR(statbuf.st_mode)) {
+            //printf("recurse: %s\r\n", path); //delayFrames(15);
 			int r = _scanForGameFiles(path, pathLen, _depth+1);
             if(r != 0) {
+                //printf("closedir...\r\n"); //delayFrames(15);
                 closedir(pdir);
                 return r;
             }
         }
         else if(!strcmp(pent->d_name, "sfa_root.flag")) {
+            //printf("found\r\n"); delayFrames(15);
             path[pathEnd+1] = 0; //undo appending the file name
             closedir(pdir);
             return 1;
         }
         path[pathEnd+1] = 0; //undo appending the file name
     }
+    //printf("closedir end\r\n"); //delayFrames(15);
     closedir(pdir);
     return 0;
 }
@@ -184,60 +212,65 @@ void initGameFiles(const char *appPath) {
         }
     }
     else strcpy(gameRootDir, defaultRootDir);
+    exiPrintf("Look for game files in: \"%s\"\r\n", gameRootDir);
+    //delayFrames(60);
     int err = _scanForGameFiles(gameRootDir, sizeof(gameRootDir), 0);
     if(err > 0) { //success
-        exiPrintf("Found game files:\n\"%s\"\n", gameRootDir);
+        exiPrintf("Found game files in: \"%s\"\r\n", gameRootDir);
+        //delayFrames(60);
         return;
     }
 
     printf("Looking for game files... (START to exit)\n");
     printf("Tip: place them at %s to skip this step!\n", defaultRootDir);
+    delayFrames(60);
     strcpy(gameRootDir, "/");
     err = _scanForGameFiles(gameRootDir, sizeof(gameRootDir), 0);
     if(err > 0) { //success
-        exiPrintf("Found game files:\n\"%s\"\n", gameRootDir);
+        exiPrintf("Found game files:\r\n\"%s\"\r\n", gameRootDir);
+        //delayFrames(60);
     }
     else if(err < 0) quit("Error scanning for game files\n");
     else quit("Game files not found.\n");
 }
 
 void printDolHeader(DolHeader *header) {
-    exiPrintf("Sect## Offset Address  Size\n");
+    exiPrintf("Sect## Offset Address  Size\r\n");
     for(int i=0; i<DOL_NUM_TEXT_SECTIONS; i++) {
-        exiPrintf("text%2d %06X %08X %08X\n", i,
+        exiPrintf("text%2d %06X %08X %08X\r\n", i,
             header->textOffset[i], header->textAddr[i],
             header->textSize[i]);
     }
     for(int i=0; i<DOL_NUM_DATA_SECTIONS; i++) {
-        exiPrintf("data%2d %06X %08X %08X\n", i,
+        exiPrintf("data%2d %06X %08X %08X\r\n", i,
             header->dataOffset[i], header->dataAddr[i],
             header->dataSize[i]);
     }
-    exiPrintf("bss    ------ %08X %08X\n", header->bssAddr,
+    exiPrintf("bss    ------ %08X %08X\r\n", header->bssAddr,
         header->bssSize);
-    exiPrintf("Entry  ------ %08X ------\n", header->entryPoint);
+    exiPrintf("Entry  ------ %08X ------\r\n", header->entryPoint);
 }
 
 void loadDol(FILE *dol, DolHeader *header) {
     for(int i=0; i<DOL_NUM_TEXT_SECTIONS; i++) {
         if(header->textSize[i] > 0) {
-            exiPrintf("Loading text%d...\n", i);
+            exiPrintf("Loading text%d...\r\n", i);
             fseek(dol, header->textOffset[i], SEEK_SET);
             fread((void*)header->textAddr[i], 1, header->textSize[i], dol);
         }
     }
     for(int i=0; i<DOL_NUM_DATA_SECTIONS; i++) {
         if(header->dataSize[i] > 0) {
-            exiPrintf("Loading data%d...\n", i);
+            exiPrintf("Loading data%d...\r\n", i);
             fseek(dol, header->dataOffset[i], SEEK_SET);
             fread((void*)header->dataAddr[i], 1, header->dataSize[i], dol);
         }
     }
-    exiPrintf("Init bss...\n");
+    exiPrintf("Init bss...\r\n");
     memset((void*)header->bssAddr, 0, header->bssSize);
 }
 
-void loadGame() {
+void* loadGame() {
     //load the game program itself at a fixed address.
     //the second-stage loader can then copy it to the
     //appropriate memory and boot it without needing
@@ -254,11 +287,8 @@ void loadGame() {
     u32 size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    //this address will later be used by the game as ARAM.
-    //that means the loader isn't using it at all and it
-    //won't go to waste storing a copy of the DOL.
-    //ARAM is 16MB and the DOL is < 4MB so this works out.
-    void *dest = (void*)0x90000000;
+    void *dest  = (void*)DOL_LOAD_ADDR;
+    void *start = dest;
     int r = 0;
     u32 offset = 0;
     while(offset < size) {
@@ -270,9 +300,27 @@ void loadGame() {
         }
         printf("\x1B[2;0H\x1B[2KLoading: %5.2f%%  ", //home, clear line
             ((float)offset/(float)size) * 100.0f);
+        DCFlushRange(dest, r);
         offset += r;
         dest += r;
     }
+
+    u32 cksum = 0;
+    u8 *data  = (u8*)DOL_LOAD_ADDR;
+    for(u32 i=0; i<size; i++) cksum += data[i];
+    exiPrintf("DOL CKSUM = %08X\r\n", cksum);
+    *(u32*)(DOL_LOAD_ADDR-4) = size;
+    *(u32*)(DOL_LOAD_ADDR-8) = cksum;
+
+    printDolHeader((DolHeader*)start);
+    //udelay(700000);
+    /*uint32_t *dumpCode = (uint32_t*)0x90008510;
+    for(int i=0; i<16; i++) {
+        exiPrintf("%08X%s", *(dumpCode++),
+            ((i&3)==3) ? "\r\n" : " ");
+    }*/
+
+    return start;
 }
 
 __attribute__((noreturn)) void loadAppDol() {
@@ -303,6 +351,8 @@ __attribute__((noreturn)) void loadAppDol() {
     loadDol(dol, &header);
     fclose(dol);
 
+    void *dolAddr = loadGame();
+
     //find the magic placeholder string for the path
     static const char *magic = "*** GAME ROOT DIR ***";
     for(int i=0; i<DOL_NUM_DATA_SECTIONS; i++) {
@@ -315,20 +365,23 @@ __attribute__((noreturn)) void loadAppDol() {
                     //for the size to strncpy (we're not)
                     size_t size = sizeof(gameRootDir);
                     strncpy((char*)j, gameRootDir, size);
+                    //also pass the address we loaded the DOL at.
+                    //snprintf((char*)j, size, "%08X%s",
+                    //    dolAddr, gameRootDir);
                 }
             }
         }
     }
 
-    loadGame();
+    exiPuts("Shutting down SD\r\n");
     fatUnmount("sd");
     __io_wiisd.shutdown();
     //delay to let SD tidy itself up
-    u64 then = SYS_Time() + 10000000;
-    while(SYS_Time() < then);
+    u64 later = SYS_Time() + 10000000;
+    while(SYS_Time() < later);
     __IOS_ShutdownSubsystems();
-    then = SYS_Time() + 10000000;
-    while(SYS_Time() < then);
+    later = SYS_Time() + 10000000;
+    while(SYS_Time() < later);
 
     exiPrintf("Exec...\n");
     void (*boot)(void) = (void (*)())header.entryPoint;
@@ -340,11 +393,15 @@ __attribute__((noreturn)) void loadAppDol() {
 int main(int argc, char **argv) {
     int err = init();
     if(err) quit("Startup failed\n");
-    /*printf("argc=%d\n", argc);
+    printf("argc=%d\n", argc);
     for(int i=0; i<argc; i++) {
         printf("argv[%d]=\"%s\"\n", i, argv[i]);
-    }*/
+    }
+    //delayFrames(60);
     initGameFiles(argc > 0 ? argv[0] : NULL);
+    //delayFrames(60);
+    exiPrintf("Boot game...\r\n");
+    //delayFrames(60);
     loadAppDol();
 	return 0;
 }

@@ -254,7 +254,7 @@ static s32 __ipc_queuerequest(struct _ipcreq *req)
 	u32 cnt;
 	u32 level;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_queuerequest(0x%p)\n",req);
+	exiPrintf("__ipc_queuerequest(0x%p)\r\n",req);
 #endif
 	_CPU_ISR_Disable(level);
 
@@ -276,7 +276,7 @@ static s32 __ipc_syncqueuerequest(struct _ipcreq *req)
 {
 	u32 cnt;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_syncqueuerequest(0x%p)\n",req);
+	exiPrintf("__ipc_syncqueuerequest(0x%p)\r\n",req);
 #endif
 	cnt = (_ipc_responses.cnt_queue - _ipc_responses.cnt_sent);
 	if(cnt>=16) {
@@ -296,7 +296,7 @@ static void __ipc_sendrequest(void)
 	u32 ipc_send;
 	struct _ipcreq *req;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_sendrequest()\n");
+	exiPrintf("__ipc_sendrequest()\r\n");
 #endif
 	cnt = (_ipc_responses.cnt_queue - _ipc_responses.cnt_sent);
 	if(cnt>0) {
@@ -329,7 +329,7 @@ static void __ipc_replyhandler(void)
 	struct _ipcreq *req = NULL;
 	ioctlv *v = NULL;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_replyhandler()\n");
+	exiPrintf("__ipc_replyhandler()\r\n");
 #endif
 	req = (struct _ipcreq*)IPC_ReadReg(2);
 	if(req==NULL) return;
@@ -343,7 +343,7 @@ static void __ipc_replyhandler(void)
 
 	if(req->magic==IPC_REQ_MAGIC) {
 #ifdef DEBUG_IPC
-		exiPrintf("IPC res: cmd %08x rcmd %08x res %08x\n",req->cmd,req->req_cmd,req->result);
+		exiPrintf("IPC res: cmd %08x rcmd %08x res %08x\r\n",req->cmd,req->req_cmd,req->result);
 #endif
 		if(req->req_cmd==IOS_READ) {
 			if(req->read.data!=NULL) {
@@ -391,10 +391,10 @@ static void __ipc_replyhandler(void)
 		// It is the responsibility of the loader to clear these things,
 		// but we want to find out if they happen so loaders can be fixed.
 //#ifdef DEBUG_IPC
-		exiPrintf("Received unknown IPC response (magic %08x):\n", req->magic);
-		exiPrintf("  CMD %08x RES %08x REQCMD %08x\n", req->cmd, req->result, req->req_cmd);
-		exiPrintf("  Args: %08x %08x %08x %08x %08x\n", req->args[0], req->args[1], req->args[2], req->args[3], req->args[4]);
-		exiPrintf("  CB %08x DATA %08x REL %08x QUEUE %08x\n", (u32)req->cb, (u32)req->usrdata, req->relnch, (u32)req->syncqueue);
+		exiPrintf("Received unknown IPC response (magic %08x):\r\n", req->magic);
+		exiPrintf("  CMD %08x RES %08x REQCMD %08x\r\n", req->cmd, req->result, req->req_cmd);
+		exiPrintf("  Args: %08x %08x %08x %08x %08x\r\n", req->args[0], req->args[1], req->args[2], req->args[3], req->args[4]);
+		exiPrintf("  CB %08x DATA %08x REL %08x QUEUE %08x\r\n", (u32)req->cb, (u32)req->usrdata, req->relnch, (u32)req->syncqueue);
 //#endif
 		_ipc_spuriousresponsecnt++;
 	}
@@ -406,7 +406,7 @@ static void __ipc_ackhandler(void)
 {
 	u32 ipc_ack;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_ackhandler()\n");
+	exiPrintf("__ipc_ackhandler()\r\n");
 #endif
 	ipc_ack = ((IPC_ReadReg(1)&0x30)|0x02);
 	IPC_WriteReg(1,ipc_ack);
@@ -432,7 +432,7 @@ static void __ipc_interrupthandler(u32 irq,void *ctx)
 {
 	u32 ipc_int;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_interrupthandler(%d)\n",irq);
+	exiPrintf("__ipc_interrupthandler(%d)\r\n",irq);
 #endif
 	ipc_int = IPC_ReadReg(1);
 	if((ipc_int&0x0014)==0x0014) __ipc_replyhandler();
@@ -732,7 +732,7 @@ s32 iosCreateHeap(s32 size)
 	u32 level;
 	u32 ipclo,ipchi;
 #ifdef DEBUG_IPC
-	exiPrintf("iosCreateHeap(%d)\n",size);
+	exiPrintf("iosCreateHeap(%d)\r\n",size);
 #endif
 	_CPU_ISR_Disable(level);
 
@@ -765,7 +765,7 @@ s32 iosCreateHeap(s32 size)
 void* iosAlloc(s32 hid,s32 size)
 {
 #ifdef DEBUG_IPC
-	exiPrintf("iosAlloc(%d,%d)\n",hid,size);
+	exiPrintf("iosAlloc(%d,%d)\r\n",hid,size);
 #endif
 	if(hid<0 || hid>=IPC_NUMHEAPS || size<=0) return NULL;
 	return __lwp_heap_allocate(&_ipc_heaps[hid].heap,size);
@@ -774,7 +774,7 @@ void* iosAlloc(s32 hid,s32 size)
 void iosFree(s32 hid,void *ptr)
 {
 #ifdef DEBUG_IPC
-	exiPrintf("iosFree(%d,0x%p)\n",hid,ptr);
+	exiPrintf("iosFree(%d,0x%p)\r\n",hid,ptr);
 #endif
 	if(hid<0 || hid>=IPC_NUMHEAPS || ptr==NULL) return;
 	__lwp_heap_free(&_ipc_heaps[hid].heap,ptr);
@@ -817,7 +817,6 @@ u32 __IPC_ClntInit(void)
 		// generate a random request magic
 		__ipc_srand(gettick());
 		IPC_REQ_MAGIC = __ipc_rand();
-
 		__IPC_Init();
 
 		_ipc_hid = iosCreateHeap(IPC_HEAP_SIZE);

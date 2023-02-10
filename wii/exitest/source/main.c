@@ -221,10 +221,10 @@ int main(int argc, char **argv) {
         u32 bHeld = PAD_ButtonsHeld(PAD_CHAN0);
         if(bDown & PAD_BUTTON_START) quit(NULL);
         if(bHeld & PAD_TRIGGER_Z) {
-            //for(int i=0; i<300; i++) doUartTest(NULL);
-            doUartTest("boot game\n");
-            doUartTest("Locked cache machine check handler installed\n");
-            doUartTest("ISR[0000] = AABBCCDD 12345678\r\n");
+            doUartTest(NULL);
+            //doUartTest("boot game\n");
+            //doUartTest("Locked cache machine check handler installed\n");
+            //doUartTest("ISR[0000] = AABBCCDD 12345678\r\n");
         }
         if(bDown & PAD_BUTTON_X) {
             speed++;

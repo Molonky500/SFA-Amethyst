@@ -184,9 +184,11 @@ def correctSectionAddrs(header:dict) -> None:
                 sec['addr']   += diff
                 sec['offset'] += diff
                 sec['size']   -= diff
-            if sec['addr'] < 0x80003400:
-                # lol HBC refuses to load such things
-                sec['addr'] = 0x80600000
+            #if sec['addr'] < 0x80003400:
+            #    # lol HBC refuses to load such things
+            #    sec['addr'] = 0x80600000
+            # but we don't need to worry about that, because
+            # HBC isn't loading *this* DOL.
     # for this use case we know no data/bss section needs
     # to be adjusted, so no point doing it
 

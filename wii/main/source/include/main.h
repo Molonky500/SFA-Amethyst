@@ -10,7 +10,14 @@
 #include <stdarg.h>
 #include "gcc-macros.h"
 
-#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)
+//1 = use custom hardware for debug print on real console
+//0 = use "official" UART for Dolphin/real devkit
+#define USE_CUSTOM_GECKO 1
+
+#define DOL_LOAD_ADDR 0x90C00000
+
+//#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)
+#define SET_SCREEN_SOLID_YUV(y,u,v)
 #define SET_DISC_LED(on) _ipcReg[30] = ((on) ? (_ipcReg[30] | 0x20) : (_ipcReg[30] & ~0x20))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -94,6 +101,8 @@ void* checkThreadMain(void *param);
 //debugprint.c
 void osPrintHook(const char *fmt, ...);
 void putHex(char *dst, u32 num);
+void dumpMem(void *addr, uint32_t count);
+void dumpStack();
 
 //dol.c
 void printDolHeader(DolHeader *header);
@@ -144,9 +153,9 @@ void dvd_removeFile(HackDvdOpenFile* file);
 void OSExceptionInit_hook();
 void exceptionHook(u32 *exc_gpr, int code);
 void gameExceptionInit();
-//void gameExceptionHook(int exceptionCode, OSContext *ctx,
-//    uint cause, void *addr);
-void gameExceptionHook();
+void gameExceptionHook(int exceptionCode, OSContext *ctx,
+    uint cause, void *addr);
+void gameBsodHook();
 
 //exi.c
 void exiPuts(const char *str);
@@ -179,6 +188,7 @@ extern vu32 lastIrqCause;
 extern vu32 lastIrqCause2;
 extern vu32 *gameIrqHandlers;
 void gameExtIrqHandler_hook(int irqNo, OSContext *ctx);
+void OSEnableInterrupts_hook();
 void __OSInterruptInit_hook();
 //void* __OSSetInterruptHandler_hook(int irq, void *handler);
 //void* __OSGetInterruptHandler_hook(int irq);

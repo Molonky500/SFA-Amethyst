@@ -1,7 +1,7 @@
 #include "main.h"
 
 void __DVDFSInit_hook(void) {
-    exiPuts("reached __DVDFSInit_hook\n");
+    exiPuts("reached __DVDFSInit_hook\r\n");
 
     //since this is the first thing called back into
     //from the game, this is where we init stuff.
@@ -14,7 +14,7 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
         gameRootDir, path);
     DVD_DPRINT("DVDOpen(\"%s\", %08X)... ", newPath, (u32)info);
     if(!dvdThreadReady) {
-        DVD_DPRINT("wait for DVD...\n");
+        DVD_DPRINT("wait for DVD...\r\n");
         while(!dvdThreadReady);
     }
 
@@ -31,11 +31,11 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
         dvd_removeFile(oldFile);
     }
 
-    DVD_DPRINT("fopen...\n");
+    DVD_DPRINT("fopen...\r\n");
     FILE *file = fopen(newPath, "rb");
 
     int err = errno;
-    DVD_DPRINT("fopen: %08X\n", (u32)file);
+    DVD_DPRINT("fopen: %08X\r\n", (u32)file);
     if(!file) {
         if(abs(err) != ENOENT) {
             printf(" *** ERROR *** DVDOpen(\"%s\", %08X) FAILED: %d\n",
@@ -51,7 +51,7 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     fseek(file, 0, SEEK_END);
     info->length = ftell(file);
     fseek(file, 0, SEEK_SET);
-    DVD_DPRINT("file=0x%08X size=%d\n", (u32)file, info->length);
+    DVD_DPRINT("file=0x%08X size=%d\r\n", (u32)file, info->length);
     dvd_addFile(info, file, path);
     printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
         (u32)info, (u32)file, (u32)info->length);
@@ -67,7 +67,7 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
         return -EINVAL;
     }
     if(!areInterruptsEnabled()) {
-        exiPrintf(" *** %s with interrupts idsabled @%08X\n",
+        exiPrintf(" *** %s with interrupts idsabled @%08X\r\n",
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
     info->cb.state = 2; //wait
@@ -81,7 +81,7 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
 }
 
 int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback) {
-    DVD_DPRINT("DVDCancelAsync(%08X, cb %08X) from %08X < %08X < %08X\n",
+    DVD_DPRINT("DVDCancelAsync(%08X, cb %08X) from %08X < %08X < %08X\r\n",
         (u32)info, (u32)callback,
         (u32)__builtin_extract_return_addr(__builtin_return_address(0)),
         (u32)__builtin_extract_return_addr(__builtin_return_address(1)),
@@ -92,7 +92,7 @@ int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback) {
     //while(DVD_BUSY) OSYieldThread();
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     if(callback) {
-        DVD_DPRINT("DVDCancelAsync callback %08X(0, %08X)\n",
+        DVD_DPRINT("DVDCancelAsync callback %08X(0, %08X)\r\n",
             (u32)callback, (u32)info);
         callback(0, info);
     }
@@ -106,12 +106,12 @@ int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback) {
 s32 DVDReadPrio_hook(DVDFileInfo* info, void* addr,
 s32 length, s32 offset, s32 prio) {
     if(!addr) {
-        printf(" *** ERROR *** DVDReadPrio with NULL address @%08X\n",
+        printf(" *** ERROR *** DVDReadPrio with NULL address @%08X\r\n",
             (u32)RETURN_ADDRESS);
         return false;
     }
     if(!areInterruptsEnabled()) {
-        exiPrintf(" *** %s with interrupts idsabled @%08X\n",
+        exiPrintf(" *** %s with interrupts idsabled @%08X\r\n",
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
     int r = sendReadToDvdThread(info, addr, length,
@@ -124,13 +124,13 @@ s32 length, s32 offset, s32 prio) {
 bool DVDReadAsyncPrio_hook(DVDFileInfo *info, void *addr, int length,
 uint offset, DVDCallback callback, int prio) {
     if(!addr) {
-        printf(" *** ERROR *** DVDReadAsyncPrio with NULL address @%08X\n",
+        printf(" *** ERROR *** DVDReadAsyncPrio with NULL address @%08X\r\n",
             (u32)RETURN_ADDRESS);
         if(callback) callback(-1, info);
         return false;
     }
     if(!areInterruptsEnabled()) {
-        exiPrintf(" *** %s with interrupts idsabled @%08X\n",
+        exiPrintf(" *** %s with interrupts idsabled @%08X\r\n",
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
 

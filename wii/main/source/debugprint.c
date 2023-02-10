@@ -24,6 +24,33 @@ void osPrintHook(const char *fmt, ...) {
     exiPuts(buf);
 
     int len = strlen(buf);
-    if(buf[len-1] != '\n') exiPuts("\n");
+    if(buf[len-1] != '\n') exiPuts("\r\n");
     va_end(args);
+}
+
+void dumpMem(void *addr, uint32_t count) {
+    uint32_t *dumpCode = (uint32_t*)addr;
+    for(uint32_t i=0; i<count / 4; i++) {
+        if((i&3)==0) exiPrintf("%08X: ", (uint32_t)dumpCode);
+        exiPrintf("%08X%s", *(dumpCode++),
+            ((i&3)==3) ? "\r\n" : " ");
+    }
+}
+
+void dumpStack() {
+    char msg[1024];
+    strcpy(msg, "LR = ........ F = ........\r\n");
+    putHex(&msg[ 5], __builtin_return_address(0));
+    putHex(&msg[18], __builtin_frame_address(0)); //stack pointer
+    exiPuts(msg);
+    strcpy(msg, "-> ........ [........]\r\n");
+
+    u32 *sp = (u32*)__builtin_frame_address(0);
+    while((u32)sp >= 0x80000000 && (u32)sp <= 0x93FFFFFF) {
+        putHex(&msg[ 3], sp[1]);
+        putHex(&msg[13], sp);
+        exiPuts(msg);
+        sp = (u32*)*sp;
+    }
+    exiPuts("-- end\r\n");
 }

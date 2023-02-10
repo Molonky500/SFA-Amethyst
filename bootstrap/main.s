@@ -18,7 +18,7 @@ constants:
     .set SP_FLAGS_ADDR,0x18
     .set SP_GPR_SAVE,  0x1C
 
-_start:
+_start: # 803fa480
     # entry point of this file.
     # we patch the game's entry point to this as well
     # so that on Wii we can make up for the init code
@@ -27,7 +27,7 @@ _start:
     # and so that we can grab the args.
     b      _start2
 
-    .long	0x5f617267 # magic to tell the loader to put args here.
+    .long	0x5f617267 # "_arg" magic to tell the loader to put args here.
 __argv:
 	.long 0 # argv magic
 	.long 0 # command line
@@ -51,21 +51,6 @@ _start2:
     # we need to recreate everything up to 0x800031A0
     # since it's clobbered by RevolutionOS
 
-    # copy text0 to where it's supposed to go
-    # because we have to move it to appease HBC loader.
-    # src/dst are adjusted for lwzu
-    lis    r3,  0x8060
-    subi   r3,  r3,  4
-    lis    r4,  0x8000
-    ori    r4,  r4,  0x319C
-    li     r5,  0x2480
-.start2_copy:
-    lwzu   r6,  4(r3)
-    stwu   r6,  4(r4)
-    subi   r5,  r5,  4
-    cmpwi  r5,  0
-    bne    .start2_copy
-
     # reproduce __init_registers here
     lis     r1,  0x803F
     ori     r1,  r1,  0x8478
@@ -73,6 +58,11 @@ _start2:
     ori     r2,  r2,  0x6500
     lis     r13, 0x803E
     ori     r13, r13, 0x31E0
+
+    # store a dummy value at the end of the stack trace
+    lis     r3,  0
+    stw     r3,  0(r1)
+
     CALL    0x80003354 # __init_hardware
 
     li      r0,  -1

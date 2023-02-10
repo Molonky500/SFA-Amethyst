@@ -23,38 +23,46 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
         || (oldOp & ~0x03FFFFFF) == 0x48000000) {
             //replacing a b or bl
             if((u32)trampoline >= 0x80000300) {
-                exiPrintf("Too many trampolines (%08X)\n", addr);
-                while(1);
+                exiPrintf(" *** ERROR *** Too many trampolines (%08X)\r\n", addr);
+                while(1) {
+                    SET_SCREEN_SOLID_YUV(76, 84, 255); //red
+                    udelay(250000);
+                    SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
+                    udelay(250000);
+                }
             }
 
             uint32_t relDest = (uint32_t)trampoline - addr;
             *(uint32_t*)addr = (relDest & 0x03FFFFFC) | (isBl ? 1 : 0) | 0x48000000;
 
-            exiPrintf("trampoline at %08X -> %08X op %08X -> %08X (bl=%d)\n",
+            exiPrintf("trampoline at %08X -> %08X op %08X -> %08X (bl=%d)\r\n",
                 addr, trampoline, oldOp, *(uint32_t*)addr, isBl);
             *(trampoline++) = 0x3D800000 | ((u32)target >> 16); //lis r12, aaaa
             *(trampoline++) = 0x618C0000 | ((u32)target & 0xFFFF); //ori r12, r12, aaaa
             *(trampoline++) = 0x7D8903A6; //mtspr CTR,r12
             *(trampoline++) = 0x4E800420; //bctr
-            DCInvalidateRange((void*)&trampoline[-4], 32);
+            DCStoreRange((void*)&trampoline[-4], 32);
+            ICInvalidateRange((void*)&trampoline[-4], 32);
         }
         else {
-            exiPrintf("direct long jump at %08X (bl=%d)\n",
+            exiPrintf("direct long jump at %08X (bl=%d)\r\n",
                 addr, isBl);
             *(code++) = 0x3D800000 | ((u32)target >> 16); //lis r12, aaaa
             *(code++) = 0x618C0000 | ((u32)target & 0xFFFF); //ori r12, r12, aaaa
             *(code++) = 0x7D8903A6; //mtspr CTR,r12
             *(code++) = 0x4E800420 | (isBl ? 1 : 0); //bctr or bctrl
         }
-        DCInvalidateRange((void*)addr, 32);
+        DCStoreRange((void*)addr, 32);
+        ICInvalidateRange((void*)addr, 32);
     }
     else {
         //make b or bl opcode
         uint32_t relDest = (uint32_t)target - addr;
         *(uint32_t*)addr = (relDest & 0x03FFFFFC) | (isBl ? 1 : 0) | 0x48000000;
-        exiPrintf("patch short jump at 0x%08X op 0x%08X (bl=%d)\n",
+        exiPrintf("patch short jump at 0x%08X op 0x%08X (bl=%d)\r\n",
             addr, *(uint32_t*)addr, isBl);
-        DCInvalidateRange((void*)addr, 32);
+        DCStoreRange((void*)addr, 32);
+        ICInvalidateRange((void*)addr, 32);
     }
 
     //decode original instruction and return original destination
@@ -78,16 +86,25 @@ void doPatches() {
         0x8024f8a8, 0x8024f8d8, 0x8024f998, 0x8024f9cc,
         0x8024fa80, 0x8024fa90, 0x8024fabc, 0x8024fb8c,
         0x8024fc68, 0x8024fde4,
+        //SI
+        0x80251a00, 0x80251b30, 0x80251cc4, 0x80251cfc,
+        0x80251e14, 0x80252064, 0x802522d4, 0x80252384,
+        0x80252464, 0x80252518, 0x80252560, 0x802525c4,
+        0x802525d4, 0x80252614, 0x802526b8, 0x8025272c,
+        0x80252780, 0x802527d0, 0x80252868, 0x8025310c,
         0 //end of list
     };
     for(int i=0; regRemap[i]; i++) {
         u32 op = *(u32*)regRemap[i];
-        if((op & 0xFFFF) != 0xCC00) {
-            exiPrintf(" *** ERROR *** Incorrect entry %08X in regRemap\n",
-                regRemap[i]);
+        if((op & 0xFFFF) == 0xCD00) {
+            //do nothing
+        }
+        else if((op & 0xFFFF) != 0xCC00) {
+            exiPrintf(" *** ERROR *** Incorrect entry %08X in regRemap (%08X)\r\n",
+                regRemap[i], op);
         }
         else *(u32*)regRemap[i] = (op & 0xFFFF0000) | 0xCD00;
-        DCInvalidateRange((void*)regRemap[i], 32);
+        DCStoreRange((void*)regRemap[i], 32);
         ICInvalidateRange((void*)regRemap[i], 32);
     }
 
@@ -96,12 +113,13 @@ void doPatches() {
     hookBranch(0x80246e04, osPrintHook, 0, 0);
     hookBranch(0x802510cc, osPrintHook, 0, 0);
     hookBranch(0x8024091c, OSExceptionInit_hook, 0, 0);
-    //hookBranch(0x80242a10, gameExceptionHook, 0, 0);
-    hookBranch(0x80137df8, gameExceptionHook, 0, 0);
+    hookBranch(0x80242a10, gameExceptionHook, 0, 0);
+    hookBranch(0x80137df8, gameBsodHook, 0, 0);
     hookBranch(0x802406c0, __OSInterruptInit_hook, 1, 0);
     hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0, 0);
     hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0, 0);
     hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0, 0);
+    hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
     hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0, 0);
     hookBranch(0x80015850, DVDRead_hook, 0, 0);
@@ -112,6 +130,7 @@ void doPatches() {
     hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0, 0);
     hookBranch(0x8024afd8, DVDCancelStreamAsync_hook, 0, 0);
     hookBranch(0x80244a58, OSRebootHook, 1, 0);
+
     doDspPatch();
 
     static const u32 patches[] = {
@@ -130,7 +149,7 @@ void doPatches() {
 
         //use the pad3 value to instead store a magic value to
         //tell Amethyst hooks that we're in Wii mode.
-        0x800030e4, 0xACAB7511,
+        //0x800030e4, 0xACAB7511,
 
         //disable some DVD stuff
         //0x802491f4, 0x4E800020, //DVDInit
@@ -159,11 +178,23 @@ void doPatches() {
         //0x8007db24, 0x38600000,
         //0x8007db28, 0x4E800020,
 
+        //force prompt for progressive scan mode
+        //0x80020f44, 0x60000000,
+
+        //joypadDisable = false
+        //enableRumble = true
+        //two padding bytes
+        //0x803dc908, 0x00010000,
+
         0 //end of list
     };
     for(int i=0; patches[i]; i += 2) {
         (*(u32*)patches[i]) = patches[i+1];
-        DCInvalidateRange((void*)patches[i], 32);
+        DCStoreRange((void*)patches[i], 32);
         ICInvalidateRange((void*)patches[i], 32);
     }
+
+    //ICFlashInvalidate();
+    //DCFlashInvalidate();
+    //L2GlobalInvalidate();
 }

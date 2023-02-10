@@ -6,9 +6,10 @@ void OSExceptionInit_hook() {
     //we repurpose the memory for some unused handlers
     //to store our trampolines and such, so we disable
     //the game's original method and install them ourselves.
-    //exiPrintf("%s\n", __FUNCTION__);
+    exiPrintf("%s\r\n", __FUNCTION__);
 
     SET_SCREEN_SOLID_YUV(105, 212, 134); //magenta
+    udelay(500000);
     *(u32*)0x803dddec = 0x80003000; //set exception handler table
     // *(u32*)0x803dde38 = 0x80003040; //set IRQ handler table
 
@@ -43,14 +44,14 @@ void OSExceptionInit_hook() {
         //patch out debugger hook
         patch[0x16] = 0x60000000;
 
-        //80240c90 = OSDefaultExceptionHandler
+        //80240c90 = OSDeIRQ_Disable();faultExceptionHandler
         __OSSetExceptionHandler(i, (void*)0x80240c90);
     }
 
-    DCInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
+    DCFlushRange((void*)0x80000300, 0x80001800 - 0x80000300);
     ICInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
 
-    //exiPrintf("%s done\n", __FUNCTION__);
+    //exiPrintf("%s done\r\n", __FUNCTION__);
 }
 
 void gameExceptionInit() {
@@ -59,13 +60,13 @@ void gameExceptionInit() {
     char path[1024];
     snprintf(path, sizeof(path), "%s/crash.log", gameRootDir);
     crashLog  = fopen(path, "wt");
-    if(crashLog) exiPuts("Opened crashlog file OK\n");
-    else exiPrintf("Open crashlog FAIL: %d\n", errno);
+    if(crashLog) exiPuts("Opened crashlog file OK\r\n");
+    else exiPrintf("Open crashlog FAIL: %d\r\n", errno);
 
     snprintf(path, sizeof(path), "%s/crash.dmp", gameRootDir);
     crashDump = fopen(path, "wb");
-    if(crashDump) exiPuts("Opened crashdump file OK\n");
-    else exiPrintf("Open crashdump FAIL: %d\n", errno);
+    if(crashDump) exiPuts("Opened crashdump file OK\r\n");
+    else exiPrintf("Open crashdump FAIL: %d\r\n", errno);
 }
 
 static const char *excNames[] = {
@@ -88,18 +89,33 @@ void flashDiscLedForever() {
 
 void writeCrashLog(int exceptionCode, OSContext *ctx,
 uint cause, void *addr, u32 msr) {
+    if(!areInterruptsEnabled()) {
+        exiPuts("Can't write crash dump during IRQ\r\n");
+        return;
+    }
     //OSEnableScheduler();
     //OSEnableInterrupts();
     if(crashDump) {
-        exiPuts("Writing crash dump\n");
-        fwrite((void*)0x80000000, 1024, 24*1024, crashDump);
-        fwrite((void*)0x90000000, 1024, 64*1024, crashDump);
-        exiPuts("Wrote crash dump\n");
+        exiPuts("Writing crash dump (8x)");
+        void *addr = (void*)0x80000000;
+        for(int i=0; i<24; i++) {
+            fwrite(addr, 1024, 1024, crashDump);
+            exiPuts(".");
+            addr += 1024*1024;
+        }
+        exiPuts("\r\nWriting crash dump (9x)");
+        addr = (void*)0x90000000;
+        for(int i=0; i<64; i++) {
+            fwrite(addr, 1024, 1024, crashDump);
+            exiPuts(".");
+            addr += 1024*1024;
+        }
+        exiPuts("Wrote crash dump OK\r\n");
         fclose(crashDump);
     }
 
     if(!crashLog) return;
-    exiPuts("Writing crash log\n");
+    exiPuts("Writing crash log\r\n");
     //I don't know why, but this fputs() makes the following
     //fprintf()s work
     fputs("Star Fox Adventures crash log\n", crashLog);
@@ -128,17 +144,11 @@ uint cause, void *addr, u32 msr) {
     fclose(crashLog);
 }
 
-//void gameExceptionHook(int exceptionCode, OSContext *ctx,
-//uint cause, void *addr) {
-void gameExceptionHook() {
+void gameExceptionHook(int exceptionCode, OSContext *ctx,
+uint cause, void *addr) {
     static bool alreadyExc = false;
     if(alreadyExc) flashDiscLedForever();
     alreadyExc = true;
-
-    int exceptionCode = *(s16*)0x803dda40;
-    OSContext *ctx = *(OSContext**)0x803dda3c;
-    uint cause = *(uint*)0x803dda38;
-    void *addr = *(void**)0x803dda34;
 
     u32 msr = mfmsr();
 
@@ -156,11 +166,12 @@ void gameExceptionHook() {
     exiPuts(msg);
 
     if(PTR_VALID(ctx)) {
-        strcpy(msg, "XER=........ SRR0=........ SRR1=........ LR=........\n");
+        strcpy(msg, "XER=........ SRR0=........ [........] SRR1=........ LR=........\n");
         putHex(&msg[ 4], ctx->xer);
         putHex(&msg[18], ctx->srr0);
-        putHex(&msg[32], ctx->srr1);
-        putHex(&msg[44], ctx->lr);
+        if(PTR_VALID(ctx->srr0)) putHex(&msg[28], *(u32*)ctx->srr0);
+        putHex(&msg[43], ctx->srr1);
+        putHex(&msg[55], ctx->lr);
         exiPuts(msg);
     }
     else exiPuts("NO CTX\n");
@@ -195,11 +206,44 @@ void gameExceptionHook() {
 
     writeCrashLog(exceptionCode, ctx, cause, addr, msr);
     dumpGameHeaps();
-    checkIntegrity();
-    SET_SCREEN_SOLID_YUV(76, 84, 255); //red
-    exiPuts("Crash log written OK.\n");
-    flashDiscLedForever();
+    if(areInterruptsEnabled()) checkIntegrity();
 
-    //SYS_ResetSystem(SYS_SHUTDOWN,0,0);
+    u32 srr0 = ctx->srr0 - 128;
+    if(PTR_VALID(srr0)) {
+        strcpy(msg, "SRR0=........\n");
+        putHex(&msg[5], srr0+128);
+        exiPuts(msg);
+        strcpy(msg, "........: ........ ........ ........ ........\n");
+        for(int i=0; i<32; i++) {
+            putHex(&msg[ 0], srr0);
+            putHex(&msg[10], *(u32*)srr0);
+            putHex(&msg[19], *(u32*)(srr0+4));
+            putHex(&msg[28], *(u32*)(srr0+8));
+            putHex(&msg[37], *(u32*)(srr0+12));
+            srr0 += 16;
+            exiPuts(msg);
+        }
+    }
+
+    //SET_SCREEN_SOLID_YUV(76, 84, 255); //red
+    //udelay(500000);
+    //exiPuts("Crash log written OK.\r\n");
+    //flashDiscLedForever();
+
+    exiPuts("Shutting down!\r\n");
+    //STM_ShutdownToStandby();
+    STM_RebootSystem();
     while(1);
+}
+
+void gameBsodHook() {
+    //hook the game's BSOD thread.
+    //this is used later instead of the default handler hooked
+    //by the above function. hooking here instead has the advantage
+    //that we aren't running in an IRQ, so can dump to SD card.
+    int exceptionCode = *(s16*)0x803dda40;
+    OSContext *ctx = *(OSContext**)0x803dda3c;
+    uint cause = *(uint*)0x803dda38;
+    void *addr = *(void**)0x803dda34;
+    gameExceptionHook(exceptionCode, ctx, cause, addr);
 }

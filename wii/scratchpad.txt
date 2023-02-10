@@ -1,0 +1,35 @@
+0x8000C5E8:
+7F84E378 7FE5FB78 38C00000 482662B5
+7C7F1B78 3C1F0001 32323232 32323232
+2E2E2E2E 2E2E2E2E 2B2B2B2B 2B2B2B2B
+27272727 27272727 48266189 38000000
+
+corrupted data is similar to that found at DOL:32C7D4 but this seems to be coincidence
+correct data comes from DOL:8528
+
+DOL CKSUM = 12123BB1
+DOL CKSUM = 0D3A4D93 [00000000]
+correct: 12123bb1
+so this area is getting corrupted when we execute the second stage
+
+now it works with the original game (but doesn't prompt for progressive scan) but instantly dies with patched dol, but checksum is valid. also, sound is bugged, even though we apply the DSP patch.
+also why is main.dol 4.1MB? ton of empty space.
+from 100 - 10000 and 5B5F0 - 410010 are empty
+the .data section is at 410000 in the file for some reason.
+we can improve by changing the load addresses of the segments but it doesn't seem like we can make it much smaller just by reordering.
+got it reasonably small by shrinking them instead.
+
+we might be overflowing stack? or it seems like framebuffer is overlapping things...
+stack is in 9x range, but at some point is changed to 803F8478
+because Amethyst boot does that, copied from original boot code. so that's fine.
+LR = 800234d8 F = 803f7d40
+-> 91189f74 [803f7d40]
+-> 800234d8 [803f8180]
+-> 8002381c [803f8190]
+-> 8001f4b4 [803f81a0] in Light::free (why are we here!?)
+-> edffffff [803f8478]
+-- end
+
+seems like maybe when modified DOL is loaded, some of our patches don't get applied because it's patching a section that was moved?
+or the cache doesn't get flushed. either way, our modified DOL isn't being updated correctly in the build process.
+oh and we don't even need to move the section, because that was only done to appease the HBC loader, but we don't use it for that stage anymore.

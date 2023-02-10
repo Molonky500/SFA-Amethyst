@@ -3,10 +3,10 @@
 typedef u32 mutex_t;
 
 void _FAT_lock_init(mutex_t *mutex) {
-    //printf("%s(%08X)\n", __FUNCTION__, (u32)mutex);
+    //printf("%s(%08X)\r\n", __FUNCTION__, (u32)mutex);
     OSMutex *osm = malloc(sizeof(OSMutex));
     if(!osm) {
-        exiPrintf(" *** ERROR *** %s alloc fail\n", __FUNCTION__);
+        exiPrintf(" *** ERROR *** %s alloc fail\r\n", __FUNCTION__);
         return;
     }
     OSInitMutex(osm);

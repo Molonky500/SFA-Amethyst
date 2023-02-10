@@ -43,13 +43,13 @@ HackDvdOpenFile* dvd_getFileByHandle(FILE *file) {
             return (HackDvdOpenFile*)&dvdOpenFiles[i];
         }
     }
-    exiPrintf(" *** ERROR *** Can't find FILE* %08X!\n", file);
+    exiPrintf(" *** ERROR *** Can't find FILE* %08X!\r\n", file);
     OSUnlockMutex(&dvdFileInfoMutex);
     return NULL;
 }
 HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file, const char *path) {
     if(!file) {
-        exiPuts(" *** ERROR *** adding NULL file!\n");
+        exiPuts(" *** ERROR *** adding NULL file!\r\n");
         while(1);
     }
     OSLockMutex(&dvdFileInfoMutex);
@@ -60,13 +60,13 @@ HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file, const char *path) {
             #if DVD_DEBUG
                 strncpy(dvdOpenFiles[i].path, path, 256);
             #endif
-            DVD_DPRINT("dvd_addFile(%08X, %08X) slot %d %08X\n",
+            DVD_DPRINT("dvd_addFile(%08X, %08X) slot %d %08X\r\n",
                 info, file, i, &dvdOpenFiles[i]);
             OSUnlockMutex(&dvdFileInfoMutex);
             return (HackDvdOpenFile*)&dvdOpenFiles[i];
         }
     }
-    exiPuts(" *** ERROR *** Too many open files!\n");
+    exiPuts(" *** ERROR *** Too many open files!\r\n");
     OSUnlockMutex(&dvdFileInfoMutex);
     return NULL;
 }
@@ -82,7 +82,7 @@ int sendFromDvdThread(HackDvdMsg *msg) {
     OSLockMutex(&dvdMsgMutex);
     int next = (dvdMsgsOutHead + 1) % DVD_MAX_MSGS;
     if(next == dvdMsgsOutTail) {
-        exiPuts(" *** ERROR *** sendFromDvdThread msg overflow\n");
+        exiPuts(" *** ERROR *** sendFromDvdThread msg overflow\r\n");
         OSUnlockMutex(&dvdMsgMutex);
         return -EOVERFLOW;
     }
@@ -93,7 +93,7 @@ int sendFromDvdThread(HackDvdMsg *msg) {
     memcpy(buf, msg, sizeof(HackDvdMsg));
     bool r = OSSendMessage(&hackDvdThreadMailOut, (OSMessage)buf, OS_MESSAGE_NOBLOCK);
     if(!r) {
-        exiPrintf(" *** ERROR *** sendFromDvdThread fail\n");
+        exiPrintf(" *** ERROR *** sendFromDvdThread fail\r\n");
         OSUnlockMutex(&dvdMsgMutex);
         return -EIO;
     }
@@ -118,7 +118,7 @@ int recvToDvdThread(HackDvdMsg **msg, u32 flags) {
         return -EIO;
     }
     *msg = (HackDvdMsg*)m; //m points to buf
-    DVD_DPRINT("recvToDvdThread m=%08X -> %08X\n",
+    DVD_DPRINT("recvToDvdThread m=%08X -> %08X\r\n",
         (u32)m, (u32)*msg);
     dvdMsgsInTail = next;
     OSUnlockMutex(&dvdMsgMutex);
@@ -136,7 +136,7 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
         return -EMFILE;
     }
     #if DVD_DEBUG
-        DVD_DPRINT("DVDRead(f=%08X dst=%08X len=%08X) (%s)\n",
+        DVD_DPRINT("DVDRead(f=%08X dst=%08X len=%08X) (%s)\r\n",
             info, addr, size, file->path);
     #endif
 
@@ -144,10 +144,10 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
     while(nRead < size) {
         DCInvalidateRange(readDest, size-nRead);
         memset(readDest, 0xBBBBBBBB, MIN(DVD_SECTOR_SIZE, size-nRead));
-        DVD_DPRINT("DVD fread(a=%08X s=%08X f=%08X->%08X)\n",
+        DVD_DPRINT("DVD fread(a=%08X s=%08X f=%08X->%08X)\r\n",
             readDest, MIN(DVD_SECTOR_SIZE, size-nRead), file, file->file);
         r = fread(readDest, 1, MIN(DVD_SECTOR_SIZE, size-nRead), file->file);
-        DVD_DPRINT("fread: %d\n", r);
+        DVD_DPRINT("fread: %d\r\n", r);
         if(r <= 0) break;
         DCFlushRange(readDest, r);
 
@@ -164,11 +164,11 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
         }*/
     }
     if(nRead < size) {
-        DVD_DPRINT("DVDRead(%08X): want %d but got %d\n",
+        DVD_DPRINT("DVDRead(%08X): want %d but got %d\r\n",
             file, size, nRead);
     }
     else {
-        DVD_DPRINT("DVDRead(%08X -> %08X): %d: %08X %08X %08X %08X...\n",
+        DVD_DPRINT("DVDRead(%08X -> %08X): %d: %08X %08X %08X %08X...\r\n",
             file, (u32)addr, nRead,
             *(u32*)addr,
             *(u32*)(addr+4),
@@ -184,13 +184,13 @@ void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
     //#endif
     static vu32 canary5 = 0xA55FACE5;
     if(canary1 != 0xFACEB007 || canary2 != 0xABADBABE) {
-        exiPrintf("CANARY FAIL %08X %08X\n", canary1, canary2);
+        exiPrintf("CANARY FAIL %08X %08X\r\n", canary1, canary2);
     }
     if(canary3 != 0xB000B1E5 || canary4 != 0x2D0661E5) {
-        exiPrintf("S-CANARY FAIL %08X %08X\n", canary3, canary4);
+        exiPrintf("S-CANARY FAIL %08X %08X\r\n", canary3, canary4);
     }
     if(canary5 != 0xA55FACE5) {
-        exiPrintf("L-CANARY FAIL %08X\n", canary5);
+        exiPrintf("L-CANARY FAIL %08X\r\n", canary5);
     }
 
     //set alarm again because we don't have OSSetPeriodicAlarm
@@ -213,13 +213,13 @@ void* hackDvdThreadMain(void *param) {
      */
     __UnmaskIrq(IM_PI_ACR);
     OSEnableInterrupts();
-    exiPuts("DVD thread online\n");
+    exiPuts("DVD thread online\r\n");
     registerThreadForDebug(OSGetCurrentThread(), "dvdhack");
 
     if(fatInitDefault()) {
-        exiPrintf("DVD FAT init OK\n");
+        exiPrintf("DVD FAT init OK\r\n");
     }
-    else PANIC("DVD FAT init FAIL\n");
+    else PANIC("DVD FAT init FAIL\r\n");
 
     OSInitMutex(&dvdFileInfoMutex);
     dvdThreadReady = true;
@@ -246,7 +246,7 @@ void* hackDvdThreadMain(void *param) {
 
         SET_DISC_LED(1);
         DVD_BUSY = 1; //DVD drive is busy
-        DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\n", msg->cmd, msg->id);
+        DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\r\n", msg->cmd, msg->id);
 
         switch(msg->cmd) {
             case DVDCMD_SHUTDOWN: {
@@ -261,14 +261,14 @@ void* hackDvdThreadMain(void *param) {
                 uint offset = msg->read.offset;
                 DVDCallback callback = msg->read.callback;
 
-                DVD_DPRINT("DVD thread read f=%08X->%08X o=%08X a=%08X l=%08X (end %08X)\n",
+                DVD_DPRINT("DVD thread read f=%08X->%08X o=%08X a=%08X l=%08X (end %08X)\r\n",
                     file, file->file, offset, addr, length, addr+length);
                 if(!file) break;
 
                 fseek(file->file, offset, SEEK_SET);
                 file->info->cb.offset = offset;
                 int r = _dvdDoRead(file->info, addr, length);
-                DVD_DPRINT("DVD thread res=%d callback %08X\n",
+                DVD_DPRINT("DVD thread res=%d callback %08X\r\n",
                     r, callback);
                 dvdIdle();
 
@@ -284,7 +284,7 @@ void* hackDvdThreadMain(void *param) {
                     mRead.read.prio = msg->read.prio;
                     int err = sendFromDvdThread(&mRead);
                     if(err) {
-                        exiPrintf(" *** ERROR *** sendFromDvdThread: %d\n", err);
+                        exiPrintf(" *** ERROR *** sendFromDvdThread: %d\r\n", err);
                     }
                 }
                 /*if(file->info->cb.callback) {
@@ -296,24 +296,24 @@ void* hackDvdThreadMain(void *param) {
                 }*/
 
                 if(callback) {
-                    DVD_DPRINT("DVD callback for file %08X: %08X(%d, %08X)\n",
+                    DVD_DPRINT("DVD callback for file %08X: %08X(%d, %08X)\r\n",
                         file, callback, r, file->info);
                     callback(r, file->info);
-                    DVD_DPRINT("DVD callback for file %08X done\n", file);
+                    DVD_DPRINT("DVD callback for file %08X done\r\n", file);
                 }
 
-                DVD_DPRINT("DVD thread read done\n");
+                DVD_DPRINT("DVD thread read done\r\n");
                 break;
             }
             default: {
-                exiPrintf(" *** ERROR *** DVD thread unknown cmd %d\n", msg->cmd);
+                exiPrintf(" *** ERROR *** DVD thread unknown cmd %d\r\n", msg->cmd);
                 run = false;
                 break;
             }
         }
         //free(msg);
     }
-    exiPuts("DVD thread shutdown\n");
+    exiPuts("DVD thread shutdown\r\n");
     if(!gIsSystemShuttingDown) {
         HackDvdMsg mShutdown;
         mShutdown.cmd = DVDCMD_SHUTDOWN;
