@@ -44,7 +44,7 @@ void OSExceptionInit_hook() {
         //patch out debugger hook
         patch[0x16] = 0x60000000;
 
-        //80240c90 = OSDeIRQ_Disable();faultExceptionHandler
+        //80240c90 = OSDefaultExceptionHandler
         __OSSetExceptionHandler(i, (void*)0x80240c90);
     }
 
@@ -87,6 +87,29 @@ void flashDiscLedForever() {
     }
 }
 
+void writeMemDump() {
+    if(!crashDump) {
+        exiPuts("No crash dump file\n");
+        return;
+    }
+    exiPuts("Writing crash dump (8x)");
+    void *addr = (void*)0x80000000;
+    for(int i=0; i<24; i++) {
+        fwrite(addr, 1024, 1024, crashDump);
+        exiPuts(".");
+        addr += 1024*1024;
+    }
+    exiPuts("\r\nWriting crash dump (9x)");
+    addr = (void*)0x90000000;
+    for(int i=0; i<64; i++) {
+        fwrite(addr, 1024, 1024, crashDump);
+        exiPuts(".");
+        addr += 1024*1024;
+    }
+    exiPuts("Wrote crash dump OK\r\n");
+    fclose(crashDump);
+}
+
 void writeCrashLog(int exceptionCode, OSContext *ctx,
 uint cause, void *addr, u32 msr) {
     if(!areInterruptsEnabled()) {
@@ -95,25 +118,7 @@ uint cause, void *addr, u32 msr) {
     }
     //OSEnableScheduler();
     //OSEnableInterrupts();
-    if(crashDump) {
-        exiPuts("Writing crash dump (8x)");
-        void *addr = (void*)0x80000000;
-        for(int i=0; i<24; i++) {
-            fwrite(addr, 1024, 1024, crashDump);
-            exiPuts(".");
-            addr += 1024*1024;
-        }
-        exiPuts("\r\nWriting crash dump (9x)");
-        addr = (void*)0x90000000;
-        for(int i=0; i<64; i++) {
-            fwrite(addr, 1024, 1024, crashDump);
-            exiPuts(".");
-            addr += 1024*1024;
-        }
-        exiPuts("Wrote crash dump OK\r\n");
-        fclose(crashDump);
-    }
-
+    writeMemDump();
     if(!crashLog) return;
     exiPuts("Writing crash log\r\n");
     //I don't know why, but this fputs() makes the following
@@ -151,6 +156,7 @@ uint cause, void *addr) {
     alreadyExc = true;
 
     u32 msr = mfmsr();
+    udelay(500000);
 
     char msg[1024];
     strcpy(msg, "ERR ........ ");

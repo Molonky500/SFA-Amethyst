@@ -132,10 +132,32 @@ void checkThreads() {
     }
 }
 
+void checkObjects() {
+    void **pObjs = *(void***)0x803dcb88;
+    int nObjs = *(int*)0x803dcb84;
+    for(int i=0; i<nObjs; i++) {
+        void *obj = pObjs[i];
+        if(!obj) continue;
+        if(!PTR_VALID(obj)) {
+            exiPrintf(" *** ERROR *** invalid objptr %p\n", obj);
+            continue;
+        }
+        float *pos = (float*)(obj + 0xC);
+        if((isnan(pos[0]) || isnan(pos[1]) || isnan(pos[2]))
+        || (isinf(pos[0]) || isinf(pos[1]) || isinf(pos[2]))) {
+            exiPrintf(" *** ERROR *** Obj %p has invalid position\n", obj);
+            pos[0] = 0;
+            pos[1] = 0;
+            pos[2] = 0;
+        }
+    }
+}
+
 void checkIntegrity() {
     checkAlloc();
     checkGameHeaps();
     checkThreads();
+    checkObjects();
 }
 
 void* checkThreadMain(void *param) {

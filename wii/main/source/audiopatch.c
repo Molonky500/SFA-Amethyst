@@ -89,7 +89,72 @@ u32 Dup2Offset) {
 	return;
 }
 
+//this is here because it involves DSP in a way I don't quite understand
+void doCardPatch() {
+    //copied from libogc
+    static u32 _cardunlockdata[] ATTRIBUTE_ALIGN(32) = {
+        0x00000000,0x00000000,0x00000000,0x00000000,
+        0x00000000,0x00000000,0x00000021,0x02ff0021,
+        0x13061203,0x12041305,0x009200ff,0x0088ffff,
+        0x0089ffff,0x008affff,0x008bffff,0x8f0002bf,
+        0x008816fc,0xdcd116fd,0x000016fb,0x000102bf,
+        0x008e25ff,0x0380ff00,0x02940027,0x02bf008e,
+        0x1fdf24ff,0x02403fff,0x00980400,0x009a0010,
+        0x00990000,0x8e0002bf,0x009402bf,0x864402bf,
+        0x008816fc,0xdcd116fd,0x000316fb,0x00018f00,
+        0x02bf008e,0x0380cdd1,0x02940048,0x27ff0380,
+        0x00010295,0x005a0380,0x00020295,0x8000029f,
+        0x00480021,0x8e0002bf,0x008e25ff,0x02bf008e,
+        0x25ff02bf,0x008e25ff,0x02bf008e,0x00c5ffff,
+        0x03403fff,0x1c9f02bf,0x008e00c7,0xffff02bf,
+        0x008e00c6,0xffff02bf,0x008e00c0,0xffff02bf,
+        0x008e20ff,0x03403fff,0x1f5f02bf,0x008e21ff,
+        0x02bf008e,0x23ff1205,0x1206029f,0x80b50021,
+        0x27fc03c0,0x8000029d,0x008802df,0x27fe03c0,
+        0x8000029c,0x008e02df,0x2ece2ccf,0x00f8ffcd,
+        0x00f9ffc9,0x00faffcb,0x26c902c0,0x0004029d,
+        0x009c02df,0x00000000,0x00000000,0x00000000,
+        0x00000000,0x00000000,0x00000000,0x00000000
+    };
+    memcpy(0x8032ebe0, _cardunlockdata, 0x160);
+    DCFlushRange(0x8032ebe0, 0x160);
+}
+
 void doDspPatch() {
     PatchAX_Dsp(0x80330840, 0x5A8, 0x65D, 0x707, 0x8F );
     DCStoreRange(0x80330840, 0x2000);
+	doCardPatch();
+	exiPuts(" *** WROTE DSP PATCH\n");
+}
+
+void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL) {
+	//type: 0: RAM -> ARAM; 1: ARAM -> RAM
+	//exiPrintf("AR DMA RAM:0x%8x %c ARAM:0x%8x len 0x%8x\n", mmaddr,
+	//	type ? '<' : '>', araddr, cntL);
+	int level = OSDisableInterrupts();
+	if(type) { //ARAM to main
+		DCInvalidateRange((void*)mmaddr, cntL);
+		DCFlushRange((void*)(araddr+0x90000000), cntL);
+		memcpy((void*)mmaddr, (void*)(araddr+0x90000000), cntL);
+		DCFlushRange((void*)mmaddr, cntL);
+	}
+	else { //main to ARAM
+		DCFlushRange((void*)mmaddr, cntL);
+		DCInvalidateRange((void*)(araddr+0x90000000), cntL);
+		memcpy((void*)(araddr+0x90000000), (void*)mmaddr, cntL);
+		DCFlushRange((void*)(araddr+0x90000000), cntL);
+	}
+	//we still have to set the registers even though it seems
+	//like they no longer do the actual transfer, since the game
+	//still expects the interrupt.
+	AR_DMA_MMADDR_H = AR_DMA_MMADDR_H & 0xfc00 | (mmaddr >> 0x10);
+	AR_DMA_MMADDR_L = AR_DMA_MMADDR_L & 0x1f | mmaddr;
+	AR_DMA_ARADDR_H = (AR_DMA_ARADDR_H & 0xfc00 | (araddr >> 0x10)) & 0x03FF;
+	AR_DMA_ARADDR_L = AR_DMA_ARADDR_L & 0x1f | araddr;
+	AR_DMA_CNT_H    = (type << 0xf) | AR_DMA_CNT_H & 0x7fff;
+	AR_DMA_CNT_H    = AR_DMA_CNT_H & 0xfc00 | (cntL >> 0x10);
+	AR_DMA_CNT_L    = AR_DMA_CNT_L & 0x1f | cntL;
+	OSRestoreInterrupts(level);
+	//- For AUDIO_DMA_START_HI, only bits 0x03ff can be set on GCN
+	//and 0x1fff on Wii
 }

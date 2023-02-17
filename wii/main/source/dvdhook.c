@@ -53,8 +53,8 @@ bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     fseek(file, 0, SEEK_SET);
     DVD_DPRINT("file=0x%08X size=%d\r\n", (u32)file, info->length);
     dvd_addFile(info, file, path);
-    printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
-        (u32)info, (u32)file, (u32)info->length);
+    //printf("DVDOpen(\"%s\", %08X) => %08X, size %08X\n", path,
+    //    (u32)info, (u32)file, (u32)info->length);
 
     //OSYieldThread();
     return true;
@@ -156,14 +156,32 @@ uint offset, DVDCallback callback, int prio) {
 
 BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
 u32 offset, DVDCallback callback) {
-    callback(0, fInfo);
+    //exiPrintf("DVDPrepareStreamAsync(%p, 0x%X, 0x%X, %p)\n",
+    //    fInfo, length, offset, callback);
+    (*(u8*)0x803dc849) = 0;
     OSYieldThread();
+    if(callback) callback(0, fInfo);
     return true;
 }
 
 BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
 DVDCBCallback callback) {
-    callback(0, block);
+    //exiPrintf("DVDCancelStreamAsync(%p, %p)\n",
+    //    block, callback);
     OSYieldThread();
+    if(callback) callback(0, block);
     return true;
+}
+
+BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
+DVDCBCallback callback) {
+    //exiPrintf("DVDStopStreamAtEndAsync(%p, %p)\n",
+    //    block, callback);
+    OSYieldThread();
+    if(callback) callback(0, block);
+    return true;
+}
+
+void AISetStreamPlayState_hook(int param) {
+    //exiPrintf("AISetStreamPlayState(%d)\n", param);
 }

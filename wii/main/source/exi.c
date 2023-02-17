@@ -8,6 +8,7 @@ void exiPuts(const char *str) {
      */
     //LWP_MutexLock(exiMutex);
     u32 irq = IRQ_Disable();
+    memset(dmaBuf, 0, sizeof(dmaBuf));
 
     //0x800400 is address for UART.
     //high bit indicates write.
@@ -95,6 +96,7 @@ void exiPuts(const char *str) {
             (1 << 13) | //ROMDIS
             //(5 <<  4) | //32MHz
             (0 <<  4) | //1MHz
+            //(4 <<  4) | //16MHz
         #if USE_CUSTOM_GECKO
             (1 <<  7); //device 0 (Gecko)
         #else
@@ -129,7 +131,7 @@ void exiPrintInit() {
     //_exiReg[0] = (vu32)0xCD006800; //channel 0
     while(_exiReg[3] & 1); //wait for TSTART
     _exiReg[3] = 0;
-    (*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
+    //(*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
     IRQ_Restore(irq);
     exiPuts("EXI init OK\r\n");
 }

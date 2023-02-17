@@ -749,13 +749,19 @@ s32 iosCreateHeap(s32 size)
 	ipclo = (((u32)IPC_GetBufferLo()+0x1f)&~0x1f);
 	ipchi = (u32)IPC_GetBufferHi();
 	free = (ipchi - (ipclo + size));
-	if(free<0) return IPC_ENOMEM;
+	if(free<0) {
+		exiPrintf(" *** iosCreateHeap(%d) failed (line %d)\n", size, __LINE__);
+		return IPC_ENOMEM;
+	}
 
 	_ipc_heaps[i].membase = (void*)ipclo;
 	_ipc_heaps[i].size = size;
 
 	ret = __lwp_heap_init(&_ipc_heaps[i].heap,(void*)ipclo,size,PPC_CACHE_ALIGNMENT);
-	if(ret<=0) return IPC_ENOMEM;
+	if(ret<=0) {
+		exiPrintf(" *** iosCreateHeap(%d) failed (line %d)\n", size, __LINE__);
+		return IPC_ENOMEM;
+	}
 
 	IPC_SetBufferLo((void*)(ipclo+size));
 	_CPU_ISR_Restore(level);
@@ -855,10 +861,14 @@ s32 IOS_Open(const char *filepath,u32 mode)
 
 	//exiPrintf("%s(%s, %08X)\n", __FUNCTION__, filepath, mode);
 	if(filepath==NULL) return IPC_EINVAL;
+	/*if(!PTR_VALID(filepath)) {
+		exiPrintf(" *** ERROR *** Invalid IOS_Open(%p)\n", filepath);
+		*(u32*)0 = 0;
+	}*/
 
 	req = __ipc_allocreq();
 	if(req==NULL) {
-		//exiPrintf("alloc failed\n");
+		exiPrintf("%s: alloc failed\n", __FUNCTION__);
 		return IPC_ENOMEM;
 	}
 
@@ -871,9 +881,9 @@ s32 IOS_Open(const char *filepath,u32 mode)
 	req->open.filepath	= (char*)MEM_VIRTUAL_TO_PHYSICAL(filepath);
 	req->open.mode		= mode;
 
-	//exiPrintf("__ipc_syncrequest...\n");
+	//exiPrintf("%s: __ipc_syncrequest...\n", __FUNCTION__);
 	ret = __ipc_syncrequest(req);
-	//exiPrintf("__ipc_syncrequest done\n");
+	//exiPrintf("%s: __ipc_syncrequest done\n", __FUNCTION__);
 
 	if(req!=NULL) __ipc_freereq(req);
 	return ret;

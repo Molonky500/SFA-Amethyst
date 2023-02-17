@@ -681,6 +681,7 @@ s32 WPAD_Init(void)
 			__wpdcb[i].thresh.wb = WPAD_THRESH_DEFAULT_BALANCEBOARD;
 			__wpdcb[i].thresh.mp = WPAD_THRESH_DEFAULT_MOTION_PLUS;
 
+			//exiPrintf("Create sound alarm %d\n", i);
 			if (SYS_CreateAlarm(&__wpdcb[i].sound_alarm) < 0)
 			{
 				WPAD_Shutdown();
@@ -689,6 +690,7 @@ s32 WPAD_Init(void)
 			}
 		}
 
+		//exiPrintf("GetPadDevices...\n");
 		if(CONF_GetPadDevices(&__wpad_devs) < 0) {
 			WPAD_Shutdown();
 			_CPU_ISR_Restore(level);
@@ -707,6 +709,7 @@ s32 WPAD_Init(void)
 			return WPAD_ERR_BADCONF;
 		}
 
+		//exiPrintf("Init...\n");
 		__wpads = wiiuse_init(WPAD_MAX_WIIMOTES,__wpad_eventCB);
 		if(__wpads==NULL) {
 			WPAD_Shutdown();
@@ -716,10 +719,13 @@ s32 WPAD_Init(void)
 
 		__wiiuse_sensorbar_enable(1);
 
+		//exiPrintf("BTE_Init...\n");
 		BTE_Init();
 		BTE_SetDisconnectCallback(__wpad_disconnectCB);
+		//exiPrintf("BTE_InitCore...\n");
 		BTE_InitCore(__initcore_finished);
 
+		//exiPrintf("SYS_CreateAlarm...\n");
 		if (SYS_CreateAlarm(&__wpad_timer) < 0)
 		{
 			WPAD_Shutdown();
@@ -731,6 +737,7 @@ s32 WPAD_Init(void)
 
 		tb.tv_sec = 1;
 		tb.tv_nsec = 0;
+		//exiPrintf("SYS_SetPeriodicAlarm...\n");
 		SYS_SetPeriodicAlarm(__wpad_timer,&tb,&tb,__wpad_timeouthandler,NULL);
 		__wpads_inited = WPAD_STATE_ENABLING;
 	}

@@ -67,8 +67,17 @@ void initWiimote() {
     if(triedWiimoteInit) return;
     triedWiimoteInit = true;
 
-    int err = CONF_Init();
-    exiPrintf("\nCONF_Init: %d\n", err);
+    exiPrintf("Init Wiimote...\n");
+    //exiPrintf("BT Reset...\n");
+    //resetBluetooth();
+    //USB_Deinitialize();
+    //exiPrintf("WPAD_Shutdown...\n");
+    //WPAD_Shutdown();
+    //udelay(1000000);
+
+    int err = 0;
+    err = CONF_Init();
+    exiPrintf("CONF_Init: %d\n", err);
     err = WPAD_Init();
     exiPrintf("WPAD_Init: %d\n", err);
     int view_width=640, view_height=480;
@@ -84,7 +93,7 @@ void initWiimote() {
 
 static int prevState = -1;
 static bool checkWpads() {
-    initWiimote();
+    //initWiimote();
     if(!isWiimoteInit) return false;
 
     int err = WPAD_ScanPads();

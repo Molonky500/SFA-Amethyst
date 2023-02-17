@@ -285,7 +285,7 @@ s32 __IOS_LaunchNewIOS(int version)
 
 	// Mask IPC IRQ while we're busy reloading
 	__MaskIrq(IRQ_PI_ACR);
-	irq_handler = IRQ_Free(IRQ_PI_ACR);
+	//irq_handler = IRQ_Free(IRQ_PI_ACR);
 
 #ifdef DEBUG_IOS
 	exiPrintf("Waiting for IOS ...\n");
@@ -312,7 +312,7 @@ s32 __IOS_LaunchNewIOS(int version)
 	exiPrintf("IPC started (%u)\n", counter);
 #endif
 
-	IRQ_Request(IRQ_PI_ACR, irq_handler, NULL);
+	//IRQ_Request(IRQ_PI_ACR, irq_handler, NULL);
     __UnmaskIrq(IRQ_PI_ACR);
 
 	__IPC_Reinitialize();

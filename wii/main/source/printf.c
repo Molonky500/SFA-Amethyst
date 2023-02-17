@@ -141,8 +141,9 @@ static inline void write_str(printf_context *ctxt, const char *str) {
 			p <<= 4;
 		}
 		*(c++) = '>';
-		*(c++) = 0;
-		ctxt->write(ctxt, buf, (c-buf)+1);
+		//*(c++) = 0;
+		*c = 0;
+		ctxt->write(ctxt, buf, (c-buf));
 		return;
 	}
 	int len = strlen(str);
@@ -208,7 +209,7 @@ static inline int write_uint(printf_context *ctxt, char *buf, int base) {
 		ctxt->useZeros     = 0;
 		ctxt->forceDecimal = 0;
 		ctxt->precision    = 0;
-		strncpy(&buf[-5], "(nil)", 6); //strlen("(nil)") = 5, +1 for \0
+		strncpy(&buf[-4], "(nil)", 5); //strlen("(nil)") = 5, +1 for \0
 		return 5;
 	}
 	if(val > 0) ctxt->sign = 1;

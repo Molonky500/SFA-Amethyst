@@ -46,6 +46,9 @@ sizeBoot:  .int 0 # size of entire injected section
 # load this DOL in Wii mode instead of GC mode.
 #.long 0x7c13fba6
 
+#.string "Beans beans beans?"
+#.align 4
+
 _start2:
     # new entry point for game.
     # we need to recreate everything up to 0x800031A0
@@ -73,8 +76,10 @@ _start2:
 
     # let's sneak in here to hook DVDInit
     # and set the arena.
-    lis     r3,  0x8024
-    ori     r3,  r3,  0x08BC
+    #lis     r3,  0x8024
+    #ori     r3,  r3,  0x08BC
+    lis     r3,  0x8002
+    ori     r3,  r3,  0x0DB0
     bl      .init_getpc
     .init_getpc: mflr r14
     subi    r14, r14, .init_getpc - _start
@@ -133,9 +138,13 @@ makeBranch:
     or      r6,  r6,  r5
     oris    r6,  r6,  0x4800
     stw     r6,  0(r3)
-    lis     r7,  0
-    dcbi    r7,  r3
-    icbi    r7,  r3
+    #lis     r7,  0
+    #dcbi    r7,  r3
+    #icbi    r7,  r3
+    dcbst   0,   r3
+    icbi    0,   r3
+    isync
+    sync
     blr
 
 # 0x80243fe8 __OSModuleInit start
@@ -231,11 +240,15 @@ DVDInit_hook:
 
 .done:
 endSub:
+    lis     r3,  0x8024
+    ori     r3,  r3,  0x91f4 # jump to DVDInit
+    mtctr   r3
     lwz     r3,  SP_LR_SAVE(r1)
     mtlr    r3   # restore LR
     lmw     r3,  SP_GPR_SAVE(r1)
     addi    r1,  r1,  STACK_SIZE # restore stack ptr
-    blr
+    #blr
+    bctr
 
 panic: # r5 = msg
     # apparently OSPanic doesn't work right in Dolphin or something...

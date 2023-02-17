@@ -69,6 +69,55 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
     return addr + (oldOp & 0x03FFFFFC);
 }
 
+int tempCardHook(int chan, void *work, void *cb) {
+    exiPrintf("CARDMount(%d, %p, %p)\n", chan, work, cb);
+    //initWiimote();
+    return 0;
+}
+
+void wiimoteInitHook() {
+    initWiimote();
+}
+
+void mainLoopHook() {
+    /*static u32 startAddr = 0x91000000;
+    u32 buttons = *(u32*)0x803398e0;
+    if(buttons & 0x8) startAddr -= (8*12); //up
+    if(buttons & 0x4) startAddr += (8*12); //down
+    if(buttons & 0x1) startAddr -= 0x1000; //left
+    if(buttons & 0x2) startAddr += 0x1000; //right
+
+    u32 addr = startAddr;
+    static char msg[4096];
+    strcpy(msg, "\x1B[H");
+    int n = strlen(msg);
+    for(int iLine=0; iLine<12; iLine++) {
+        putHex(&msg[n], addr); n += 8;
+        msg[n++] = ':';
+        msg[n++] = ' ';
+        for(int iCol=0; iCol<8; iCol++) {
+            putHex(&msg[n], *(u32*)addr); n += 8;
+            msg[n++] = ' ';
+            addr++;
+        }
+        msg[n++] = ' ';
+        msg[n++] = '\n';
+    }
+    msg[n++] = 0;
+    exiPuts(msg);*/
+
+    extern u8 __ipcbufferLo[], __ipcbufferHi[];
+    //exiPrintf("IPC BUF %08X %08X  Arena1 %08X %08X  Arena2  %08X %08X\n",
+    //    __ipcbufferLo, __ipcbufferHi,
+    //    SYS_GetArena1Lo(), SYS_GetArena1Hi(),
+    //    _mem2_heap_start, _mem2_heap_end);
+}
+
+void cardUnlock_hook(void *addr, u32 size) {
+    *(u32*)(addr+0xC) = 0x10000000;
+    DCFlushRange(addr, size); //replaced
+}
+
 void doPatches() {
     //remap some HW regs
     u32 regRemap[] = {
@@ -92,6 +141,17 @@ void doPatches() {
         0x80252464, 0x80252518, 0x80252560, 0x802525c4,
         0x802525d4, 0x80252614, 0x802526b8, 0x8025272c,
         0x80252780, 0x802527d0, 0x80252868, 0x8025310c,
+        //DI
+        0x80240d20, 0x80247ae0, 0x80247b34, 0x80247bec,
+        0x80247c28, 0x80247e90, 0x80247fd8, 0x80248288,
+        0x80248308, 0x80248358, 0x802483ec, 0x80248478,
+        0x8024850c, 0x802485a0, 0x80248638, 0x802486d8,
+        0x80248748, 0x80248814, 0x80249260, 0x80249660,
+        0x8024994c, 0x8024a0d8, 0x8024a440, 0x8024a46c,
+        0x8024a4c8, 0x8024a50c, 0x8024a570, 0x8024a59c,
+        0x8024a5d0, 0x8024a5f4, 0x8024a618, 0x8024a63c,
+        0x8024a660, 0x8024a688, 0x8024a840, 0x8024aa0c,
+        0x8024aa1c, 0x8024aa78, 0x8024b2ec, 0x8024b810,
         0 //end of list
     };
     for(int i=0; regRemap[i]; i++) {
@@ -108,7 +168,12 @@ void doPatches() {
         ICInvalidateRange((void*)regRemap[i], 32);
     }
 
+    hookBranch(0x8025fe1c, cardUnlock_hook, 1, 0);
+
+    //hookBranch(0x802623ac, tempCardHook, 0, 0);
     //hookBranch(0x80014f90, padUpdate_hook, 1, 0);
+    //hookBranch(0x800212a4, wiimoteInitHook, 1, 0); //patch unused init func
+    hookBranch(0x80020c60, mainLoopHook, 1, 0); //patch unused main loop func
     hookBranch(0x8007d6dc, osPrintHook, 0, 0);
     hookBranch(0x80246e04, osPrintHook, 0, 0);
     hookBranch(0x802510cc, osPrintHook, 0, 0);
@@ -119,7 +184,7 @@ void doPatches() {
     hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0, 0);
     hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0, 0);
     hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0, 0);
-    hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
+    //hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
     hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0, 0);
     hookBranch(0x80015850, DVDRead_hook, 0, 0);
@@ -129,18 +194,32 @@ void doPatches() {
     hookBranch(0x80248eac, DVDReadAsyncPrio_hook, 0, 0);
     hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0, 0);
     hookBranch(0x8024afd8, DVDCancelStreamAsync_hook, 0, 0);
+    hookBranch(0x8024b094, DVDStopStreamAtEndAsync_hook, 0, 0);
+    hookBranch(0x8024f7d0, AISetStreamPlayState_hook, 0, 0);
     hookBranch(0x80244a58, OSRebootHook, 1, 0);
-
-    doDspPatch();
+    hookBranch(0x8024ffe4, ARStartDMA_Hook, 0, 0);
 
     static const u32 patches[] = {
         //address, value
 
+        //temp stuff to try to fix Wii mode
+        //0x80021074, 0x60000000, //do not init DSP
+        //0x802848d8, 0x4E800020, //do not upload ucode
+        //0x80281044, 0x4E800020, //do not init audio
+        //0x80284670, 0x4E800020, //kill DSP IRQ handler (makes audio a VERY LOUD buzz)
+        //0x8014d4f0, 0x4E800020, //do not update baddies
+        //0x8014d650, 0x60000000, //do not run baddie seqs
+        //0x8014a9f0, 0x4E800020, //disable baddie AI
+        //0x8014a5fc, 0x4E800020, //something to do with jellyfish bug
+        //0x8014a8bc, 0x38600000,
+        //0x8006edcc, 0x4E800020,
+
         //set some header values that apploader should set
-        0x80000000, 0x47534145,
-        0x80000004, 0x30310000,
-        0x80000008, 0x01000000,
-        0x800000f0, 0x01800000,
+        0x80000000, 0x47534145, //disc ID
+        0x80000004, 0x30310000, //disc ID
+        0x80000008, 0x01000000, //streaming params
+        0x800000d0, 0x01000000, //ARAM size
+        0x800000f0, 0x01800000, //simulated RAM size
 
         //0x80245980, 0x4E800020, //OSSetWirelessID
 
@@ -161,6 +240,8 @@ void doPatches() {
         //manually instead.
         0x80250218, 0x4E800020, //__ARCheckSize
         0x803de01c, 0x01000000, //__ARSize
+        0x803de020, 0x01000000, //__ARInternalSize
+        0x803de024, 0x00000000, //__ARExpansionSize
 
         //titleTryLoadSaveFiles
         //0x8007dbc0, 0x38600000,
@@ -178,14 +259,6 @@ void doPatches() {
         //0x8007db24, 0x38600000,
         //0x8007db28, 0x4E800020,
 
-        //force prompt for progressive scan mode
-        //0x80020f44, 0x60000000,
-
-        //joypadDisable = false
-        //enableRumble = true
-        //two padding bytes
-        //0x803dc908, 0x00010000,
-
         0 //end of list
     };
     for(int i=0; patches[i]; i += 2) {
@@ -193,6 +266,10 @@ void doPatches() {
         DCStoreRange((void*)patches[i], 32);
         ICInvalidateRange((void*)patches[i], 32);
     }
+
+    //Nintendont does this. this is AR_REFRESH.
+    //doesn't seem to make much difference though.
+    // *(vu16*)0xCC00501A = 156;
 
     //ICFlashInvalidate();
     //DCFlashInvalidate();

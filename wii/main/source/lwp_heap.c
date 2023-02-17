@@ -98,6 +98,7 @@ void* __lwp_heap_allocate(heap_cntrl *theheap,u32 size)
 	offset = (theheap->pg_size - ((u32)ptr&(theheap->pg_size-1)));
 	ptr += offset;
 	*(((u32*)ptr)-1) = offset;
+	//memset(ptr, 0, size);
 
 	_CPU_ISR_Restore(level);
 

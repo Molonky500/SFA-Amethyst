@@ -389,21 +389,28 @@ void BTE_Init(void)
 	u32 level;
 	struct timespec tb;
 
-	LOG("WPAD: BTE_Init()\n");
+	//exiPuts("WPAD: BTE_Init()\n");
 
 	memset(&btstate,0,sizeof(struct bt_state));
 
+	//exiPuts("hci_init...\n");
 	hci_init();
+	//exiPuts("l2cap_init...\n");
 	l2cap_init();
+	//exiPuts("physbusif_init...\n");
 	physbusif_init();
 
 	OSInitThreadQueue(&btstate.hci_cmdq);
 	OSCreateAlarm(&btstate.timer_svc);
 
 	_CPU_ISR_Disable(level);
+	//exiPuts("bte_reset_all...\n");
 	bte_reset_all();
+	//exiPuts("hci_reset_all...\n");
 	hci_reset_all();
+	//exiPuts("l2cap_reset_all...\n");
 	l2cap_reset_all();
+	//exiPuts("physbusif_reset_all...\n");
 	physbusif_reset_all();
 
 	hci_wlp_complete(acl_wlp_completed);

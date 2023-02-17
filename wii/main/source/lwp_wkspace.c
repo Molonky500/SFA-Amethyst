@@ -44,7 +44,7 @@ void __lwp_wkspace_init(u32 size)
 	u32 arLo,level,dsize;
 
 	// Get current ArenaLo and adjust to 32-byte boundary
-	/*
+
 	_CPU_ISR_Disable(level);
 	arLo = ROUND32UP(SYS_GetArena2Lo());
 	dsize = (size - (arLo - (u32)SYS_GetArena2Lo()));
@@ -53,9 +53,4 @@ void __lwp_wkspace_init(u32 size)
 
 	memset((void*)arLo,0,dsize);
 	__wkspace_heap_size += __lwp_heap_init(&__wkspace_heap,(void*)arLo,dsize,PPC_ALIGNMENT);
-	*/
-	_CPU_ISR_Disable(level);
-	void *ptr = malloc(size);
-	__lwp_heap_init(&__wkspace_heap, ptr, size, PPC_ALIGNMENT);
-	_CPU_ISR_Restore(level);
 }

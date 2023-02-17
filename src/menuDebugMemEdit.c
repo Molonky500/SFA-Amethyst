@@ -2,9 +2,9 @@
  */
 #include "main.h"
 #define HEXEDIT_XPOS  30
-#define HEXEDIT_YPOS 100
+#define HEXEDIT_YPOS  20
 #define HEXEDIT_WIDTH  560
-#define HEXEDIT_HEIGHT 328
+#define HEXEDIT_HEIGHT 428
 #define HEXEDIT_NUM_LINES ((HEXEDIT_HEIGHT / LINE_HEIGHT) - 3)
 #define HEXEDIT_NUM_COLS 8
 static u8 cursorX = 0;
@@ -35,19 +35,29 @@ void hexEdit_draw(Menu *self) {
     sprintf(str, "\eF%s %08X", T("Addr"), hexEditAddr);
     drawSimpleText(str, x, y);
 
-    if(!PTR_VALID(hexEditAddr)) hexEditAddr = RAM_START;
+    //if(!PTR_VALID(hexEditAddr)) hexEditAddr = RAM_START;
 
     u8 *addr = (u8*)hexEditAddr;
     for(int i=0; i < HEXEDIT_NUM_LINES; i++) {
         y += LINE_HEIGHT;
-        sprintf(str, "\eF%04X ", addr);
+        sprintf(str, "\eF%04X  ", addr);
 
+        uint8_t data[HEXEDIT_NUM_COLS];
         for(int j=0; j < HEXEDIT_NUM_COLS; j++) {
-            sprintf(&str[strlen(str)], "%02X ", addr[j]);
+            if(PTR_VALID(&addr[j])) {
+                data[j] = addr[j];
+                sprintf(&str[strlen(str)], "%02X ", data[j]);
+            }
+            else {
+                data[j] = 0;
+                sprintf(&str[strlen(str)], ".. ");
+            }
         }
         int idx = strlen(str);
+        str[idx++] = ' ';
+        str[idx] = 0;
         for(int j=0; j < HEXEDIT_NUM_COLS; j++) {
-            u8 val = addr[j];
+            u8 val = data[j];
             str[idx+j] = (val >= 0x20 && val <= 0x7E) ? val : '.';
             str[idx+j+1] = 0;
         }
@@ -70,7 +80,7 @@ void hexEdit_draw(Menu *self) {
     }
     else {
         x = HEXEDIT_XPOS + (cursorX * w) +
-            ((cursorX / 2) * w) + (w * 9) + 4;
+            ((cursorX / 2) * w) + (w * 10) + 4;
     }
     y = HEXEDIT_YPOS + 5 + (LINE_HEIGHT * self->selected);
     drawBox(x, y, 20, 24, 255, false);
@@ -150,18 +160,19 @@ void hexEdit_run(Menu *self) {
         cursorX++;
         if(cursorX >= (HEXEDIT_NUM_COLS * 2)) cursorX = 0;
     }
-    /* else if(controllerStates[0].triggerLeft > MENU_TRIGGER_THRESHOLD) { //L
-        sel -= 0x100;
-        if(sel <= 0) sel = NUM_GAMEBITS;
-        curMenu->selected = sel - 1;
+    /*else if(controllerStates[0].triggerLeft > MENU_TRIGGER_THRESHOLD) { //L
+        u32 *cardBuf = (u32*)0x803dd044;
+        if(PTR_VALID(*cardBuf)) hexEditAddr = *cardBuf;
+        saveGame_load(0);
+    }*/
+    else if(controllerStates[0].triggerLeft > MENU_TRIGGER_THRESHOLD) { //L
+        hexEditAddr -= 0x1000;
         menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
     }
     else if(controllerStates[0].triggerRight > MENU_TRIGGER_THRESHOLD) { //R
-        sel += 0x100;
-        if(sel >= NUM_GAMEBITS) sel = 0;
-        curMenu->selected = sel;
+        hexEditAddr += 0x1000;
         menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
-    } */
+    }
 }
 
 Menu menuDebugHexEdit = {

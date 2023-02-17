@@ -18,6 +18,11 @@ int main(int argc, char **argv) {
     //else we're launched in Dolphin from command line or something
     //and there's no loader to exit to.
 
+    _ipcReg[0x64>>2]  = 0xFFFFFFFF; //AHBPROT: access everything
+    _ipcReg[0xFC>>2] |= 0x00FF0020; //allow PPC access
+    _ipcReg[0xDC>>2]  = 0xFFFFFFFF; //enable GPIOs
+    _ipcReg[0xC4>>2] |= 0x00FF0020; //set directions
+
     exiPrintInit();
     exiPrintf(" ---- loader2 start ---- \r\nstack: %08X - %08X\r\n",
         &__crt0stack_end, &__crt0stack);
@@ -40,8 +45,7 @@ int main(int argc, char **argv) {
 
     wiiIface.magic = WII_IFACE_MAGIC;
     WII_IFACE_PTR = &wiiIface;
-
-    STM_RegisterEventHandler(MyStmHandler);
+    L2Enhance();
 
     exiPuts("boot game\r\n");
     bootGame(header); //doesn't return
@@ -74,6 +78,8 @@ void MyStmHandler(u32 event) {
 
 void OSRebootHook() {
     gIsSystemShuttingDown = true;
+
+    //writeMemDump();
     exiPuts(isReset ? "*** SYSTEM REBOOTING\r\n" :
         "*** SYSTEM SHUTTING DOWN\r\n");
     OSCancelThread(&hackDvdThread);

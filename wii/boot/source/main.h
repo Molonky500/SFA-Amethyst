@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <wiiuse/wpad.h>
 
 //1 = use custom hardware for debug print on real console
 //0 = use "official" UART for Dolphin/real devkit

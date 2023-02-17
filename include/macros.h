@@ -18,7 +18,10 @@
 #define RAM_SIZE   0x01800000
 #define RAM_END    (RAM_START + RAM_SIZE)
 #define RAM2_START 0x91000000
-#define RAM2_END   0x92FFFFFF
+#define RAM2_END   0x93000000
+//temporarily changed for debug
+//#define RAM2_START 0x90000000
+//#define RAM2_END   0x94000000
 #define PTR_VALID(p) \
     ((((u32)p) >= RAM_START && ((u32)p) < RAM_END) || \
     (IS_WII && (((u32)p) >= RAM2_START && ((u32)p) < RAM2_END)))

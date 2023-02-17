@@ -23,6 +23,8 @@ bool gIsVideoInit = false;
 
 static const char *defaultRootDir = "sd:/apps/SFA";
 
+extern void __exception_closeall ();
+
 int initVideo() {
     /** Init video system.
      *  @returns 0 on success, nonzero on failure.
@@ -34,10 +36,10 @@ int initVideo() {
 	rmode = VIDEO_GetPreferredMode(NULL);
 
     // Allocate memory for the display in the uncached region
-	//xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
     //this is the address the game uses.
     //XXX this is probably unsafe...
-	xfb = MEM_K0_TO_K1(0x8048e480);
+	//xfb = MEM_K0_TO_K1(0x8048e480);
 
     // Initialise the console, required for printf
 	console_init(xfb,20,20,
@@ -98,9 +100,13 @@ int init() {
      *  @returns 0 on success, nonzero on failure.
      */
     int err = 0;
+    //err = IOS_ReloadIOS(36);
     initVideo();
     exiPrintInit();
-    if(!err) err = initFilesystem();
+    if(!err) {
+        //exiPrintf("IOS reload: %d\n", err);
+        err = initFilesystem();
+    }
     return err;
 }
 
@@ -301,6 +307,7 @@ void* loadGame() {
         printf("\x1B[2;0H\x1B[2KLoading: %5.2f%%  ", //home, clear line
             ((float)offset/(float)size) * 100.0f);
         DCFlushRange(dest, r);
+        ICInvalidateRange(dest, r);
         offset += r;
         dest += r;
     }
@@ -379,12 +386,23 @@ __attribute__((noreturn)) void loadAppDol() {
     //delay to let SD tidy itself up
     u64 later = SYS_Time() + 10000000;
     while(SYS_Time() < later);
-    __IOS_ShutdownSubsystems();
+
+    //prevent game crashing on reset
+    //shouldn't be necessary since we do SYS_ResetSystem instead.
+    /*__IOS_ShutdownSubsystems();
     later = SYS_Time() + 10000000;
-    while(SYS_Time() < later);
+    while(SYS_Time() < later);*/
 
     exiPrintf("Exec...\n");
     void (*boot)(void) = (void (*)())header.entryPoint;
+    //DSP_Reset();
+    //DSP_Halt();
+    //Amazingly, this does NOT shut down the system.
+    //Use SYS_POWEROFF for that.
+    //What this does do is un-init all the OS stuff,
+    //to be ready to reboot or load another program.
+    SYS_ResetSystem(SYS_SHUTDOWN, 0, 0);
+    __exception_closeall();
     IRQ_Disable();
     boot(); //shouldn't return
     while(1); //but compiler doesn't believe me
@@ -400,6 +418,9 @@ int main(int argc, char **argv) {
     //delayFrames(60);
     initGameFiles(argc > 0 ? argv[0] : NULL);
     //delayFrames(60);
+    //exiPrintf("WPAD_Init...\n");
+    //err = WPAD_Init();
+    //exiPrintf("WPAD_Init: %d\n", err);
     exiPrintf("Boot game...\r\n");
     //delayFrames(60);
     loadAppDol();

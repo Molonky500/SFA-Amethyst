@@ -18,7 +18,8 @@
 
 //#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)
 #define SET_SCREEN_SOLID_YUV(y,u,v)
-#define SET_DISC_LED(on) _ipcReg[30] = ((on) ? (_ipcReg[30] | 0x20) : (_ipcReg[30] & ~0x20))
+#define SET_DISC_LED(on) _ipcReg[0xC0>>2] = ((on) ? (_ipcReg[0xC0>>2] | 0x20) : (_ipcReg[0xC0>>2] & ~0x20))
+#define SET_DEBUG_PORT(val) _ipcReg[0xC0>>2] = (_ipcReg[0xC0>>2] & ~0xFF0000) | ((val) << 16);
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define PANIC(msg) do { \
@@ -88,8 +89,9 @@ void dumpGameHeaps();
 bool checkAddrInheap(void *addr, u32 len);
 void* _my_sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 
-//audio.c
+//audiopatch.c
 void doDspPatch();
+void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL);
 
 //checkthread.c
 extern OSThread checkThread;
@@ -130,6 +132,9 @@ BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
     u32 offset, DVDCallback callback);
 BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
     DVDCBCallback callback);
+BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
+    DVDCBCallback callback);
+void AISetStreamPlayState_hook(int param);
 
 //dvdthread.c
 extern volatile bool dvdThreadReady;
@@ -153,6 +158,7 @@ void dvd_removeFile(HackDvdOpenFile* file);
 void OSExceptionInit_hook();
 void exceptionHook(u32 *exc_gpr, int code);
 void gameExceptionInit();
+void writeMemDump();
 void gameExceptionHook(int exceptionCode, OSContext *ctx,
     uint cause, void *addr);
 void gameBsodHook();

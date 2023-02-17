@@ -334,18 +334,18 @@ void __MaskIrq(u32 nMask) {
 void OSEnableInterrupts_hook() {
     //This is the game enabling interrupts for the first time.
     //exiPuts("REACHED GAME CODE\r\n");
-    for(uint32_t addr=0x80000000; addr<0x80001800; addr += 0x100) {
-        exiPuts("\r\n");
-        dumpMem((void*)addr, 32);
-    }
-    dumpMem(0x80056140, 32);
-    _ipcReg[9] = 0; //disable VI forced blank
-    _viReg[1] = 0; //unsure, but official code does it on reset
-    _viReg[0] = 0; //reset
+    //for(uint32_t addr=0x80000000; addr<0x80001800; addr += 0x100) {
+    //    exiPuts("\r\n");
+    //    dumpMem((void*)addr, 32);
+    //}
+    //dumpMem(0x80056140, 32);
+    //_ipcReg[9] = 0; //disable VI forced blank
+    //_viReg[1] = 0; //unsure, but official code does it on reset
+    //_viReg[0] = 0; //reset
     //_viReg[0x1B] = 1; //progressive scan
-    exiPuts("About to enable interrupts\r\n");
+    //exiPuts("About to enable interrupts\r\n");
     OSEnableInterrupts();
-    exiPuts("Returned from OSEnableInterrupts\r\n");
+    //exiPuts("Returned from OSEnableInterrupts\r\n");
 }
 
 void __OSInterruptInit_hook() {

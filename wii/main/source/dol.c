@@ -28,9 +28,11 @@ void loadDolFromMemory(DolHeader *header) {
     //printDolHeader(header);
 
     void *data = (void*)header;
+    memset(0x80003F00, 0, 0x81800000-0x80003F00);
 
     exiPrintf("Init bss    .................. -> %8X..%8X [%6X]\r\n",
-        header->bssAddr, header->bssSize);
+        header->bssAddr, header->bssAddr+header->bssSize,
+        header->bssSize);
     memset((void*)header->bssAddr, 0, header->bssSize);
     DCStoreRange((void*)header->bssAddr, header->bssSize);
     ICInvalidateRange((void*)header->bssAddr, header->bssSize);
@@ -81,4 +83,6 @@ void loadDolFromMemory(DolHeader *header) {
         STM_RebootSystem();
         while(1);
     }
+
+    doDspPatch();
 }

@@ -59,11 +59,13 @@ void* _my_sbrk_r( struct _reent *ptr, ptrdiff_t incr) {
 
     char *newEnd = _mem2_heap_start + incr;
     if(newEnd > (char*)_arena2_max) {
+        exiPrintf("sbrk(%p, 0x%x): ENOMEM\n", ptr, incr);
         ptr->_errno = ENOMEM;
         result = (char*)-1;
     }
     else if(newEnd < (char*)_arena2_min) {
         //freeing more than was allocated
+        exiPrintf("sbrk(%p, 0x%x): EINVAL\n", ptr, incr);
         ptr->_errno = EINVAL;
         result = (char*)-1;
     }
