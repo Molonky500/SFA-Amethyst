@@ -59,6 +59,7 @@ void playStream_hook() {
 void mainLoopUpdateStream_hook() {
 	void (*origFunc)() = 0x8000d55c;
 	origFunc();
+	dvdDoPendingCallbacks();
 
 	if(pendingCallback) {
 		//avoid race condition by not calling this right away.

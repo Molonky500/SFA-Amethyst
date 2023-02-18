@@ -48,6 +48,7 @@ extern int _argc;
 
 #define IPC_QUEUE_MAX 256
 #define USB_ALIGN __attribute__ ((aligned(32)))
+#define DVD_MAX_CANCEL_CALLBACKS 64
 
 #include "asminline.h"
 #include "lwpnode.h"
@@ -141,6 +142,7 @@ s32 DVDReadPrio_hook(DVDFileInfo* file, void* addr,
     s32 length, s32 offset, s32 prio);
 bool DVDReadAsyncPrio_hook(DVDFileInfo *file, void *addr, int length,
     uint offset, DVDCallback callback, int prio);
+void dvdDoPendingCallbacks();
 
 //dvdthread.c
 extern volatile bool dvdThreadReady;
