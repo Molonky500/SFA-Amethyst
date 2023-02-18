@@ -154,34 +154,4 @@ uint offset, DVDCallback callback, int prio) {
     return (r > 0);
 }
 
-BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
-u32 offset, DVDCallback callback) {
-    //exiPrintf("DVDPrepareStreamAsync(%p, 0x%X, 0x%X, %p)\n",
-    //    fInfo, length, offset, callback);
-    (*(u8*)0x803dc849) = 0;
-    OSYieldThread();
-    if(callback) callback(0, fInfo);
-    return true;
-}
 
-BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
-DVDCBCallback callback) {
-    //exiPrintf("DVDCancelStreamAsync(%p, %p)\n",
-    //    block, callback);
-    OSYieldThread();
-    if(callback) callback(0, block);
-    return true;
-}
-
-BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
-DVDCBCallback callback) {
-    //exiPrintf("DVDStopStreamAtEndAsync(%p, %p)\n",
-    //    block, callback);
-    OSYieldThread();
-    if(callback) callback(0, block);
-    return true;
-}
-
-void AISetStreamPlayState_hook(int param) {
-    //exiPrintf("AISetStreamPlayState(%d)\n", param);
-}

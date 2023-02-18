@@ -1,6 +1,86 @@
 #include "main.h"
 //adapted from http://fileformats.archiveteam.org/wiki/Nintendo_GameCube_/_Wii_ADP
 
+FILE *curStreamFile = NULL;
+
+BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
+u32 offset, DVDCallback callback) {
+    //exiPrintf("DVDPrepareStreamAsync(%p, 0x%X, 0x%X, %p)\n",
+    //    fInfo, length, offset, callback);
+    (*(u8*)0x803dc849) = 0;
+    OSYieldThread();
+    if(callback) callback(0, fInfo);
+    return true;
+}
+
+BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
+DVDCBCallback callback) {
+    //exiPrintf("DVDCancelStreamAsync(%p, %p)\n",
+    //    block, callback);
+    OSYieldThread();
+    if(callback) callback(0, block);
+    return true;
+}
+
+BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
+DVDCBCallback callback) {
+    //exiPrintf("DVDStopStreamAtEndAsync(%p, %p)\n",
+    //    block, callback);
+    OSYieldThread();
+    if(callback) callback(0, block);
+    return true;
+}
+
+void AISetStreamPlayState_hook(int param) {
+    //exiPrintf("AISetStreamPlayState(%d)\n", param);
+}
+
+static bool pendingCallback = false;
+void playStream_hook() {
+	//replaces call to DVDPrepareStreamAsync in streamPlay
+	int streamNo = (*(int*)0x803dc870) - 1;
+
+	StreamsBinEntry *streamsBin = *(StreamsBinEntry**)0x803dc850;
+	StreamsBinEntry *stream = &streamsBin[streamNo];
+	exiPrintf("Playing stream 0x%X: %s\n", streamNo, stream->name);
+
+	char path[256];
+	sprintf(path, "%s/files/streams/%s.adp", gameRootDir, stream->name);
+	curStreamFile = fopen(path, "rb");
+	if(!curStreamFile) {
+		exiPrintf(" *** ERROR *** failed opening: \"%s\"\n", path);
+	}
+
+	//(*(int*)0x803dc868) = streamNo + 1; //curStream
+	// *(int*)0x803dc86c = 1;
+	pendingCallback = true;
+}
+
+void mainLoopUpdateStream_hook() {
+	void (*origFunc)() = 0x8000d55c;
+	origFunc();
+
+	if(pendingCallback) {
+		//avoid race condition by not calling this right away.
+		void (*callback)(int, void*) = 0x8000d5dc;
+		callback(0, NULL);
+		pendingCallback = false;
+	}
+
+	if(!curStreamFile) return;
+
+	float *pStreamPos    = (float*)0x803dc858;
+	float *pStreamEndPos = (float*)0x803dc84c;
+	//exiPrintf("Stream pos %d / %d\n",
+	//	(int)(*pStreamPos), (int)(*pStreamEndPos));
+
+	if(*pStreamPos >= *pStreamEndPos) {
+		exiPuts("Stream finished\n");
+		fclose(curStreamFile);
+		curStreamFile = NULL;
+	}
+}
+
 #if 0
 #define SAMPLES_PER_BLOCK 28
 

@@ -198,6 +198,8 @@ void doPatches() {
     hookBranch(0x8024f7d0, AISetStreamPlayState_hook, 0, 0);
     hookBranch(0x80244a58, OSRebootHook, 1, 0);
     hookBranch(0x8024ffe4, ARStartDMA_Hook, 0, 0);
+    hookBranch(0x8000d528, playStream_hook, 1, 0);
+    hookBranch(0x80009be4, mainLoopUpdateStream_hook, 1, 0);
 
     static const u32 patches[] = {
         //address, value

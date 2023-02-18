@@ -610,7 +610,23 @@ static void printEnvironment() {
     }
 }
 
+static void printTextSeq() {
+    int frame = *(int*)0x803dca10;
+    float curTime = *(float*)0x803dca0c;
+    int curPhrase = *(int*)0x803dca08;
+    int nPhrases = *(int*)0x803dca18;
+    int bIsSeq = *(int*)0x803dc9f0;
+
+    if(bIsSeq) {
+        debugPrintf("Text " DPRINT_FIXED "%3d/%3d" DPRINT_NOFIXED
+            " frame " DPRINT_FIXED "%5d" DPRINT_NOFIXED
+            " time %f\n", curPhrase, nPhrases,
+            frame, curTime);
+    }
+}
+
 static void printObjSeq() {
+    printTextSeq();
     if(curSeqNo) {
         debugPrintf("Seq " DPRINT_FIXED "%02X" DPRINT_NOFIXED
             " %f\n",

@@ -149,6 +149,9 @@ void checkObjects() {
             pos[0] = 0;
             pos[1] = 0;
             pos[2] = 0;
+            pos[3] = 0; //oldPos
+            pos[4] = 0;
+            pos[5] = 0;
         }
     }
 }

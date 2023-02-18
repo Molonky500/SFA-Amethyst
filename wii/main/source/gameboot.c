@@ -45,7 +45,7 @@ void bootGame(DolHeader *header) {
     //boot->consoleType             = 0x10000006;
     boot->arenaHi                 = 0x81800000;
 
-    //reset some hardware (not working?)
+    //reset some hardware
     u32 RESET_BITS =
         (1 << 22) | //DSP (hangs system on boot if we do both DSP resets)
         (1 << 21) | //VI1

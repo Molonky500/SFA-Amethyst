@@ -81,6 +81,7 @@ extern int _argc;
 #include "pad.h"
 #include "../../../../gameWiiIface.h" //oh god
 #include "gamecontrols.h"
+#include "audiostream.h"
 
 int fatInitDefault();
 
@@ -92,6 +93,18 @@ void* _my_sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 //audiopatch.c
 void doDspPatch();
 void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL);
+
+//audiostream.c
+extern FILE *curStreamFile;
+BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
+    u32 offset, DVDCallback callback);
+BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
+    DVDCBCallback callback);
+BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
+    DVDCBCallback callback);
+void AISetStreamPlayState_hook(int param);
+void playStream_hook();
+void mainLoopUpdateStream_hook();
 
 //checkthread.c
 extern OSThread checkThread;
@@ -128,13 +141,6 @@ s32 DVDReadPrio_hook(DVDFileInfo* file, void* addr,
     s32 length, s32 offset, s32 prio);
 bool DVDReadAsyncPrio_hook(DVDFileInfo *file, void *addr, int length,
     uint offset, DVDCallback callback, int prio);
-BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
-    u32 offset, DVDCallback callback);
-BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,
-    DVDCBCallback callback);
-BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
-    DVDCBCallback callback);
-void AISetStreamPlayState_hook(int param);
 
 //dvdthread.c
 extern volatile bool dvdThreadReady;
