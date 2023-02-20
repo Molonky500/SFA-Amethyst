@@ -116,7 +116,7 @@ int recvFromDvdThread(HackDvdMsg **msg, u32 flags) {
 
 int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
 int offset, DVDCallback callback, int prio, bool async) {
-    DVD_BUSY = 1;
+    //DVD_BUSY = 1;
     HackDvdMsg msg;
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     msg.cmd = DVDCMD_READ;

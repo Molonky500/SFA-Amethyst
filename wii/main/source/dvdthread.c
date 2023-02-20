@@ -177,7 +177,7 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
         readDest += r;
         info->cb.offset += r;
         //the game dislikes us reading too fast
-        //OSYieldThread();
+        OSYieldThread();
 
         /*if(OSGetCurrentThread() == &hackDvdThread) {
             DVD_DPRINT("DVD thread pause, q=%08X\n", dvdThreadQueue);
@@ -237,7 +237,7 @@ void dvdIdle() {
 void* hackDvdThreadMain(void *param) {
     /** Main thread for async DVD emulation.
      */
-    __UnmaskIrq(IM_PI_ACR);
+    __UnmaskIrq(IM_PI_ACR); //enable IOS IPC
     OSEnableInterrupts();
     exiPuts("DVD thread online\r\n");
     registerThreadForDebug(OSGetCurrentThread(), "dvdhack");
@@ -297,7 +297,7 @@ void* hackDvdThreadMain(void *param) {
                 int r = _dvdDoRead(file->info, addr, length);
                 DVD_DPRINT("DVD thread res=%d callback %08X\r\n",
                     r, callback);
-                dvdIdle();
+                //dvdIdle();
 
                 if(!msg->read.async) {
                     HackDvdMsg mRead;
@@ -314,14 +314,6 @@ void* hackDvdThreadMain(void *param) {
                         exiPrintf(" *** ERROR *** sendFromDvdThread: %d\r\n", err);
                     }
                 }
-                /*if(file->info->cb.callback) {
-                    DVD_DPRINT("DVDCB callback for file %08X: %08X(%d, %08X)\n",
-                        file, file->info->cb.callback, r, &file->info->cb);
-                    //void DVDCBCallback(undefined4 param, DVDCommandBlock * block)
-                    file->info->cb.callback(r, &file->info->cb);
-                    DVD_DPRINT("DVDCB callback for file %08X done\n", file);
-                }*/
-
                 if(callback) dvdAddPendingReadCallback(callback, file, r);
 
                 DVD_DPRINT("DVD thread read done\r\n");
