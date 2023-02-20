@@ -294,9 +294,10 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
         }
         if(buf) {
             checkNoOverlap(buf, size);
-            //DPRINT("alloc success, %08X, entry %08X (type=%d prev=%04X stack=%04X next=%04X id=%08X reg=%d)",
+            //DPRINT("alloc success, %08X, entry %08X (type=%d prev=%04X stack=%04X next=%04X id=%08X reg=%d) lr=%08x < %08x < %08x",
             //    buf, entry, entry->type, entry->prev, entry->stack, entry->next,
-            //    entry->mmUniqueIdent, successfulRegion);
+            //    entry->mmUniqueIdent, successfulRegion, lr,
+            //    __builtin_return_address(1), __builtin_return_address(2));
             if((!PTR_VALID(entry)) || (entry->type > 1)) {
                 //sanity check, in case our patch to return the heap entry
                 //doesn't work. XXX why does this happen?
@@ -340,7 +341,7 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
                 }
             }
             if(!doEmergencyFree(count)) break;
-            //OSReport("Emergency free attempt %d OK", count);
+            OSReport("Emergency free attempt %d OK", count);
         }
         count += 1;
     }
@@ -362,7 +363,10 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
 }
 
 void freeHook(void *addr) {
-    //OSReport("free(%08X)\n", addr);
+    //OSReport("free(%08X): %08X < %08X < %08X\n", addr,
+    //    (u32)__builtin_return_address(0),
+    //    (u32)__builtin_return_address(1),
+    //    (u32)__builtin_return_address(2));
     if(!addr) return;
     OSLockMutex(&allocMutex);
 
@@ -408,8 +412,8 @@ void freeHook(void *addr) {
 
 //XXX move this
 Texture* textureLoadHook(int id, int bJustCheckIfLoaded) {
-    DPRINT("textureLoad(0x%04X, %d)\n",
-        id < 0 ? -id : id, bJustCheckIfLoaded);
+    //DPRINT("textureLoad(0x%04X, %d)\n",
+    //    id < 0 ? -id : id, bJustCheckIfLoaded);
     Texture* result = textureLoad(id, bJustCheckIfLoaded);
     if(bJustCheckIfLoaded) return result;
     if(!PTR_VALID(result)) {

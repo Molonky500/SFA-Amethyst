@@ -203,7 +203,7 @@ uint cause, void *addr) {
 
         u32 *sp = (u32*)gpr[1];
         strcpy(msg, "-> ........\n");
-        while((u32)sp >= 0x80000000 && (u32)sp <= 0x93FFFFFF) {
+        while(PTR_VALID(sp)) {
             putHex(&msg[3], sp[1]);
             exiPuts(msg);
             sp = (u32*)*sp;
@@ -211,7 +211,7 @@ uint cause, void *addr) {
     }
 
     writeCrashLog(exceptionCode, ctx, cause, addr, msr);
-    dumpGameHeaps();
+    //dumpGameHeaps();
     if(areInterruptsEnabled()) checkIntegrity();
 
     u32 srr0 = ctx->srr0 - 128;

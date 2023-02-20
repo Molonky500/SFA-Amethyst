@@ -118,6 +118,17 @@ void cardUnlock_hook(void *addr, u32 size) {
     DCFlushRange(addr, size); //replaced
 }
 
+void updateFrameTime_hook(void *param) {
+    void (*origFunc)(void*) = 0x80245ba4; //OSResetStopwatch
+    origFunc(param);
+    //ensure msecsThisFrame is > 0
+    float *msecs = (float*)0x803dccc0;
+    if(*msecs < 8.0f) {
+        exiPrintf("Previous frame took less than 8ms\n");
+        *msecs = 8.0f;
+    }
+}
+
 void doPatches() {
     //remap some HW regs
     u32 regRemap[] = {
@@ -200,6 +211,9 @@ void doPatches() {
     hookBranch(0x8024ffe4, ARStartDMA_Hook, 0, 0);
     hookBranch(0x8000d528, playStream_hook, 1, 0);
     hookBranch(0x80009be4, mainLoopUpdateStream_hook, 1, 0);
+    hookBranch(0x80020604, dvdMainLoopHook, 0, 1);
+    hookBranch(0x8025400c, exiInterrupt_hook, 0, 0);
+    hookBranch(0x8004a8d8, updateFrameTime_hook, 1, 0);
 
     static const u32 patches[] = {
         //address, value
@@ -236,6 +250,8 @@ void doPatches() {
         //0x802491f4, 0x4E800020, //DVDInit
         0x802408fc, 0x60000000, //DVDInquiryAsync
         0x80015624, 0x4E800020, //dvdCheckError
+        0x8004a900, 0x38000000, //don't set timeDelta to zero thinking
+            //there's a DVD error message displayed.
 
         //__ARCheckSize probes ARAM to detect size, but this
         //clobbers MEM2, so disable it and set the size

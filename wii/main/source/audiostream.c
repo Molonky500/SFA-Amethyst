@@ -9,7 +9,7 @@ u32 offset, DVDCallback callback) {
     //    fInfo, length, offset, callback);
     (*(u8*)0x803dc849) = 0;
     OSYieldThread();
-    if(callback) callback(0, fInfo);
+    if(callback) dvdAddPendingStreamCallback(callback, fInfo);
     return true;
 }
 
@@ -35,7 +35,6 @@ void AISetStreamPlayState_hook(int param) {
     //exiPrintf("AISetStreamPlayState(%d)\n", param);
 }
 
-static bool pendingCallback = false;
 void playStream_hook() {
 	//replaces call to DVDPrepareStreamAsync in streamPlay
 	int streamNo = (*(int*)0x803dc870) - 1;
@@ -53,21 +52,13 @@ void playStream_hook() {
 
 	//(*(int*)0x803dc868) = streamNo + 1; //curStream
 	// *(int*)0x803dc86c = 1;
-	pendingCallback = true;
+	dvdAddPendingStreamCallback(0x8000d5dc, NULL);
 }
 
 void mainLoopUpdateStream_hook() {
 	void (*origFunc)() = 0x8000d55c;
 	origFunc();
-	dvdDoPendingCallbacks();
-
-	if(pendingCallback) {
-		//avoid race condition by not calling this right away.
-		void (*callback)(int, void*) = 0x8000d5dc;
-		callback(0, NULL);
-		pendingCallback = false;
-	}
-
+	dvdDoPendingStreamCallbacks();
 	if(!curStreamFile) return;
 
 	float *pStreamPos    = (float*)0x803dc858;

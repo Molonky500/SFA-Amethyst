@@ -28,7 +28,7 @@ void loadDolFromMemory(DolHeader *header) {
     //printDolHeader(header);
 
     void *data = (void*)header;
-    memset(0x80003F00, 0, 0x81800000-0x80003F00);
+    //memset(0x80003F00, 0, 0x81800000-0x80003F00);
 
     exiPrintf("Init bss    .................. -> %8X..%8X [%6X]\r\n",
         header->bssAddr, header->bssAddr+header->bssSize,

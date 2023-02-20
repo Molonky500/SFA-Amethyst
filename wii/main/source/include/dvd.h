@@ -22,6 +22,9 @@
 #define DVD_MAX_OPEN_FILES 256
 #define DVD_ALARM_PERIOD OSMillisecondsToTicks(1)
 #define DVD_THREAD_STACK_SIZE 65536
+#define DVD_MAX_READ_CALLBACKS 64
+#define DVD_MAX_CANCEL_CALLBACKS 64
+#define DVD_MAX_STREAM_CALLBACKS 64
 
 typedef void (*DVDCallback)(s32 result, void* fileInfo);
 #define DVD_BUSY (*(vu8*)0x803dc950)
@@ -96,5 +99,21 @@ typedef struct {
         } read;
     };
 } HackDvdMsg;
+
+typedef struct {
+    DVDCallback cb;
+    HackDvdOpenFile *file;
+    int result;
+} DvdPendingReadCb;
+
+typedef struct {
+    DVDCBCallback cb;
+    DVDFileInfo *info;
+} DvdPendingCancelCb;
+
+typedef struct {
+    void *cb;
+    void *param;
+} DvdPendingStreamCb; //used for multiple types
 
 #endif //__DVD_H__

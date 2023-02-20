@@ -80,33 +80,24 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
     return r;
 }
 
-struct {
-    DVDCBCallback cb;
-    DVDFileInfo *info;
-} pendingCancelCb[DVD_MAX_CANCEL_CALLBACKS];
-int nPendingCancelCbs = 0;
-
 int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback) {
     DVD_DPRINT("DVDCancelAsync(%08X, cb %08X) from %08X < %08X < %08X\r\n",
         (u32)info, (u32)callback,
         (u32)__builtin_extract_return_addr(__builtin_return_address(0)),
         (u32)__builtin_extract_return_addr(__builtin_return_address(1)),
         (u32)__builtin_extract_return_addr(__builtin_return_address(2)));
+    if(!info) {
+        exiPrintf(" *** ERROR *** DVDCancelAsync(NULL)\n");
+        dumpStack();
+        //dvdAddPendingCancelCallback(callback, info);
+        return 0;
+    }
     info->cb.state = 10; //cancelled
 
     //deadlocks if called from a callback
     //while(DVD_BUSY) OSYieldThread();
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
-    if(callback) {
-        if(nPendingCancelCbs >= DVD_MAX_CANCEL_CALLBACKS) {
-            exiPuts(" *** ERROR *** too many pending DVD cancel callbacks\n");
-        }
-        else {
-            pendingCancelCb[nPendingCancelCbs].cb = callback;
-            pendingCancelCb[nPendingCancelCbs].info = info;
-            nPendingCancelCbs++;
-        }
-    }
+    if(callback) dvdAddPendingCancelCallback(callback, info);
     else if(file) {
         fclose(file->file);
         dvd_removeFile(file);
@@ -135,7 +126,7 @@ s32 length, s32 offset, s32 prio) {
 bool DVDReadAsyncPrio_hook(DVDFileInfo *info, void *addr, int length,
 uint offset, DVDCallback callback, int prio) {
     if(!addr) {
-        printf(" *** ERROR *** DVDReadAsyncPrio with NULL address @%08X\r\n",
+        exiPrintf(" *** ERROR *** DVDReadAsyncPrio with NULL address @%08X\r\n",
             (u32)RETURN_ADDRESS);
         if(callback) callback(-1, info);
         return false;
@@ -159,27 +150,14 @@ uint offset, DVDCallback callback, int prio) {
     int r = sendReadToDvdThread(info, addr, length,
         offset, callback, prio, true);
     if(r <= 0) {
-        printf(" *** ERROR *** DVDReadAsyncPrio send failed: %d\n", r);
+        exiPrintf(" *** ERROR *** DVDReadAsyncPrio send failed: %d\n", r);
     }
     OSYieldThread();
     return (r > 0);
 }
 
-void dvdDoPendingCallbacks() {
-    while(nPendingCancelCbs) {
-        DVDCBCallback cb = pendingCancelCb[0].cb;
-        DVDFileInfo *info = pendingCancelCb[0].info;
-        DVD_DPRINT("DVDCancelAsync callback %08X(0, %08X)\r\n",
-            (u32)cb, (u32)info);
-        cb(0, info);
-
-        HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
-        if(file) {
-            fclose(file->file);
-            dvd_removeFile(file);
-        }
-
-        memcpy(&pendingCancelCb[1], &pendingCancelCb[0], sizeof(pendingCancelCb[0]));
-        nPendingCancelCbs--;
-    }
+void dvdMainLoopHook() {
+    dvdDoPendingReadCallbacks();
+    dvdDoPendingCancelCallbacks();
+    __UnmaskIrq(IRQMASK(IRQ_EXI1_EXI) | IRQMASK(IRQ_EXI1_EXT));
 }

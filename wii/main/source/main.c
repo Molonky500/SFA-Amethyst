@@ -82,6 +82,9 @@ void OSRebootHook() {
     //writeMemDump();
     exiPuts(isReset ? "*** SYSTEM REBOOTING\r\n" :
         "*** SYSTEM SHUTTING DOWN\r\n");
+    u32 flags1 = *(u32*)0x803dcc80;
+    u32 flags2 = *(u32*)0x803dcc84;
+    exiPrintf("PI flags: %08X %08X\n", flags1, flags2);
     OSCancelThread(&hackDvdThread);
     SET_SCREEN_SOLID_YUV(106, 139, 94); //teal
     udelay(500000);

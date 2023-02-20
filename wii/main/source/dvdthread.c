@@ -23,6 +23,28 @@ u32 dvdCmdId=0;
 vu32 canary2 = 0xABADBABE;
 static vu32 canary4 = 0x2D0661E5;
 
+void dvdDumpOpenFiles() {
+    if(!OSTryLockMutex(&dvdFileInfoMutex)) {
+        exiPuts("Can't lock dvdFileInfoMutex\n");
+        return;
+    }
+
+    exiPuts("Open files:\n"
+        "  Idx#  FileInfo FILE*     ReadPos  FileSize  Path\n");
+    for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
+        if(dvdOpenFiles[i].info == NULL || dvdOpenFiles[i].file == NULL) continue;
+        FILE *file = dvdOpenFiles[i].file;
+        int pos = ftell(file);
+        fseek(file, 0, SEEK_END);
+        int size = ftell(file);
+        fseek(file, pos, SEEK_SET);
+        exiPrintf("  %4d: %08x %08x: %8x/%8x: %s\n",
+            i, dvdOpenFiles[i].info, file, pos, size,
+            dvdGetFilePath(&dvdOpenFiles[i]));
+    }
+    OSUnlockMutex(&dvdFileInfoMutex);
+}
+
 HackDvdOpenFile* dvd_getFileByInfo(DVDFileInfo *info) {
     OSLockMutex(&dvdFileInfoMutex);
     for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
@@ -143,7 +165,7 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
     void *readDest = addr;
     while(nRead < size) {
         DCInvalidateRange(readDest, size-nRead);
-        memset(readDest, 0xBBBBBBBB, MIN(DVD_SECTOR_SIZE, size-nRead));
+        //memset(readDest, 0xBBBBBBBB, MIN(DVD_SECTOR_SIZE, size-nRead));
         DVD_DPRINT("DVD fread(a=%08X s=%08X f=%08X->%08X)\r\n",
             readDest, MIN(DVD_SECTOR_SIZE, size-nRead), file, file->file);
         r = fread(readDest, 1, MIN(DVD_SECTOR_SIZE, size-nRead), file->file);
@@ -179,9 +201,7 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
 }
 
 void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
-    //#if DVD_DEBUG
-    //    exiPrintf("DVD alarm CB, q=%08X\n", dvdThreadQueue);
-    //#endif
+    //DVD_DPRINT("DVD alarm CB, q=%08X\n", dvdThreadQueue);
     static vu32 canary5 = 0xA55FACE5;
     if(canary1 != 0xFACEB007 || canary2 != 0xABADBABE) {
         exiPrintf("CANARY FAIL %08X %08X\r\n", canary1, canary2);
@@ -193,19 +213,25 @@ void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
         exiPrintf("L-CANARY FAIL %08X\r\n", canary5);
     }
 
+    //dvdDoPendingReadCallbacks();
+    //dvdDoPendingCancelCallbacks();
+
     //set alarm again because we don't have OSSetPeriodicAlarm
     OSSetAlarm(&dvdThreadAlarm, DVD_ALARM_PERIOD,
         dvdThreadAlarmCb);
     OSWakeupThread(&dvdThreadQueue);
 }
 
-void dvdIdle() {
-    int wasBusy = DVD_BUSY;
+void _updateBusyFlag() {
+    bool busy = dvdAnyPendingCallbacks();
     DVD_BUSY = 0;
-    SET_DISC_LED(0);
+    SET_DISC_LED(busy);
+}
+
+void dvdIdle() {
+    _updateBusyFlag();
     OSYieldThread();
-    DVD_BUSY = wasBusy;
-    SET_DISC_LED(wasBusy);
+    _updateBusyFlag();
 }
 
 void* hackDvdThreadMain(void *param) {
@@ -222,6 +248,7 @@ void* hackDvdThreadMain(void *param) {
     else PANIC("DVD FAT init FAIL\r\n");
 
     OSInitMutex(&dvdFileInfoMutex);
+    OSInitMutex(&dvdPendingReadCbMutex);
     dvdThreadReady = true;
 
     int err = 0;
@@ -233,8 +260,8 @@ void* hackDvdThreadMain(void *param) {
             #if DVD_DEBUG
                 //exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
-            SET_DISC_LED(0);
-            DVD_BUSY = 0;
+            //SET_DISC_LED(0);
+            //DVD_BUSY = 0;
             dvdIdle();
             OSSleepThread(&dvdThreadQueue);
             err = recvToDvdThread(&msg, OS_MESSAGE_NOBLOCK);
@@ -244,8 +271,8 @@ void* hackDvdThreadMain(void *param) {
             #endif
         }
 
-        SET_DISC_LED(1);
-        DVD_BUSY = 1; //DVD drive is busy
+        //SET_DISC_LED(1);
+        //DVD_BUSY = 1; //DVD drive is busy
         DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\r\n", msg->cmd, msg->id);
 
         switch(msg->cmd) {
@@ -295,12 +322,7 @@ void* hackDvdThreadMain(void *param) {
                     DVD_DPRINT("DVDCB callback for file %08X done\n", file);
                 }*/
 
-                if(callback) {
-                    DVD_DPRINT("DVD callback for file %08X: %08X(%d, %08X)\r\n",
-                        file, callback, r, file->info);
-                    callback(r, file->info);
-                    DVD_DPRINT("DVD callback for file %08X done\r\n", file);
-                }
+                if(callback) dvdAddPendingReadCallback(callback, file, r);
 
                 DVD_DPRINT("DVD thread read done\r\n");
                 break;

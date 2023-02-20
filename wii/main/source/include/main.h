@@ -48,7 +48,6 @@ extern int _argc;
 
 #define IPC_QUEUE_MAX 256
 #define USB_ALIGN __attribute__ ((aligned(32)))
-#define DVD_MAX_CANCEL_CALLBACKS 64
 
 #include "asminline.h"
 #include "lwpnode.h"
@@ -109,6 +108,7 @@ void mainLoopUpdateStream_hook();
 
 //checkthread.c
 extern OSThread checkThread;
+PrevThreadState* findThread(OSThread *thread);
 void registerThreadForDebug(OSThread *thread, const char *name);
 void initCheckThread();
 void checkIntegrity();
@@ -132,6 +132,21 @@ int sendToDvdThread(HackDvdMsg *msg);
 int recvFromDvdThread(HackDvdMsg **msg, u32 flags);
 int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
     int offset, DVDCallback callback, int prio, bool async);
+char* dvdGetFilePath(HackDvdOpenFile *file);
+
+//dvdcallbacks.c
+extern OSMutex dvdPendingReadCbMutex;
+void dvdDumpPendingReadCallbacks();
+void dvdDoPendingReadCallbacks();
+void dvdAddPendingReadCallback(DVDCallback callback,
+    HackDvdOpenFile *file, int result);
+void dvdAddPendingStreamCallback(void *cb, void *param);
+void dvdDumpPendingStreamCallbacks();
+void dvdDoPendingStreamCallbacks();
+void dvdAddPendingCancelCallback(DVDCBCallback *callback, DVDFileInfo *info);
+void dvdDumpPendingCancelCallbacks();
+void dvdDoPendingCancelCallbacks();
+bool dvdAnyPendingCallbacks();
 
 //dvdhook.c
 void __DVDFSInit_hook(void);
@@ -142,7 +157,7 @@ s32 DVDReadPrio_hook(DVDFileInfo* file, void* addr,
     s32 length, s32 offset, s32 prio);
 bool DVDReadAsyncPrio_hook(DVDFileInfo *file, void *addr, int length,
     uint offset, DVDCallback callback, int prio);
-void dvdDoPendingCallbacks();
+void dvdMainLoopHook();
 
 //dvdthread.c
 extern volatile bool dvdThreadReady;
@@ -157,6 +172,7 @@ extern OSAlarm dvdThreadAlarm;
 extern u32 dvdCmdId;
 void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx);
 void* hackDvdThreadMain(void *param);
+void dvdDumpOpenFiles();
 HackDvdOpenFile* dvd_getFileByInfo(DVDFileInfo *info);
 HackDvdOpenFile* dvd_getFileByHandle(FILE *file);
 HackDvdOpenFile* dvd_addFile(DVDFileInfo *info, FILE *file, const char *path);
@@ -175,6 +191,7 @@ void gameBsodHook();
 void exiPuts(const char *str);
 void exiPrintf(const char *fmt, ...);
 void exiPrintInit();
+void exiInterrupt_hook();
 
 //gameboot.c
 extern void (*gameEntry)(void);

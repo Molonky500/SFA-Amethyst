@@ -194,4 +194,11 @@ void OSInitCond(OSCond* cond);
 void OSWaitCond(OSCond* cond, OSMutex* mutex);
 void OSSignalCond(OSCond* cond);
 
+typedef struct {
+    OSThread *thread;
+    u32 stackTop;
+    u32 stackBot;
+    const char *name;
+} PrevThreadState;
+
 #endif //__THREAD_H__

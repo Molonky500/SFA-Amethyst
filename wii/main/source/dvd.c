@@ -166,3 +166,10 @@ int offset, DVDCallback callback, int prio, bool async) {
     return length;
 }
 
+char* dvdGetFilePath(HackDvdOpenFile *file) {
+    #if DVD_DEBUG
+        return file->path;
+    #else
+        return "(no path info)";
+    #endif
+}

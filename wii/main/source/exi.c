@@ -132,6 +132,48 @@ void exiPrintInit() {
     while(_exiReg[3] & 1); //wait for TSTART
     _exiReg[3] = 0;
     //(*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
+
+    //enable INT interrupt for custom Gecko thing.
+    static volatile u32 *exi = (volatile u32*)0xCD006814; //channel 1
+    exi[0] |= (1 << 0);
+
     IRQ_Restore(irq);
     exiPuts("EXI init OK\r\n");
+}
+
+void exiInterrupt_hook() {
+    SET_DEBUG_PORT(0xEE);
+    exiPuts(" *** EXI INTERRUPT\n");
+
+    //dump threads
+    OSThread *thread = *(OSThread**)0x800000dc;
+    while(thread) {
+        u32 stackTop = (u32)thread->stackBase; //high addr
+        u32 stackBot = (u32)thread->stackEnd;  //low  addr
+        u32 *sp      = (u32*)thread->context.gpr[1];
+        u32 pc       = (u32)thread->context.srr0;
+
+        const char *name = "unknown";
+        PrevThreadState *pState = findThread(thread);
+        if(pState) {
+            if(pState->name != NULL) name = pState->name;
+        }
+        exiPrintf("Thread %08X (%s): PC=%08x\n", thread, name, pc);
+        for(int i=0; i<32; i += 4) {
+            for(int j=0; j<4; j++) {
+                exiPrintf("  r%2d: %08x", (i+j), (u32)thread->context.gpr[i+j]);
+            }
+            exiPrintf("\n");
+        }
+        while(PTR_VALID(sp)) {
+            exiPrintf(" > %08x\n", sp[1]);
+            sp = (u32*)*sp;
+        }
+        thread = thread->linkActive.next;
+    }
+    dvdDumpPendingReadCallbacks();
+    dvdDumpPendingCancelCallbacks();
+    dvdDumpPendingStreamCallbacks();
+    dvdDumpOpenFiles();
+    writeMemDump();
 }

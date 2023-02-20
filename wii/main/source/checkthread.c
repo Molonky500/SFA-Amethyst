@@ -8,16 +8,9 @@
 OSThread checkThread;
 static u8 checkThreadStack[CHECK_THREAD_STACK_SIZE];
 
-typedef struct {
-    OSThread *thread;
-    u32 stackTop;
-    u32 stackBot;
-    const char *name;
-} PrevThreadState;
-
 PrevThreadState prevThreadState[MAX_THREADS_CHECK];
 
-static PrevThreadState* findThread(OSThread *thread) {
+PrevThreadState* findThread(OSThread *thread) {
     PrevThreadState *pState = NULL;
     PrevThreadState *empty = NULL;
     for(int i=0; i<MAX_THREADS_CHECK; i++) {
@@ -135,6 +128,10 @@ void checkThreads() {
 void checkObjects() {
     void **pObjs = *(void***)0x803dcb88;
     int nObjs = *(int*)0x803dcb84;
+    if(nObjs > 1000) {
+        exiPrintf(" *** ERROR *** too many objects (%d)\n", nObjs);
+        nObjs = 1000;
+    }
     for(int i=0; i<nObjs; i++) {
         void *obj = pObjs[i];
         if(!obj) continue;
@@ -146,12 +143,13 @@ void checkObjects() {
         if((isnan(pos[0]) || isnan(pos[1]) || isnan(pos[2]))
         || (isinf(pos[0]) || isinf(pos[1]) || isinf(pos[2]))) {
             exiPrintf(" *** ERROR *** Obj %p has invalid position\n", obj);
-            pos[0] = 0;
-            pos[1] = 0;
-            pos[2] = 0;
-            pos[3] = 0; //oldPos
-            pos[4] = 0;
-            pos[5] = 0;
+            //this doesn't help.
+            //pos[0] = 0;
+            //pos[1] = 0;
+            //pos[2] = 0;
+            //pos[3] = 0; //oldPos
+            //pos[4] = 0;
+            //pos[5] = 0;
         }
     }
 }
