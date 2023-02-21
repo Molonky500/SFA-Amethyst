@@ -92,6 +92,8 @@ void exiPuts(const char *str) {
 
         while(exi[3] & 1); //wait for any previous transfer
         u32 prev0 = exi[0];
+        //u32 prev1 = exi[1];
+        //u32 prev2 = exi[2];
         exi[0] =
             (1 << 13) | //ROMDIS
             //(5 <<  4) | //32MHz
@@ -108,6 +110,9 @@ void exiPuts(const char *str) {
             (1 << 1) | //use DMA
             (1 << 0); //start now
         while(exi[3] & 1); //wait for transfer
+        //exi[0] |= (1 << 1) | (1 << 11); //clear interrupt flags
+        //exi[2] = prev2;
+        //exi[1] = prev1;
         exi[0] = prev0;
         len -= copyLen;
     }
@@ -142,6 +147,7 @@ void exiPrintInit() {
 }
 
 void exiInterrupt_hook() {
+    //only triggers when debug adapter asserts INT.
     SET_DEBUG_PORT(0xEE);
     exiPuts(" *** EXI INTERRUPT\n");
 

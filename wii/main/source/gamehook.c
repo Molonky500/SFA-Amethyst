@@ -92,4 +92,21 @@ void initGameHooks() {
     GameWiiInterface *wii = WII_IFACE_PTR;
     wii->updateWiimotes = updateWiimotes;
     wii->magic = WII_IFACE_MAGIC;
+
+    //Get some of the Wii's system settings and
+    //apply them to the game's defaults.
+    s32 lang      = CONF_GetLanguage();
+    switch(lang) { //translate to game's language enum
+        case CONF_LANG_JAPANESE: lang = 4; break;
+        case CONF_LANG_ENGLISH:  lang = 0; break;
+        case CONF_LANG_GERMAN:   lang = 2; break;
+        case CONF_LANG_FRENCH:   lang = 1; break;
+        case CONF_LANG_SPANISH:  lang = 5; break;
+        case CONF_LANG_ITALIAN:  lang = 3; break;
+        default: lang = 0; break; //default to English
+    }
+    wii->language = lang; //game will set it when ready
+
+    //patch default option in progressive scan prompt
+    (*(u32*)0x8001fa6c) = 0x3ba00000 | (CONF_GetProgressiveScan() ? 1 : 0);
 }

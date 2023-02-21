@@ -123,7 +123,7 @@ void doCardPatch() {
 void doDspPatch() {
     PatchAX_Dsp(0x80330840, 0x5A8, 0x65D, 0x707, 0x8F );
     DCStoreRange(0x80330840, 0x2000);
-	doCardPatch();
+	//doCardPatch();
 	exiPuts(" *** WROTE DSP PATCH\n");
 }
 

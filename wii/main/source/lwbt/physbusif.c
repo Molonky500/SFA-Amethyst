@@ -226,9 +226,12 @@ static s32 __usb_register(pbcallback cb)
 	//ret = __IPC_ClntInit();
 	//if(ret<0) return ret;
 
-	//exiPuts("USB_Initialize...\n");
+	exiPuts("USB_Initialize...\n");
 	ret = USB_Initialize();
-	if(ret<0) return ret;
+	if(ret<0) {
+		exiPrintf("USB_Initialize fail: %d\n", ret);
+		return ret;
+	}
 
 	__usbdev.fd = -1;
 	__usbdev.unregcb = cb;
@@ -240,7 +243,7 @@ static s32 __usb_register(pbcallback cb)
 		__usbdev.pid = 0x0305;
 	}
 
-	//exiPuts("get device ID...\n");
+	exiPuts("get device ID...\n");
 	ret = __getDeviceId(__usbdev.vid,__usbdev.pid);
 	if(ret<0) return ret;
 
@@ -249,9 +252,10 @@ static s32 __usb_register(pbcallback cb)
 	__usbdev.hci_evt		= 0x81;
 	__usbdev.hci_ctrl		= 0x00;
 
-	//exiPuts("init buffer...\n");
+	exiPuts("init buffer...\n");
 	__initUsbIOBuffer(&ctrlbufs,CTRL_BUF_SIZE,NUM_CTRL_BUFS);
 	__initUsbIOBuffer(&aclbufs,ACL_BUF_SIZE,NUM_ACL_BUFS);
+	exiPuts("USB register done\n");
 
 	__usbdev.openstate = 4;
 	__wait4hci = 1;

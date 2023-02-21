@@ -31,6 +31,7 @@ void Amethyst_loadSaveFile(int slot) {
 }
 
 static void doStartup() {
+    //note: runs on several frames at startup
     if(!didTryLoadArgs) {
         didTryLoadArgs = 1;
         ArgStruct *args = loadFileByPath("amethyst.arg", NULL);
@@ -39,6 +40,11 @@ static void doStartup() {
             free(args);
         }
         else DPRINT("No args file\n");
+
+        if(IS_WII) {
+            GameWiiInterface *wii = WII_IFACE_PTR;
+            setGameLanguage(wii->language);
+        }
     }
 
     //check current and previous frame

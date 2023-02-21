@@ -274,3 +274,7 @@ void OSYieldThread(void);
 void __OSPromoteThread(OSThread* thread, OSPriority priority);
 void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime tStart,
 OSTime period, OSAlarmHandler handler);
+
+//wiiconfig.c
+uint OSGetSoundMode_hook();
+void saveGame_initialize_hook();

@@ -114,6 +114,7 @@ void mainLoopHook() {
 }
 
 void cardUnlock_hook(void *addr, u32 size) {
+    //change a param for Wii HW
     *(u32*)(addr+0xC) = 0x10000000;
     DCFlushRange(addr, size); //replaced
 }
@@ -214,6 +215,8 @@ void doPatches() {
     hookBranch(0x80020604, dvdMainLoopHook, 0, 1);
     hookBranch(0x8025400c, exiInterrupt_hook, 0, 0);
     //hookBranch(0x8004a8d8, updateFrameTime_hook, 1, 0);
+    hookBranch(0x802456c4, OSGetSoundMode_hook, 0, 0);
+    hookBranch(0x800ea170, saveGame_initialize_hook, 0, 0);
 
     static const u32 patches[] = {
         //address, value
@@ -236,6 +239,7 @@ void doPatches() {
         0x80000008, 0x01000000, //streaming params
         0x800000d0, 0x01000000, //ARAM size
         0x800000f0, 0x01800000, //simulated RAM size
+        0x800030c0, 0xE2D383C1, //memory card is present
 
         //0x80245980, 0x4E800020, //OSSetWirelessID
 
@@ -261,6 +265,16 @@ void doPatches() {
         0x803de01c, 0x01000000, //__ARSize
         0x803de020, 0x01000000, //__ARInternalSize
         0x803de024, 0x00000000, //__ARExpansionSize
+
+        //use the Wii's config system
+        0x8001fbe8, 0x60000000, //progressive scan prompt immediately closes
+        0x800212c0, 0x60000000, //always go to progressive scan prompt
+        0x8001fd64, 0x60000000, //progrssive scan confirm immediately closes
+        0x8001fd44, 0x60000000, //don't show progressive scan confirm
+        0x800e8564, 0x60000000, //don't override default widescreen setting
+        0x800e8570, 0x60000000, //don't override default rumble setting
+        0x800e8554, 0x60000000, //don't clear default savedata
+            //XXX this might cause an issue on quitting from pause menu?
 
         //titleTryLoadSaveFiles
         //0x8007dbc0, 0x38600000,

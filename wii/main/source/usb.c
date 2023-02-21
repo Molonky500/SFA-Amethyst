@@ -624,10 +624,10 @@ s32 USB_Initialize(void)
 	if(hId<0) return IPC_ENOMEM;
 
 	if (ven_host==NULL) {
-		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		s32 ven_fd = IOS_Open(__ven_path, IPC_OPEN_NONE);
-		//exiPrintf("IOS_Open(%s) => %d\n", __ven_path, ven_fd);
-		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		exiPrintf("IOS_Open(%s) => %d\n", __ven_path, ven_fd);
+		exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		if (ven_fd>=0) {
 			ven_host = (struct _usbv5_host*)iosAlloc(hId, sizeof(*ven_host));
 			if (ven_host==NULL) {
@@ -653,11 +653,11 @@ s32 USB_Initialize(void)
 	}
 
 	if (hid_host==NULL) {
-		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
-		//exiPrintf("%s:%d: IOS_Open(%s)\n", __FILE__, __LINE__, __hid_path);
+		exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		exiPrintf("%s:%d: IOS_Open(%s)\n", __FILE__, __LINE__, __hid_path);
 		s32 hid_fd = IOS_Open(__hid_path, IPC_OPEN_NONE);
-		//exiPrintf("IOS_Open(%s) => %d\n", __hid_path, hid_fd);
-		//exiPrintf("%s:%d\n", __FILE__, __LINE__);
+		exiPrintf("IOS_Open(%s) => %d\n", __hid_path, hid_fd);
+		exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		if (hid_fd>=0) {
 			hid_host = (struct _usbv5_host*)iosAlloc(hId, sizeof(*hid_host));
 			if (hid_host==NULL) {
@@ -683,7 +683,7 @@ s32 USB_Initialize(void)
 		}
 	}
 
-	//exiPrintf("%s:%d\n", __FILE__, __LINE__);
+	exiPrintf("%s:%d\n", __FILE__, __LINE__);
 	return IPC_OK;
 
 mem_error:

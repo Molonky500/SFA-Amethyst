@@ -52,6 +52,8 @@ typedef struct {
 
     //function pointers filled in by loader for game to use.
     void (*updateWiimotes)(void);
+
+    u8 language; //read from Wii config
 } GameWiiInterface;
 
 //we store the pointer here in a place that's normally
