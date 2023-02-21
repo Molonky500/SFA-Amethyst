@@ -2,6 +2,25 @@ BUG: turning off HUD also turns off the aim cursor to shoot fireballs.
 
 idea: a setting where the C-stick/D-pad cycle through items by just changing which one is equipped to Y instead of opening the menu, like ALTTP rando can do
 
+Additional features of Wii mode that we should note:
+- The Wii's system settings are used as the defaults for progressive scan, rumble, widescreen, and sound settings.
+	- The game won't prompt for progressive scan mode.
+	- The settings are applied at the title screen.
+	- The game's language is also set to the Wii's by default, if it's one of the supported languages (English, Japanese, German, French, Spanish, Italian). Others default to English.
+- Pressing the Reset button will exit back to the loader (Homebrew Channel or whatever you used)
+	- XXX make it so X+B+Start resets the game as normal.
+
+=== copy of profiles/default.ini ===
+# leave these commented to use the values
+# from the console's config
+# language=EN
+# aspect=16:9
+
+# set to 1 to use a GameCube memory card in slot A.
+# set to 0 to use <profilename>1.sav, <profilename>2.sav...
+useMemcard=0
+=== EOF ===
+
 Btn  | Player 1    | Player 2 | Player 3 | Player 4
 L.St | Move        |          |          | FreeCam Move
 C.St | Item/Camera |          | Camera   | FreeCam Turn

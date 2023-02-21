@@ -74,6 +74,7 @@ extern int _argc;
 #include "ipc.h"
 #include "ios.h"
 #include "disc_io.h"
+#include "gamemath.h"
 #include "gameheap.h"
 #include "gamefuncs.h"
 #include "bte.h"
@@ -82,6 +83,7 @@ extern int _argc;
 #include "../../../../gameWiiIface.h" //oh god
 #include "gamecontrols.h"
 #include "audiostream.h"
+#include "save.h"
 
 int fatInitDefault();
 
@@ -253,6 +255,17 @@ char* OSGetFontTexel_hook(char* string, void* image, s32 pos,
 //patches.c
 uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline);
 void doPatches();
+
+//save.c
+void initSaveHacks();
+BOOL saveGameSave_hook(BOOL bNoCreate, int slot, void *cbParam,
+    SaveGame *save, RamSaveData *data, void *callback);
+BOOL saveGameLoad_hook(BOOL bNoCreate, int slot, void *cbParam,
+    SaveGame *save, RamSaveData *data, void *callback);
+int CARDMountAsync_hook(s32 chan, void *workArea,
+    CARDCallback detachCallback, CARDCallback attachCallback);
+int CARDProbeEx_hook(int chan,s32 *memSize,s32 *sectorSize);
+int CARDCheckExAsync_hook(int chan,s32 *xferBytes,CARDCallback callback);
 
 //system.c
 void* __SYS_GetIPCBufferLo(void);

@@ -85,6 +85,7 @@ void initGameHooks() {
     SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
     udelay(500000);
     gameExceptionInit();
+    initSaveHacks();
 
     memcpy((void*)0x80001800, loaderRebootCode, 6144);
     //doDspPatch();

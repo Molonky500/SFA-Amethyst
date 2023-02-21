@@ -2,6 +2,27 @@
 
 static u32 *trampoline = (u32*)0x80000200;
 
+u32 nextTrampoline(u32 cur) {
+    if((cur+16) >= 0x80000C00) {
+        exiPrintf(" *** ERROR *** Too many trampolines (reached %08X)\n", cur);
+        while(1) {
+            SET_SCREEN_SOLID_YUV(76, 84, 255); //red
+            udelay(250000);
+            SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
+            udelay(250000);
+        }
+    }
+    //Axx, Bxx are unused
+    if(cur < 0x80000900 && (cur+16) >= 0x80000900) return 0x800009a0;
+    if(cur < 0x80000800 && (cur+16) >= 0x80000800) return 0x800008a0;
+    if(cur < 0x80000700 && (cur+16) >= 0x80000700) return 0x800007a0;
+    if(cur < 0x80000600 && (cur+16) >= 0x80000600) return 0x800006a0;
+    if(cur < 0x80000500 && (cur+16) >= 0x80000500) return 0x800005a0;
+    if(cur < 0x80000400 && (cur+16) >= 0x80000400) return 0x800004a0;
+    if(cur < 0x80000300 && (cur+16) >= 0x80000300) return 0x800003a0;
+    return cur;
+}
+
 uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline) {
     /** Replace a `b` or `bl` instruction in memory.
      *  @param addr Address to hook.
@@ -22,15 +43,7 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
         if(forceTrampoline
         || (oldOp & ~0x03FFFFFF) == 0x48000000) {
             //replacing a b or bl
-            if((u32)trampoline >= 0x80000300) {
-                exiPrintf(" *** ERROR *** Too many trampolines (%08X)\r\n", addr);
-                while(1) {
-                    SET_SCREEN_SOLID_YUV(76, 84, 255); //red
-                    udelay(250000);
-                    SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
-                    udelay(250000);
-                }
-            }
+            trampoline = nextTrampoline(trampoline);
 
             uint32_t relDest = (uint32_t)trampoline - addr;
             *(uint32_t*)addr = (relDest & 0x03FFFFFC) | (isBl ? 1 : 0) | 0x48000000;
@@ -216,7 +229,6 @@ void doPatches() {
     hookBranch(0x8025400c, exiInterrupt_hook, 0, 0);
     //hookBranch(0x8004a8d8, updateFrameTime_hook, 1, 0);
     hookBranch(0x802456c4, OSGetSoundMode_hook, 0, 0);
-    hookBranch(0x800ea170, saveGame_initialize_hook, 0, 0);
 
     static const u32 patches[] = {
         //address, value
