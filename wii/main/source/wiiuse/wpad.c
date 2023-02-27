@@ -720,7 +720,8 @@ s32 WPAD_Init(void)
 		__wiiuse_sensorbar_enable(1);
 
 		exiPrintf("BTE_Init...\n");
-		BTE_Init();
+		int r = BTE_Init();
+		if(r) return r;
 		BTE_SetDisconnectCallback(__wpad_disconnectCB);
 		exiPrintf("BTE_InitCore...\n");
 		BTE_InitCore(__initcore_finished);

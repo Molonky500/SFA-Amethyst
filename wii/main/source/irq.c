@@ -22,7 +22,7 @@ static const char *causes[] = {
 	"Debugger", "HSP", "Hollywood IRQs", "RSVD15",
 	"Reset Switch State", "RSVD17", "RSVD18", "RSVD19",
 	"RSVD20", "RSVD21", "RSVD22", "RSVD23",
-	"RSVD24", "RSVD25", "RSVD26", "RSVD27",
+	"RSVD24", "RSVD25", "RSVD26", "IPC",
 	"RSVD28", "RSVD29", "RSVD30", "RSVD31"
 };
 #endif
@@ -177,28 +177,26 @@ void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
 
         //from here to end of function is from the game, not libogc.
 		//mostly the same though.
-        if(gameIrqHandlers[irq]) {
-            OSDisableScheduler();
-            void (*handler)(int,OSContext*) =
-                (void(*)(int,OSContext*))gameIrqHandlers[irq];
+		OSDisableScheduler();
+		void (*handler)(int,OSContext*) =
+			(void(*)(int,OSContext*))gameIrqHandlers[irq];
 
-			irqHandlerDepth++;
-			s32 prevIrq  = curIrqHandler;
-			curIrqHandler = irq;
-			handler(irq,ctx);
-			curIrqHandler = prevIrq;
-			irqHandlerDepth--;
+		irqHandlerDepth++;
+		s32 prevIrq  = curIrqHandler;
+		curIrqHandler = irq;
+		if(handler) handler(irq,ctx);
+		else {
+			char msg[64];
+			strcpy(msg, "no handler IRQ ........\n");
+			putHex(&msg[15], irq);
+			exiPuts(msg);
+		}
+		curIrqHandler = prevIrq;
+		irqHandlerDepth--;
 
-            OSEnableScheduler();
-            __OSReschedule();
-            OSLoadContext(ctx);
-        }
-        else {
-            char msg[64];
-            strcpy(msg, "no handler IRQ ........\n");
-            putHex(&msg[15], irq);
-            exiPuts(msg);
-        }
+		OSEnableScheduler();
+		__OSReschedule();
+		OSLoadContext(ctx);
 	}
     OSLoadContext(ctx);
 }
@@ -350,6 +348,7 @@ void OSEnableInterrupts_hook() {
 
 void __OSInterruptInit_hook() {
     __OSInterruptInit();
+	//gameIrqHandlers[IRQ_PI_ACR] = __ipc_interrupthandler;
     //gameIrqHandlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
 }
 

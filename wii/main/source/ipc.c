@@ -49,7 +49,7 @@ distribution.
 #include "lwp_heap.h"
 #include "lwp_wkspace.h"
 
-//#define DEBUG_IPC
+#define DEBUG_IPC
 void exiPrintf(const char *fmt, ...);
 
 #define IPC_HEAP_SIZE			4096
@@ -254,13 +254,13 @@ static s32 __ipc_queuerequest(struct _ipcreq *req)
 	u32 cnt;
 	u32 level;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_queuerequest(0x%p)\r\n",req);
+	exiPrintf("__ipc_queuerequest(%p)\r\n",req);
 #endif
-	_CPU_ISR_Disable(level);
+	level = OSDisableInterrupts();
 
 	cnt = (_ipc_responses.cnt_queue - _ipc_responses.cnt_sent);
 	if(cnt>=16) {
-		_CPU_ISR_Restore(level);
+		OSRestoreInterrupts(level);
 		return IPC_EQUEUEFULL;
 	}
 
@@ -268,7 +268,7 @@ static s32 __ipc_queuerequest(struct _ipcreq *req)
 	_ipc_responses.req_queue_no = ((_ipc_responses.req_queue_no+1)&0x0f);
 	_ipc_responses.cnt_queue++;
 
-	_CPU_ISR_Restore(level);
+	OSRestoreInterrupts(level);
 	return IPC_OK;
 }
 
@@ -276,7 +276,7 @@ static s32 __ipc_syncqueuerequest(struct _ipcreq *req)
 {
 	u32 cnt;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_syncqueuerequest(0x%p)\r\n",req);
+	exiPrintf("__ipc_syncqueuerequest(%p)\r\n",req);
 #endif
 	cnt = (_ipc_responses.cnt_queue - _ipc_responses.cnt_sent);
 	if(cnt>=16) {
@@ -382,6 +382,9 @@ static void __ipc_replyhandler(void)
 			req->cb(req->result,req->usrdata);
 			__ipc_freereq(req);
 		} else
+			#ifdef DEBUG_IPC
+				exiPrintf("IPC wakeup %p\n", req->syncqueue);
+			#endif
 			OSWakeupThread(req->syncqueue);
 	} else {
 		// NOTE: we really want to find out if this ever happens
@@ -428,17 +431,19 @@ static void __ipc_ackhandler(void)
 
 }
 
-static void __ipc_interrupthandler(u32 irq,void *ctx)
+void __ipc_interrupthandler(u32 irq,void *ctx)
 {
 	u32 ipc_int;
 #ifdef DEBUG_IPC
 	exiPrintf("__ipc_interrupthandler(%d)\r\n",irq);
 #endif
+	//SET_DEBUG_PORT(1);
 	ipc_int = IPC_ReadReg(1);
 	if((ipc_int&0x0014)==0x0014) __ipc_replyhandler();
 
 	ipc_int = IPC_ReadReg(1);
 	if((ipc_int&0x0022)==0x0022) __ipc_ackhandler();
+	//SET_DEBUG_PORT(0);
 }
 
 static s32 __ios_ioctlvformat_parse(const char *format,va_list args,struct _ioctlvfmt_cbdata *cbdata,s32 *cnt_in,s32 *cnt_io,struct _ioctlv **argv,s32 hId)
@@ -687,9 +692,9 @@ static s32 __ipc_asyncrequest(struct _ipcreq *req)
 	ret = __ipc_queuerequest(req);
 	if(ret) __ipc_freereq(req);
 	else {
-		_CPU_ISR_Disable(level);
+		level = OSDisableInterrupts();
 		if(_ipc_mailboxack>0) __ipc_sendrequest();
-		_CPU_ISR_Restore(level);
+		OSRestoreInterrupts(level);
 	}
 	return ret;
 }
@@ -700,12 +705,16 @@ static s32 __ipc_syncrequest(struct _ipcreq *req)
 	u32 level;
 
 	//exiPrintf("%s: init queue\n", __FUNCTION__);
-	req->syncqueue = malloc(sizeof(OSThreadQueue));
-	if(!req->syncqueue) return -ENOMEM;
+	level = OSDisableInterrupts();
+	//req->syncqueue = malloc(sizeof(OSThreadQueue));
+	req->syncqueue = iosAlloc(_ipc_hid, sizeof(OSThreadQueue));
+	if(!req->syncqueue) {
+		OSRestoreInterrupts(level);
+		return -ENOMEM;
+	}
 	OSInitThreadQueue(req->syncqueue);
 
 	//exiPrintf("%s: disable IRQ\n", __FUNCTION__);
-	_CPU_ISR_Disable(level);
 	ret = __ipc_syncqueuerequest(req);
 	//exiPrintf("IPC sync req done\n");
 	if(ret==0) {
@@ -713,14 +722,24 @@ static s32 __ipc_syncrequest(struct _ipcreq *req)
 			//exiPrintf("IPC sync ACK\n");
 			__ipc_sendrequest();
 		}
-		//exiPrintf("IPC sync sleeping\n");
+		#ifdef DEBUG_IPC
+			exiPrintf("IPC sync sleeping(%08X)\n", req->syncqueue);
+		#endif
+		//SET_DEBUG_PORT(1);
 		OSSleepThread(req->syncqueue);
-		//exiPrintf("IPC sync sleep done\n");
+		//SET_DEBUG_PORT(0);
+		#ifdef DEBUG_IPC
+			exiPrintf("IPC sync sleep done(%08X)\n", req->syncqueue);
+		#endif
 		ret = req->result;
 	}
-	_CPU_ISR_Restore(level);
+	else {
+		exiPrintf("IPC sync ERROR %d\n", ret);
+	}
 
-	free(req->syncqueue);
+	//free(req->syncqueue);
+	iosFree(_ipc_hid, req->syncqueue);
+	OSRestoreInterrupts(level);
 	req->syncqueue = NULL;
 	return ret;
 }
@@ -734,7 +753,7 @@ s32 iosCreateHeap(s32 size)
 #ifdef DEBUG_IPC
 	exiPrintf("iosCreateHeap(%d)\r\n",size);
 #endif
-	_CPU_ISR_Disable(level);
+	level = OSDisableInterrupts();
 
 	i=0;
 	while(i<IPC_NUMHEAPS) {
@@ -742,7 +761,7 @@ s32 iosCreateHeap(s32 size)
 		i++;
 	}
 	if(i>=IPC_NUMHEAPS) {
-		_CPU_ISR_Restore(level);
+		OSRestoreInterrupts(level);
 		return IPC_ENOHEAP;
 	}
 
@@ -764,7 +783,7 @@ s32 iosCreateHeap(s32 size)
 	}
 
 	IPC_SetBufferLo((void*)(ipclo+size));
-	_CPU_ISR_Restore(level);
+	OSRestoreInterrupts(level);
 	return i;
 }
 
@@ -774,16 +793,21 @@ void* iosAlloc(s32 hid,s32 size)
 	exiPrintf("iosAlloc(%d,%d)\r\n",hid,size);
 #endif
 	if(hid<0 || hid>=IPC_NUMHEAPS || size<=0) return NULL;
-	return __lwp_heap_allocate(&_ipc_heaps[hid].heap,size);
+	int level = OSDisableInterrupts();
+	void *r = __lwp_heap_allocate(&_ipc_heaps[hid].heap,size);
+	OSRestoreInterrupts(level);
+	return r;
 }
 
 void iosFree(s32 hid,void *ptr)
 {
 #ifdef DEBUG_IPC
-	exiPrintf("iosFree(%d,0x%p)\r\n",hid,ptr);
+	exiPrintf("iosFree(%d,%p)\r\n",hid,ptr);
 #endif
 	if(hid<0 || hid>=IPC_NUMHEAPS || ptr==NULL) return;
+	int level = OSDisableInterrupts();
 	__lwp_heap_free(&_ipc_heaps[hid].heap,ptr);
+	OSRestoreInterrupts(level);
 }
 
 void* IPC_GetBufferLo(void)
@@ -827,7 +851,8 @@ u32 __IPC_ClntInit(void)
 
 		_ipc_hid = iosCreateHeap(IPC_HEAP_SIZE);
 		//IRQ_Request(IRQ_PI_ACR,__ipc_interrupthandler,NULL);
-		*(void**)0x800030ac = __ipc_interrupthandler;
+		// *(void**)0x800030ac = __ipc_interrupthandler;
+		gameIrqHandlers[27] = __ipc_interrupthandler;
 		__UnmaskIrq(IM_PI_ACR);
 		IPC_WriteReg(1,56);
 	}
@@ -838,7 +863,7 @@ void __IPC_Reinitialize(void)
 {
 	u32 level;
 
-	_CPU_ISR_Disable(level);
+	level = OSDisableInterrupts();
 
 	IPC_WriteReg(1,56);
 
@@ -851,7 +876,7 @@ void __IPC_Reinitialize(void)
 	_ipc_responses.req_send_no = 0;
 	_ipc_responses.cnt_sent = 0;
 
-	_CPU_ISR_Restore(level);
+	OSRestoreInterrupts(level);
 }
 
 s32 IOS_Open(const char *filepath,u32 mode)
@@ -868,7 +893,7 @@ s32 IOS_Open(const char *filepath,u32 mode)
 
 	req = __ipc_allocreq();
 	if(req==NULL) {
-		exiPrintf("%s: alloc failed\n", __FUNCTION__);
+		exiPrintf(" *** ERROR *** %s: alloc failed\n", __FUNCTION__);
 		return IPC_ENOMEM;
 	}
 
@@ -876,6 +901,8 @@ s32 IOS_Open(const char *filepath,u32 mode)
 	req->cb = NULL;
 	req->relnch = 0;
 
+	//exiPrintf("%s(%s, %08X) path=%p req=%p\n", __FUNCTION__,
+	//	filepath, mode, filepath, req);
 	DCFlushRange((void*)filepath,strnlen(filepath,IPC_MAXPATH_LEN) + 1);
 
 	req->open.filepath	= (char*)MEM_VIRTUAL_TO_PHYSICAL(filepath);

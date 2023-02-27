@@ -80,6 +80,7 @@ SaveGame *save, RamSaveData *data, void *callback) {
     exiPrintf("Read %s OK\n", path);
     exiPrintf("Save file name is \"%s\"\n", buf.save.saveFileName);
     memcpy(save, &buf.save, sizeof(SaveGame));
+
     return 1;
 }
 

@@ -627,27 +627,37 @@ s32 USB_Initialize(void)
 		exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		s32 ven_fd = IOS_Open(__ven_path, IPC_OPEN_NONE);
 		exiPrintf("IOS_Open(%s) => %d\n", __ven_path, ven_fd);
+		if(ven_fd < 0) return ven_fd;
 		exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		if (ven_fd>=0) {
 			ven_host = (struct _usbv5_host*)iosAlloc(hId, sizeof(*ven_host));
 			if (ven_host==NULL) {
+				exiPrintf("%s:%d\n", __FILE__, __LINE__);
 				IOS_Close(ven_fd);
 				return IPC_ENOMEM;
 			}
 			memset(ven_host, 0, sizeof(*ven_host));
 			ven_host->fd = ven_fd;
 
+			exiPrintf("%s:%d\n", __FILE__, __LINE__);
 			u32 *ven_ver = (u32*)iosAlloc(hId, 0x20);
 			if (ven_ver==NULL) goto mem_error;
-			if (IOS_Ioctl(ven_fd, USBV5_IOCTL_GETVERSION, NULL, 0, ven_ver, 0x20)==0 && ven_ver[0]==0x50001)
+			exiPrintf("%s:%d\n", __FILE__, __LINE__);
+			if (IOS_Ioctl(ven_fd, USBV5_IOCTL_GETVERSION, NULL, 0, ven_ver, 0x20)==0 && ven_ver[0]==0x50001) {
+				exiPrintf("%s:%d\n", __FILE__, __LINE__);
 				IOS_IoctlAsync(ven_fd, USBV5_IOCTL_GETDEVICECHANGE, NULL, 0, ven_host->attached_devices, 0x180, __usbv5_devicechangeCB, ven_host);
+				exiPrintf("%s:%d\n", __FILE__, __LINE__);
+			}
 			else {
 				// wrong ven version
+				exiPrintf("%s:%d\n", __FILE__, __LINE__);
 				IOS_Close(ven_fd);
 				iosFree(hId, ven_host);
 				ven_host = NULL;
+				exiPrintf("%s:%d\n", __FILE__, __LINE__);
 			}
 
+			exiPrintf("%s:%d\n", __FILE__, __LINE__);
 			iosFree(hId, ven_ver);
 		}
 	}
@@ -687,6 +697,7 @@ s32 USB_Initialize(void)
 	return IPC_OK;
 
 mem_error:
+	exiPrintf("%s:%d\n", __FILE__, __LINE__);
 	USB_Deinitialize();
 	return IPC_ENOMEM;
 }

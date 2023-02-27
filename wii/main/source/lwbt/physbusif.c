@@ -297,16 +297,17 @@ void __ntd_set_pid_vid(u16 vid,u16 pid)
 }
 
 
-void physbusif_init(void)
+int physbusif_init(void)
 {
 	s32 ret;
 
-	//exiPuts("usb register...\n");
+	exiPuts("usb register...\n");
 	ret = __usb_register(NULL);
-	if(ret<0) return;
+	exiPrintf("__usb_register => %d\n", ret);
+	if(ret<0) return ret;
 
 	//exiPuts("usb open...\n");
-	__usb_open(NULL);
+	return __usb_open(NULL);
 }
 
 void physbusif_close(void)

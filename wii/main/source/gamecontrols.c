@@ -62,7 +62,7 @@ void resetBluetooth() {
     exiPuts("Reset bluetooth OK\n");
 }
 
-void initWiimote() {
+int initWiimote() {
     //init if not already tried
     if(triedWiimoteInit) return;
     triedWiimoteInit = true;
@@ -78,8 +78,11 @@ void initWiimote() {
     int err = 0;
     err = CONF_Init();
     exiPrintf("CONF_Init: %d\n", err);
+    if(err) return err;
     err = WPAD_Init();
     exiPrintf("WPAD_Init: %d\n", err);
+    if(err) return err;
+
     int view_width=640, view_height=480;
     for(int i=0; i < WPAD_MAX_WIIMOTES; i++) {
         WPAD_SetDataFormat(i, WPAD_FMT_BTNS_ACC_IR);
@@ -89,6 +92,7 @@ void initWiimote() {
     WPAD_SetIdleTimeout(120);
     exiPuts("WPAD: initWiimote OK\n");
     isWiimoteInit = true;
+    return 0;
 }
 
 static int prevState = -1;

@@ -29,7 +29,7 @@ void SYS_Init(void) {
     __ipcbufferlo = (void*)__ipcbufferLo; //what the fuck
 	__ipcbufferhi = (void*)__ipcbufferHi;
 	//why would you have these differ only by one letter case
-	//__lwp_wkspace_init(KERNEL_HEAP);
+	__lwp_wkspace_init(KERNEL_HEAP);
 	//__lwp_priority_init();
 	//__lwp_watchdog_init();
     main(_argc, _argc_raw);
@@ -141,8 +141,8 @@ void SYS_SetArena2Lo(void *newLo)
 {
 	u32 level;
 
-	exiPrintf("SetArena2Lo(%p)\n", newLo);
-	if(!PTR_VALID(newLo)) *(u32*)0 = 0xBAD;
+	//exiPrintf("SetArena2Lo(%p)\n", newLo);
+	//if(!PTR_VALID(newLo)) *(u32*)0 = 0xBAD;
 	_CPU_ISR_Disable(level);
 	__sysarena2lo = newLo;
 	_CPU_ISR_Restore(level);
@@ -164,7 +164,7 @@ void SYS_SetArena2Hi(void *newHi)
 {
 	u32 level;
 
-	exiPrintf("SetArena2Hi(%p)\n", newHi);
+	//exiPrintf("SetArena2Hi(%p)\n", newHi);
 	if(!PTR_VALID(newHi)) *(u32*)0 = 0xBAD;
 	_CPU_ISR_Disable(level);
 	__sysarena2hi = newHi;

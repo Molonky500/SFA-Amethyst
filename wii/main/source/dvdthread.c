@@ -22,6 +22,7 @@ OSAlarm dvdThreadAlarm;
 u32 dvdCmdId=0;
 vu32 canary2 = 0xABADBABE;
 static vu32 canary4 = 0x2D0661E5;
+vu32 bInitWiimote = 0;
 
 void dvdDumpOpenFiles() {
     if(!OSTryLockMutex(&dvdFileInfoMutex)) {
@@ -241,6 +242,12 @@ void* hackDvdThreadMain(void *param) {
     OSEnableInterrupts();
     exiPuts("DVD thread online\r\n");
     registerThreadForDebug(OSGetCurrentThread(), "dvdhack");
+
+    /*exiPuts("About to init Wiimote\n");
+    if(initWiimote()) {
+        exiPuts("Wiimote init failed\n");
+    }
+    else exiPuts("Wiimote init OK\n");*/
 
     if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\r\n");

@@ -2,6 +2,8 @@
 //adapted from http://fileformats.archiveteam.org/wiki/Nintendo_GameCube_/_Wii_ADP
 
 FILE *curStreamFile = NULL;
+uint8_t *streamBuf = NULL;
+uint8_t *streamDecodeBuf = NULL;
 
 BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
 u32 offset, DVDCallback callback) {
@@ -37,6 +39,20 @@ void AISetStreamPlayState_hook(int param) {
 
 void playStream_hook() {
 	//replaces call to DVDPrepareStreamAsync in streamPlay
+	if(!streamBuf) {
+		streamBuf = malloc(STREAM_BUF_SIZE);
+		streamDecodeBuf = malloc(STREAM_DECODE_BUF_SIZE);
+	}
+	if(!(streamBuf && streamBuf)) {
+		exiPrintf(" *** ERROR *** Can't allocate %d bytes for stream buffer\n",
+			STREAM_BUF_SIZE + STREAM_DECODE_BUF_SIZE);
+		if(streamBuf) free(streamBuf);
+		if(streamDecodeBuf) free(streamDecodeBuf);
+		streamBuf = NULL;
+		streamDecodeBuf = NULL;
+	}
+	ADPInitFilter();
+
 	int streamNo = (*(int*)0x803dc870) - 1;
 
 	StreamsBinEntry *streamsBin = *(StreamsBinEntry**)0x803dc850;
@@ -66,43 +82,54 @@ void mainLoopUpdateStream_hook() {
 	//exiPrintf("Stream pos %d / %d\n",
 	//	(int)(*pStreamPos), (int)(*pStreamEndPos));
 
-	if(*pStreamPos >= *pStreamEndPos) {
+	int remain = *pStreamEndPos - *pStreamPos;
+	if(remain > 0 && streamBuf) {
+		int size = STREAM_SAMPLE_RATE / STREAM_SAMPLE_SIZE;
+		if(size > remain) size = remain;
+		fread(streamBuf, 1, size, curStreamFile);
+		DCFlushRange(streamBuf, size);
+		remain -= size;
+		*pStreamPos += 1.0f / 60.0f;
+
+		int iBlock = 0;
+		for(int i=0; i<STREAM_SAMPLE_RATE; i += STREAM_SAMPLES_PER_BLOCK) {
+			ADPDecodeBlock(&streamDecodeBuf[i], &streamBuf[iBlock++]);
+		}
+
+		u32 addr = MEM_VIRTUAL_TO_PHYSICAL(streamDecodeBuf);
+		AI_DMA_START_HI = addr >> 16;
+		AI_DMA_START_LO = addr & 0xFFFF;
+		AI_DMA_LENGTH   = (size >> 5) | 0x8000;
+	}
+
+	if(remain <= 0) {
 		exiPuts("Stream finished\n");
 		fclose(curStreamFile);
 		curStreamFile = NULL;
+		return;
 	}
 }
-
-#if 0
-#define SAMPLES_PER_BLOCK 28
-
-/* u8 flagsL;
-u8 flagsR;
-u8 flagsL2; //same as flagsL
-u8 flagsR2; //same as flagsR
-u8 sample[28]; // Top 4 bits are for R, bottom 4 are for L stereo.
-*/
 
 static s32 histl1;
 static s32 histl2;
 static s32 histr1;
 static s32 histr2;
 
-static s16 ADPDecodeSample(s32 bits, s32 q, s32& hist1,
-s32& hist2) {
+static s16 ADPDecodeSample(s32 bits, s32 q, s32 *hist1,
+s32 *hist2) {
 	s32 hist = 0;
 	switch(q >> 4) {
 	case 0:
 		hist = 0;
 		break;
 	case 1:
-		hist = (hist1 * 0x3c);
+		hist = (*hist1 * 0x3c);
 		break;
 	case 2:
-		hist = (hist1 * 0x73) - (hist2 * 0x34);
+		hist = (*hist1 * 0x73) - (*hist2 * 0x34);
 		break;
 	case 3:
-		hist = (hist1 * 0x62) - (hist2 * 0x37);
+		hist = (*hist1 * 0x62) - (*hist2 * 0x37);
 		break;
 	}
 	//hist = MathUtil::Clamp((hist + 0x20) >> 6, -0x200000, 0x1fffff);
@@ -112,8 +139,8 @@ s32& hist2) {
 
 	s32 cur = (((s16)(bits << 12) >> (q & 0xf)) << 6) + hist;
 
-	hist2 = hist1;
-	hist1 = cur;
+	*hist2 = *hist1;
+	*hist1 = cur;
 
 	cur >>= 6;
     if(cur < -0x8000) cur = -0x8000;
@@ -122,17 +149,16 @@ s32& hist2) {
 	return (s16)cur;
 }
 
-void InitFilter() {
+void ADPInitFilter() {
 	histl1 = 0;
 	histl2 = 0;
 	histr1 = 0;
 	histr2 = 0;
 }
 
-void DecodeBlock(s16* pcm, const u8* adpcm) {
-	for (int i = 0; i < SAMPLES_PER_BLOCK; i++) {
-		pcm[i * 2]     = ADPDecodeSample(adpcm[i + (ONE_BLOCK_SIZE - SAMPLES_PER_BLOCK)] & 0xf, adpcm[0], histl1, histl2);
-		pcm[i * 2 + 1] = ADPDecodeSample(adpcm[i + (ONE_BLOCK_SIZE - SAMPLES_PER_BLOCK)] >> 4,  adpcm[1], histr1, histr2);
+void ADPDecodeBlock(s16* pcm, const u8* adpcm) {
+	for (int i = 0; i < STREAM_SAMPLES_PER_BLOCK; i++) {
+		pcm[i * 2]     = ADPDecodeSample(adpcm[i + (STREAM_BLOCK_SIZE - STREAM_SAMPLES_PER_BLOCK)] & 0xf, adpcm[0], &histl1, &histl2);
+		pcm[i * 2 + 1] = ADPDecodeSample(adpcm[i + (STREAM_BLOCK_SIZE - STREAM_SAMPLES_PER_BLOCK)] >> 4,  adpcm[1], &histr1, &histr2);
 	}
 }
-#endif

@@ -80,14 +80,18 @@ size_t __malloc_allocated = 0; //track amount of currently allocated memory
 u8 *heapCanaryTop=NULL, *heapCanaryBottom=NULL;
 
 void initAlloc() {
+	exiPrintf("mem2 arena: %p - %p\n", _arena2_min, _arena2_max);
     __malloc_heap_start = (char*)_arena2_min;
     __malloc_heap_end   = (char*)_arena2_max;
 	_mem2_heap_start    = (char*)_arena2_min;
 	_mem2_heap_end      = (char*)_arena2_max;
+	exiPrintf("malloc(%X)...\n", HEAP_CANARY_SIZE);
 	heapCanaryTop       = (u8*)malloc(HEAP_CANARY_SIZE);
+	exiPrintf("malloc -> %p\n", heapCanaryTop);
 	heapCanaryBottom    = (u8*)_mem2_heap_end - HEAP_CANARY_SIZE;
 	_mem2_heap_end -= HEAP_CANARY_SIZE;
 
+	exiPuts("Init heap canary...\n");
 	for(int i=0; i<HEAP_CANARY_SIZE; i++) {
 		heapCanaryTop   [i] = (u8)i;
 		heapCanaryBottom[i] = (u8)i;

@@ -14,8 +14,11 @@ pushd main
 popd
 if [ $ok -ne 0 ]; then exit $ok; fi
 
-mv boot/boot.dol app/boot.dol
-mv main/main.dol app/main.dol
+echo "Combine..."
+./make-loadable-dol.py boot/boot.dol main/main.dol app/boot.dol 0x80100000
+ok=$?
+if [ $ok -ne 0 ]; then exit $ok; fi
+
 if [ -e $SD_MOUNT_PATH/apps ]
 then cp -r app/* $SD_MOUNT_PATH/apps/SFA/
 else

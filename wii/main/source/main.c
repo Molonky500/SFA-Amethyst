@@ -1,16 +1,33 @@
 #include "main.h"
 
-//magic string. the stage 1 loader will overwrite this string
-//in memory with the actual root directory.
-char gameRootDir[512] = "*** GAME ROOT DIR ***";
+char gameRootDir[512];
 
 GameWiiInterface wiiIface;
-u8 loaderRebootCode[6144];
+u8 *loaderRebootCode = NULL;
 bool isLaunchedFromLoader = false;
 bool gIsSystemShuttingDown = false;
 bool isReset = true; //is this shutdown really a reboot?
 
 extern u32 __crt0stack, __crt0stack_end;
+extern void *__ipcbufferLo, *__ipcbufferHi;
+
+void _initIos() {
+    SET_SCREEN_SOLID_YUV(255, 0, 148); //yellow
+    //udelay(500000);
+    initAlloc();
+    exiPuts("loader2 alloc init OK\r\n");
+    initLibc();
+    exiPrintf("loader2 libc init OK, IPC buf %p - %p\r\n",
+        __ipcbufferLo, __ipcbufferHi);
+    //__lwp_wkspace_init(1*1024*1024);
+    mtspr(920,(mfspr(920)&~0x40000000)); //DisableWriteGatherPipe();
+    __IPC_ClntInit();
+    __IOS_InitializeSubsystems();
+    exiPrintf("IOS init OK.\n IPC Buf: 0x%8x - 0x%8x\n Arena1:  0x%8x - 0x%8x\n Arena2:  0x%8x - 0x%8x\n",
+        __SYS_GetIPCBufferLo(), __SYS_GetIPCBufferHi(),
+        *(u32*)0x8000310C, *(u32*)0x80003110,
+        *(u32*)0x80003124, *(u32*)0x80003128);
+}
 
 int main(int argc, char **argv) {
     SET_SCREEN_SOLID_YUV(255, 128, 128); //white
@@ -18,18 +35,35 @@ int main(int argc, char **argv) {
     //else we're launched in Dolphin from command line or something
     //and there's no loader to exit to.
 
+    //probe some GPIO stuff for debug
     _ipcReg[0x64>>2]  = 0xFFFFFFFF; //AHBPROT: access everything
     _ipcReg[0xFC>>2] |= 0x00FF0020; //allow PPC access
     _ipcReg[0xDC>>2]  = 0xFFFFFFFF; //enable GPIOs
     _ipcReg[0xC4>>2] |= 0x00FF0020; //set directions
 
+    //init debug prints
     exiPrintInit();
+    exiPuts("Hello world!\n");
     exiPrintf(" ---- loader2 start ---- \r\nstack: %08X - %08X\r\n",
         &__crt0stack_end, &__crt0stack);
 
-    memcpy(loaderRebootCode, (void*)0x80001800, 6144);
-    DolHeader *header = (DolHeader*)DOL_LOAD_ADDR;
-    loadDolFromMemory(header);
+    _initIos();
+
+    //init filesystem
+    if(!fatInitDefault()) {
+        exiPuts("FAT init failed\n");
+        return 1;
+    }
+    initGameFiles(argc > 0 ? argv[0] : NULL);
+
+    //back up the loader reboot code since loading
+    //the game DOL will overwrite it.
+    loaderRebootCode = malloc(loaderRebootCode);
+    if(loaderRebootCode) {
+        memcpy(loaderRebootCode, (void*)0x80001800, 6144);
+    }
+    DolHeader header;
+    loadGameDol(&header);
 
     exiPrintf("game loader start; argc=%d\r\n", argc);
     for(int i=0; i<argc; i++) {
@@ -48,7 +82,7 @@ int main(int argc, char **argv) {
     L2Enhance();
 
     exiPuts("boot game\r\n");
-    bootGame(header); //doesn't return
+    bootGame(&header); //doesn't return
     while(1);
     return 0;
 }

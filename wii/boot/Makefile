@@ -17,21 +17,26 @@ TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=
+INCLUDES	:= -I../source/include
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS   = -g -O2 -Wall -fPIC $(MACHDEP) $(INCLUDE)
+CFLAGS   = -g -O2 -Wall -fPIC -msdata=data -mregnames $(MACHDEP) $(INCLUDE)
 CXXFLAGS = $(CFLAGS)
 LDFLAGS	 = -g $(MACHDEP) \
-	-Wl,-Map,$(notdir $@).map
+	-Wl,-Map,$(notdir $@).map \
+	-Wl,--section-start,.stub=0x80004000 \
+	-Wl,--section-start,.sbss=0x80005000 \
+	-Wl,--section-start,.init=0x80006000 \
+	-Wl,--section-start,.data=0x80010000
+ASFLAGS := $(MACHDEP) -mregnames -D_LANGUAGE_ASSEMBLY $(INCLUDES)
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS := -lfat -logc -lm
+LIBS :=
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

@@ -12,10 +12,9 @@
 
 //1 = use custom hardware for debug print on real console
 //0 = use "official" UART for Dolphin/real devkit
-#define USE_CUSTOM_GECKO 1
+#define USE_CUSTOM_GECKO 0
 
-#define DOL_LOAD_ADDR 0x90C00000
-
+//useful for diag, but interferes with game
 //#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)
 #define SET_SCREEN_SOLID_YUV(y,u,v)
 #define SET_DISC_LED(on) _ipcReg[0xC0>>2] = ((on) ? (_ipcReg[0xC0>>2] | 0x20) : (_ipcReg[0xC0>>2] & ~0x20))
@@ -107,6 +106,8 @@ BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
 void AISetStreamPlayState_hook(int param);
 void playStream_hook();
 void mainLoopUpdateStream_hook();
+void ADPInitFilter();
+void ADPDecodeBlock(s16* pcm, const u8* adpcm);
 
 //checkthread.c
 extern OSThread checkThread;
@@ -124,7 +125,7 @@ void dumpStack();
 
 //dol.c
 void printDolHeader(DolHeader *header);
-void loadDolFromMemory(DolHeader *header);
+void loadGameDol(DolHeader *header);
 
 //dvd.c
 extern volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
@@ -172,6 +173,7 @@ extern int dvdMsgsInHead, dvdMsgsInTail, dvdMsgsOutHead, dvdMsgsOutTail;
 extern volatile HackDvdMsg dvdMsgsIn[DVD_MAX_MSGS], dvdMsgsOut[DVD_MAX_MSGS];
 extern OSAlarm dvdThreadAlarm;
 extern u32 dvdCmdId;
+extern vu32 bInitWiimote;
 void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx);
 void* hackDvdThreadMain(void *param);
 void dvdDumpOpenFiles();
@@ -201,16 +203,17 @@ void jumpToGame();
 void bootGame(DolHeader *header);
 
 //gamecontrols.c
-void initWiimote();
+int initWiimote();
 void updateWiimotes();
 
 //gamehook.c
 void initGameHooks();
 
 //init.c
-int init();
+void initGameFiles(const char *appPath);
 
 //ipc.c
+void __ipc_interrupthandler(u32 irq,void *ctx);
 void initIpc();
 void ipcIrqHandler(int irqNo, OSContext *ctx);
 
@@ -234,7 +237,7 @@ void initLibc();
 
 //main.c
 extern char gameRootDir[512];
-extern u8 loaderRebootCode[6144];
+extern u8 *loaderRebootCode;
 extern bool gIsSystemShuttingDown;
 extern GameWiiInterface wiiIface;
 int main(int argc, char **argv);

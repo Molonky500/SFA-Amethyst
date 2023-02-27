@@ -384,7 +384,7 @@ static err_t bte_process_input(void *arg,struct l2cap_pcb *pcb,struct pbuf *p,er
 	return ERR_OK;
 }
 
-void BTE_Init(void)
+int BTE_Init(void)
 {
 	u32 level;
 	struct timespec tb;
@@ -398,7 +398,8 @@ void BTE_Init(void)
 	exiPuts("l2cap_init...\n");
 	l2cap_init();
 	exiPuts("physbusif_init...\n");
-	physbusif_init();
+	int r = physbusif_init();
+	if(r) return r;
 
 	OSInitThreadQueue(&btstate.hci_cmdq);
 	OSCreateAlarm(&btstate.timer_svc);
@@ -422,6 +423,7 @@ void BTE_Init(void)
 	OSSetPeriodicAlarm(&btstate.timer_svc,
 		timespec_to_ticks(&tb),timespec_to_ticks(&tb),
 		bt_alarmhandler);
+	return 0;
 }
 
 void BTE_Shutdown(void)

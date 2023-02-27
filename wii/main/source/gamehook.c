@@ -34,22 +34,6 @@ void initGameHooks() {
     //memset(0x90000000, 0, 16*1024*1024);
     //_dspReg[5] = 0x801; //DSP reset
 
-    SET_SCREEN_SOLID_YUV(255, 0, 148); //yellow
-    udelay(500000);
-    initAlloc();
-    exiPuts("loader2 alloc init OK\r\n");
-    initLibc();
-    exiPrintf("loader2 libc init OK, IPC buf %p - %p\r\n",
-        __ipcbufferLo, __ipcbufferHi);
-    __lwp_wkspace_init(1*1024*1024);
-    mtspr(920,(mfspr(920)&~0x40000000)); //DisableWriteGatherPipe();
-    __IPC_ClntInit();
-    __IOS_InitializeSubsystems();
-    exiPrintf("IOS init OK.\n IPC Buf: 0x%8x - 0x%8x\n Arena1:  0x%8x - 0x%8x\n Arena2:  0x%8x - 0x%8x\n",
-        __SYS_GetIPCBufferLo(), __SYS_GetIPCBufferHi(),
-        *(u32*)0x8000310C, *(u32*)0x80003110,
-        *(u32*)0x80003124, *(u32*)0x80003128);
-
     initCheckThread();
     //registerThreadForDebug(OSGetCurrentThread(),  "main");
     registerThreadForDebug((OSThread*)0x803AD848, "game");
@@ -76,18 +60,23 @@ void initGameHooks() {
     //exiPrintf("HID: %d\n", r);
     //IOS_Close(r);
 
+    SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
+    udelay(500000);
+    gameExceptionInit();
+    initSaveHacks();
+
     SET_SCREEN_SOLID_YUV(150, 42, 202); //orange
     udelay(500000);
     initDvdHack();
     exiPuts("initDvdHack: OK; wait for DVD...\r\n");
     while(!dvdThreadReady) OSYieldThread();
     DVD_DPRINT("DVD READY\r\n");
-    SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
-    udelay(500000);
-    gameExceptionInit();
-    initSaveHacks();
 
-    memcpy((void*)0x80001800, loaderRebootCode, 6144);
+    if(loaderRebootCode) {
+        memcpy((void*)0x80001800, loaderRebootCode, 6144);
+        free(loaderRebootCode);
+        loaderRebootCode = NULL;
+    }
     //doDspPatch();
 
     GameWiiInterface *wii = WII_IFACE_PTR;
@@ -96,7 +85,7 @@ void initGameHooks() {
 
     //Get some of the Wii's system settings and
     //apply them to the game's defaults.
-    s32 lang      = CONF_GetLanguage();
+    s32 lang = CONF_GetLanguage();
     switch(lang) { //translate to game's language enum
         case CONF_LANG_JAPANESE: lang = 4; break;
         case CONF_LANG_ENGLISH:  lang = 0; break;

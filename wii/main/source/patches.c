@@ -124,6 +124,13 @@ void mainLoopHook() {
     //    __ipcbufferLo, __ipcbufferHi,
     //    SYS_GetArena1Lo(), SYS_GetArena1Hi(),
     //    _mem2_heap_start, _mem2_heap_end);
+
+    static bool triedInit = false;
+    if((!triedInit) && (*(u32*)0x803dcec8) == 0xB) {
+        triedInit = true;
+        exiPuts("Telling thread to init Wiimote\n");
+        bInitWiimote = 1;
+    }
 }
 
 void cardUnlock_hook(void *addr, u32 size) {

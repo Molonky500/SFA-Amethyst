@@ -30,9 +30,12 @@ pushd ..
 popd
 if [ $ok -ne 0 ]; then exit $ok; fi
 
+echo "Combine..."
+./make-loadable-dol.py boot/boot.dol main/main.dol app/boot.dol 0x80100000
+ok=$?
+if [ $ok -ne 0 ]; then exit $ok; fi
+
 echo "Install..."
-mv boot/boot.dol app/boot.dol
-mv main/main.dol app/main.dol
 cp -r app/* $SD_MOUNT_PATH/apps/SFA/
 cp $DISCROOT/sys/* $SD_MOUNT_PATH/apps/SFA/sys/
 

@@ -60,7 +60,7 @@ void bootGame(DolHeader *header) {
         (1 << 12) | //GFX TCPE
         (1 << 10) | //DI 2
         0;
-    _ipcReg[0x194>>2] &= ~RESET_BITS; //clear = reset
+    //_ipcReg[0x194>>2] &= ~RESET_BITS; //clear = reset
 
     /*SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
     udelay(500000);
@@ -71,7 +71,7 @@ void bootGame(DolHeader *header) {
     // *(u16*)0xCC00500a = 1 | (1 << 11); //reset DSP
     udelay(500000);
     //_viReg[0] = 1; //un-reset
-    _ipcReg[0x194>>2] |= RESET_BITS;
+    //_ipcReg[0x194>>2] |= RESET_BITS;
     // *(u16*)0xCC00500a = 0;
     //_ipcReg[0x70>>2] |= 1; //enable EXI (makes no difference)
     udelay(1000000);
