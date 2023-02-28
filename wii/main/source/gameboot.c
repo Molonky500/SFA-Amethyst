@@ -5,7 +5,7 @@
 //save this for resets
 void (*gameEntry)(void);
 
-void bootGame(DolHeader *header) {
+void bootGame() {
     //protect ARAM area from accidental accesses.
     //XXX why is SYS_PROTECTCHAN0 not defined?
     //and does "prevent all access" mean SYS_PROTECTNONE
@@ -13,9 +13,9 @@ void bootGame(DolHeader *header) {
     //SYS_ProtectRange(0,
     //    (void*)0x90000000, 0x01000000, SYS_PROTECTRDWR);
     //__MaskIrq(0xFFFFFFFF);
-    gameEntry = (void(*)(void))header->entryPoint;
+    //gameEntry = (void(*)(void))header->entryPoint;
     //memset((void*)0x90000000, 0, 0x01000000);
-    //gameEntry = (void(*)(void))0x803fa480;
+    gameEntry = (void(*)(void))0x803fa480;
 
     /*exiPrintf("WPAD_Shutdown...\n");
     WPAD_Shutdown();

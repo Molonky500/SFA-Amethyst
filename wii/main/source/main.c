@@ -10,8 +10,11 @@ bool isReset = true; //is this shutdown really a reboot?
 
 extern u32 __crt0stack, __crt0stack_end;
 extern void *__ipcbufferLo, *__ipcbufferHi;
+int save_argc=0;
+char **save_argv = NULL;
 
 void _initIos() {
+    exiPuts("Init IOS...\n");
     SET_SCREEN_SOLID_YUV(255, 0, 148); //yellow
     //udelay(500000);
     initAlloc();
@@ -30,6 +33,8 @@ void _initIos() {
 }
 
 int main(int argc, char **argv) {
+    save_argc = argc;
+    save_argv = argv;
     SET_SCREEN_SOLID_YUV(255, 128, 128); //white
     if(argc > 0) isLaunchedFromLoader = true;
     //else we're launched in Dolphin from command line or something
@@ -47,23 +52,21 @@ int main(int argc, char **argv) {
     exiPrintf(" ---- loader2 start ---- \r\nstack: %08X - %08X\r\n",
         &__crt0stack_end, &__crt0stack);
 
-    _initIos();
+    //copy text0 back to correct place
+    //note Amethyst cuts off the first 0xA0 bytes because
+    //they would overlap with IOS globals, so this isn't
+    //the same address/length as normal
+    static void *text0_dst = (void*)0x800031A0;
+    static void *text0_src = (void*)0x80500000;
+    static u32   text0_len = 0x2480;
+    memcpy(text0_dst, text0_src, text0_len);
+    DCFlushRange(text0_dst, text0_len);
+    ICInvalidateRange(text0_dst, text0_len);
+    exiPuts("Moved text0 OK\n");
 
-    //init filesystem
-    if(!fatInitDefault()) {
-        exiPuts("FAT init failed\n");
-        return 1;
-    }
-    initGameFiles(argc > 0 ? argv[0] : NULL);
-
-    //back up the loader reboot code since loading
-    //the game DOL will overwrite it.
-    loaderRebootCode = malloc(loaderRebootCode);
-    if(loaderRebootCode) {
-        memcpy(loaderRebootCode, (void*)0x80001800, 6144);
-    }
-    DolHeader header;
-    loadGameDol(&header);
+    //no longer used
+    //DolHeader header;
+    //loadGameDol(&header);
 
     exiPrintf("game loader start; argc=%d\r\n", argc);
     for(int i=0; i<argc; i++) {
@@ -82,7 +85,7 @@ int main(int argc, char **argv) {
     L2Enhance();
 
     exiPuts("boot game\r\n");
-    bootGame(&header); //doesn't return
+    bootGame(); //doesn't return
     while(1);
     return 0;
 }

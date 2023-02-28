@@ -200,7 +200,7 @@ void exiInterrupt_hook();
 //gameboot.c
 extern void (*gameEntry)(void);
 void jumpToGame();
-void bootGame(DolHeader *header);
+void bootGame();
 
 //gamecontrols.c
 int initWiimote();
@@ -240,6 +240,8 @@ extern char gameRootDir[512];
 extern u8 *loaderRebootCode;
 extern bool gIsSystemShuttingDown;
 extern GameWiiInterface wiiIface;
+extern int save_argc;
+extern char **save_argv;
 int main(int argc, char **argv);
 void MyStmHandler(u32 event);
 void OSRebootHook();

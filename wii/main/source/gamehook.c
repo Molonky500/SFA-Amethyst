@@ -34,6 +34,23 @@ void initGameHooks() {
     //memset(0x90000000, 0, 16*1024*1024);
     //_dspReg[5] = 0x801; //DSP reset
 
+    exiPuts("Game init hook OK!\n");
+    _initIos();
+
+    //init filesystem
+    if(!fatInitDefault()) {
+        exiPuts("FAT init failed\n");
+        return 1;
+    }
+    initGameFiles(save_argc > 0 ? save_argv[0] : NULL);
+
+    //back up the loader reboot code since loading
+    //the game DOL will overwrite it.
+    loaderRebootCode = malloc(6144);
+    if(loaderRebootCode) {
+        memcpy(loaderRebootCode, (void*)0x80001800, 6144);
+    }
+
     initCheckThread();
     //registerThreadForDebug(OSGetCurrentThread(),  "main");
     registerThreadForDebug((OSThread*)0x803AD848, "game");
@@ -73,6 +90,7 @@ void initGameHooks() {
     DVD_DPRINT("DVD READY\r\n");
 
     if(loaderRebootCode) {
+        exiPrintf("Restoring loader reboot code from 0x%x\n", loaderRebootCode);
         memcpy((void*)0x80001800, loaderRebootCode, 6144);
         free(loaderRebootCode);
         loaderRebootCode = NULL;

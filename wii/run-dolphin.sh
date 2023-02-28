@@ -2,11 +2,15 @@
 # Build mod and run in Dolphin. (XXX not tested)
 #SD_MOUNT_PATH=/run/media/rena/WII
 SD_MOUNT_PATH=/home/rena/.local/share/dolphin-emu/Load/WiiSDSync
-pushd boot
-    make V=1
-    ok=$?
-popd
-if [ $ok -ne 0 ]; then exit $ok; fi
+# XXX move this
+DISCROOT=/home/rena/projects/sfa/DATA/files
+NEWDOL=$DISCROOT/../sys/main.dol
+
+#pushd boot
+#    make V=1
+#    ok=$?
+#popd
+#if [ $ok -ne 0 ]; then exit $ok; fi
 
 pushd main
     make V=1
@@ -15,7 +19,10 @@ popd
 if [ $ok -ne 0 ]; then exit $ok; fi
 
 echo "Combine..."
-./make-loadable-dol.py boot/boot.dol main/main.dol app/boot.dol 0x80100000
+./make-loadable-dol.py $NEWDOL \
+    main/main.dol \
+    main/build/main.elf.map \
+    app/boot.dol
 ok=$?
 if [ $ok -ne 0 ]; then exit $ok; fi
 

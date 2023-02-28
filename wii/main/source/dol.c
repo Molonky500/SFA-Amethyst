@@ -21,6 +21,7 @@ void printDolHeader(DolHeader *header) {
         header->entryPoint);
 }
 
+//XXX no longer used
 void loadGameDol(DolHeader *header) {
     char path[768];
     snprintf(path, sizeof(path), "%s/sys/main.dol", gameRootDir);
