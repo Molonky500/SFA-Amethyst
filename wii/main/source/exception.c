@@ -6,12 +6,14 @@ void OSExceptionInit_hook() {
     //we repurpose the memory for some unused handlers
     //to store our trampolines and such, so we disable
     //the game's original method and install them ourselves.
-    exiPrintf("%s\r\n", __FUNCTION__);
+    //exiPrintf("%s\r\n", __FUNCTION__);
+    SET_DEBUG_PORT(__LINE__);
 
     SET_SCREEN_SOLID_YUV(105, 212, 134); //magenta
-    udelay(500000);
+    //udelay(500000);
     *(u32*)0x803dddec = 0x80003000; //set exception handler table
     // *(u32*)0x803dde38 = 0x80003040; //set IRQ handler table
+    SET_DEBUG_PORT(__LINE__);
 
     static void *excAddrs[] = {
         (void*)0xFFFFFFFF, //(void*)0x80000100, //reset (not connected)
@@ -45,13 +47,26 @@ void OSExceptionInit_hook() {
         patch[0x16] = 0x60000000;
 
         //80240c90 = OSDefaultExceptionHandler
+        SET_DEBUG_PORT(__LINE__);
         __OSSetExceptionHandler(i, (void*)0x80240c90);
+        SET_DEBUG_PORT(__LINE__);
     }
 
+    SET_DEBUG_PORT(__LINE__);
     DCFlushRange((void*)0x80000300, 0x80001800 - 0x80000300);
     ICInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
 
-    //exiPrintf("%s done\r\n", __FUNCTION__);
+    //This is called immediately after this function, but,
+    //once exception handlers are installed, this needs to
+    //be called before we ever try to flush cache (which
+    //exiPuts does) or it will crash.
+    //There's no harm calling it twice, so let's just do it.
+    void (*__OSInitSystemCall)(void) = 0x80245bec;
+    __OSInitSystemCall();
+
+    SET_DEBUG_PORT(__LINE__);
+    exiPrintf("%s done\r\n", __FUNCTION__);
+    SET_DEBUG_PORT(__LINE__);
 }
 
 void gameExceptionInit() {
@@ -156,7 +171,7 @@ uint cause, void *addr) {
     alreadyExc = true;
 
     u32 msr = mfmsr();
-    udelay(500000);
+    //udelay(500000);
 
     char msg[1024];
     strcpy(msg, "ERR ........ ");

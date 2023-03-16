@@ -40,17 +40,18 @@ int main(int argc, char **argv) {
     //else we're launched in Dolphin from command line or something
     //and there's no loader to exit to.
 
-    //probe some GPIO stuff for debug
-    _ipcReg[0x64>>2]  = 0xFFFFFFFF; //AHBPROT: access everything
-    _ipcReg[0xFC>>2] |= 0x00FF0020; //allow PPC access
-    _ipcReg[0xDC>>2]  = 0xFFFFFFFF; //enable GPIOs
-    _ipcReg[0xC4>>2] |= 0x00FF0020; //set directions
+    SET_DEBUG_PORT(0x10);
+
+    //SET_DEBUG_PORT((((u32)_exiReg) >> 24) & 0xFF); udelay(10000);
+    //SET_DEBUG_PORT((((u32)_exiReg) >> 16) & 0xFF); udelay(10000);
+    //SET_DEBUG_PORT((((u32)_exiReg) >>  8) & 0xFF); udelay(10000);
+    //SET_DEBUG_PORT((((u32)_exiReg) >>  0) & 0xFF); udelay(10000);
+    //SET_DEBUG_PORT(0x99);
 
     //init debug prints
     exiPrintInit();
-    exiPuts("Hello world!\n");
-    exiPrintf(" ---- loader2 start ---- \r\nstack: %08X - %08X\r\n",
-        &__crt0stack_end, &__crt0stack);
+    SET_DEBUG_PORT(0x11);
+    //exiPuts("Hello world!\n");
 
     //copy text0 back to correct place
     //note Amethyst cuts off the first 0xA0 bytes because
@@ -60,33 +61,46 @@ int main(int argc, char **argv) {
     static void *text0_src = (void*)0x80500000;
     static u32   text0_len = 0x2480;
     memcpy(text0_dst, text0_src, text0_len);
+    SET_DEBUG_PORT(0x12);
     DCFlushRange(text0_dst, text0_len);
     ICInvalidateRange(text0_dst, text0_len);
     exiPuts("Moved text0 OK\n");
+    SET_DEBUG_PORT(0x13);
+
+    //SET_DEBUG_PORT(0x12);
+    //exiPrintf(" ---- loader2 start ---- \r\nstack: %08X - %08X\r\n",
+    //    &__crt0stack_end, &__crt0stack);
+    //SET_DEBUG_PORT(0x13);
 
     //no longer used
     //DolHeader header;
     //loadGameDol(&header);
 
-    exiPrintf("game loader start; argc=%d\r\n", argc);
+    /*exiPrintf("game loader start; argc=%d\r\n", argc);
     for(int i=0; i<argc; i++) {
         exiPrintf("argv[%d] = \"%s\"\r\n", i, argv[i]);
     }
 
     u32 version = *(u32*)0x80003140;
     exiPrintf("Running on IOS%d v%d.%d\r\n",
-        version >> 16, (version >> 8) & 0xFF, version & 0xFF);
+        version >> 16, (version >> 8) & 0xFF, version & 0xFF);*/
 
     exiPuts("apply patches\r\n");
     doPatches();
+    SET_DEBUG_PORT(0x14);
 
     wiiIface.magic = WII_IFACE_MAGIC;
     WII_IFACE_PTR = &wiiIface;
     L2Enhance();
+    SET_DEBUG_PORT(0x15);
 
     exiPuts("boot game\r\n");
+    SET_DEBUG_PORT(0x16);
     bootGame(); //doesn't return
-    while(1);
+    while(1) {
+        SET_DEBUG_PORT(0x1F); udelay(10000);
+        SET_DEBUG_PORT(0xEE); udelay(10000);
+    }
     return 0;
 }
 

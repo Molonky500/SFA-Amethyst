@@ -23,7 +23,7 @@ void bootGame() {
     resetBluetooth();
     USB_Deinitialize();*/
 
-    exiPrintf("Jumping to game entry point: %08X\r\n", gameEntry);
+    //exiPrintf("Jumping to game entry point: %08X\r\n", gameEntry);
     //dumpMem(gameEntry, 64);
     IRQ_Disable();
 
@@ -44,6 +44,7 @@ void bootGame() {
     boot->memorySize              = 0x01800000;
     //boot->consoleType             = 0x10000006;
     boot->arenaHi                 = 0x81800000;
+    *(u32*)0x800000F4 = 0; //dvdBI2
 
     //reset some hardware
     u32 RESET_BITS =
@@ -51,7 +52,7 @@ void bootGame() {
         (1 << 21) | //VI1
         (1 << 20) | //VI
         //(1 << 19) | //IOPI (reboots system)
-        (1 << 18) | //IOMEM
+        //(1 << 18) | //IOMEM
         (1 << 17) | //IODI
         (1 << 16) | //IOEXI
         (1 << 15) | //IOSI
@@ -60,21 +61,21 @@ void bootGame() {
         (1 << 12) | //GFX TCPE
         (1 << 10) | //DI 2
         0;
-    //_ipcReg[0x194>>2] &= ~RESET_BITS; //clear = reset
+    _ipcReg[0x194>>2] &= ~RESET_BITS; //clear = reset
 
     /*SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
     udelay(500000);
     SET_SCREEN_SOLID_YUV(255, 0, 148); //yellow
     udelay(500000);*/
     //_viReg[1] = 0; //unsure, but official code does it on reset
-    //_viReg[0] = 0; //reset
+    _viReg[0] = 0; //reset
     // *(u16*)0xCC00500a = 1 | (1 << 11); //reset DSP
     udelay(500000);
     //_viReg[0] = 1; //un-reset
-    //_ipcReg[0x194>>2] |= RESET_BITS;
+    _ipcReg[0x194>>2] |= RESET_BITS;
     // *(u16*)0xCC00500a = 0;
     //_ipcReg[0x70>>2] |= 1; //enable EXI (makes no difference)
-    udelay(1000000);
+    //udelay(1000000);
     gameEntry();
     //should never reach here...
     //SET_SCREEN_SOLID_YUV(76, 84, 255); //red

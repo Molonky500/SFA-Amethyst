@@ -10,7 +10,7 @@ vu16* const _viReg  = (u16*)0xCC002000;
 vu32* const _piReg  = (u32*)0xCC003000;
 vu16* const _memReg = (u16*)0xCC004000;
 vu16* const _dspReg = (u16*)0xCC005000;
-vu32* const _ipcReg = (u32*)0xCD000000;
+vu32* const _ipcReg = (u32*)0xCD800000;
 vu32* const _exiReg = (u32*)0xCD006800;
 vu32* const _aiReg  = (u32*)0xCD006C00;
 u8  cs    = 0;
@@ -150,6 +150,8 @@ void doUartTest(const char *str) {
 }
 
 bool bPause = true;
+bool bUartTest = false;
+uint8_t debugPort = 1;
 
 int main(int argc, char **argv) {
     int err = init();
@@ -163,15 +165,26 @@ int main(int argc, char **argv) {
         (1 << 10) | //enable EXT interrupt
         (1 << 2); //enable TC interrupt
 
+    _ipcReg[0x64>>2]  = 0xFFFFFFFF; //AHBPROT: access everything
+    _ipcReg[0xFC>>2] |= 0x00FF0020; //allow PPC access
+    _ipcReg[0xDC>>2]  = 0xFFFFFFFF; //enable GPIOs
+    _ipcReg[0xC4>>2] |= 0x00FF0020; //set directions
+
+    int debugPortCooldown = 0;
     int selCh = 0;
     //u32 data  = 0xB410B420;
     u32 data  = 0xAABBCCDD;
     while(1) {
         VIDEO_WaitVSync();
         PAD_ScanPads();
+        static const char *spinner = "/-\\|";
+        static uint32_t spinnerTick = 0;
         printf(
             "\x1B[2;0H\x1B[2K" //home, clear line
-            "%s.\n", bPause ? "PAUSED  " : "Running");
+            "%c %s  UART Test: %s   \n", spinner[(spinnerTick >> 2) & 3],
+            bPause ? "PAUSED  " : "Running",
+            bUartTest ? "ON " : "OFF");
+        spinnerTick++;
 
         if(!bPause) {
             for(int iChan=0; iChan<3; iChan++) {
@@ -208,7 +221,8 @@ int main(int argc, char **argv) {
             (cs & 0x04) ? '2' : '.',
             (cs & 0x02) ? '1' : '.',
             (cs & 0x01) ? '0' : '.');
-        printf("[A] Write  [B] Pause  [Z] UART Test\n");
+        printf("[A] Write  [B] Pause  [Z] UART Test [L/R] DebugPort: %02X\n",
+            debugPort);
 
         printf("head=%4d tail=%4d EXI=%9d EXT=%9d TC=%9d\n",
             rxHead, rxTail, exi1cnt, ext1cnt, tc1cnt);
@@ -220,7 +234,8 @@ int main(int argc, char **argv) {
         u32 bDown = PAD_ButtonsDown(PAD_CHAN0);
         u32 bHeld = PAD_ButtonsHeld(PAD_CHAN0);
         if(bDown & PAD_BUTTON_START) quit(NULL);
-        if(bHeld & PAD_TRIGGER_Z) {
+        if(bDown & PAD_TRIGGER_Z) bUartTest = !bUartTest;
+        if(bUartTest) {
             doUartTest(NULL);
             //doUartTest("boot game\n");
             //doUartTest("Locked cache machine check handler installed\n");
@@ -256,18 +271,31 @@ int main(int argc, char **argv) {
                 (1 << 0); //start
             while(_exiReg[(selCh*5)+3] & 1); //wait for transfer
         }
-        if(bDown & PAD_BUTTON_B) bPause = !bPause;
+        if(bDown & PAD_BUTTON_B) {
+            bPause = !bPause;
+            SET_DISC_LED(!bPause);
+        }
         if(bDown & PAD_BUTTON_UP) selCh--;
         if(bDown & PAD_BUTTON_DOWN) selCh++;
-        if(bDown & PAD_TRIGGER_L) {
-            static u8 count = 0;
-            _ipcReg[63] |= 0x00FF0000;
-            u32 gpio = _ipcReg[48];
-            gpio &= ~0x00FF0000; //debug port
-            count++;
-            gpio |= (count << 16);
-            gpio ^= 0x20; //disc LED
-            _ipcReg[48] = gpio;
+        if(bHeld & PAD_TRIGGER_L) {
+            /*if(debugPort == 0xFF) debugPort = 1;
+            else debugPort <<= 1;
+            if(debugPort == 0) debugPort = 0xFF;*/
+            if(debugPortCooldown) debugPortCooldown--;
+            else {
+                SET_DEBUG_PORT(++debugPort);
+                debugPortCooldown = 5;
+            }
+        }
+        if(bHeld & PAD_TRIGGER_R) {
+            /*if(debugPort == 0xFF) debugPort = 0x80;
+            else debugPort >>= 1;
+            if(debugPort == 0) debugPort = 0xFF;*/
+            if(debugPortCooldown) debugPortCooldown--;
+            else {
+                SET_DEBUG_PORT(--debugPort);
+                debugPortCooldown = 5;
+            }
         }
         if(selCh > 2) selCh = 0;
         if(selCh < 0) selCh = 2;

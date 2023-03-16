@@ -39,11 +39,11 @@ __argv:
 	.long 0 # end address of argv
 
 startup:
-	bl		__InitBATS     # Initialize BATs to a clear and known state
-	bl		__InitGPRS     # Initialize the General Purpose Registers
-	bl		__InitHardware # Initialize some aspects of the Hardware
-	bl		__InitSystem   # Initialize more cache aspects, clear a few SPR's, and disable interrupts.
-	bl		__CheckARGV    # check for argv & initialise struct
+	//bl		__InitBATS     # Initialize BATs to a clear and known state
+	//bl		__InitGPRS     # Initialize the General Purpose Registers
+	//bl		__InitHardware # Initialize some aspects of the Hardware
+	//bl		__InitSystem   # Initialize more cache aspects, clear a few SPR's, and disable interrupts.
+	//bl		__CheckARGV    # check for argv & initialise struct
 
 	lis		r3,__isIPL@h
 	ori		r3,r3,__isIPL@l
@@ -69,81 +69,15 @@ startup:
 	bl		_memset
 
 1:
+	lis     r20, 0xCD80 //IPC reg
+	lis     r4,  0xFF00
+	ori     r4,  r4,  0xFFFF
+	lwz     r3,  0xC0(r20)
+	and     r3,  r3,  r4
+	oris    r3,  r3,  0x01
+	stw     r3,  0xC0(r20) //write debug port
+
 	b      SYS_Init # Branch to the user code!
-
-__InitGPRS:
-	# Clear all of the GPR's to 0
-	li      r0,0
-	li      r3,0
-	li      r4,0
-	li      r5,0
-	li      r6,0
-	li      r7,0
-	li      r8,0
-	li      r9,0
-	li      r10,0
-	li      r11,0
-	li      r12,0
-	li      r14,0
-	li      r15,0
-	li      r16,0
-	li      r17,0
-	li      r18,0
-	li      r19,0
-	li      r20,0
-	li      r21,0
-	li      r22,0
-	li      r23,0
-	li      r24,0
-	li      r25,0
-	li      r26,0
-	li      r27,0
-	li      r28,0
-	li      r29,0
-	li      r30,0
-	li      r31,0
-
-	lis		sp,__crt0stack@h		    # we take 0x8173FFF0 as the topmost starting point for our stack,this gives us ~128Kb Stack
-	ori		sp,sp,__crt0stack@l
-	addi	sp,sp,-4
-	stw		r0,0(sp)
-	stwu	sp,-56(sp)
-
-	//load r2 and r13 with values the game uses.
-	lis     r2,  0x803E
-	ori     r2,  r2,  0x6500
-	lis     r13, 0x803E
-	ori     r13, r13, 0x31E0
-	blr
-
-__InitHardware:
-	# Enable the Floating Point Registers
-	mfmsr   r3
-	ori     r3,r3,MSR_FP
-	mtmsr   r3
-
-	mflr	r31
-	bl		__InitPS 			# Initialize Paired Singles
-	bl		__InitFPRS		 	# Initialize the FPR's
-	bl		__InitCache 		# Initialize the system caches
-	mtlr	r31
-	blr
-
-	//r3 = ptr, r4 = fill, r5 = size
-	.globl _memset
-_memset:
-	clrlwi.	r6,r5,29
-	srwi	r5,r5,2
-	subi	r3,r3,4
-	mtctr	r5
-1:	stwu	r4,4(r3)
-	bdnz	1b
-	cmplwi	r6,0
-	beq		3f
-2:	stbu	r4,1(r3)
-	addic.	r6,r6,-1
-	bne+	2b
-3:	blr
 
 	.section .bss
 	.balign 8

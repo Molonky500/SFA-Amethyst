@@ -19,8 +19,12 @@ int main(int argc, char **argv);
 
 void SYS_Init(void) {
     //called from crt0.S
-    u32 level;
+	SET_DEBUG_PORT(__LINE__);
+	u32 level;
 	_CPU_ISR_Disable(level);
+	//__SYS_PreInit();
+	//SET_DEBUG_PORT(__LINE__);
+	//_V_EXPORTNAME();
 	//__lowmem_init();
 	SYS_SetArena1Lo((void*)0x92000000);
 	SYS_SetArena1Hi((void*)0x92100000);
@@ -29,10 +33,19 @@ void SYS_Init(void) {
     __ipcbufferlo = (void*)__ipcbufferLo; //what the fuck
 	__ipcbufferhi = (void*)__ipcbufferHi;
 	//why would you have these differ only by one letter case
+	SET_DEBUG_PORT(__LINE__);
 	__lwp_wkspace_init(KERNEL_HEAP);
 	//__lwp_priority_init();
 	//__lwp_watchdog_init();
+	SET_DEBUG_PORT(__LINE__);
+	//__IPC_ClntInit();
+	//SET_DEBUG_PORT(__LINE__);
+	//__libc_init(1);
+	//SET_DEBUG_PORT(__LINE__);
+	//SYS_PreMain();
+	SET_DEBUG_PORT(__LINE__);
     main(_argc, _argc_raw);
+	SET_DEBUG_PORT(__LINE__);
 }
 
 void* __SYS_GetIPCBufferLo(void) {

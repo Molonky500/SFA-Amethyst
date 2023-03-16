@@ -9,6 +9,11 @@ void exiPuts(const char *str) {
     //LWP_MutexLock(exiMutex);
     u32 irq = IRQ_Disable();
     memset(dmaBuf, 0, sizeof(dmaBuf));
+    //SET_DEBUG_PORT(0xE0);
+    //SET_DEBUG_PORT((((u32)dmaBuf) >> 24) & 0xFF); udelay(10000);
+    //SET_DEBUG_PORT((((u32)dmaBuf) >> 16) & 0xFF); udelay(10000);
+    //SET_DEBUG_PORT((((u32)dmaBuf) >>  8) & 0xFF); udelay(10000);
+    //SET_DEBUG_PORT((((u32)dmaBuf) >>  0) & 0xFF); udelay(10000);
 
     //0x800400 is address for UART.
     //high bit indicates write.
@@ -23,6 +28,17 @@ void exiPuts(const char *str) {
     //while(*str == '\r' || *str == '\n' || *str == '\x01') str++;
 
     ssize_t len = strlen(str);
+    //SET_DEBUG_PORT(0xE1);
+    //udelay(10000);
+    //SET_DEBUG_PORT(len & 0xFF);
+    //udelay(10000);
+    //SET_DEBUG_PORT((len >> 8) & 0xFF);
+    //udelay(10000);
+
+    //for(int i=0; i<len; i++) {
+    //    SET_DEBUG_PORT(str[i]); udelay(10000);
+    //}
+
     while(len > 0 && *str) {
         int outPos=0;
         #if USE_CUSTOM_GECKO
@@ -99,23 +115,35 @@ void exiPuts(const char *str) {
             //(5 <<  4) | //32MHz
             (0 <<  4) | //1MHz
             //(4 <<  4) | //16MHz
-        #if USE_CUSTOM_GECKO
-            (1 <<  7); //device 0 (Gecko)
+            #if USE_CUSTOM_GECKO
+                (1 <<  7); //device 0 (Gecko)
+            #else
+                (2 <<  7); //device 1 (UART)
+            #endif
+        #if 1
+            exi[1] = MEM_VIRTUAL_TO_PHYSICAL(dmaBuf); //DMA source
+            exi[2] = (outPos & ~0x1F); //DMA length
+            exi[3] = (1 << 2) | //write
+                (1 << 1) | //use DMA
+                (1 << 0); //start now
+            while(exi[3] & 1); //wait for transfer
+            //exi[0] |= (1 << 1) | (1 << 11); //clear interrupt flags
+            //exi[2] = prev2;
+            //exi[1] = prev1;
         #else
-            (2 <<  7); //device 1 (UART)
+            SET_DEBUG_PORT(0xFF); udelay(10000);
+            for(int i=0; i<outPos; i++) {
+                SET_DEBUG_PORT(dmaBuf[i]); udelay(10000);
+                exi[5] = dmaBuf[i];
+                exi[4] = (1 << 2); //write 1 byte immediate
+                while(exi[3] & 1); //wait for transfer
+            }
+            SET_DEBUG_PORT(0xEE); udelay(10000);
         #endif
-        exi[1] = MEM_VIRTUAL_TO_PHYSICAL(dmaBuf); //DMA source
-        exi[2] = (outPos & ~0x1F); //DMA length
-        exi[3] = (1 << 2) | //write
-            (1 << 1) | //use DMA
-            (1 << 0); //start now
-        while(exi[3] & 1); //wait for transfer
-        //exi[0] |= (1 << 1) | (1 << 11); //clear interrupt flags
-        //exi[2] = prev2;
-        //exi[1] = prev1;
         exi[0] = prev0;
         len -= copyLen;
     }
+    //SET_DEBUG_PORT(0xEA);
     IRQ_Restore(irq);
     //LWP_MutexUnlock(exiMutex);
 }
@@ -130,10 +158,10 @@ void exiPrintf(const char *fmt, ...) {
 }
 
 void exiPrintInit() {
+    //SET_DEBUG_PORT(0xD1);
     u32 irq = IRQ_Disable();
     //LWP_MutexInit(&exiMutex, false);
-    //XXX fishy constant
-    //_exiReg[0] = (vu32)0xCD006800; //channel 0
+    //_ipcReg[0x70>>2] |= 1; //enable EXI (makes no difference)
     while(_exiReg[3] & 1); //wait for TSTART
     _exiReg[3] = 0;
     //(*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
@@ -142,6 +170,7 @@ void exiPrintInit() {
     static volatile u32 *exi = (volatile u32*)0xCD006814; //channel 1
     exi[0] |= (1 << 0);
 
+    //SET_DEBUG_PORT(0xD2);
     IRQ_Restore(irq);
     exiPuts("EXI init OK\r\n");
 }

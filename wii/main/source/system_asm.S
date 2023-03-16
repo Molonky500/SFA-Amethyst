@@ -1,5 +1,16 @@
 #include <asm.h>
 
+.section .text,"x"
+.globl WriteDebugPort
+.extern __InitBATS
+.extern __InitPS
+.extern __InitFPRS
+.extern __InitCache
+.extern __InitSystem
+.extern __sbss_start, __bss_end, __CheckARGV
+.globl _start, __main, __system_argv
+.globl _start_hack
+
 //XXX some of these are redundant
 .global get_r1
 .global get_r2
@@ -10,6 +21,293 @@
 .global get_msr
 .global set_msr
 .global get_dar
+
+/** This is the application's "bootloader".
+ *  This is a hideous hack to work around HBC refusing to load
+ *  apps that have sections at certain addresses.
+ *  The build script appends the "real" DOL to this one and
+ *  updates the section headers to load that DOL to a specific
+ *  RAM address.
+ *  This program just copies that DOL to the address it should
+ *  be loaded at and jumps to it.
+ *  This needs to be in this file instead of a file of its own
+ *  because reasons.
+ */
+
+#define DOL_NUM_TEXT_SECTIONS 7
+#define DOL_NUM_DATA_SECTIONS 11
+#define DOL_SECTION_SIZE ((DOL_NUM_TEXT_SECTIONS+DOL_NUM_DATA_SECTIONS)*4)
+
+_start_hack:
+	b startup2
+	.long	0x5f617267
+__argv: //XXX use this
+	.long 0 # argv magic
+	.long 0 # command line
+	.long 0 # command line length
+	.long 0 # argc
+	.long 0 # argv
+	.long 0 # end address of argv
+
+startup2:
+	bl		__InitGPRS     # Initialize the General Purpose Registers
+
+	bl .getpc
+	.getpc:
+		mflr r14
+
+	//set up debug port
+	lis     r20, 0xCD80 //IPC reg
+	lis     r3,  0xFFFF
+	ori     r3,  r3,  0xFFFF
+	stw     r3,  0x64(r20) //AHBPROT: access everything
+	lis     r4,  0x00FF
+	ori     r4,  r4,  0x0020
+	lwz     r5,  0xFC(r20)
+	or      r5,  r5,  r4
+	stw     r5,  0xFC(r20) //allow PPC access
+	stw     r3,  0xDC(r20) //enable GPIOs
+	lwz     r5,  0xC4(r20)
+	or      r5,  r5,  r4
+	stw     r5,  0xC4(r20) //set directions
+
+	li      r3,  0x69
+	bl      WriteDebugPort
+
+	/* //dump PC
+	mr      r15, r14
+	li      r16, 4 //number of bytes to dump
+.nextbyte:
+	srwi    r3,  r14, 24
+	slwi    r14, r14,  8
+	bl      WriteDebugPort
+
+	subi    r16, r16, 1
+	cmpwi   r16, 0
+	bne     .nextbyte */
+
+	//bl		__InitBATS     # Initialize BATs to a clear and known state
+	//li      r3,  0xB9
+	//bl      WriteDebugPort
+
+	bl		__InitHardware # Initialize some aspects of the Hardware
+	li      r3,  0x6A
+	bl      WriteDebugPort
+
+	bl		__InitSystem   # Initialize more cache aspects, clear a few SPR's, and disable interrupts.
+	li      r3,  0x6B
+	bl      WriteDebugPort
+
+	//this works, so the code IS running...
+	//lis     r4,  0
+	//stw     r4,  0x0194(r20) //reboot
+
+	//load DOL
+	li      r0,  0 //I don't *think* this is needed for cache ops?
+	lis     r15, 0x8051 //src addr
+
+    //get BSS range and zero it
+    addi    r14, r15, (DOL_SECTION_SIZE * 3)
+    lwz     r3,  0(r14) //addr
+    lwz     r4,  4(r14) //size
+	//lis     r5,  0x7FFF
+	//ori     r5,  r5,  0xFFFF
+	//and     r3,  r3,  r5 //clear high bit of address
+	/*bl      DCZeroRange
+    lwz     r3,  0(r14) //addr
+    lwz     r4,  4(r14) //size
+	bl      ICInvalidateRange*/
+
+	li      r6,  0
+	srwi    r4,  r4,  2
+	mtctr   r4
+1:
+	stw     r6,  4(r3)
+	dcbst   r0,  r3
+	icbi    r0,  r3 //more than needed but oh well
+	addi    r3,  r3,  4
+	bdnz    1b
+
+    //copy sections to appropriate places
+    li      r16, DOL_NUM_TEXT_SECTIONS + DOL_NUM_DATA_SECTIONS //count
+    //subi    r17, r15,  4 //src addr
+	mr      r17, r15
+.nextSection:
+    //check count
+    cmpwi   r16, 0
+    beq     .blastoff
+    subi    r16, r16, 1
+
+    //read section
+    lwz     r4,  0(r17) // get offset
+    lwz     r5,  DOL_SECTION_SIZE(r17) // get address
+    lwz     r6,  (DOL_SECTION_SIZE*2)(r17) // get size
+	addi    r17, r17, 4
+    cmpwi   r6,  0 //size is zero?
+    beq     .nextSection
+	//lis     r7,  0x7FFF
+	//ori     r7,  r7,  0xFFFF
+	//and     r5,  r5,  r7 //clear high bit of address
+
+    //adjust for lwzu
+    subi    r4,  r4,  4
+    subi    r5,  r5,  4
+    add     r4,  r4,  r15
+
+    //copy section
+.copy:
+    lwzu    r8,  4(r4)
+    stwu    r8,  4(r5)
+    subi    r6,  r6,  4
+	dcbst   r0,  r5
+	icbi    r0,  r5 //more than needed but oh well
+    cmpwi   r6,  0
+    bne     .copy
+
+    //flush caches
+    /*lwz     r3,  DOL_SECTION_SIZE(r17) // get address
+    lwz     r4,  (DOL_SECTION_SIZE*2)(r17) // get size
+    bl      DCFlushRange
+    lwz     r3,  DOL_SECTION_SIZE(r17) // get address
+    lwz     r4,  (DOL_SECTION_SIZE*2)(r17) // get size
+    bl      ICInvalidateRange*/
+
+    b .nextSection
+
+.blastoff:
+	sync
+	isync
+	//bl		__InitBATS     # Initialize BATs to a clear and known state
+
+	//dump the entry point out the debug port...
+	//note, this isn't great because there's no way to tell
+	//when there's two or more of the same byte in a row.
+	/*
+	lwz     r15, 8(r14) //the bytes at the entry point
+	//addi    r15, r14, 8 //the entry point itself
+	subi    r15, r15, 1 //for lbzu
+	//lis     r4,  0x7FFF
+	//ori     r4,  r4,  0xFFFF
+	//and     r15, r15, r4
+	li      r16, 16 //number of bytes to dump
+.nextbyte:
+	lbzu    r3,  1(r15)
+	bl      WriteDebugPort
+	lis     r3,  0x00FF
+	mtctr   r3
+.delay:
+	bdnz    .delay
+	subi    r16, r16, 1
+	cmpwi   r16, 0
+	bne     .nextbyte */
+
+	li      r3,  0x42
+	bl      WriteDebugPort
+
+	//jump to entry point (which is _start, not _start_hack)
+    lwz     r3,  8(r14) //entry point
+	//lis     r4,  0x7FFF
+	//ori     r4,  r4,  0xFFFF
+	//and     r3,  r3,  r4
+    mtctr   r3
+    bctr
+
+WriteDebugPort:
+	/*lis     r5,  0xCD80 //IPC reg
+	lis     r4,  0xFF00
+	ori     r4,  r4,  0xFFFF
+	lwz     r6,  0xC0(r5)
+	and     r6,  r6,  r4
+	slwi    r3,  r3,  16
+	or      r6,  r6,  r3
+	stw     r6,  0xC0(r5) //write debug port
+	mfctr   r4
+	lis     r3,  0x0005
+.delay1:
+	bdnz    .delay1
+	xoris   r6,  r6,  0xFF //invert debug port bits
+	stw     r6,  0xC0(r5) //write debug port
+	lis     r3,  0x0005
+	mtctr   r3
+.delay2:
+	bdnz    .delay2
+	mtctr   r4*/
+	blr
+
+__InitGPRS:
+	# Clear all of the GPR's to 0
+	li      r0,0
+	li      r3,0
+	li      r4,0
+	li      r5,0
+	li      r6,0
+	li      r7,0
+	li      r8,0
+	li      r9,0
+	li      r10,0
+	li      r11,0
+	li      r12,0
+	li      r14,0
+	li      r15,0
+	li      r16,0
+	li      r17,0
+	li      r18,0
+	li      r19,0
+	li      r20,0
+	li      r21,0
+	li      r22,0
+	li      r23,0
+	li      r24,0
+	li      r25,0
+	li      r26,0
+	li      r27,0
+	li      r28,0
+	li      r29,0
+	li      r30,0
+	li      r31,0
+
+	lis		sp,__crt0stack@h
+	ori		sp,sp,__crt0stack@l
+	addi	sp,sp,-4
+	stw		r0,0(sp)
+	stwu	sp,-56(sp)
+
+	//load r2 and r13 with values the game uses.
+	lis     r2,  0x803E
+	ori     r2,  r2,  0x6500
+	lis     r13, 0x803E
+	ori     r13, r13, 0x31E0
+	blr
+
+__InitHardware:
+	# Enable the Floating Point Registers
+	mfmsr   r3
+	ori     r3,r3,MSR_FP
+	mtmsr   r3
+
+	mflr	r31
+	bl		__InitPS 			# Initialize Paired Singles
+	bl		__InitFPRS		 	# Initialize the FPR's
+	bl		__InitCache 		# Initialize the system caches
+	mtlr	r31
+	blr
+
+	//r3 = ptr, r4 = fill, r5 = size
+	.globl _memset
+_memset:
+	clrlwi.	r6,r5,29
+	srwi	r5,r5,2
+	subi	r3,r3,4
+	mtctr	r5
+1:	stwu	r4,4(r3)
+	bdnz	1b
+	cmplwi	r6,0
+	beq		3f
+2:	stbu	r4,1(r3)
+	addic.	r6,r6,-1
+	bne+	2b
+3:	blr
+
 
 get_r1:
     mr r3, r1
@@ -48,12 +346,19 @@ __realmode:
 	mfmsr	r3
 	rlwinm	r3,r3,0,28,25
 	mtsrr1	r3
+	mflr    r29
+	li      r3,  0x77
+	bl      WriteDebugPort
+	mtlr    r29
 	rfi
 
 	// complete init sequence taken from bootmii's ppc skeleton. thanks to segher
 	// after a talk with dhewg we came to that point that it's good to wipe+setup BATS correctly
 	.globl __configBATS
 __configBATS:
+	mflr    r29
+	li      r3,  0xC1
+	bl      WriteDebugPort
 	// HID0 = 00110c64:
 	// bus checkstops off, sleep modes off,
 	// caches off, caches invalidate,
@@ -136,6 +441,9 @@ __configBATS:
 	mflr	r3
 	oris    r3,r3,0x8000
 	mtsrr0	r3
+	li      r3,  0xCF
+	bl      WriteDebugPort
+	mtlr    r29
 	rfi
 
 	.globl __InitFPRS
@@ -392,9 +700,13 @@ __reset:
 __InitBATS:
 	mflr	r31
 	oris	r31,r31,0x8000
+	li      r3,  0xB1
+	bl      WriteDebugPort
 	lis		r3,__configBATS@h
 	ori		r3,r3,__configBATS@l
 	bl		__realmode
+	li      r3,  0xB2
+	bl      WriteDebugPort
 	mtlr	r31
 	blr
 
@@ -419,88 +731,3 @@ zeroF:
 	.double 0.0
 zeroPS:
 	.float 0.0,0.0
-
-
-/** This is the application's "bootloader".
- *  This is a hideous hack to work around HBC refusing to load
- *  apps that have sections at certain addresses.
- *  The build script appends the "real" DOL to this one and
- *  updates the section headers to load that DOL to a specific
- *  RAM address.
- *  This program just copies that DOL to the address it should
- *  be loaded at and jumps to it.
- *  This needs to be in this file instead of a file of its own
- *  because reasons.
- */
-
-#define DOL_NUM_TEXT_SECTIONS 7
-#define DOL_NUM_DATA_SECTIONS 11
-#define DOL_SECTION_SIZE ((DOL_NUM_TEXT_SECTIONS+DOL_NUM_DATA_SECTIONS)*4)
-
-.globl _start_hack
-_start_hack:
-    lis     r15, 0x8051 //src addr
-
-    //get BSS range and zero it
-    addi    r14, r15, (DOL_SECTION_SIZE * 3)
-    lwz     r3,  0(r14) //addr
-    lwz     r4,  4(r14) //size
-	/*bl      DCZeroRange
-    lwz     r3,  0(r14) //addr
-    lwz     r4,  4(r14) //size
-	bl      ICInvalidateRange*/
-
-	//seems we can't call functions here as it'll get
-	//the wrong address...
-	subi    r3,  r3,  4 //for stwu
-	li      r6,  0
-	srwi    r4,  r4,  2
-	mtctr   r4
-1:
-	stwu    r6,  4(r3)
-	bdnz    1b
-
-    //copy sections to appropriate places
-    li      r16, DOL_NUM_TEXT_SECTIONS + DOL_NUM_DATA_SECTIONS //count
-    subi    r17, r15,  4 //src addr
-.nextSection:
-    //check count
-    cmpwi   r16, 0
-    beq     .blastoff
-    subi    r16, r16, 1
-
-    //read section
-    lwzu    r4,  4(r17) // get offset
-    lwz     r5,  DOL_SECTION_SIZE(r17) // get address
-    lwz     r6,  (DOL_SECTION_SIZE*2)(r17) // get size
-    cmpwi   r6,  0 //size is zero?
-    beq     .nextSection
-
-    //adjust for lwzu
-    subi    r4,  r4,  4
-    subi    r5,  r5,  4
-    add     r4,  r4,  r15
-
-    //copy section
-.copy:
-    lwzu    r8,  4(r4)
-    stwu    r8,  4(r5)
-    subi    r6,  r6,  4
-    cmpwi   r6,  0
-    bne     .copy
-
-    //flush caches
-    /*lwz     r3,  DOL_SECTION_SIZE(r17) // get address
-    lwz     r4,  (DOL_SECTION_SIZE*2)(r17) // get size
-    bl      DCFlushRange
-    lwz     r3,  DOL_SECTION_SIZE(r17) // get address
-    lwz     r4,  (DOL_SECTION_SIZE*2)(r17) // get size
-    bl      ICInvalidateRange*/
-
-    b .nextSection
-
-.blastoff:
-    //jump to entry point (which is _start, not _start_hack)
-    lwz     r3,  8(r14) //entry point
-    mtctr   r3
-    bctr

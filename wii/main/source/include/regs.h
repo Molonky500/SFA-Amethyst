@@ -20,8 +20,9 @@ extern vu16* const _viReg;
 extern vu32* const _piReg;
 extern vu16* const _memReg;
 extern vu16* const _dspReg;
-extern vu32* const _ipcReg;
+//extern vu32* const _ipcReg;
 extern vu32* const _exiReg;
 extern vu32* const _aiReg;
+#define _ipcReg ((vu32*)0xCD800000)
 
 #endif //__REGS_H__

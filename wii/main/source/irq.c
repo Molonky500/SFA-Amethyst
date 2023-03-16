@@ -31,6 +31,7 @@ static const char *causes[] = {
 void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
     //copied from libogc to handle Wii IRQs
     u32 i, icause=0, intmask, irq=0;
+	SET_DEBUG_PORT(0x33);
 
 	u32 rawCause = _piReg[0];
 	u32 mask     = _piReg[1];
@@ -342,7 +343,9 @@ void OSEnableInterrupts_hook() {
     //_viReg[0] = 0; //reset
     //_viReg[0x1B] = 1; //progressive scan
     //exiPuts("About to enable interrupts\r\n");
+	SET_DEBUG_PORT(0x20);
     OSEnableInterrupts();
+	SET_DEBUG_PORT(0x21);
     //exiPuts("Returned from OSEnableInterrupts\r\n");
 }
 

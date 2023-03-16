@@ -48,8 +48,8 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
             uint32_t relDest = (uint32_t)trampoline - addr;
             *(uint32_t*)addr = (relDest & 0x03FFFFFC) | (isBl ? 1 : 0) | 0x48000000;
 
-            exiPrintf("trampoline at %08X -> %08X op %08X -> %08X (bl=%d)\r\n",
-                addr, trampoline, oldOp, *(uint32_t*)addr, isBl);
+            //exiPrintf("trampoline at %08X -> %08X op %08X -> %08X (bl=%d)\r\n",
+            //    addr, trampoline, oldOp, *(uint32_t*)addr, isBl);
             *(trampoline++) = 0x3D800000 | ((u32)target >> 16); //lis r12, aaaa
             *(trampoline++) = 0x618C0000 | ((u32)target & 0xFFFF); //ori r12, r12, aaaa
             *(trampoline++) = 0x7D8903A6; //mtspr CTR,r12
@@ -58,8 +58,8 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
             ICInvalidateRange((void*)&trampoline[-4], 32);
         }
         else {
-            exiPrintf("direct long jump at %08X (bl=%d)\r\n",
-                addr, isBl);
+            //exiPrintf("direct long jump at %08X (bl=%d)\r\n",
+            //    addr, isBl);
             *(code++) = 0x3D800000 | ((u32)target >> 16); //lis r12, aaaa
             *(code++) = 0x618C0000 | ((u32)target & 0xFFFF); //ori r12, r12, aaaa
             *(code++) = 0x7D8903A6; //mtspr CTR,r12
@@ -72,8 +72,8 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
         //make b or bl opcode
         uint32_t relDest = (uint32_t)target - addr;
         *(uint32_t*)addr = (relDest & 0x03FFFFFC) | (isBl ? 1 : 0) | 0x48000000;
-        exiPrintf("patch short jump at 0x%08X op 0x%08X (bl=%d)\r\n",
-            addr, *(uint32_t*)addr, isBl);
+        //exiPrintf("patch short jump at 0x%08X op 0x%08X (bl=%d)\r\n",
+        //    addr, *(uint32_t*)addr, isBl);
         DCStoreRange((void*)addr, 32);
         ICInvalidateRange((void*)addr, 32);
     }

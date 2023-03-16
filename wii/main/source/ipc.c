@@ -49,7 +49,7 @@ distribution.
 #include "lwp_heap.h"
 #include "lwp_wkspace.h"
 
-#define DEBUG_IPC
+//#define DEBUG_IPC
 void exiPrintf(const char *fmt, ...);
 
 #define IPC_HEAP_SIZE			4096

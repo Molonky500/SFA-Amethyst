@@ -243,11 +243,11 @@ void* hackDvdThreadMain(void *param) {
     exiPuts("DVD thread online\r\n");
     registerThreadForDebug(OSGetCurrentThread(), "dvdhack");
 
-    /*exiPuts("About to init Wiimote\n");
+    exiPuts("About to init Wiimote\n");
     if(initWiimote()) {
         exiPuts("Wiimote init failed\n");
     }
-    else exiPuts("Wiimote init OK\n");*/
+    else exiPuts("Wiimote init OK\n");
 
     if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\r\n");

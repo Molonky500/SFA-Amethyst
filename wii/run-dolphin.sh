@@ -34,5 +34,9 @@ else
 fi
 
 #cp main/build/main.elf.map ???
-dolphin-emu -d ./app/boot.dol
-#dolphin-emu -d ./boot/boot.elf
+if [ "$1" != "--dry-run" ]; then
+    # this variable runs Dolphin on the primary AMD GPU,
+    # instead of the weaker embedded one.
+    DRI_PRIME=1 dolphin-emu -d ./app/boot.dol
+    #dolphin-emu -d ./boot/boot.elf
+fi

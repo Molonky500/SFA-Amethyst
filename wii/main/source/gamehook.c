@@ -78,12 +78,12 @@ void initGameHooks() {
     //IOS_Close(r);
 
     SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
-    udelay(500000);
+    //udelay(500000);
     gameExceptionInit();
     initSaveHacks();
 
     SET_SCREEN_SOLID_YUV(150, 42, 202); //orange
-    udelay(500000);
+    //udelay(500000);
     initDvdHack();
     exiPuts("initDvdHack: OK; wait for DVD...\r\n");
     while(!dvdThreadReady) OSYieldThread();
