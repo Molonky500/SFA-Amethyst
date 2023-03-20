@@ -121,6 +121,7 @@ void doCardPatch() {
 }
 
 void doDspPatch() {
+	//exiPuts(" *** WRITING DSP PATCH\n");
     PatchAX_Dsp(0x80330840, 0x5A8, 0x65D, 0x707, 0x8F );
     DCStoreRange(0x80330840, 0x2000);
 	//doCardPatch();
@@ -129,8 +130,8 @@ void doDspPatch() {
 
 void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL) {
 	//type: 0: RAM -> ARAM; 1: ARAM -> RAM
-	//exiPrintf("AR DMA RAM:0x%8x %c ARAM:0x%8x len 0x%8x\n", mmaddr,
-	//	type ? '<' : '>', araddr, cntL);
+	exiPrintf("AR DMA RAM:0x%8x %c ARAM:0x%8x len 0x%8x\n", mmaddr,
+		type ? '<' : '>', araddr, cntL);
 	int level = OSDisableInterrupts();
 	if(type) { //ARAM to main
 		DCInvalidateRange((void*)mmaddr, cntL);
@@ -147,13 +148,13 @@ void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL) {
 	//we still have to set the registers even though it seems
 	//like they no longer do the actual transfer, since the game
 	//still expects the interrupt.
-	AR_DMA_MMADDR_H = AR_DMA_MMADDR_H & 0xfc00 | (mmaddr >> 0x10);
-	AR_DMA_MMADDR_L = AR_DMA_MMADDR_L & 0x1f | mmaddr;
-	AR_DMA_ARADDR_H = (AR_DMA_ARADDR_H & 0xfc00 | (araddr >> 0x10)) & 0x03FF;
-	AR_DMA_ARADDR_L = AR_DMA_ARADDR_L & 0x1f | araddr;
-	AR_DMA_CNT_H    = (type << 0xf) | AR_DMA_CNT_H & 0x7fff;
-	AR_DMA_CNT_H    = AR_DMA_CNT_H & 0xfc00 | (cntL >> 0x10);
-	AR_DMA_CNT_L    = AR_DMA_CNT_L & 0x1f | cntL;
+	AR_DMA_MMADDR_H = (AR_DMA_MMADDR_H & 0xfc00) | (mmaddr >> 0x10);
+	AR_DMA_MMADDR_L = (AR_DMA_MMADDR_L & 0x1f) | mmaddr;
+	AR_DMA_ARADDR_H = ((AR_DMA_ARADDR_H & 0xfc00) | ((araddr >> 0x10)) & 0x1FFF);
+	AR_DMA_ARADDR_L = (AR_DMA_ARADDR_L & 0x1f) | araddr;
+	AR_DMA_CNT_H    = (type << 0xf) | (AR_DMA_CNT_H & 0x7fff);
+	AR_DMA_CNT_H    = (AR_DMA_CNT_H & 0xfc00) | (cntL >> 0x10);
+	AR_DMA_CNT_L    = (AR_DMA_CNT_L & 0x1f) | cntL;
 	OSRestoreInterrupts(level);
 	//- For AUDIO_DMA_START_HI, only bits 0x03ff can be set on GCN
 	//and 0x1fff on Wii
