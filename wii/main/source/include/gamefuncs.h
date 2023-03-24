@@ -15,6 +15,7 @@ extern void      (*__OSDispatchInterrupt)(int, OSContext*);
 extern int       (*OSEnableInterrupts)(void);
 extern int       (*OSEnableScheduler)(void);
 extern OSThread* (*OSGetCurrentThread)(void);
+extern u64       (*OSGetTime)(void);
 extern void      (*OSInitMessageQueue)(OSMessageQueue* mq, OSMessage* msgArray, s32 msgCount);
 extern void      (*OSInitThreadQueue)(OSThreadQueue* queue);
 extern void      (*__OSInterruptInit)(void);

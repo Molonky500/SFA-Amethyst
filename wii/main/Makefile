@@ -40,9 +40,9 @@ CXXFLAGS = $(CFLAGS)
 LDFLAGS	 = -L../lib -g $(MACHDEP) \
 	-Wl,-Map,$(notdir $@).map \
 	-Wl,--section-start,.stub=0x91000000 \
-	-Wl,--section-start,.sbss=0x91080000 \
-	-Wl,--section-start,.init=0x91180000 \
-	-Wl,--section-start,.data=0x91200000
+	-Wl,--section-start,.init=0x91050000 \
+	-Wl,--section-start,.sbss=0x910C0000 \
+	-Wl,--section-start,.data=0x91500000
 ASFLAGS := $(MACHDEP) -mregnames -D_LANGUAGE_ASSEMBLY $(INCLUDES)
 
 #---------------------------------------------------------------------------------

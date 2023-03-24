@@ -96,7 +96,9 @@ void doDspPatch();
 void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL);
 
 //audiostream.c
+extern OSThread streamThread;
 extern FILE *curStreamFile;
+void initStreamThread();
 BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
     u32 offset, DVDCallback callback);
 BOOL DVDCancelStreamAsync_hook(DVDCommandBlock *block,

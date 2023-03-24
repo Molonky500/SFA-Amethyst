@@ -38,10 +38,12 @@ void initGameHooks() {
     _initIos();
 
     //init filesystem
+    exiPuts("Init FAT...\n");
     if(!fatInitDefault()) {
         exiPuts("FAT init failed\n");
         return 1;
     }
+    exiPuts("Init game files...\n");
     initGameFiles(save_argc > 0 ? save_argv[0] : NULL);
 
     //back up the loader reboot code since loading
@@ -51,6 +53,7 @@ void initGameHooks() {
         memcpy(loaderRebootCode, (void*)0x80001800, 6144);
     }
 
+    exiPuts("Init check-thread...\n");
     initCheckThread();
     //registerThreadForDebug(OSGetCurrentThread(),  "main");
     registerThreadForDebug((OSThread*)0x803AD848, "game");
@@ -58,6 +61,7 @@ void initGameHooks() {
     registerThreadForDebug((OSThread*)0x803A54A0, "THPaudio");
     registerThreadForDebug((OSThread*)0x803A6F08, "THPdisc");
     registerThreadForDebug((OSThread*)0x803A8348, "THPvideo");
+    initStreamThread();
 
     //CONF_Init();
     //initWiimote();
@@ -79,11 +83,14 @@ void initGameHooks() {
 
     SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
     //udelay(500000);
+    exiPuts("Init exception...\n");
     gameExceptionInit();
+    exiPuts("Init save...\n");
     initSaveHacks();
 
     SET_SCREEN_SOLID_YUV(150, 42, 202); //orange
     //udelay(500000);
+    exiPuts("Init DVD...\n");
     initDvdHack();
     exiPuts("initDvdHack: OK; wait for DVD...\r\n");
     while(!dvdThreadReady) OSYieldThread();
@@ -95,8 +102,10 @@ void initGameHooks() {
         free(loaderRebootCode);
         loaderRebootCode = NULL;
     }
-    //doDspPatch();
+    exiPuts("Init DSP...\n");
+    doDspPatch();
 
+    exiPuts("Init Wii iface...\n");
     GameWiiInterface *wii = WII_IFACE_PTR;
     wii->updateWiimotes = updateWiimotes;
     wii->magic = WII_IFACE_MAGIC;
@@ -117,4 +126,6 @@ void initGameHooks() {
 
     //patch default option in progressive scan prompt
     (*(u32*)0x8001fa6c) = 0x3ba00000 | (CONF_GetProgressiveScan() ? 1 : 0);
+
+    exiPuts("Init OK\n");
 }

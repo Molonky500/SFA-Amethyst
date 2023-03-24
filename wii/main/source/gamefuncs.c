@@ -16,6 +16,7 @@ int       (*OSEnableInterrupts)(void) = 0x80243790;
 int       (*OSEnableScheduler)(void) = 0x80245dd4;
 OSThread* (*OSGetCurrentThread)(void) = 0x80245d88;
 int       (*__OSGetEffectivePriority)(OSThread*) = 0x80245e7c;
+u64       (*OSGetTime)(void) = 0x80246c50;
 void      (*OSInitMessageQueue)(OSMessageQueue* mq, OSMessage* msgArray, s32 msgCount) = 0x80244000;
 void      (*OSInitThreadQueue)(OSThreadQueue* queue) = 0x80245d78;
 void      (*__OSInterruptInit)(void) = 0x802437f8;
