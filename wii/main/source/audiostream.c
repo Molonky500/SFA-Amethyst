@@ -13,7 +13,7 @@ void* streamThreadMain(void *param);
 FILE *curStreamFile = NULL;
 //uint8_t *streamBuf = NULL;
 //int16_t *streamDecodeBuf = NULL;
-__attribute__ ((aligned (32))) uint8_t streamBuf[STREAM_READ_BUF_SIZE];
+//__attribute__ ((aligned (32))) uint8_t streamBuf[STREAM_READ_BUF_SIZE];
 __attribute__ ((aligned (32))) int16_t streamDecodeBuf1[STREAM_DECODE_BUF_SIZE / 2];
 __attribute__ ((aligned (32))) int16_t streamDecodeBuf2[STREAM_DECODE_BUF_SIZE / 2];
 int16_t *streamDecodeBuf;
@@ -146,12 +146,11 @@ void* streamThreadMain(void *param) {
 		//XXX multiply by time scale to allow for fast forward
 		//exiPrintf("Stream block %d\n", iStartBlock);
 
-		//this works but is staticky, probably because we overwrite
-		//the decoded buffer every frame making the multi-frame
-		//buffering basically pointless.
-		//instead we should have two buffers to alternate between.
-		//also a good idea to do this in a dedicated thread instead
-		//of the game loop so it can update more often.
+		//this works but is staticky.
+		//we aren't really doing double-buffer correctly.
+		//should be swapping buffers when the DMA is finished,
+		//and appending to the buffer rather than always writing
+		//at the beginning.
 		//might also end up having to resample because right now
 		//we change the DSP sample rate which will likely screw up
 		//all the sound effects.
@@ -159,24 +158,24 @@ void* streamThreadMain(void *param) {
 		//maybe we need to splice into the game's sound effect handler
 		//and inject the decoded stream as a sound effect?
 
-		if(remain > 0 && streamBuf) {
+		if(remain > 0) {
 			int size = STREAM_BYTES_PER_FRAME;
 			if(size > remain) size = remain;
 
 			fseek(curStreamFile, iStartBlock * STREAM_BLOCK_SIZE, SEEK_SET);
-			int r = fread(streamBuf, 1, size, curStreamFile);
-			if(!r) { //reached end
-				exiPuts("Stream finished\n");
-				_finishStream();
-				return;
-			}
 			remain -= size;
-			// *pStreamPos += 1.0f / (STREAM_UPDATE_RATE * 60.0f);
 
 			uint32_t iByte   = 0;
 			uint32_t iSample = 0;
+			u8 block[STREAM_BLOCK_SIZE];
 			while(iByte < size) {
-				ADPDecodeBlock(&streamDecodeBuf[iSample], &streamBuf[iByte]);
+				int r = fread(block, 1, STREAM_BLOCK_SIZE, curStreamFile);
+				if(!r) { //reached end
+					exiPuts("Stream finished\n");
+					_finishStream();
+					break;
+				}
+				ADPDecodeBlock(&streamDecodeBuf[iSample], block);
 				iSample += STREAM_SAMPLES_PER_BLOCK * 2;
 				iByte   += STREAM_BLOCK_SIZE;
 			}
