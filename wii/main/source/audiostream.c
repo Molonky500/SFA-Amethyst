@@ -12,10 +12,11 @@ void* streamThreadMain(void *param);
 
 FILE *curStreamFile = NULL;
 //uint8_t *streamBuf = NULL;
-//int16_t *streamDecodeBuf = NULL;
+int16_t *streamDecodeBuf1 = NULL;
+int16_t *streamDecodeBuf2 = NULL;
 //__attribute__ ((aligned (32))) uint8_t streamBuf[STREAM_READ_BUF_SIZE];
-__attribute__ ((aligned (32))) int16_t streamDecodeBuf1[STREAM_DECODE_BUF_SIZE / 2];
-__attribute__ ((aligned (32))) int16_t streamDecodeBuf2[STREAM_DECODE_BUF_SIZE / 2];
+//__attribute__ ((aligned (32))) int16_t streamDecodeBuf1[STREAM_DECODE_BUF_SIZE / 2];
+//__attribute__ ((aligned (32))) int16_t streamDecodeBuf2[STREAM_DECODE_BUF_SIZE / 2];
 int16_t *streamDecodeBuf;
 
 void initStreamThread() {
@@ -124,6 +125,18 @@ static void _finishStream() {
 void* streamThreadMain(void *param) {
 	exiPrintf("Stream thread online; update rate %d\n",
 		(int)STREAM_UPDATE_RATE);
+	u32 *aramUsed = 0x803de384;
+	void *aramBase = 0x90000000;
+
+	while(!curStreamFile) OSSleepThread(&streamThreadQueue);
+	exiPrintf("Alloc stream buffers (%d bytes) at 0x%X\n",
+		STREAM_DECODE_BUF_SIZE * 2, *aramUsed);
+	streamDecodeBuf1 = aramBase + *aramUsed;
+	streamDecodeBuf2 = aramBase + *aramUsed + STREAM_DECODE_BUF_SIZE;
+	*aramUsed += (STREAM_DECODE_BUF_SIZE * 2);
+	exiPrintf("Free ARAM: %dK\n", *(u32*)0x800000D0 - *aramUsed);
+	streamDecodeBuf = streamDecodeBuf1;
+
 	while(1) {
 		do { //always sleep at least once per iteration
 			OSSleepThread(&streamThreadQueue);
@@ -149,6 +162,7 @@ void* streamThreadMain(void *param) {
 		//this works but is staticky.
 		//we aren't really doing double-buffer correctly.
 		//should be swapping buffers when the DMA is finished,
+		//which might require an interrupt handler;
 		//and appending to the buffer rather than always writing
 		//at the beginning.
 		//might also end up having to resample because right now
@@ -157,6 +171,7 @@ void* streamThreadMain(void *param) {
 		//right now they aren't playing at all during/after a stream...
 		//maybe we need to splice into the game's sound effect handler
 		//and inject the decoded stream as a sound effect?
+		//that might require storing it in ARAM, but that's fine.
 
 		if(remain > 0) {
 			int size = STREAM_BYTES_PER_FRAME;
@@ -182,11 +197,13 @@ void* streamThreadMain(void *param) {
 
 			DCFlushRange(streamDecodeBuf, iSample);
 			u32 addr = MEM_VIRTUAL_TO_PHYSICAL(streamDecodeBuf);
+			#if 0
 			//set DSP sample rate to 32KHz
 			_aiReg[0] = (_aiReg[0] & ~(1<<6)) ;//| (1<<6);
 			AI_DMA_START_HI = addr >> 16;
 			AI_DMA_START_LO = addr & 0xFFFF;
 			AI_DMA_LENGTH   = ((iSample) >> 5) | 0x8000;
+			#endif
 
 			if(streamDecodeBuf == streamDecodeBuf1) {
 				streamDecodeBuf = streamDecodeBuf2;

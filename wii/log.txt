@@ -1,63 +1,36 @@
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build/exi.d -g -O2 -Wall -fPIC -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/exi.c -o exi.o 
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build/main.d -g -O2 -Wall -fPIC -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float   -I/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/build -I/opt/devkitpro/libogc/include -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c -o main.o 
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c: In function 'initGameFiles':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/source/main.c:175:9: warning: 'strncpy' specified bound 512 equals destination size [-Wstringop-truncation]
-  175 |         strncpy(gameRootDir, appPath, sizeof(gameRootDir));
-      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-powerpc-eabi-gcc  exi.o main.o -g -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -Wl,-Map,boot.elf.map -L/opt/devkitpro/libogc/lib/wii  -lfat -logc -lm -o /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf
-elf2dol /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.elf /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/boot/boot.dol
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/alloc.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c -o alloc.o 
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c: In function 'dumpGameHeaps':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c:13:39: warning: format '%X' expects argument of type 'unsigned int', but argument 5 has type 'void *' [-Wformat=]
-   13 |                 printf("%2d|%5d|%c|%08X|%8X|%08X|%08X|%08X\n",
-      |                                    ~~~^
-      |                                       |
-      |                                       unsigned int
-      |                                    %08p
-......
-   16 |                     entry->loc, entry->size, entry->loc+entry->size,
-      |                     ~~~~~~~~~~         
-      |                          |
-      |                          void *
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/alloc.c:13:48: warning: format '%X' expects argument of type 'unsigned int', but argument 7 has type 'void *' [-Wformat=]
-   13 |                 printf("%2d|%5d|%c|%08X|%8X|%08X|%08X|%08X\n",
-      |                                             ~~~^
-      |                                                |
-      |                                                unsigned int
-      |                                             %08p
-......
-   16 |                     entry->loc, entry->size, entry->loc+entry->size,
-      |                                              ~~~~~~~~~~~~~~~~~~~~~~
-      |                                                        |
-      |                                                        void *
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/argv.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/argv.c -o argv.o 
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/audiopatch.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiopatch.c -o audiopatch.o 
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiopatch.c: In function 'doDspPatch':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiopatch.c:94:18: warning: passing argument 1 of 'DCStoreRange' makes pointer from integer without a cast [-Wint-conversion]
-   94 |     DCStoreRange(0x80330840, 0x2000);
-      |                  ^~~~~~~~~~
-      |                  |
-      |                  unsigned int
-In file included from ../source/include/main.h:51,
-                 from /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiopatch.c:1:
-../source/include/cache.h:145:25: note: expected 'void *' but argument is of type 'unsigned int'
-  145 | void DCStoreRange(void *startaddress,u32 len);
-      |                   ~~~~~~^~~~~~~~~~~~
-powerpc-eabi-gcc -MMD -MP -MF /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build/audiostream.d -g -O2 -Wall -fPIC -mno-toc -msdata=data -mregnames -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -I../source/include -ffile-prefix-map=/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/build=. -c /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiostream.c -o audiostream.o 
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiostream.c:18:48: error: expected ';', ',' or ')' before '&' token
-   18 | static s16 ADPDecodeSample(s32 bits, s32 q, s32& hist1,
-      |                                                ^
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiostream.c: In function 'DecodeBlock':
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiostream.c:61:34: warning: implicit declaration of function 'ADPDecodeSample' [-Wimplicit-function-declaration]
-   61 |                 pcm[i * 2]     = ADPDecodeSample(adpcm[i + (ONE_BLOCK_SIZE - SAMPLES_PER_BLOCK)] & 0xf, adpcm[0], histl1, histl2);
-      |                                  ^~~~~~~~~~~~~~~
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiostream.c:61:61: error: 'ONE_BLOCK_SIZE' undeclared (first use in this function)
-   61 |                 pcm[i * 2]     = ADPDecodeSample(adpcm[i + (ONE_BLOCK_SIZE - SAMPLES_PER_BLOCK)] & 0xf, adpcm[0], histl1, histl2);
-      |                                                             ^~~~~~~~~~~~~~
-/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/source/audiostream.c:61:61: note: each undeclared identifier is reported only once for each function it appears in
-make[1]: *** [/opt/devkitpro/devkitPPC//base_rules:18: audiostream.o] Error 1
-make: *** [Makefile:113: build] Error 2
+make[1]: '/mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii/main/main.dol' is up to date.
 /mnt/guilmon/home/rena/projects/games/hax/sfa/amethyst/wii
+Combine...
+origPath: /home/rena/projects/sfa/DATA/files/../sys/main.dol
+loaderPath: main/main.dol
+mapPath: main/build/main.elf.map
+outPath: app/boot.dol
+Reading map: main/build/main.elf.map
+Entry symbol in section text0 (91180000-911C3400) at 911805A0
+ -> 805106A0
+Entry point: 0x805106A0 -> 0x91180000
+Original sections:
+Sect##  Address Offset   Size
+text 0 800031a0    1a0   2480
+text 1 800066e0   2620 2bb1a0
+text 2 803fa480 33dd40  2ade0
+text 3        0      0      0
+text 4        0      0      0
+text 5        0      0      0
+text 6        0      0      0
+data 0 80005620 2bd7c0    6a0
+data 1 80005cc0 2bde60    a20
+data 2 802c1880 2be880     20
+data 3 802c18a0 2be8a0     20
+data 4 802c18c0 2be8c0   14a0
+data 5 802c2d60 2bfd60  72ae0
+data 6 803db1e0 332840   15c0
+data 7 803de500 333e00   9f40
+data 8        0      0      0
+data 9        0      0      0
+data10        0      0      0
+bss    80335840 ------  b2c38
+entry  803fa480
+Moving text0 from 0x800031A0 to 0x80500000
+dolphin-emu: error while loading shared libraries: libavformat.so.59: cannot open shared object file: No such file or directory

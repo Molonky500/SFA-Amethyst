@@ -568,6 +568,7 @@ static void printStreams() {
         OSReport("Stopped stream: %s", prevStream->name);
         prevStream = NULL;
     }
+    debugPrintf("ARAM free: %5dK\n", (*(u32*)0x800000D0 - *(u32*)0x803de384) / 1024);
 }
 
 static void printSFX() {

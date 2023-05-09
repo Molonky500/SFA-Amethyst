@@ -1,6 +1,7 @@
 #include "main.h"
 
 //pointers to functions in the game binary
+u32       (*aramAllocAndUpload)(u16 *buf,int size) = 0x80284468;
 void      (*debugPrintf)(const char *fmt, ...) = 0x801378a8;
 void*     (*gameAlloc)(u32 size, u32 tag, const char *name) = 0x80023cc8;
 void      (*gameFree)(void *addr) = 0x800233e8;

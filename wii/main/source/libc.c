@@ -12,43 +12,43 @@ void initLibc() {
 }
 
 void *__syscall_sbrk_r(struct _reent *ptr, ptrdiff_t incr) {
-	return _my_sbrk_r(ptr, incr);
+	return _sbrk_r(ptr, incr);
 }
 
-int __syscall_lock_init(int *lock, int recursive) {
+void __syscall_lock_init(_LOCK_T *lock) {
     //exiPrintf("%s(%08X, %d)\n", __FUNCTION__, (u32)lock, recursive);
-	if(!lock) return -1;
+	if(!lock) return;
 	*lock = 0;
 
 	OSMutex *retlck = malloc(sizeof(OSMutex));
-    if(!retlck) return -1;
+    if(!retlck) return;
 
     //XXX recursive
 	OSInitMutex(retlck);
     *lock = (int)retlck;
-    return 0;
+    //return 0;
 }
 
-int __syscall_lock_close(int *lock) {
+void __syscall_lock_close(_LOCK_T *lock) {
     //exiPrintf("%s(%08X)\n", __FUNCTION__, (u32)lock);
-	if(!lock || *lock==0) return -1;
+	if(!lock || *lock==0) return;
     free(*(OSMutex**)lock);
     *lock = 0;
-    return 0;
+    //return 0;
 }
 
-int __syscall_lock_release(int *lock) {
+void __syscall_lock_release(_LOCK_T *lock) {
 	//exiPrintf("%s(%08X)\n", __FUNCTION__, (u32)lock);
-	if(!lock || *lock==0) return -1;
+	if(!lock || *lock==0) return;
     OSUnlockMutex(*(OSMutex**)lock);
-    return 0;
+    //return 0;
 }
 
-int __syscall_lock_acquire(int *lock) {
+void __syscall_lock_acquire(int *lock) {
 	//exiPrintf("%s(%08X)\n", __FUNCTION__, (u32)lock);
-	if(!lock || *lock==0) return -1;
+	if(!lock || *lock==0) return;
     OSLockMutex(*(OSMutex**)lock);
-    return 0;
+    //return 0;
 }
 
 void __syscall_malloc_lock(struct _reent *ptr) {

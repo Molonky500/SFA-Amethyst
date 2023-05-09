@@ -89,7 +89,7 @@ int fatInitDefault();
 //alloc.c
 void dumpGameHeaps();
 bool checkAddrInheap(void *addr, u32 len);
-void* _my_sbrk_r(struct _reent *ptr, ptrdiff_t incr);
+void* _sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 
 //audiopatch.c
 void doDspPatch();

@@ -11,9 +11,9 @@ typedef struct {
 
 #define STREAM_THREAD_PRIO 2 //31=lowest 0=highest
 #define STREAM_THREAD_STACK_SIZE 65536
-#define STREAM_ALARM_PERIOD_MSEC 8
+#define STREAM_ALARM_PERIOD_MSEC 5
 #define STREAM_ALARM_PERIOD OSMillisecondsToTicks(STREAM_ALARM_PERIOD_MSEC)
-#define STREAM_BUF_FRAMES 4 //frames of data to buffer
+#define STREAM_BUF_FRAMES 60 //frames of data to buffer
 //how many msec of audio per update
 #define STREAM_UPDATE_RATE ((1000.0/60.0) / STREAM_ALARM_PERIOD_MSEC)
 
@@ -22,7 +22,7 @@ typedef struct {
 //R/L interleaved 16-bit signed integers, big endian
 #define STREAM_SAMPLE_RATE 48000 //samples per second
 #define STREAM_SAMPLE_SIZE 4 //bytes per sample (s16 R, s16 L)
-#define STREAM_DECODE_BUF_SIZE (STREAM_SAMPLE_RATE*STREAM_SAMPLE_SIZE*STREAM_BUF_FRAMES) //bytes
+#define STREAM_DECODE_BUF_SIZE (STREAM_SAMPLE_RATE*STREAM_SAMPLE_SIZE) //bytes
 
 #define STREAM_BLOCK_SIZE 32 //bytes
 #define STREAM_SAMPLES_PER_BLOCK 28 //per channel

@@ -1,6 +1,7 @@
 #ifndef __GAMEFUNCS_H__
 #define __GAMEFUNCS_H__
 
+extern u32       (*aramAllocAndUpload)(u16 *buf,int size);
 extern void      (*debugPrintf)(const char *fmt, ...);
 extern void*     (*gameAlloc)(u32 size, u32 tag, const char *name);
 extern void      (*gameFree)(void *addr);

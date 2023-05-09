@@ -51,7 +51,7 @@ bool checkAddrInheap(void *addr, u32 len) {
     return false;
 }
 
-void* _my_sbrk_r( struct _reent *ptr, ptrdiff_t incr) {
+void* _sbrk_r( struct _reent *ptr, ptrdiff_t incr) {
     u32 level;
     _CPU_ISR_Disable(level);
 
