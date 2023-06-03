@@ -94,6 +94,7 @@ void* _sbrk_r(struct _reent *ptr, ptrdiff_t incr);
 //audiopatch.c
 void doDspPatch();
 void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL);
+bool audioInit_hook();
 
 //audiostream.c
 extern OSThread streamThread;

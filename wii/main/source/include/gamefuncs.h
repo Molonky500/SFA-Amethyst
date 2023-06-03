@@ -2,6 +2,10 @@
 #define __GAMEFUNCS_H__
 
 extern u32       (*aramAllocAndUpload)(u16 *buf,int size);
+extern bool      (*audioInit)(void);
+extern bool      (*audioLoadSdiFile)(void *sdiFile, void *samFile);
+extern void      (*audioPlaySound)(void *sourceObj,int soundid);
+extern BOOL      (*audioStopSound)(uint id);
 extern void      (*debugPrintf)(const char *fmt, ...);
 extern void*     (*gameAlloc)(u32 size, u32 tag, const char *name);
 extern void      (*gameFree)(void *addr);

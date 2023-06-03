@@ -14,6 +14,53 @@ void menuDebugMiscHexEdit_select(const MenuItem *self, int amount) {
     audioPlaySound(NULL, MENU_OPEN_SOUND);
 }
 
+#define AR_DMA_MMADDR_H *(vu16*)0xCC005020
+#define AR_DMA_MMADDR_L *(vu16*)0xCC005022
+#define AR_DMA_ARADDR_H *(vu16*)0xCC005024
+#define AR_DMA_ARADDR_L *(vu16*)0xCC005026
+#define AR_DMA_CNT_H    *(vu16*)0xCC005028
+#define AR_DMA_CNT_L    *(vu16*)0xCC00502A
+#define AR_DMA_CNT_LEFT *(vu16*)0xCC00503A
+#define AI_DMA_START_HI *(vu16*)0xCC005030
+#define AI_DMA_START_LO *(vu16*)0xCC005032
+#define AI_DMA_LENGTH   *(vu16*)0xCC005036
+static u32 aramAddr = 0x90000000;
+void menuDebugMiscAramTest_draw(const MenuItem *self, int x, int y, bool selected) {
+    char str[256];
+    u32 addr = ((u32)AI_DMA_START_HI << 16) | (u32)AI_DMA_START_LO;
+    sprintf(str, self->fmt, T(self->name), aramAddr,
+        //aramAddr + (0x8000 - AR_DMA_CNT_LEFT));
+        addr);
+    menuDrawText(str, x, y, selected);
+
+    static bool didInit = false;
+    if(!didInit) {
+        //HACK to fix volume resetting to 0 on load
+        void (*audioSetVolumes)(uint volume,uint scale,int bMusic,
+            int bSfx,int bCutscenes) = 0x80009a28;
+        audioSetVolumes(100, 1000, 1, 1, 1); //no idea what scale is
+        //WRITE_BLR(0x8024f6fc); //disable AI DMA from game
+        //WRITE_BLR(0x8024ffe4);
+        didInit = true;
+    }
+}
+
+void menuDebugMiscAramTest_select(const MenuItem *self, int amount) {
+    if(amount) {
+        aramAddr += amount * 0x100;
+        return;
+    }
+    //_aiReg[0] = (_aiReg[0] & ~(1<<6)) ;//| (1<<6); //32khz
+    /*u32 addr = aramAddr & 0x7FFFFFFF;
+    AI_DMA_START_HI = addr >> 16;
+    AI_DMA_START_LO = addr & 0xFFFF;
+    AI_DMA_LENGTH   = 0xFFFF;*/
+    //aramAddr += 0x8000;
+    u32 *d = (u32*)aramAddr;
+    for(int i=0; i<0x8000; i++) {
+        d[i] = 0xAAAAAAAA;
+    }
+}
 
 void menuDebugFpTest_select(const MenuItem *self, int amount) {
     if(amount) return;
@@ -297,6 +344,7 @@ Menu menuDebugMisc = {
     "RNG Test", "%s",    genericMenuItem_draw,  menuDebugMiscRNGTest_select,
     "Kill Player", "%s", genericMenuItem_draw,  menuDebugMiscDie_select,
     "Crash Game",  "%s", genericMenuItem_draw,  menuDebugMiscCrash_select,
+    "ARAM Test", "%s: %08X %08X",   menuDebugMiscAramTest_draw,  menuDebugMiscAramTest_select,
     "FPU Test",  "%s",   genericMenuItem_draw,  menuDebugFpTest_select,
     "Copy Test",  "%s",  genericMenuItem_draw,  menuDebugCopyTest_select,
     "Heap Test",  "%s",  genericMenuItem_draw,  menuDebugHeapTest_select,

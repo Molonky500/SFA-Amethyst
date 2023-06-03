@@ -331,22 +331,22 @@ typedef struct PACKED SfxBinEntry {
 	u8  prevIdx : 4;//0x1F previously played idx, to avoid playing same random idx twice in a row.
 } SfxBinEntry;
 extern SfxBinEntry *pSfxBin;
-extern u32 sfxBinSize; //bytes
+extern u32 sfxBin_numEntries;
 
 typedef struct PACKED SoundEffect {
-	ushort id;          //0x0
-	ushort unk02;       //0x2
-	byte   unk04;       //0x4
-	byte   unk05;       //0x5
-	byte   unk06;       //0x6
-	byte   unk07;       //0x7
-	u32    idxAndOffset;//0x8
-	u16    rate;        //0xC
-	u16    pitch;       //0xE
-	int    length;      //0x10
-	u32    repeatStart; //0x14
-	u32    repeatEnd;   //0x18
-	u32    variation;   //0x1C
+	u16 id;          //0x0
+	u16 unk02;       //0x2
+	u8  unk04;       //0x4
+	u8  unk05;       //0x5
+	u8  unk06;       //0x6
+	u8  unk07;       //0x7
+	u32 idxAndOffset;//0x8
+	u16 rate;        //0xC
+	u16 pitch;       //0xE
+	int length;      //0x10
+	u32 repeatStart; //0x14
+	u32 repeatEnd;   //0x18
+	u32 variation;   //0x1C
 } SoundEffect;
 
 typedef struct PACKED SongTableEntry {

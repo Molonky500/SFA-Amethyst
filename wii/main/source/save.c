@@ -81,6 +81,16 @@ SaveGame *save, RamSaveData *data, void *callback) {
     exiPrintf("Save file name is \"%s\"\n", buf.save.saveFileName);
     memcpy(save, &buf.save, sizeof(SaveGame));
 
+    //temp
+    /*FILE *dump1 = fopen("sd:/mem1.raw", "wb");
+    exiPrintf("Writing dump1 %x\n", dump1);
+    fwrite(0x80000000, 1, 24*1024*1024, dump1);
+    fclose(dump1);
+    FILE *dump2 = fopen("sd:/mem2.raw", "wb");
+    exiPrintf("Writing dump2 %x\n", dump2);
+    fwrite(0x90000000, 1, 16*1024*1024, dump2);
+    fclose(dump2);*/
+
     return 1;
 }
 

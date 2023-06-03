@@ -1,7 +1,16 @@
 #!/bin/sh
-# Build mod and run in Dolphin. (XXX not tested)
+# Build mod and run in Dolphin.
 #SD_MOUNT_PATH=/run/media/rena/WII
 SD_MOUNT_PATH=/home/rena/.local/share/dolphin-emu/Load/WiiSDSync
+
+# build the actual mod
+pushd ..
+    ./build.sh
+    ./build.sh install
+    ok=$?
+popd
+if [ $ok -ne 0 ]; then exit $ok; fi
+
 # XXX move this
 DISCROOT=/home/rena/projects/sfa/DATA/files
 NEWDOL=$DISCROOT/../sys/main.dol
@@ -32,6 +41,7 @@ else
     echo "SD not mounted!"
     exit
 fi
+cp -ru $DISCROOT/* $SD_MOUNT_PATH/apps/SFA/files/
 
 #cp main/build/main.elf.map ???
 if [ "$1" != "--dry-run" ]; then

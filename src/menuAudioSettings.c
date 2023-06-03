@@ -89,23 +89,47 @@ void menuMusicTest_select(const MenuItem *self, int amount) {
 }
 
 
-static u16 sfxTestIdx = 0;
+static s16 sfxTestIdx = 0;
 void menuSfxTest_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     //sound effects don't have names
     sprintf(str, self->fmt, T(self->name), sfxTestIdx);
     menuDrawText(str, x, y, selected);
+    if(selected) {
+        int idx = -1;
+        SfxBinEntry *entry = pSfxBin;
+        for(int i=0; i<sfxBin_numEntries; i++) {
+            if(entry[i].id == sfxTestIdx) {
+                idx = i;
+                entry = &entry[i];
+                break;
+            }
+        }
+        debugPrintf("samples " DPRINT_FIXED
+            "%04X %04X %04X %04X %04X %04X" DPRINT_NOFIXED,
+            entry->fxIds[0],
+            entry->fxIds[1],
+            entry->fxIds[2],
+            entry->fxIds[3],
+            entry->fxIds[4],
+            entry->fxIds[5]);
+        debugPrintf(" idx %d range %d unk %04X %02X\n", idx,
+            entry->range,
+            entry->unk06, entry->unk1E);
+    }
 }
 void menuSfxTest_select(const MenuItem *self, int amount) {
     if(amount == 0) { //A button
         audioPlaySound(NULL, sfxTestIdx);
     }
-    else { //XXX what is the max SFX ID?
+    else {
         //int idx = sfxTestIdx + amount;
         //if(idx < 0) idx = NUM_SFX - 1;
         //if(idx >= NUM_SFX) idx = 0;
         //sfxTestIdx = idx;
         sfxTestIdx += amount;
+        if(sfxTestIdx >= sfxBin_numEntries) sfxTestIdx = 0;
+        else if(sfxTestIdx < 0) sfxTestIdx = sfxBin_numEntries - 1;
         audioPlaySound(NULL, MENU_ADJUST_SOUND);
     }
 }

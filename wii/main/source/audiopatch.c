@@ -159,3 +159,13 @@ void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL) {
 	//- For AUDIO_DMA_START_HI, only bits 0x03ff can be set on GCN
 	//and 0x1fff on Wii
 }
+
+SfxBinEntry* findSfxBinEntry(int id) {
+	SfxBinEntry *sfxBin = *pSfxBin;
+	for(int i=0; i<sfxBin_numEntries; i++) {
+		SfxBinEntry *entry = &sfxBin[i];
+		if(entry->id == id) return entry;
+	}
+	exiPrintf(" *** can't find SFX ID 0x%X!\r\n", id);
+	return NULL;
+}

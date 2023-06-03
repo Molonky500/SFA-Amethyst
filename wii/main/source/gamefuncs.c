@@ -2,6 +2,10 @@
 
 //pointers to functions in the game binary
 u32       (*aramAllocAndUpload)(u16 *buf,int size) = 0x80284468;
+bool      (*audioInit)(void) = 0x80009bf8;
+bool      (*audioLoadSdiFile)(void *sdiFile, void *samFile) = 0x802744bc;
+void      (*audioPlaySound)(void *sourceObj,int soundid) = 0x8000bb18;
+BOOL      (*audioStopSound)(uint id) = 0x80272868;
 void      (*debugPrintf)(const char *fmt, ...) = 0x801378a8;
 void*     (*gameAlloc)(u32 size, u32 tag, const char *name) = 0x80023cc8;
 void      (*gameFree)(void *addr) = 0x800233e8;

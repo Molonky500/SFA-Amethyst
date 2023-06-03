@@ -17,6 +17,7 @@ GLOBALFN void* allocTagged(uint size,AllocTag tag,const char *name);
 GLOBALFN void angleToVec2(int angle, float *outX, float *outY);
 GLOBALFN int atan2fi(float y, float x); //returns angle as s16 0-65535 (or -32768-32767?)
 GLOBALFN void audioPlaySound(ObjInstance *sourceObj,SoundId soundid);
+GLOBALFN BOOL audioStopSound(uint id);
 GLOBALFN void buttonDisable(int pad, u32 buttons);
 GLOBALFN void cameraCheckEnterFirstPerson(void *param1, void *param2); //XXX signature
 GLOBALFN void cameraGetFocusObjDistance(float offsY, Camera *this,
