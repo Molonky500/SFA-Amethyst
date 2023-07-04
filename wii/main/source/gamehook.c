@@ -127,5 +127,7 @@ void initGameHooks() {
     //patch default option in progressive scan prompt
     (*(u32*)0x8001fa6c) = 0x3ba00000 | (CONF_GetProgressiveScan() ? 1 : 0);
 
+    STM_RegisterEventHandler(MyStmHandler);
+
     exiPuts("Init OK\n");
 }

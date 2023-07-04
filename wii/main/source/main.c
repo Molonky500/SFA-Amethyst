@@ -105,20 +105,24 @@ int main(int argc, char **argv) {
 }
 
 void MyStmHandler(u32 event) {
+    //exiPrintf("STM event %d\r\n", event);
     switch(event) {
         case STM_EVENT_POWER:
             isReset = false;
             //fall thru
 
         case STM_EVENT_RESET:
-            if(*(u8*)0x803dcca6 == 0) {
+            //if(*(u8*)0x803dcca6 == 0) {
                 // *(float*)0x803dcb00 = 4.0f; //reset fadeout timer
                 //we get FPU Unavailable exception...
                 // *(u32*)0x803dcb00 = 0x40800000;
                 *(u8*)0x803dcca6 = 1; //shouldReset
                 *(u8*)0x803dca3e = 1; //shouldResetNextFrame
                 exiPuts("Told game to reboot!\r\n");
-            }
+            //}
+            //else {
+            //    exiPuts("shouldReset already set\r\n");
+            //}
             //OSRebootHook();
             break;
 
