@@ -386,7 +386,10 @@ void freeHook(void *addr) {
                         (u32)__builtin_return_address(1),
                         (u32)__builtin_return_address(2));
                 }
-                memset(entry->loc, 0xEE, entry->size);
+                //this causes issues with map debug render because the globalma.bin
+                //is actually freed and just left as a stale pointer in the file
+                //table... either that or some race condition is happening.
+                //memset(entry->loc, 0xEE, entry->size);
                 heapFree(iHeap, iEntry);
                 OSUnlockMutex(&allocMutex);
                 return;
