@@ -2,15 +2,19 @@
 
 static u32 *trampoline = (u32*)0x80000200;
 
+void panic() {
+    while(1) {
+        SET_SCREEN_SOLID_YUV(76, 84, 255); //red
+        udelay(250000);
+        SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
+        udelay(250000);
+    }
+}
+
 u32 nextTrampoline(u32 cur) {
     if((cur+16) >= 0x80000C00) {
         exiPrintf(" *** ERROR *** Too many trampolines (reached %08X)\n", cur);
-        while(1) {
-            SET_SCREEN_SOLID_YUV(76, 84, 255); //red
-            udelay(250000);
-            SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
-            udelay(250000);
-        }
+        panic();
     }
     //Axx, Bxx are unused
     if(cur < 0x80000900 && (cur+16) >= 0x80000900) return 0x800009a0;
@@ -60,6 +64,10 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
         else {
             //exiPrintf("direct long jump at %08X (bl=%d)\r\n",
             //    addr, isBl);
+            if(*code == 0x4E800420) {
+                exiPrintf(" *** ERROR *** can't insert long jump at 0x%08X\r\n", addr);
+                panic();
+            }
             *(code++) = 0x3D800000 | ((u32)target >> 16); //lis r12, aaaa
             *(code++) = 0x618C0000 | ((u32)target & 0xFFFF); //ori r12, r12, aaaa
             *(code++) = 0x7D8903A6; //mtspr CTR,r12
