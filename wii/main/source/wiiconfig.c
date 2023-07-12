@@ -11,6 +11,9 @@ uint OSGetSoundMode_hook() {
 }
 
 void saveGame_initialize_hook() {
+    //actually takes a param but doesn't use it
+    void (*origFunc)(void) = 0x800ea078;
+    origFunc();
     exiPrintf("CONF: Aspect:%d Sound:%d Rumble:%d\n",
         CONF_GetAspectRatio(),
         CONF_GetSoundMode(),

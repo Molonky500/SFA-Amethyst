@@ -14,7 +14,7 @@ void initSaveHacks() {
         gameRootDir);
 
     if(saveFilePath[0] != 0) {
-        hookBranch(0x800ea170, saveGame_initialize_hook, 0, 0);
+        *(u32*)0x80311910 = saveGame_initialize_hook;
         hookBranch(0x8007db74, saveGameSave_hook, 1, 0);
         hookBranch(0x8007dc0c, saveGameLoad_hook, 1, 0);
         //can reuse same hooks
