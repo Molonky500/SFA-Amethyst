@@ -31,7 +31,8 @@ typedef struct {
 #define STREAM_SAMPLE_RATE 48000 //samples per second
 #define STREAM_SAMPLE_SIZE 4 //bytes per sample (s16 R, s16 L)
 #define STREAM_DECODE_BUF_SIZE \
-	(STREAM_SAMPLE_RATE*STREAM_SAMPLE_SIZE*STREAM_BUF_FRAMES) //bytes
+	(STREAM_SAMPLE_RATE*STREAM_SAMPLE_SIZE*STREAM_BUF_FRAMES*2) //bytes
+	//times 2 for stereo (???)
 
 #define STREAM_BLOCK_SIZE 32 //bytes
 #define STREAM_SAMPLES_PER_BLOCK 28 //per channel

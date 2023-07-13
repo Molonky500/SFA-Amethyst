@@ -143,13 +143,6 @@ void checkObjects() {
         if((isnan(pos[0]) || isnan(pos[1]) || isnan(pos[2]))
         || (isinf(pos[0]) || isinf(pos[1]) || isinf(pos[2]))) {
             exiPrintf(" *** ERROR *** Obj %p has invalid position\n", obj);
-            //this doesn't help.
-            //pos[0] = 0;
-            //pos[1] = 0;
-            //pos[2] = 0;
-            //pos[3] = 0; //oldPos
-            //pos[4] = 0;
-            //pos[5] = 0;
         }
     }
 }

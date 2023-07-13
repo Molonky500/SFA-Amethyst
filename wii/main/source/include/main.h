@@ -261,6 +261,7 @@ char* OSGetFontTexel_hook(char* string, void* image, s32 pos,
     s32 stride, s32* width);
 
 //patches.c
+extern u32 gFrameCount;
 uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline);
 void doPatches();
 

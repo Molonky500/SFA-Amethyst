@@ -1,5 +1,6 @@
 #include "main.h"
 
+u32 gFrameCount = 0;
 static u32 *trampoline = (u32*)0x80000200;
 
 void panic() {
@@ -126,6 +127,8 @@ void mainLoopHook() {
     }
     msg[n++] = 0;
     exiPuts(msg);*/
+
+    gFrameCount++;
 
     extern u8 __ipcbufferLo[], __ipcbufferHi[];
     //exiPrintf("IPC BUF %08X %08X  Arena1 %08X %08X  Arena2  %08X %08X\n",

@@ -4,13 +4,16 @@
 OSThread streamThread;
 OSThreadQueue streamThreadQueue;
 OSAlarm streamThreadAlarm;
+OSAlarm streamEndAlarm;
 static u8 streamThreadStack[STREAM_THREAD_STACK_SIZE];
 
 void streamThreadAlarmCb(OSAlarm *alarm, OSContext *ctx);
+void streamEndAlarmCb(OSAlarm *alarm, OSContext *ctx);
 void* streamThreadMain(void *param);
 
 FILE *curStreamFile = NULL;
 int16_t *streamDecodeBuf; //-> decoded samples to be played
+volatile bool bReachedStreamEnd = false;
 
 //game variables for tracking stream position, in seconds
 float *pStreamPos    = (float*)0x803dc858; //current pos
@@ -71,6 +74,7 @@ void ADPDecodeBlock(s16* pcm, const u8* adpcm) {
 void initStreamThread() {
 	exiPuts("Init stream-thread...\n");
 	OSCreateAlarm(&streamThreadAlarm);
+	OSCreateAlarm(&streamEndAlarm);
 	OSInitThreadQueue(&streamThreadQueue);
     OSCreateThread(&streamThread, streamThreadMain,
         NULL, streamThreadStack+STREAM_THREAD_STACK_SIZE,
@@ -79,6 +83,23 @@ void initStreamThread() {
 	OSSetAlarm(&streamThreadAlarm, STREAM_ALARM_PERIOD,
         streamThreadAlarmCb);
     OSResumeThread(&streamThread);
+}
+
+void streamEndAlarmCb(OSAlarm *alarm, OSContext *ctx) {
+	bReachedStreamEnd = true;
+	//XXX this won't work if we fast-forward.
+	//maybe we can check the OS-level timers in the thread
+	//instead of using an alarm?
+}
+
+static void _finishStream() {
+	audioStopSound(STREAM_REPLACE_SFX_ID);
+	if(curStreamFile) {
+		fclose(curStreamFile);
+		curStreamFile = NULL;
+		exiPrintf("Stream stopped! %d/%d\r\n",
+			(int)*pStreamPos, (int)*pStreamEndPos);
+	}
 }
 
 BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
@@ -97,6 +118,7 @@ DVDCBCallback callback) {
         block, callback);
     OSYieldThread();
     if(callback) callback(0, block);
+	_finishStream();
 	if(curStreamFile) fclose(curStreamFile);
 	curStreamFile = NULL;
     return true;
@@ -113,18 +135,21 @@ DVDCBCallback callback) {
 
 void AISetStreamPlayState_hook(int param) {
     exiPrintf("AISetStreamPlayState(%d)\n", param);
+	if(!param) _finishStream();
 }
 
 void playStream_hook() {
 	//replaces call to DVDPrepareStreamAsync in streamPlay
 	ADPInitFilter();
+	_finishStream();
 
 	int streamNo = (*(int*)0x803dc870) - 1;
 	//streamNo = 0x1B; //test
 
 	StreamsBinEntry *streamsBin = *(StreamsBinEntry**)0x803dc850;
 	StreamsBinEntry *stream = &streamsBin[streamNo];
-	exiPrintf("Playing stream 0x%X: %s\n", streamNo, stream->name);
+	exiPrintf("Playing stream 0x%X: %s, length %d\n", streamNo, stream->name,
+		stream->length);
 
 	char path[600];
 	sprintf(path, "%s/files/streams/%s.adp", gameRootDir, stream->name);
@@ -133,6 +158,15 @@ void playStream_hook() {
 		exiPrintf(" *** ERROR *** failed opening: \"%s\"\n", path);
 		return;
 	}
+	fseek(curStreamFile, 0, SEEK_END);
+	u32 totalSamples = (ftell(curStreamFile) * STREAM_SAMPLES_PER_BLOCK) / STREAM_BLOCK_SIZE;
+	OSSetAlarm(&streamEndAlarm,
+		OSMillisecondsToTicks((totalSamples*1000)/STREAM_SAMPLE_RATE),
+        streamEndAlarmCb);
+	//exiPrintf("Stream file size: %d bytes = %d samples = %d frames\r\n",
+	//	ftell(curStreamFile), totalSamples,
+	//	totalSamples / (STREAM_SAMPLE_RATE/60));
+	fseek(curStreamFile, 0, SEEK_SET);
 
 	//(*(int*)0x803dc868) = streamNo + 1; //curStream
 	// *(int*)0x803dc86c = 1;
@@ -151,12 +185,6 @@ void streamThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
     OSSetAlarm(&streamThreadAlarm, STREAM_ALARM_PERIOD,
         streamThreadAlarmCb);
     OSWakeupThread(&streamThreadQueue);
-}
-
-static void _finishStream() {
-	audioStopSound(STREAM_REPLACE_SFX_ID);
-	fclose(curStreamFile);
-	curStreamFile = NULL;
 }
 
 MusyxSampleDirTblA* findStreamSfxEntry() {
@@ -185,7 +213,7 @@ MusyxSampleDirTblA* findStreamSfxEntry() {
 	replaceEntry->sampleRate = STREAM_SAMPLE_RATE;
 	replaceEntry->loopStartSample = 0;
 	replaceEntry->formatAndNumSamples = 0x02000000 | //PCM
-		STREAM_DECODE_BUF_SIZE;
+		(STREAM_DECODE_BUF_SIZE >> 1);
 	replaceEntry->loopSampleCount =
 		(replaceEntry->formatAndNumSamples & 0xFFFFFF);
 	return replaceEntry;
@@ -200,7 +228,6 @@ void* streamThreadMain(void *param) {
 	while(!curStreamFile) OSSleepThread(&streamThreadQueue);
 	MusyxSampleDirTblA *sfxEntry = findStreamSfxEntry();
 	exiPrintf("Alloc stream buffers (%d bytes) at 0x%X\n",
-		//STREAM_DECODE_BUF_SIZE * 2, *aramUsed);
 		STREAM_DECODE_BUF_SIZE, *aramUsed);
 	streamDecodeBuf = aramBase + *aramUsed;
 	*aramUsed += STREAM_DECODE_BUF_SIZE;
@@ -218,29 +245,47 @@ void* streamThreadMain(void *param) {
 
 	bool restart = true;
 	u32 iSample = 0;
+	//tDelta is frames passed this tick
+	float *ptDelta = (float*)0x803db414;
+
 	while(1) {
 		if(!curStreamFile) restart = true;
 		do { //always sleep at least once per iteration
 			OSSleepThread(&streamThreadQueue);
+			if(bReachedStreamEnd) {
+				//no idea how you're meant to know when a stream reaches its
+				//end when it has a length of zero, or why that's the case.
+				//instead we need to guess based on the file length.
+
+				//clear the buffer for when the game decides it would
+				//rather not stop playing it when told
+				memset(streamDecodeBuf, 0, STREAM_DECODE_BUF_SIZE);
+				bReachedStreamEnd = false;
+				audioStopSound(STREAM_REPLACE_SFX_ID); //futily try again
+				exiPuts("Cleared stream buffer\r\n");
+			}
 		} while(!curStreamFile);
 		if(restart) {
+			exiPrintf("Starting stream\r\n");
 			audioPlaySound(NULL, STREAM_REPLACE_SFX_ID);
 			restart = false;
 			iSample = 0;
 			*pStreamPos = 0;
+			bReachedStreamEnd = false;
 		}
 		//tDelta is frames passed this tick
-		float tDelta = (*(float*)0x803db414) / 60.0f;
+		float tDelta = *ptDelta / 60.0f;
+		//exiPrintf("delta = %dms\r\n", (int32_t)(tDelta*1000.0f));
 
 		int samplePos = (*pStreamPos    * (float)STREAM_SAMPLE_RATE);
 		int sampleEnd = (*pStreamEndPos * (float)STREAM_SAMPLE_RATE);
 		int remain = sampleEnd - samplePos;
-		//sampleEnd isn't reliable for some reason; likes to read 0x7FFFFFFF
+		//sampleEnd isn't reliable because some streams inexplicably
+		//have a length of 0, which defaults to 9 billion.
 		//exiPrintf("Stream pos %d / %d\n",
 		//	samplePos, sampleEnd);
 
 		s32 iStartBlock = (*pStreamPos) * STREAM_BLOCK_RATE;
-		//if(iStartBlock > 0) iStartBlock--;
 		iSample = (iStartBlock * STREAM_SAMPLES_PER_BLOCK) % nSamples;
 
 		//read a few blocks ahead.

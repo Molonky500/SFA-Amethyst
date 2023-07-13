@@ -124,6 +124,7 @@ static void drawObjPos(ObjInstance *obj, Color4b *color, float scale) {
 }
 
 void drawMapGrid() {
+    //XXX this is unsafe. globalma.bin has already been freed.
     GlobalMaEntry    *mapGrid = dataFileBuffers[FILE_GLOBALMA_BIN];
     MapsTabEntry     *mapsTab = dataFileBuffers[FILE_MAPS_TAB];
     MapsBinInfoEntry *mapsBin = dataFileBuffers[FILE_MAPS_BIN];
