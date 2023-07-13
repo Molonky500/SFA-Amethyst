@@ -1,6 +1,9 @@
 #ifndef __GAMEFUNCS_H__
 #define __GAMEFUNCS_H__
 
+//XXX move
+#define physicsTimeScale (*(float*)0x803dea9c)
+
 extern u32       (*aramAllocAndUpload)(u16 *buf,int size);
 extern bool      (*audioInit)(void);
 extern bool      (*audioLoadSdiFile)(void *sdiFile, void *samFile);

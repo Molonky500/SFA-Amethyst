@@ -4,16 +4,14 @@
 OSThread streamThread;
 OSThreadQueue streamThreadQueue;
 OSAlarm streamThreadAlarm;
-OSAlarm streamEndAlarm;
+u64 streamTime, streamPrevTime, streamEndTime;
 static u8 streamThreadStack[STREAM_THREAD_STACK_SIZE];
 
 void streamThreadAlarmCb(OSAlarm *alarm, OSContext *ctx);
-void streamEndAlarmCb(OSAlarm *alarm, OSContext *ctx);
 void* streamThreadMain(void *param);
 
 FILE *curStreamFile = NULL;
 int16_t *streamDecodeBuf; //-> decoded samples to be played
-volatile bool bReachedStreamEnd = false;
 
 //game variables for tracking stream position, in seconds
 float *pStreamPos    = (float*)0x803dc858; //current pos
@@ -74,7 +72,6 @@ void ADPDecodeBlock(s16* pcm, const u8* adpcm) {
 void initStreamThread() {
 	exiPuts("Init stream-thread...\n");
 	OSCreateAlarm(&streamThreadAlarm);
-	OSCreateAlarm(&streamEndAlarm);
 	OSInitThreadQueue(&streamThreadQueue);
     OSCreateThread(&streamThread, streamThreadMain,
         NULL, streamThreadStack+STREAM_THREAD_STACK_SIZE,
@@ -83,13 +80,6 @@ void initStreamThread() {
 	OSSetAlarm(&streamThreadAlarm, STREAM_ALARM_PERIOD,
         streamThreadAlarmCb);
     OSResumeThread(&streamThread);
-}
-
-void streamEndAlarmCb(OSAlarm *alarm, OSContext *ctx) {
-	bReachedStreamEnd = true;
-	//XXX this won't work if we fast-forward.
-	//maybe we can check the OS-level timers in the thread
-	//instead of using an alarm?
 }
 
 static void _finishStream() {
@@ -160,9 +150,9 @@ void playStream_hook() {
 	}
 	fseek(curStreamFile, 0, SEEK_END);
 	u32 totalSamples = (ftell(curStreamFile) * STREAM_SAMPLES_PER_BLOCK) / STREAM_BLOCK_SIZE;
-	OSSetAlarm(&streamEndAlarm,
-		OSMillisecondsToTicks((totalSamples*1000)/STREAM_SAMPLE_RATE),
-        streamEndAlarmCb);
+	streamEndTime = OSMillisecondsToTicks((totalSamples*1000)/STREAM_SAMPLE_RATE);
+	streamTime = 0;
+	streamPrevTime = OSGetTime();
 	//exiPrintf("Stream file size: %d bytes = %d samples = %d frames\r\n",
 	//	ftell(curStreamFile), totalSamples,
 	//	totalSamples / (STREAM_SAMPLE_RATE/60));
@@ -252,17 +242,26 @@ void* streamThreadMain(void *param) {
 		if(!curStreamFile) restart = true;
 		do { //always sleep at least once per iteration
 			OSSleepThread(&streamThreadQueue);
-			if(bReachedStreamEnd) {
+			if(streamEndTime) {
 				//no idea how you're meant to know when a stream reaches its
 				//end when it has a length of zero, or why that's the case.
 				//instead we need to guess based on the file length.
+				u64 now = OSGetTime();
+				u64 dt = 0;
+				if(streamPrevTime) {
+					dt = now - streamPrevTime;
+					streamPrevTime = now;
+				}
+				streamTime += dt * (physicsTimeScale/60.0f);
 
-				//clear the buffer for when the game decides it would
-				//rather not stop playing it when told
-				memset(streamDecodeBuf, 0, STREAM_DECODE_BUF_SIZE);
-				bReachedStreamEnd = false;
-				audioStopSound(STREAM_REPLACE_SFX_ID); //futily try again
-				exiPuts("Cleared stream buffer\r\n");
+				if(streamTime >= streamEndTime) {
+					//clear the buffer for when the game decides it would
+					//rather not stop playing it when told
+					memset(streamDecodeBuf, 0, STREAM_DECODE_BUF_SIZE);
+					streamEndTime = 0;
+					audioStopSound(STREAM_REPLACE_SFX_ID); //futily try again
+					exiPuts("Cleared stream buffer\r\n");
+				}
 			}
 		} while(!curStreamFile);
 		if(restart) {
@@ -271,7 +270,6 @@ void* streamThreadMain(void *param) {
 			restart = false;
 			iSample = 0;
 			*pStreamPos = 0;
-			bReachedStreamEnd = false;
 		}
 		//tDelta is frames passed this tick
 		float tDelta = *ptDelta / 60.0f;
@@ -312,10 +310,10 @@ void* streamThreadMain(void *param) {
 				STREAM_SAMPLES_PER_BLOCK * STREAM_SAMPLE_SIZE);
 		}
 
-		if(remain <= 0) {
+		/*if(remain <= 0) {
 			exiPuts("Reached end of stream\n");
 			_finishStream();
-		}
+		}*/
 		*pStreamPos += tDelta;
 		OSYieldThread();
 	}
