@@ -16,10 +16,10 @@ void initSaveHacks() {
     if(saveFilePath[0] != 0) {
         *(u32*)0x80311910 = saveGame_initialize_hook;
         hookBranch(0x8007db74, saveGameSave_hook, 1, 0);
-        hookBranch(0x8007dc0c, saveGameLoad_hook, 1, 0);
+        hookBranch(0x8007dc0c, saveGameLoad_hook, 1, 0); //titleTryLoadSaveFiles
         //can reuse same hooks
         hookBranch(0x8007ddb0, saveGameSave_hook, 1, 0);
-        hookBranch(0x8007dcb0, saveGameLoad_hook, 1, 0);
+        hookBranch(0x8007dcb0, saveGameLoad_hook, 1, 0); //loadSaveGame
         hookBranch(0x802623c8, CARDMountAsync_hook, 1, 0);
         hookBranch(0x8007de48, CARDProbeEx_hook, 1, 0);
         hookBranch(0x80261a48, CARDCheckExAsync_hook, 1, 0);
@@ -51,6 +51,9 @@ SaveGame *save, RamSaveData *data, void *callback) {
     }
     exiPuts("Writing save file!\n");
     exiPrintf("Writing save file \"%s\"\n", data->save.saveFileName);
+    //exiPrintf("Volume m=%d s=%d c=%d\n", data->global.settings.musicVolume,
+    //    data->global.settings.sfxVolume,
+    //    data->global.settings.cutsceneVolume);
     DCFlushRange(data, sizeof(RamSaveData)); //probably unnecessary
     fwrite(data, sizeof(RamSaveData), 1, file);
     fclose(file);
@@ -79,7 +82,16 @@ SaveGame *save, RamSaveData *data, void *callback) {
     fclose(file);
     exiPrintf("Read %s OK\n", path);
     exiPrintf("Save file name is \"%s\"\n", buf.save.saveFileName);
-    memcpy(save, &buf.save, sizeof(SaveGame));
+    //exiPrintf("Volume m=%d s=%d c=%d cb=0x%08X\n", buf.global.settings.musicVolume,
+    //    buf.global.settings.sfxVolume,
+    //    buf.global.settings.cutsceneVolume, callback);
+    if(callback == 0x8007E748) {
+        //this is the first load, getting the global settings.
+        memcpy(save, &buf.global, sizeof(SaveSettingsAndScores));
+    }
+    else { //this is one of the three loads at the file select menu.
+        memcpy(save, &buf.save, sizeof(SaveGame));
+    }
 
     //temp
     /*FILE *dump1 = fopen("sd:/mem1.raw", "wb");
