@@ -17,6 +17,9 @@ int16_t *streamDecodeBuf; //-> decoded samples to be played
 float *pStreamPos    = (float*)0x803dc858; //current pos
 float *pStreamEndPos = (float*)0x803dc84c; //end pos
 
+//tDelta is frames passed this tick
+float *ptDelta = (float*)0x803db414;
+
 //some ADP decoding code copied from Dolphin
 static s32 histl1 = 0;
 static s32 histl2 = 0;
@@ -209,6 +212,29 @@ MusyxSampleDirTblA* findStreamSfxEntry() {
 	return replaceEntry;
 }
 
+void checkStreamEnd() {
+	if(!streamEndTime) return;
+	//no idea how you're meant to know when a stream reaches its
+	//end when it has a length of zero, or why that's the case.
+	//instead we need to guess based on the file length.
+	u64 now = OSGetTime();
+	u64 dt = 0;
+	if(streamPrevTime) {
+		dt = now - streamPrevTime;
+		streamPrevTime = now;
+	}
+	streamTime += dt * (physicsTimeScale/60.0f);
+
+	if(streamTime >= streamEndTime) {
+		//clear the buffer for when the game decides it would
+		//rather not stop playing it when told
+		memset(streamDecodeBuf, 0, STREAM_DECODE_BUF_SIZE);
+		streamEndTime = 0;
+		audioStopSound(STREAM_REPLACE_SFX_ID); //futily try again
+		exiPuts("Cleared stream buffer\r\n");
+	}
+}
+
 void* streamThreadMain(void *param) {
 	exiPrintf("Stream thread online; update rate %d\n",
 		(int)STREAM_UPDATE_RATE);
@@ -235,34 +261,14 @@ void* streamThreadMain(void *param) {
 
 	bool restart = true;
 	u32 iSample = 0;
-	//tDelta is frames passed this tick
-	float *ptDelta = (float*)0x803db414;
+	static u32 prevFrame = 0; //must be a constant
+	if(!prevFrame) prevFrame = gFrameCount; //ugh
 
 	while(1) {
 		if(!curStreamFile) restart = true;
 		do { //always sleep at least once per iteration
 			OSSleepThread(&streamThreadQueue);
-			if(streamEndTime) {
-				//no idea how you're meant to know when a stream reaches its
-				//end when it has a length of zero, or why that's the case.
-				//instead we need to guess based on the file length.
-				u64 now = OSGetTime();
-				u64 dt = 0;
-				if(streamPrevTime) {
-					dt = now - streamPrevTime;
-					streamPrevTime = now;
-				}
-				streamTime += dt * (physicsTimeScale/60.0f);
-
-				if(streamTime >= streamEndTime) {
-					//clear the buffer for when the game decides it would
-					//rather not stop playing it when told
-					memset(streamDecodeBuf, 0, STREAM_DECODE_BUF_SIZE);
-					streamEndTime = 0;
-					audioStopSound(STREAM_REPLACE_SFX_ID); //futily try again
-					exiPuts("Cleared stream buffer\r\n");
-				}
-			}
+			checkStreamEnd();
 		} while(!curStreamFile);
 		if(restart) {
 			exiPrintf("Starting stream\r\n");
@@ -293,7 +299,7 @@ void* streamThreadMain(void *param) {
 		i += STREAM_SAMPLES_PER_BLOCK / 2) {
 			int r = fread(block, 1, STREAM_BLOCK_SIZE, curStreamFile);
 			if(!r) { //reached end
-				exiPuts("Stream finished\n");
+				exiPuts("Stream decode finished\n");
 				_finishStream();
 				break;
 			}
@@ -314,7 +320,11 @@ void* streamThreadMain(void *param) {
 			exiPuts("Reached end of stream\n");
 			_finishStream();
 		}*/
-		*pStreamPos += tDelta;
+		u32 frame = gFrameCount;
+		if(frame > prevFrame) {
+			prevFrame = frame;
+			*pStreamPos += tDelta;
+		}
 		OSYieldThread();
 	}
 }
