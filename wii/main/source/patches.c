@@ -140,6 +140,7 @@ void mainLoopHook() {
     //    _mem2_heap_start, _mem2_heap_end);
 
     static bool triedInit = false;
+    //curMap == warlock
     if((!triedInit) && (*(u32*)0x803dcec8) == 0xB) {
         triedInit = true;
         exiPuts("Telling thread to init Wiimote\r\n");

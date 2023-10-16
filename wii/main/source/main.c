@@ -97,11 +97,12 @@ int main(int argc, char **argv) {
     exiPuts("boot game\r\n");
     SET_DEBUG_PORT(0x16);
     bootGame(); //doesn't return
-    exiPuts("Returned from boot!?\r\n");
+    __builtin_unreachable();
+    /*exiPuts("Returned from boot!?\r\n");
     while(1) {
         SET_DEBUG_PORT(0x1F); udelay(10000);
         SET_DEBUG_PORT(0xEE); udelay(10000);
-    }
+    }*/
     return 0;
 }
 

@@ -71,7 +71,8 @@ void OSExceptionInit_hook() {
     iguanaPutsNoFlush("Init syscall...\r\n");
     void (*__OSInitSystemCall)(void) = 0x80245bec;
     __OSInitSystemCall();
-    *(u32*)0x80000C10 = 0x60000000; //no idea but this sync freezes
+    *(u32*)0x80000C10 = 0x60000000; //no idea but this sync freezes.
+    //without it, everything is fine...
 
     iguanaPutsNoFlush("Flush...\r\n");
     DCFlushRangeNoSync(0x80000000, 0x1800);
@@ -83,14 +84,14 @@ void OSExceptionInit_hook() {
     iguanaPutsNoFlush("OSExceptionInit_hook done\r\n");
     SET_DEBUG_PORT(__LINE__);
 
-    exiPrintf("INTSR=%08X INTMR=%08X DAR=%08X DSISR=%08X\r\n",
+    /*exiPrintf("INTSR=%08X INTMR=%08X DAR=%08X DSISR=%08X\r\n",
         *(vu32*)0xCC003000, *(vu32*)0xCC003004,
         mfspr(19), mfspr(18));
     for(u32 addr = 0x80003000; addr < 0x800030C0; addr += 16) {
         u32 *d = (u32*)addr;
         exiPrintf("%08X: %08X %08X %08X %08X\r\n", addr,
             d[0], d[1], d[2], d[3]);
-    }
+    }*/
 }
 
 void gameExceptionInit() {

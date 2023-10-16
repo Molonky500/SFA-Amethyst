@@ -46,6 +46,8 @@ SaveGame *save, RamSaveData *data, void *callback) {
         profileName, slot+1);
     FILE *file = fopen(path, "wb");
     if(!file) {
+        //TODO display error to user.
+        //also, create the directory first.
         exiPrintf(" *** Failed opening %s to write: %d\n", path, errno);
         return 1;
     }
