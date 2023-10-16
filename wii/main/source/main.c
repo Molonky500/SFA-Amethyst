@@ -110,14 +110,14 @@ void MyStmHandler(u32 event) {
     //exiPrintf("STM event %d\r\n", event);
     switch(event) {
         case STM_EVENT_POWER:
-            isReset = false;
-            //fall thru
-
-        case STM_EVENT_RESET:
             if(haveGecko) {
                 interactiveDebugger(0);
                 return;
             }
+            isReset = false;
+            //fall thru
+
+        case STM_EVENT_RESET:
             //if(*(u8*)0x803dcca6 == 0) {
                 // *(float*)0x803dcb00 = 4.0f; //reset fadeout timer
                 //we get FPU Unavailable exception...
