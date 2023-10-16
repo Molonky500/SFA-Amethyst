@@ -536,18 +536,31 @@ static void printPerformance() {
 }
 
 static void printFPS() {
+    static uint8_t history[60];
+    static uint8_t histIdx = 0;
+    static bool filled = false;
     char color[] = {0x81, 255, (gxFrameQueue.nPending > 1) ? 1 : 255, 255, 255, 0};
 
     //msecsThisFrame goes very low sometimes when it's lagging... frameskip?
     //or more like it's only measuring a partial frame
+    int fps = (int)(1000.0 / msecsThisFrame);
+    history[histIdx++] = fps;
+    if(histIdx >= 60) {
+        filled = true;
+        histIdx = 0;
+    }
+    if(filled) { //running average
+        uint32_t sum = 0;
+        for(int i=0; i<60; i++) sum += history[i];
+        fps = (int)((float)sum / 60.0f);
+    }
 
     //XXX will these positions need changing for console?
     debugPrintSetPos(480, 0); //wtf is this coordinate system
     debugPrintf(DPRINT_FIXED "%s%3d" DPRINT_NOFIXED
         DPRINT_COLOR "\xFF\xFF\xFF\xFF", color,
         //(int)((frame / totalSecs) * 60.0));
-        (int)(1000.0 / msecsThisFrame)
-    );
+        fps);
     debugPrintSetPos(0, 0);
 }
 
