@@ -23,7 +23,6 @@ typedef struct {
 #define STREAM_UPDATE_RATE ((1000.0/60.0) / STREAM_ALARM_PERIOD_MSEC)
 
 //following shouldn't need to be changed.
-//#define STREAM_REPLACE_SAMPLE_ID 0x25C //unused "decoy" voice clip
 #define STREAM_REPLACE_SAMPLE_ID 0x4CF //unused "decoy" voice clip
 #define STREAM_REPLACE_SFX_ID 0x3F7
 //AI DMA output format:

@@ -261,8 +261,8 @@ void* streamThreadMain(void *param) {
 
 	bool restart = true;
 	u32 iSample = 0;
-	static u32 prevFrame = 0; //must be a constant
-	if(!prevFrame) prevFrame = gFrameCount; //ugh
+	static u64 prevTime = 0; //must be a constant
+	if(!prevTime) prevTime = OSGetTime(); //ugh
 
 	while(1) {
 		if(!curStreamFile) restart = true;
@@ -277,9 +277,6 @@ void* streamThreadMain(void *param) {
 			iSample = 0;
 			*pStreamPos = 0;
 		}
-		//tDelta is frames passed this tick
-		float tDelta = *ptDelta / 60.0f;
-		//exiPrintf("delta = %dms\r\n", (int32_t)(tDelta*1000.0f));
 
 		int samplePos = (*pStreamPos    * (float)STREAM_SAMPLE_RATE);
 		int sampleEnd = (*pStreamEndPos * (float)STREAM_SAMPLE_RATE);
@@ -297,11 +294,16 @@ void* streamThreadMain(void *param) {
 		fseek(curStreamFile, iStartBlock * STREAM_BLOCK_SIZE, SEEK_SET);
 		for(int i=0; i<STREAM_BUF_FRAMES * STREAM_SAMPLE_RATE;
 		i += STREAM_SAMPLES_PER_BLOCK / 2) {
+			SET_DISC_LED(1);
 			int r = fread(block, 1, STREAM_BLOCK_SIZE, curStreamFile);
+			SET_DISC_LED(0);
 			if(!r) { //reached end
 				exiPuts("Stream decode finished\n");
 				_finishStream();
 				break;
+			}
+			if(r < STREAM_BLOCK_SIZE) {
+				exiPrintf("Stream read %d but only got %d\r\n", STREAM_BLOCK_SIZE, r);
 			}
 			//ADPDecodeBlockMono(&streamDecodeBuf[iSample], block);
 			for(int ibs = 0; ibs < STREAM_SAMPLES_PER_BLOCK; ibs++) {
@@ -316,15 +318,14 @@ void* streamThreadMain(void *param) {
 				STREAM_SAMPLES_PER_BLOCK * STREAM_SAMPLE_SIZE);
 		}
 
-		/*if(remain <= 0) {
+		if(remain <= 0) {
 			exiPuts("Reached end of stream\n");
 			_finishStream();
-		}*/
-		u32 frame = gFrameCount;
-		if(frame > prevFrame) {
-			prevFrame = frame;
-			*pStreamPos += tDelta;
 		}
-		OSYieldThread();
+		u64 now = OSGetTime();
+		u64 dt  = OSTicksToMilliseconds(now - prevTime);
+		prevTime = now;
+		*pStreamPos += ((float)dt) * 0.001f * (physicsTimeScale/60.0f);
+		//OSYieldThread();
 	}
 }
