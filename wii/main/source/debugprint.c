@@ -11,21 +11,33 @@ void putHex(char *dst, u32 num) {
     }
 }
 
+size_t fixCrlf(const char *bufIn, char *bufOut, size_t lenOut) {
+    //replace "\n" with "\r\n"
+    const char *startOut = bufOut;
+    const char *endOut = &bufOut[lenOut];
+    char p = 0;
+    while(bufOut < endOut) {
+        char c = *(bufIn++);
+        if(c == '\n' && p != '\r') *(bufOut++) = '\r';
+        *(bufOut++) = c;
+        if(!c) break;
+        p = c;
+    }
+    return bufOut - startOut;
+}
+
 //same hook is used for several debug print functions
 //that are stubbed in the game binary.
 //XXX any reason we can't do this on the GC side instead?
 //only the lack of vsnprintf which we could port?
 void osPrintHook(const char *fmt, ...) {
     char buf[1024];
-
     va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
     exiPuts(buf);
-
-    int len = strlen(buf);
-    if(buf[len-1] != '\n') exiPuts("\r\n");
     va_end(args);
+    //dumpStack();
 }
 
 void dumpMem(void *addr, uint32_t count) {
@@ -53,4 +65,33 @@ void dumpStack() {
         sp = (u32*)*sp;
     }
     exiPuts("-- end\r\n");
+}
+
+void dumpThreads() {
+    exiPuts("Thread dump:\r\n");
+    OSThread *thread = *(OSThread**)0x800000dc;
+    while(thread) {
+        //u32 stackTop = (u32)thread->stackBase; //high addr
+        //u32 stackBot = (u32)thread->stackEnd;  //low  addr
+        u32 *sp      = (u32*)thread->context.gpr[1];
+        u32 pc       = (u32)thread->context.srr0;
+
+        const char *name = "unknown";
+        PrevThreadState *pState = findThread(thread);
+        if(pState) {
+            if(pState->name != NULL) name = pState->name;
+        }
+        exiPrintf("Thread %08X (%s): PC=%08x\r\n", thread, name, pc);
+        for(int i=0; i<32; i += 4) {
+            for(int j=0; j<4; j++) {
+                exiPrintf("  r%2d: %08x", (i+j), (u32)thread->context.gpr[i+j]);
+            }
+            exiPrintf("\r\n");
+        }
+        while(PTR_VALID(sp)) {
+            exiPrintf(" > %08x\r\n", sp[1]);
+            sp = (u32*)*sp;
+        }
+        thread = thread->linkActive.next;
+    }
 }

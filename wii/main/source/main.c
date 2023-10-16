@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     //init debug prints
     exiPrintInit();
     SET_DEBUG_PORT(0x11);
-    //exiPuts("Hello world!\n");
+    exiPuts("\r\n *** Hello cruel world\r\n");
 
     //copy text0 back to correct place
     //note Amethyst cuts off the first 0xA0 bytes because
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     SET_DEBUG_PORT(0x12);
     DCFlushRange(text0_dst, text0_len);
     ICInvalidateRange(text0_dst, text0_len);
-    exiPuts("Moved text0 OK\n");
+    exiPuts("Moved text0 OK\r\n");
     SET_DEBUG_PORT(0x13);
 
     //SET_DEBUG_PORT(0x12);
@@ -76,14 +76,14 @@ int main(int argc, char **argv) {
     //DolHeader header;
     //loadGameDol(&header);
 
-    /*exiPrintf("game loader start; argc=%d\r\n", argc);
+    exiPrintf("game loader start; argc=%d\r\n", argc);
     for(int i=0; i<argc; i++) {
         exiPrintf("argv[%d] = \"%s\"\r\n", i, argv[i]);
     }
 
     u32 version = *(u32*)0x80003140;
     exiPrintf("Running on IOS%d v%d.%d\r\n",
-        version >> 16, (version >> 8) & 0xFF, version & 0xFF);*/
+        version >> 16, (version >> 8) & 0xFF, version & 0xFF);
 
     exiPuts("apply patches\r\n");
     doPatches();
@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
     exiPuts("boot game\r\n");
     SET_DEBUG_PORT(0x16);
     bootGame(); //doesn't return
+    exiPuts("Returned from boot!?\r\n");
     while(1) {
         SET_DEBUG_PORT(0x1F); udelay(10000);
         SET_DEBUG_PORT(0xEE); udelay(10000);
@@ -112,6 +113,10 @@ void MyStmHandler(u32 event) {
             //fall thru
 
         case STM_EVENT_RESET:
+            if(haveGecko) {
+                interactiveDebugger(0);
+                return;
+            }
             //if(*(u8*)0x803dcca6 == 0) {
                 // *(float*)0x803dcb00 = 4.0f; //reset fadeout timer
                 //we get FPU Unavailable exception...

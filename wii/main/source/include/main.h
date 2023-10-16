@@ -12,11 +12,15 @@
 
 //1 = use custom hardware for debug print on real console
 //0 = use "official" UART for Dolphin/real devkit
-#define USE_CUSTOM_GECKO 0
+#define USE_CUSTOM_GECKO 1
 
 //useful for diag, but interferes with game
 //#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)
-#define SET_SCREEN_SOLID_YUV(y,u,v)
+#define SET_SCREEN_SOLID_YUV(y,u,v) do { \
+    (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1); \
+    udelay(10000); \
+} while(0)
+//#define SET_SCREEN_SOLID_YUV(y,u,v)
 #define SET_DISC_LED(on) _ipcReg[0xC0>>2] = ((on) ? (_ipcReg[0xC0>>2] | 0x20) : (_ipcReg[0xC0>>2] & ~0x20))
 #define SET_DEBUG_PORT(val) _ipcReg[0xC0>>2] = (_ipcReg[0xC0>>2] & ~0xFF0000) | ((val) << 16);
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -83,6 +87,7 @@ extern int _argc;
 #include "gamecontrols.h"
 #include "audiostream.h"
 #include "save.h"
+#include "dbgconsole.h"
 
 int fatInitDefault();
 
@@ -120,11 +125,17 @@ void initCheckThread();
 void checkIntegrity();
 void* checkThreadMain(void *param);
 
+//dbgconsole.c
+extern DebugConsoleCommand debugConsoleCmds[];
+void interactiveDebugger(int excCode);
+
 //debugprint.c
 void osPrintHook(const char *fmt, ...);
 void putHex(char *dst, u32 num);
+size_t fixCrlf(const char *bufIn, char *bufOut, size_t lenOut);
 void dumpMem(void *addr, uint32_t count);
 void dumpStack();
+void dumpThreads();
 
 //dol.c
 void printDolHeader(DolHeader *header);
@@ -195,6 +206,8 @@ void gameExceptionHook(int exceptionCode, OSContext *ctx,
 void gameBsodHook();
 
 //exi.c
+extern u8 exiDmaBuf[4096];
+extern bool haveGecko;
 void exiPuts(const char *str);
 void exiPrintf(const char *fmt, ...);
 void exiPrintInit();
@@ -211,6 +224,18 @@ void updateWiimotes();
 
 //gamehook.c
 void initGameHooks();
+
+#if USE_CUSTOM_GECKO
+//iguana.c
+void iguanaPuts(const char *str);
+void iguanaPutsNoFlush(const char *str);
+u32 iguanaReadWrite(u32 val);
+void iguanaSetHwctl(int bit, bool on);
+void iguanaSetRedLed(bool on);
+void iguanaSetGreenLed(bool on);
+void iguanaSetBlueLed(bool on);
+void iguanaInit();
+#endif
 
 //init.c
 void initGameFiles(const char *appPath);

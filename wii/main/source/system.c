@@ -154,7 +154,7 @@ void SYS_SetArena2Lo(void *newLo)
 {
 	u32 level;
 
-	//exiPrintf("SetArena2Lo(%p)\n", newLo);
+	exiPrintf("SetArena2Lo(%p)\r\n", newLo);
 	//if(!PTR_VALID(newLo)) *(u32*)0 = 0xBAD;
 	_CPU_ISR_Disable(level);
 	__sysarena2lo = newLo;
@@ -177,7 +177,7 @@ void SYS_SetArena2Hi(void *newHi)
 {
 	u32 level;
 
-	//exiPrintf("SetArena2Hi(%p)\n", newHi);
+	exiPrintf("SetArena2Hi(%p)\r\n", newHi);
 	if(!PTR_VALID(newHi)) *(u32*)0 = 0xBAD;
 	_CPU_ISR_Disable(level);
 	__sysarena2hi = newHi;

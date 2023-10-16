@@ -456,7 +456,7 @@ MUST_CHECK void* realloc(void *ptr, size_t len) {
 
 //for libfat
 #define ALLOC_MAGIC_SIZE 16
-#define ALLOC_MAGIC1 0xF0C5BABE
+#define ALLOC_MAGIC1 0xF0C57175
 #define ALLOC_MAGIC2 0x71DDD1E5
 
 void* my_malloc(size_t size) {

@@ -14,46 +14,22 @@ vu16* const _dspReg = (u16*)0xCC005000;
 vu32* const _ipcReg = (u32*)0xCD800000;
 vu32* const _exiReg = (u32*)0xCD006800;
 vu32* const _aiReg  = (u32*)0xCD006C00;
-bool isCustomProtocol = true;
-bool useGecko = true;
 s8  chan   = 1;
 s8  cs     = 1;
 s8  speed  = 0;
-s32 delay  = 0;
-s8  nStart = 1;
-s8  nStop  = 1;
-u8  payload[4] = {0x40, 0x41, 0x42, 0x43};
+u8  payload[4] = {0x70, 0x00, 0x00, 0x00};
 s32 dataMode = 0;
+s32 testMode = TEST_BOTH;
 u8 debugPort = 0;
 bool autoWrite = false;
-bool invert = false;
-bool reverse = false;
+bool useDma = false;
+bool useBulk = false;
 u32  writeCount = 0;
 u32  lastRx = 0xD06FECE5;
 static const char *statusMsg = "";
 
 vu8 rxBuf[RX_BUF_SIZE];
 volatile int rxPos = 0;
-/*
-u8 reverse8(u8 val) {
-    u8 res = 0;
-    for(int i=0; i<8; i++) {
-        res <<= 1;
-        if(val & 1) res |= 1;
-        val >>= 1;
-    }
-    return res;
-}
-u32 reverse32(u32 val) {
-    u32 res = 0;
-    for(int i=0; i<32; i++) {
-        res <<= 1;
-        if(val & 1) res |= 1;
-        val >>= 1;
-    }
-    return res;
-}
-*/
 
 uint32_t crc32b(const void *data_, uint32_t len) {
     const uint8_t *data = (const uint8_t*)data_;
@@ -141,8 +117,8 @@ volatile u32* beginTransaction() {
     waitTransaction();
     volatile u32 *exi = (volatile u32*)(0xCD006800 + (chan * 0x14));
     exi[0] =
-        (1 <<  0) | //enable interrupt
-        (1 << 10) | //enable interrupt
+        //(1 <<  0) | //enable interrupt
+        //(1 << 10) | //enable interrupt
         (1 << 13) | //ROMDIS
         //(3 << 4) | //8MHz
         //(0 << 4) | //1MHz
@@ -166,7 +142,6 @@ void readWrite8(volatile u32 *exi, u8 val) {
         (0 << 4) | //1 byte
         (1 << 0); //start now
     waitTransaction();
-    if(delay) udelay(delay);
 
     lastRx = exi[4];
     rxBuf[rxPos++] = lastRx & 0xFF; //XXX should this be >> 24 ?
@@ -179,7 +154,6 @@ void readWrite16(volatile u32 *exi, u16 val) {
         (1 << 4) | //2 bytes
         (1 << 0); //start now
     waitTransaction();
-    if(delay) udelay(delay);
 
     lastRx = exi[4];
     rxBuf[rxPos++] = (lastRx >> 24) & 0xFF;
@@ -195,14 +169,11 @@ void readWrite32(volatile u32 *exi, u32 val) {
         (3 << 4) | //4 bytes
         (1 << 0); //start now
     waitTransaction();
-    if(delay) udelay(delay);
 
     lastRx = exi[4];
     //work around bug that causes first bit to be missed
     //with custom gecko device
-    //if(isCustomProtocol) {
-    //    if(!(lastRx & 1)) lastRx <<= 1;
-    //}
+    if(!(lastRx & 1)) lastRx <<= 1;
 
     rxBuf[rxPos++] = (lastRx >> 24) & 0xFF;
     if(rxPos >= RX_BUF_SIZE) rxPos = 0;
@@ -247,200 +218,59 @@ void writeDma(volatile u32 *exi, const void *msg, u32 len) {
     }
 }
 
-void geckoWrite8(volatile u32 *exi, uint8_t val) {
-    for(int tries=0; tries<100; tries++) {
-        readWrite16(exi, (val << 4) | 0xB000);
-        if(lastRx & 0x04000000) break;
-        //readWrite16(exi, 0);
-        //since SPI is full-duplex, the value we get back tells
-        //whether the buffer was full *before* we sent this byte.
-        //however, other apps do re-transmit the byte until
-        //we respond saying we received it.
-        //probably the real Gecko using a CPLD/FPGA was able to
-        //connect the "full" bit directly to the output...
-        //this design is very silly and works much better if we
-        //can just transmit zeros instead.
-        udelay(100);
-    }
-}
-
-void geckoWrite16(volatile u32 *exi, uint16_t val) {
-    for(int tries=0; tries<100; tries++) {
-        readWrite32(exi,
-            ((val & 0xFF) <<  4) | 0xB000 |
-            ((val & 0xFF) << 12) | 0xB0000000);
-        if(lastRx & 0x04000000) break;
-        udelay(100);
-    }
-}
-
-void geckoWrite32(volatile u32 *exi, uint32_t val) {
-    for(int tries=0; tries<100; tries++) {
-        readWrite32(exi, val);
-        if(lastRx & 0x04000000) break;
-        udelay(100);
-    }
-}
-
-void geckoBulkWriteString(const void *msg, u32 len) {
+void bulkWriteString(const void *msg, u32 len) {
     const u32 *data = (const u32*)msg;
 
     u32 crc = crc32b(msg, len);
     volatile u32 *exi = beginTransaction();
     //readWrite32(exi, 0x41000000 | len); //bulk send with CRC
     readWrite32(exi, 0x40000000 | len); //bulk send without CRC
-    #if 0
+    if(useDma) {
         writeDma(exi, msg, len);
-    #else
+        readWrite32(exi, 0); //inexplicably required or else DMA will
+            //only send the first word!?
+    }
+    else {
         for(u32 i=0; i<len; i += 4) {
             readWrite32(exi, data[i>>2]);
             //udelay(100);
         }
-    #endif
+    }
     //readWrite32(exi, crc);
-    readWrite32(exi, 0); //inexplicably required or else DMA will
-        //only send the first word!?
     endTransaction();
 }
 
-void geckoWriteString(const void *msg, u32 len) {
-    if(isCustomProtocol) {
-        geckoBulkWriteString(msg, len);
+void writeString(const void *msg, u32 len) {
+    if(useBulk) {
+        bulkWriteString(msg, len);
         return;
     }
+
     const u8 *data = (const u8*)msg;
     volatile u32 *exi = beginTransaction();
     u32 i = 0;
     while(i < len) {
-        if(isCustomProtocol) {
-            u32 out = 0, cnt = 0;
-            while(++cnt < 3) {
-                out = (out << 8) | (u32)(data[i++]);
-                if(i >= len) break;
-            }
-            //if(cnt == 2) out <<= 8;
-            //if(cnt == 1) out <<= 16;
-            readWrite32(exi, (cnt << 28) | out);
+        u32 out = 0, cnt = 0;
+        while(++cnt < 3) {
+            out = (out << 8) | (u32)(data[i++]);
+            if(i >= len) break;
         }
-        else {
-            geckoWrite8(exi, data[i++]);
-        }
+        //if(cnt == 2) out <<= 8;
+        //if(cnt == 1) out <<= 16;
+        readWrite32(exi, (cnt << 28) | out);
         waitTransaction();
     }
     endTransaction();
-}
-
-void writeStringImm(const void *msg, u32 len) {
-    const u8 *data = (const u8*)msg;
-
-    volatile u32 *exi = beginTransaction();
-    for(u32 i=0; i<len; i++) {
-        u8 val = data[i];
-        if(invert) val = ~val;
-        //if(reverse) val = reverse8(val);
-        /*for(u32 j=0; j<nStart; j++) readWrite32(exi, 0x00FFFFFF); //start bit (low)
-        for(u32 iBit=0; iBit<8; iBit++) {
-            readWrite32(exi, (val & (1 << (7-i))) ? 0xFFFFFFFF : 0x00FFFFFF);
-        }
-        for(u32 j=0; j<nStop; j++) readWrite32(exi, 0xFFFFFFFF); //stop bit (high)*/
-        readWrite8(exi, val);
-        waitTransaction();
-    }
-    endTransaction();
-}
-
-#if 0
-static u32 msgCnt = 0;
-
-void writeStringDma(const void *msg, u32 len) {
-    const u8 *data = (const u8*)msg;
-    //0x800400 is address for UART.
-    //high bit indicates write.
-    static u32 addr = (0x800400 << 6) | 0x80000000;
-    memset(dmaBuf, 0, sizeof(dmaBuf));
-    u8 *d = dmaBuf;
-    //for UART we need to send address first.
-    // *(d++) = (addr >> 24) & 0xFF;
-    // *(d++) = (addr >> 16) & 0xFF;
-    // *(d++) = (addr >>  8) & 0xFF;
-    // *(d++) =  addr        & 0xFF,
-    //for our weird Gecko-like thing we send length first.
-    // *(d++) = 0xDE; *(d++) = 0xAD; //magic
-    // *(d++) = 0xFA; *(d++) = 0xCE; //magic
-
-    //DMA length must be multiple of 32.
-    //that means we send some extra zeros, but the magic
-    //header and length prefix mean the recipient knows
-    //to just ignore it.
-    u32 origLen = len;
-    len *= 2;
-    u32 pad = len & 0x1F;
-    if(pad) len += 32 - pad;
-    len >>= 5; //since it has to be multiple of 32, may
-    //as well encode "number of 32-byte chunks" rather than
-    //"number of bytes"
-
-    // *(d++) = (length >>  8) & 0xFF;
-    // *(d++) = (length >>  0) & 0xFF;
-
-    for(u32 i=0; i<origLen; i++) {
-        u16 val = (data[i] << shift) | //the data
-            (prefix << 12) | //a start bit (low) after three high bits (nothing)
-            suffix; //a stop bit (and three more just to be sure)
-        if(invert) val = ~val;
-        if(reverse) val = reverse32(val) >> 16;
-        if(doubleData) {
-            u16 d1 = doubleBits(val >> 8);
-            u16 d2 = doubleBits(val & 0xFF);
-            *(d++) = (d1 >> 8);
-            *(d++) = (d1 & 0xFF);
-            *(d++) = (d2 >> 8);
-            *(d++) = (d2 & 0xFF);
-        }
-        else {
-            *(d++) = (val >> 8);
-            *(d++) = (val & 0xFF);
-        }
-    }
-    if(doubleData) len *= 2;
-
-    DCFlushRange(dmaBuf, len << 5);
-    volatile u32 *exi = (volatile u32*)(0xCD006800 + (chan * 0x14));
-    while(exi[3] & 1); //wait for any previous transfer
-    u32 prev0 = exi[0];
-    exi[0] =
-        (1 <<  0) | //enable interrupt
-        (1 << 10) | //enable interrupt
-        (1 << 13) | //ROMDIS
-        //(3 << 4) | //8MHz
-        //(0 << 4) | //1MHz
-        (speed << 4) |
-        (7 << cs);
-        //(1 << 7); //device 0 (Gecko)
-        //(2 << 7); //device 1 (UART)
-    //printf("%08X\n", exi[0]);
-    exi[1] = MEM_VIRTUAL_TO_PHYSICAL(dmaBuf); //DMA source
-    //send one more block than needed so that the device has a
-    //chance to read in all of the message, even if it has to
-    //skip past a few padding bytes first.
-    exi[2] = (len+1) << 5; //DMA length
-    exi[3] = (1 << 2) | //write
-        (1 << 1) | //use DMA
-        (1 << 0); //start now
-    while(exi[3] & 1); //wait for transfer
-    exi[0] = prev0;
-}
-#endif
-
-void writeString(const void *data, u32 len) {
-    /*if(useDma) writeStringDma(data, len);
-    else*/ if(useGecko) geckoWriteString(data, len);
-    else writeStringImm(data, len);
 }
 
 void doWrite() {
     volatile u32 *exi;
     switch(dataMode) {
+        case HELLO:
+            exi = beginTransaction();
+            readWrite32(exi, 0x01230ABC);
+            endTransaction();
+            break;
         case TEXT: {
             char msg[256];
             sprintf(msg, "Message %d of a zillion. %d is a random number I pulled from my arse. %d is another one.\r\n",
@@ -448,60 +278,66 @@ void doWrite() {
             writeString(msg, strlen(msg));
             break;
         }
-        case PAYLOAD8:
-            writeString(payload, 4);
-            break;
-        case PAYLOAD16:
-            exi = beginTransaction();
-            readWrite16(exi, (payload[0] << 8) | payload[1]);
-            readWrite16(exi, (payload[2] << 8) | payload[3]);
-            endTransaction();
-            break;
-        case PAYLOAD32:
+        case PAYLOAD:
             exi = beginTransaction();
             readWrite32(exi,
                 (payload[0] << 24) | (payload[1] << 16) |
                 (payload[2] <<  8) |  payload[3]);
             endTransaction();
             break;
-        case ZERO: {
-            static const u32 val = 0;
-            writeString(&val, 4);
+        case ZERO:
+            exi = beginTransaction();
+            readWrite32(exi, 0);
+            endTransaction();
             break;
-        }
-        case ONE: {
-            static const u32 val = 0xFFFFFFFF;
-            writeString(&val, 4);
+        case ONE:
+            exi = beginTransaction();
+            readWrite32(exi, 0xFFFFFFFF);
+            endTransaction();
             break;
-        }
-        case ZERO_ONE: {
-            static const u32 val = 0x55555555;
-            writeString(&val, 4);
+        case ZERO_ONE:
+            exi = beginTransaction();
+            readWrite32(exi, 0x55555555);
+            endTransaction();
             break;
-        }
-        case ONE_ZERO: {
-            static const u32 val = 0xAAAAAAAA;
-            writeString(&val, 4);
+        case ONE_ZERO:
+            exi = beginTransaction();
+            readWrite32(exi, 0xAAAAAAAA);
+            endTransaction();
             break;
-        }
-        case ECHO:
-            writeString(&lastRx, 2);
-            break;
-        case RANDOM: {
-            u32 val = rand();
-            writeString(&val, 4);
-            break;
-        }
-        case COUNT:
-            writeString(&writeCount, 4);
+        case RANDOM:
+            exi = beginTransaction();
+            readWrite32(exi, rand());
+            endTransaction();
             break;
     }
     writeCount++;
 }
 
+void doRead() {
+    volatile u32 *exi = beginTransaction();
+    if(useBulk) {
+        readWrite32(exi, 0x60000008);
+        readWrite32(exi, 0x00000000);
+        readWrite32(exi, 0x00000000);
+    }
+    else {
+        int limit = 100;
+        do {
+            if(!(limit--)) break;
+            readWrite32(exi, 0x50000000);
+        } while(lastRx & (1 << 26));
+    }
+}
+
+void doExec() {
+    if(testMode != TEST_READ) doWrite();
+    if(testMode != TEST_WRITE) doRead();
+}
+
 void drawLastRx() {
     int idx = rxPos;
-    for(int row=0; row<4; row++) {
+    for(int row=0; row<RX_BUF_SIZE/16; row++) {
         printf("%04X ", row * 16);
 
         char chrs[17];
@@ -580,7 +416,7 @@ int main(int argc, char **argv) {
                 writeCount);
 
         u32 bHeld = PAD_ButtonsHeld(PAD_CHAN0);
-        if(autoWrite || (bHeld & PAD_BUTTON_B)) doWrite();
+        if(autoWrite || (bHeld & PAD_BUTTON_B)) doExec();
     }
 	return 0;
 }

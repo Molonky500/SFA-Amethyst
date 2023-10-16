@@ -6,7 +6,7 @@ void OSExceptionInit_hook() {
     //we repurpose the memory for some unused handlers
     //to store our trampolines and such, so we disable
     //the game's original method and install them ourselves.
-    //exiPrintf("%s\r\n", __FUNCTION__);
+    iguanaPutsNoFlush("OSExceptionInit_hook\r\n");
     SET_DEBUG_PORT(__LINE__);
 
     SET_SCREEN_SOLID_YUV(105, 212, 134); //magenta
@@ -21,7 +21,7 @@ void OSExceptionInit_hook() {
         (void*)0x80000300, //DSI
         (void*)0x80000400, //ISI
         (void*)0x80000500, //External interrupt
-        (void*)0x80000600, //alignment
+        (void*)0xFFFFFFFF, //(void*)0x80000600, //alignment
         (void*)0x80000700, //program
         (void*)0x80000800, //FPU Unavailable
         (void*)0x80000900, //decrementer
@@ -33,10 +33,21 @@ void OSExceptionInit_hook() {
         (void*)0x80001700, //thermal
         (void*)0
     };
+    iguanaPutsNoFlush("About to install exception handlers\r\n");
     for(int i=0; excAddrs[i]; i++) {
-        if(excAddrs[i] == (void*)0xFFFFFFFF) continue;
+        exiPrintf("Handler[%2d] = 0x%08X\r\n", i, excAddrs[i]);
+    }
+
+    for(int i=0; excAddrs[i]; i++) {
+        if(excAddrs[i] == (void*)0xFFFFFFFF) {
+            __OSSetExceptionHandler(i, (void*)interactiveDebugger);
+            continue;
+        }
         //copy exception handler.
-        memcpy(excAddrs[i], (void*)0x80240bf4, 0x98);
+        //memcpy(excAddrs[i], (void*)0x80240bf4, 0x98);
+        u32 *dst = (u32*)excAddrs[i];
+        u32 *src = (u32*)0x80240bf4;
+        for(int j=0; j<0x98 >> 2; j++) dst[j] = src[j];
         //patch to put exception ID in r3.
         //this is actually how the game does this.
         //in fact this is part of DolphinOS, so this is
@@ -52,21 +63,34 @@ void OSExceptionInit_hook() {
         SET_DEBUG_PORT(__LINE__);
     }
 
-    SET_DEBUG_PORT(__LINE__);
-    DCFlushRange((void*)0x80000300, 0x80001800 - 0x80000300);
-    ICInvalidateRange((void*)0x80000300, 0x80001800 - 0x80000300);
-
     //This is called immediately after this function, but,
     //once exception handlers are installed, this needs to
     //be called before we ever try to flush cache (which
     //exiPuts does) or it will crash.
     //There's no harm calling it twice, so let's just do it.
+    iguanaPutsNoFlush("Init syscall...\r\n");
     void (*__OSInitSystemCall)(void) = 0x80245bec;
     __OSInitSystemCall();
+    *(u32*)0x80000C10 = 0x60000000; //no idea but this sync freezes
+
+    iguanaPutsNoFlush("Flush...\r\n");
+    DCFlushRangeNoSync(0x80000000, 0x1800);
+    _sync();
+    __asm__ __volatile__ ("isync");
+    ICInvalidateRange(0x80000000, 0x1800);
 
     SET_DEBUG_PORT(__LINE__);
-    exiPrintf("%s done\r\n", __FUNCTION__);
+    iguanaPutsNoFlush("OSExceptionInit_hook done\r\n");
     SET_DEBUG_PORT(__LINE__);
+
+    exiPrintf("INTSR=%08X INTMR=%08X DAR=%08X DSISR=%08X\r\n",
+        *(vu32*)0xCC003000, *(vu32*)0xCC003004,
+        mfspr(19), mfspr(18));
+    for(u32 addr = 0x80003000; addr < 0x800030C0; addr += 16) {
+        u32 *d = (u32*)addr;
+        exiPrintf("%08X: %08X %08X %08X %08X\r\n", addr,
+            d[0], d[1], d[2], d[3]);
+    }
 }
 
 void gameExceptionInit() {
@@ -166,6 +190,11 @@ uint cause, void *addr, u32 msr) {
 
 void gameExceptionHook(int exceptionCode, OSContext *ctx,
 uint cause, void *addr) {
+    //if(haveGecko) iguanaSetRedLed(true);
+    if(haveGecko) {
+        iguanaSetRedLed(true);
+        interactiveDebugger(cause);
+    }
     static bool alreadyExc = false;
     if(alreadyExc) flashDiscLedForever();
     alreadyExc = true;
@@ -225,7 +254,7 @@ uint cause, void *addr) {
         }
     }
 
-    writeCrashLog(exceptionCode, ctx, cause, addr, msr);
+    //writeCrashLog(exceptionCode, ctx, cause, addr, msr);
     //dumpGameHeaps();
     if(areInterruptsEnabled()) checkIntegrity();
 
@@ -250,6 +279,11 @@ uint cause, void *addr) {
     //udelay(500000);
     //exiPuts("Crash log written OK.\r\n");
     //flashDiscLedForever();
+
+    /*if(haveGecko) {
+        iguanaSetRedLed(true);
+        interactiveDebugger(cause);
+    }*/
 
     exiPuts("Shutting down!\r\n");
     //STM_ShutdownToStandby();

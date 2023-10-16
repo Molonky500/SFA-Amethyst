@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+  <name>Iguana Test</name>
+  <coder>Rena Kunisaki</coder>
+  <version>1.0</version>
+  <release_date>31/12/1999</release_date>
+  <short_description>Iguana Test Program</short_description>
+  <long_description>Test program for Iguana device</long_description>
+  <ahb_access/>
+</app>

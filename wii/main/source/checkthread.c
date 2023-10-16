@@ -165,4 +165,5 @@ void* checkThreadMain(void *param) {
         checkIntegrity();
     }
     exiPuts("checkThread shutting down\n");
+    return NULL;
 }

@@ -1,5 +1,5 @@
 #include "main.h"
-#define DEBUG_IRQ 0
+#define DEBUG_IRQ 1
 
 vs32  irqHandlerDepth =  0;
 vs32  curIrqHandler   = -1;
@@ -31,7 +31,10 @@ static const char *causes[] = {
 void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
     //copied from libogc to handle Wii IRQs
     u32 i, icause=0, intmask, irq=0;
-	SET_DEBUG_PORT(0x33);
+	//iguanaSetBlueLed(true);
+	//SET_DEBUG_PORT(0x33);
+	//_ipcReg[0x194>>2] = 0; //reset system
+	//exiPuts("IRQ!!!\r\n");
 
 	u32 rawCause = _piReg[0];
 	u32 mask     = _piReg[1];
@@ -43,8 +46,8 @@ void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
 		#if DEBUG_IRQ
 			if(cause) { //ignore reset button
 				char msg[64];
-				strcpy(msg, "SPURIOUS IRQ ........ CAUSE=........ CTX=........\n");
-				putHex(&msg[13], irqNo);
+				strcpy(msg, "SPURIOUS IRQ ........ CAUSE=........ CTX=........\r\n");
+				putHex(&msg[13], excNo);
 				putHex(&msg[28], rawCause);
 				putHex(&msg[41], (u32)ctx);
 				exiPuts(msg);
@@ -57,8 +60,16 @@ void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
 			}
 		#endif
 		OSLoadContext(ctx);
+		//iguanaSetBlueLed(false);
 		return;
 	}
+
+	/*char msg[64];
+	strcpy(msg, "IRQ ........ CAUSE=........ CTX=........\r\n");
+	putHex(&msg[ 4], excNo);
+	putHex(&msg[19], rawCause);
+	putHex(&msg[32], (u32)ctx);
+	exiPuts(msg);*/
 
 	intmask = 0;
 	if(cause&0x00000080) {		//Memory Interface
@@ -188,7 +199,7 @@ void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
 		if(handler) handler(irq,ctx);
 		else {
 			char msg[64];
-			strcpy(msg, "no handler IRQ ........\n");
+			strcpy(msg, "no handler IRQ ........\r\n");
 			putHex(&msg[15], irq);
 			exiPuts(msg);
 		}
@@ -200,6 +211,7 @@ void gameExtIrqHandler_hook(int excNo, OSContext *ctx) {
 		OSLoadContext(ctx);
 	}
     OSLoadContext(ctx);
+	//iguanaSetBlueLed(false);
 }
 
 static u32 __SetInterrupts(u32 iMask,u32 nMask) {
@@ -332,43 +344,46 @@ void __MaskIrq(u32 nMask) {
 
 void OSEnableInterrupts_hook() {
     //This is the game enabling interrupts for the first time.
-    //exiPuts("REACHED GAME CODE\r\n");
+    iguanaPutsNoFlush("REACHED GAME CODE\r\n");
     //for(uint32_t addr=0x80000000; addr<0x80001800; addr += 0x100) {
     //    exiPuts("\r\n");
     //    dumpMem((void*)addr, 32);
     //}
     //dumpMem(0x80056140, 32);
     //_ipcReg[9] = 0; //disable VI forced blank
-    //_viReg[1] = 0; //unsure, but official code does it on reset
-    //_viReg[0] = 0; //reset
+    _viReg[1] = 0; //unsure, but official code does it on reset
+    _viReg[0] = 0; //reset
     //_viReg[0x1B] = 1; //progressive scan
-    //exiPuts("About to enable interrupts\r\n");
+	//interactiveDebugger(0);
+    iguanaPutsNoFlush("About to enable interrupts\r\n");
 	SET_DEBUG_PORT(0x20);
     OSEnableInterrupts();
 	SET_DEBUG_PORT(0x21);
-    //exiPuts("Returned from OSEnableInterrupts\r\n");
+    iguanaPutsNoFlush("Returned from OSEnableInterrupts\r\n");
 }
 
 void __OSInterruptInit_hook() {
+	iguanaPutsNoFlush("Enter __OSInterruptInit\r\n");
     __OSInterruptInit();
-	//gameIrqHandlers[IRQ_PI_ACR] = __ipc_interrupthandler;
+	iguanaPutsNoFlush("Exit __OSInterruptInit\r\n");
+	gameIrqHandlers[IRQ_PI_ACR] = __ipc_interrupthandler;
     //gameIrqHandlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
 }
 
 void __OSMaskInterrupts_hook(u32 mask) {
-    //exiPrintf("OSMaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
+    //exiPrintf("OSMaskInterrupts(%08X) from %08X\r\n", mask, RETURN_ADDRESS);
     //mask &= ~IM_PI_ACR; //keep that one on
     __MaskIrq(mask);
 }
 
 void __OSUnmaskInterrupts_hook(u32 mask) {
     __UnmaskIrq(mask);
-    //exiPrintf("OSUnmaskInterrupts(%08X) from %08X\n", mask, RETURN_ADDRESS);
+    //exiPrintf("OSUnmaskInterrupts(%08X) from %08X\r\n", mask, RETURN_ADDRESS);
 }
 
 void _irqPiError(int irq, OSContext *ctx) {
     char msg[64];
-    strcpy(msg, "PI ERROR ctx=........\n");
+    strcpy(msg, "PI ERROR ctx=........\r\n");
     putHex(&msg[13], (u32)ctx);
     exiPuts(msg);
     gameExceptionHook(1, ctx, 0, NULL);

@@ -1,66 +1,54 @@
 #include "main.h"
 
 //mutex_t exiMutex;
-__attribute__ ((aligned (32))) static u8 dmaBuf[4096];
+__attribute__ ((aligned (32))) u8 exiDmaBuf[4096];
+bool haveGecko = false;
 
+u32 exiReadWrite32(volatile u32 *exi, u32 val) {
+    exi[4] = val;
+    exi[3] = (2 << 2) | //read and write
+        (3 << 4) | //4 bytes
+        (1 << 0); //start now
+    while(exi[3] & 1); //wait for any previous transfer
+    return exi[4];
+}
+
+#if USE_CUSTOM_GECKO
+void exiPuts(const char *str) {
+    //iguanaPuts(str);
+    iguanaPutsNoFlush(str);
+}
+
+#else //not USE_CUSTOM_GECKO
 void exiPuts(const char *str) {
     /** Send a string to the EXI UART.
      */
     //LWP_MutexLock(exiMutex);
     u32 irq = IRQ_Disable();
-    memset(dmaBuf, 0, sizeof(dmaBuf));
-    //SET_DEBUG_PORT(0xE0);
-    //SET_DEBUG_PORT((((u32)dmaBuf) >> 24) & 0xFF); udelay(10000);
-    //SET_DEBUG_PORT((((u32)dmaBuf) >> 16) & 0xFF); udelay(10000);
-    //SET_DEBUG_PORT((((u32)dmaBuf) >>  8) & 0xFF); udelay(10000);
-    //SET_DEBUG_PORT((((u32)dmaBuf) >>  0) & 0xFF); udelay(10000);
+    memset(exiDmaBuf, 0, sizeof(exiDmaBuf));
 
-    //0x800400 is address for UART.
-    //high bit indicates write.
-    #if USE_CUSTOM_GECKO
-        static volatile u32 *exi = (volatile u32*)0xCD006814; //channel 1
-    #else
-        static volatile u32 *exi = (volatile u32*)0xCD006800; //channel 0
-    #endif
+    static volatile u32 *exi = (volatile u32*)0xCD006800; //channel 0
 
     //skip any leftover line breaks and this \x01 that
     //keeps somehow sneaking in.
     //while(*str == '\r' || *str == '\n' || *str == '\x01') str++;
 
     ssize_t len = strlen(str);
-    //SET_DEBUG_PORT(0xE1);
-    //udelay(10000);
-    //SET_DEBUG_PORT(len & 0xFF);
-    //udelay(10000);
-    //SET_DEBUG_PORT((len >> 8) & 0xFF);
-    //udelay(10000);
-
-    //for(int i=0; i<len; i++) {
-    //    SET_DEBUG_PORT(str[i]); udelay(10000);
-    //}
-
     while(len > 0 && *str) {
         int outPos=0;
-        #if USE_CUSTOM_GECKO
-            dmaBuf[outPos++] = 0xDE;
-            dmaBuf[outPos++] = 0xAD;
-            dmaBuf[outPos++] = 0xFA;
-            dmaBuf[outPos++] = 0xCE;
-        #else
-            static u32 addr = (0x800400 << 6) | 0x80000000;
-            dmaBuf[outPos++] = addr >> 24;
-            dmaBuf[outPos++] = addr >> 16;
-            dmaBuf[outPos++] = addr >>  8;
-            dmaBuf[outPos++] = addr;
-        #endif
+
+        //0x800400 is address for UART.
+        //high bit indicates write.
+        static u32 addr = (0x800400 << 6) | 0x80000000;
+        exiDmaBuf[outPos++] = addr >> 24;
+        exiDmaBuf[outPos++] = addr >> 16;
+        exiDmaBuf[outPos++] = addr >>  8;
+        exiDmaBuf[outPos++] = addr;
 
         //copy a chunk of the string
         ssize_t copyLen = len;
-        #if USE_CUSTOM_GECKO
-            copyLen += 7;
-        #endif
-        if(copyLen >= sizeof(dmaBuf)-4) {
-            copyLen = sizeof(dmaBuf)-4;
+        if(copyLen >= sizeof(exiDmaBuf)-4) {
+            copyLen = sizeof(exiDmaBuf)-4;
         }
 
         //pad the length - must be a multiple of 32 bytes
@@ -68,43 +56,23 @@ void exiPuts(const char *str) {
         ssize_t pad = paddedLen & 0x1F;
         if(pad) paddedLen += (32-pad);
 
-        #if USE_CUSTOM_GECKO
-            uint32_t nBlocks = paddedLen >> 5;
-            dmaBuf[outPos++] = (nBlocks >> 8) & 0xFF;
-            dmaBuf[outPos++] = (nBlocks >> 0) & 0xFF;
-        #endif
-
         //copy the string, replacing '\n' with '\r'
         //because dolphin (and probably real HW) treats '\r' as
         //"actually print the buffered message".
-        #if USE_CUSTOM_GECKO
-            while(*str && outPos < sizeof(dmaBuf)) {
-                char c = *(str++);
-                if(c == '\n') dmaBuf[outPos++] = '\r';
-                dmaBuf[outPos++] = c;
-            }
-        #else
-            while(*str && outPos < sizeof(dmaBuf)) {
-                char c = *(str++);
-                if(c == '\n') {
-                    dmaBuf[outPos++] = '\r';
-                    while((*str == '\r') || (*str == '\n')
-                    || (*str == '\x01')) str++;
-                }
-                else if(c != '\r' && c != '\x01') dmaBuf[outPos++] = c;
-            }
-        #endif
-        while(outPos < paddedLen && outPos < sizeof(dmaBuf)) {
-            dmaBuf[outPos++] = 0;
-        }
 
-        #if USE_CUSTOM_GECKO
-            //send one more block than needed so that the device has a
-            //chance to read in all of the message, even if it has to
-            //skip past a few padding bytes first.
-            outPos += 32;
-        #endif
-        DCFlushRange(dmaBuf, outPos);
+        while(*str && outPos < sizeof(exiDmaBuf)) {
+            char c = *(str++);
+            if(c == '\n') {
+                exiDmaBuf[outPos++] = '\r';
+                while((*str == '\r') || (*str == '\n')
+                || (*str == '\x01')) str++;
+            }
+            else if(c != '\r' && c != '\x01') exiDmaBuf[outPos++] = c;
+        }
+        while(outPos < paddedLen && outPos < sizeof(exiDmaBuf)) {
+            exiDmaBuf[outPos++] = 0;
+        }
+        DCFlushRange(exiDmaBuf, outPos);
 
         while(exi[3] & 1); //wait for any previous transfer
         u32 prev0 = exi[0];
@@ -115,13 +83,9 @@ void exiPuts(const char *str) {
             //(5 <<  4) | //32MHz
             (0 <<  4) | //1MHz
             //(4 <<  4) | //16MHz
-            #if USE_CUSTOM_GECKO
-                (1 <<  7); //device 0 (Gecko)
-            #else
-                (2 <<  7); //device 1 (UART)
-            #endif
+            (2 <<  7); //device 1 (UART)
         #if 1
-            exi[1] = MEM_VIRTUAL_TO_PHYSICAL(dmaBuf); //DMA source
+            exi[1] = MEM_VIRTUAL_TO_PHYSICAL(exiDmaBuf); //DMA source
             exi[2] = (outPos & ~0x1F); //DMA length
             exi[3] = (1 << 2) | //write
                 (1 << 1) | //use DMA
@@ -133,8 +97,8 @@ void exiPuts(const char *str) {
         #else
             SET_DEBUG_PORT(0xFF); udelay(10000);
             for(int i=0; i<outPos; i++) {
-                SET_DEBUG_PORT(dmaBuf[i]); udelay(10000);
-                exi[5] = dmaBuf[i];
+                SET_DEBUG_PORT(exiDmaBuf[i]); udelay(10000);
+                exi[5] = exiDmaBuf[i];
                 exi[4] = (1 << 2); //write 1 byte immediate
                 while(exi[3] & 1); //wait for transfer
             }
@@ -147,12 +111,21 @@ void exiPuts(const char *str) {
     IRQ_Restore(irq);
     //LWP_MutexUnlock(exiMutex);
 }
+#endif
 
 void exiPrintf(const char *fmt, ...) {
-    char buf[1024];
+    #if USE_CUSTOM_GECKO
+        char *buf = (char*)exiDmaBuf;
+        size_t len = sizeof(exiDmaBuf);
+    #else
+        char buf[1024];
+        size_t len = sizeof(buf);
+    #endif
+    memset(buf, 0, len);
+    //DCFlushRange(buf, len);
     va_list args;
     va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
+    vsnprintf(buf, len, fmt, args);
     exiPuts(buf);
     va_end(args);
 }
@@ -166,9 +139,9 @@ void exiPrintInit() {
     _exiReg[3] = 0;
     //(*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
 
-    //enable INT interrupt for custom Gecko thing.
-    static volatile u32 *exi = (volatile u32*)0xCD006814; //channel 1
-    exi[0] |= (1 << 0);
+    #if USE_CUSTOM_GECKO
+        iguanaInit();
+    #endif
 
     //SET_DEBUG_PORT(0xD2);
     IRQ_Restore(irq);
@@ -180,35 +153,11 @@ void exiInterrupt_hook() {
     SET_DEBUG_PORT(0xEE);
     exiPuts(" *** EXI INTERRUPT\n");
 
-    //dump threads
-    OSThread *thread = *(OSThread**)0x800000dc;
-    while(thread) {
-        u32 stackTop = (u32)thread->stackBase; //high addr
-        u32 stackBot = (u32)thread->stackEnd;  //low  addr
-        u32 *sp      = (u32*)thread->context.gpr[1];
-        u32 pc       = (u32)thread->context.srr0;
-
-        const char *name = "unknown";
-        PrevThreadState *pState = findThread(thread);
-        if(pState) {
-            if(pState->name != NULL) name = pState->name;
-        }
-        exiPrintf("Thread %08X (%s): PC=%08x\n", thread, name, pc);
-        for(int i=0; i<32; i += 4) {
-            for(int j=0; j<4; j++) {
-                exiPrintf("  r%2d: %08x", (i+j), (u32)thread->context.gpr[i+j]);
-            }
-            exiPrintf("\n");
-        }
-        while(PTR_VALID(sp)) {
-            exiPrintf(" > %08x\n", sp[1]);
-            sp = (u32*)*sp;
-        }
-        thread = thread->linkActive.next;
-    }
+    /*dumpThreads();
     dvdDumpPendingReadCallbacks();
     dvdDumpPendingCancelCallbacks();
     dvdDumpPendingStreamCallbacks();
     dvdDumpOpenFiles();
-    writeMemDump();
+    writeMemDump();*/
+    interactiveDebugger(5);
 }

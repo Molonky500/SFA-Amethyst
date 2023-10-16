@@ -1,9 +1,11 @@
 #include "main.h"
 
 u32 gFrameCount = 0;
-static u32 *trampoline = (u32*)0x80000200;
+static u32 *trampoline = (u32*)0x800002a0;
 
 void panic() {
+    exiPuts("*** PANIC ***\r\n");
+    interactiveDebugger(99);
     while(1) {
         SET_SCREEN_SOLID_YUV(76, 84, 255); //red
         udelay(250000);
@@ -14,7 +16,7 @@ void panic() {
 
 u32 nextTrampoline(u32 cur) {
     if((cur+16) >= 0x80000C00) {
-        exiPrintf(" *** ERROR *** Too many trampolines (reached %08X)\n", cur);
+        exiPrintf(" *** ERROR *** Too many trampolines (reached %08X)\r\n", cur);
         panic();
     }
     //Axx, Bxx are unused
@@ -92,7 +94,7 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
 }
 
 int tempCardHook(int chan, void *work, void *cb) {
-    exiPrintf("CARDMount(%d, %p, %p)\n", chan, work, cb);
+    exiPrintf("CARDMount(%d, %p, %p)\r\n", chan, work, cb);
     //initWiimote();
     return 0;
 }
@@ -129,6 +131,7 @@ void mainLoopHook() {
     exiPuts(msg);*/
 
     gFrameCount++;
+    __UnmaskIrq(IM_EXI1);
 
     extern u8 __ipcbufferLo[], __ipcbufferHi[];
     //exiPrintf("IPC BUF %08X %08X  Arena1 %08X %08X  Arena2  %08X %08X\n",
@@ -139,7 +142,7 @@ void mainLoopHook() {
     static bool triedInit = false;
     if((!triedInit) && (*(u32*)0x803dcec8) == 0xB) {
         triedInit = true;
-        exiPuts("Telling thread to init Wiimote\n");
+        exiPuts("Telling thread to init Wiimote\r\n");
         bInitWiimote = 1;
     }
 }
@@ -160,6 +163,18 @@ void cardUnlock_hook(void *addr, u32 size) {
         *msecs = 8.0f;
     }
 }*/
+
+void _init_hook(u32 x,u32 y) {
+    //exiPrintf("Reached memInit; debuggerHookCode=0x%X pi2DebugFlag=0x%X debug=0x%X\r\n",
+    //    *(u32*)0x80000060, *(u32*)0x803ddddc, *(u32*)0x803dde98);
+    iguanaSetGreenLed(true);
+    iguanaPutsNoFlush(" *** Reached hook ***\r\n");
+    interactiveDebugger(0);
+    void (*origFunc)(u32,u32) = 0x80240400;
+    origFunc(x,y);
+    iguanaSetGreenLed(false);
+    iguanaPutsNoFlush("Survived hook\r\n");
+}
 
 void doPatches() {
     //remap some HW regs
@@ -212,6 +227,7 @@ void doPatches() {
     }
 
     hookBranch(0x8025fe1c, cardUnlock_hook, 1, 0);
+    //hookBranch(0x802406dc, _init_hook, 1, 0);
 
     //hookBranch(0x802623ac, tempCardHook, 0, 0);
     //hookBranch(0x80014f90, padUpdate_hook, 1, 0);
@@ -227,7 +243,7 @@ void doPatches() {
     hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0, 0);
     hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0, 0);
     hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0, 0);
-    //hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
+    hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
     hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0, 0);
     hookBranch(0x80015850, DVDRead_hook, 0, 0);
@@ -262,6 +278,11 @@ void doPatches() {
         //0x8014a5fc, 0x4E800020, //something to do with jellyfish bug
         //0x8014a8bc, 0x38600000,
         //0x8006edcc, 0x4E800020,
+        //0x80240608, 0x38000042, //don't change debug flags
+        0x802543f8, 0x60000000, //don't change EXI1 settings, we're using it
+        //0x80240758, 0x60000000, //always call memInit
+        //0x80241a14, 0x60000000, //don't syscall
+        //0x80241a48, 0x60000000, //don't syscall
 
         //set some header values that apploader should set
         0x80000000, 0x47534145, //disc ID
@@ -269,6 +290,7 @@ void doPatches() {
         0x80000008, 0x01000000, //streaming params
         0x800000d0, 0x01000000, //ARAM size
         0x800000f0, 0x01800000, //simulated RAM size
+        //0x800000f4, 0x817e8240, //pDVDBI2
         0x800030c0, 0xE2D383C1, //memory card is present
 
         //0x80245980, 0x4E800020, //OSSetWirelessID

@@ -95,6 +95,7 @@ void initGameHooks() {
     exiPuts("initDvdHack: OK; wait for DVD...\r\n");
     while(!dvdThreadReady) OSYieldThread();
     DVD_DPRINT("DVD READY\r\n");
+    _ipcReg[9] = 0; //stop forcing screen color
 
     if(loaderRebootCode) {
         exiPrintf("Restoring loader reboot code from 0x%x\n", loaderRebootCode);
