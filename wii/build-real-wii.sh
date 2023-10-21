@@ -1,25 +1,11 @@
 #!/bin/sh
-# Build mod and copy to SD card.
-SD_MOUNT_PATH=/run/media/rena/WII
-#SD_MOUNT_PATH=/home/rena/.local/share/dolphin-emu/Load/WiiSDSync
+# Build mod and send via wiiload.
+BUILD_PATH=./build
 DISCROOT=/home/rena/projects/sfa/DATA/
 NEWDOL=$DISCROOT/sys/main.dol
-INSTALL_PATH=$SD_MOUNT_PATH/apps/SFA
+INSTALL_PATH=$BUILD_PATH/SFA
 
-if [ ! -e $SD_MOUNT_PATH/apps ]; then
-    echo "SD not mounted!"
-    exit 1
-fi
-
-mkdir -p $INSTALL_PATH/files
 mkdir -p $INSTALL_PATH/sys
-
-#echo "Build boot..."
-#pushd boot
-#    make V=1
-#    ok=$?
-#popd
-#if [ $ok -ne 0 ]; then exit $ok; fi
 
 echo "Build main..."
 pushd main
@@ -43,9 +29,13 @@ echo "Combine..."
 ok=$?
 if [ $ok -ne 0 ]; then exit $ok; fi
 
-echo "Install..."
+echo "Zip..."
 cp -r app/* $INSTALL_PATH
 cp $DISCROOT/sys/* $INSTALL_PATH/sys/
-cp -ru $DISCROOT/files/* $INSTALL_PATH/files/
+#cp -ru $DISCROOT/files/* $INSTALL_PATH/files/
 
-umount $SD_MOUNT_PATH
+echo "Upload..."
+pushd $BUILD_PATH
+zip -r sfa.zip ./SFA
+popd
+/opt/devkitpro/tools/bin/wiiload $BUILD_PATH/sfa.zip
