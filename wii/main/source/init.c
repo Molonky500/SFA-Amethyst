@@ -45,7 +45,7 @@ int _depth) {
     if(!pdir) {
         int err = errno;
         if(err == ENOTDIR) return 0;
-        exiPrintf("Error opening path: %s\n", path);
+        exiPrintf("Error opening path: %s: %d\n", path, err);
         //delayFrames(60);
         return -abs(err);
     }
@@ -96,6 +96,7 @@ void initGameFiles(const char *appPath) {
      *   because how would that even work?
      */
     if(appPath) {
+        exiPrintf("App path = \"%s\"\r\n", appPath);
         strncpy(gameRootDir, appPath, sizeof(gameRootDir));
         //cut off the name
         int n = strlen(gameRootDir) - 1;
@@ -107,25 +108,22 @@ void initGameFiles(const char *appPath) {
             else n--;
         }
     }
-    else strcpy(gameRootDir, "sd:/apps/SFA");
-    exiPrintf("Look for game files in: \"%s\"\r\n", gameRootDir);
-    //delayFrames(60);
-    int err = _scanForGameFiles(gameRootDir, sizeof(gameRootDir), 0);
-    if(err > 0) { //success
-        exiPrintf("Found game files in: \"%s\"\r\n", gameRootDir);
-        //delayFrames(60);
-        return;
+    else {
+        exiPuts("No app path\r\n");
+        static const char *tryPaths[] = {
+            "sd:/apps/SFA", //proper install path
+            "sd:/SFA", //for debugging
+            NULL //end of list
+        };
+        for(int iPath=0; tryPaths[iPath]; iPath++) {
+            strcpy(gameRootDir, tryPaths[iPath]);
+            exiPrintf("Look for game files in: \"%s\"\r\n", gameRootDir);
+            int err = _scanForGameFiles(gameRootDir, sizeof(gameRootDir), 0);
+            if(err > 0) { //success
+                exiPrintf("Found game files in: \"%s\"\r\n", gameRootDir);
+                return;
+            }
+        }
+        PANIC("Game files not found.\n");
     }
-
-    //printf("Looking for game files... (START to exit)\n");
-    //printf("Tip: place them at %s to skip this step!\n", defaultRootDir);
-    //delayFrames(60);
-    strcpy(gameRootDir, "/");
-    err = _scanForGameFiles(gameRootDir, sizeof(gameRootDir), 0);
-    if(err > 0) { //success
-        exiPrintf("Found game files:\r\n\"%s\"\r\n", gameRootDir);
-        //delayFrames(60);
-    }
-    else if(err < 0) PANIC("Error scanning for game files\n");
-    else PANIC("Game files not found.\n");
 }
