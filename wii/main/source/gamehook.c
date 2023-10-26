@@ -24,7 +24,7 @@ void printConsoleInfo() {
         (*(u32*)0x800000F8) / 1000000,
         (*(u32*)0x800000FC) / 1000000);
 
-    CONF_Init();
+    //CONF_Init();
     char name[12];
     CONF_GetNickName(name);
     exiPrintf("Console name: \"%s\"\n", name);
@@ -35,7 +35,14 @@ void initGameHooks() {
     //_dspReg[5] = 0x801; //DSP reset
 
     exiPuts("Game init hook OK!\n");
+    __UnmaskIrq(IM_PI_ACR); //enable IOS IPC
     _initIos();
+
+    exiPuts("About to init Wiimote\n");
+    if(initWiimote()) {
+        exiPuts("Wiimote init failed\n");
+    }
+    else exiPuts("Wiimote init OK\n");
 
     //init filesystem
     exiPuts("Init FAT...\n");
@@ -69,8 +76,8 @@ void initGameHooks() {
 
     /*exiPrintf("IOS reload... (cur ver %d)\n", IOS_GetVersion());
     int r = IOS_ReloadIOS(36);
+    //int r = IOS_ReloadIOS(IOS_GetVersion());
     exiPrintf("=> %d\n", r);
-    //IOS_ReloadIOS(IOS_GetVersion());
     udelay(1000000);
     exiPrintf("Now on IOS %d\n", IOS_GetVersion());*/
 
@@ -129,6 +136,5 @@ void initGameHooks() {
     (*(u32*)0x8001fa6c) = 0x3ba00000 | (CONF_GetProgressiveScan() ? 1 : 0);
 
     STM_RegisterEventHandler(MyStmHandler);
-
     exiPuts("Init OK\n");
 }

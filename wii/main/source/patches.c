@@ -131,7 +131,7 @@ void mainLoopHook() {
     exiPuts(msg);*/
 
     gFrameCount++;
-    __UnmaskIrq(IM_EXI1);
+    __UnmaskIrq(IM_EXI1); //we need this for debug
 
     extern u8 __ipcbufferLo[], __ipcbufferHi[];
     //exiPrintf("IPC BUF %08X %08X  Arena1 %08X %08X  Arena2  %08X %08X\n",
@@ -165,13 +165,28 @@ void cardUnlock_hook(void *addr, u32 size) {
     }
 }*/
 
-void _init_hook(u32 x,u32 y) {
+void LCEnable_hook() {
+    exiPuts("REACHED LCEnable_hook\r\n");
+    static void (*origFunc)(void) = 0x80241c08;
+    origFunc();
+    exiPuts("About to init game hooks\r\n");
+    initGameHooks();
+    exiPuts("Init game hooks OK\r\n");
+}
+
+int OSWakeupThread_hook(void *queue) {
+    static int (*origFunc)(void) = 0x8024377c; //OSDisableInterrupts
+    if(!queue) PANIC("OSWakeupThread(NULL)");
+    return origFunc();
+}
+
+void _init_hook(u32 x,u32 y) { //for testing; not used
     //exiPrintf("Reached memInit; debuggerHookCode=0x%X pi2DebugFlag=0x%X debug=0x%X\r\n",
     //    *(u32*)0x80000060, *(u32*)0x803ddddc, *(u32*)0x803dde98);
     iguanaSetGreenLed(true);
     iguanaPutsNoFlush(" *** Reached hook ***\r\n");
     interactiveDebugger(0);
-    void (*origFunc)(u32,u32) = 0x80240400;
+    void (*origFunc)(u32,u32) = 0x8024b418;
     origFunc(x,y);
     iguanaSetGreenLed(false);
     iguanaPutsNoFlush("Survived hook\r\n");
@@ -228,7 +243,8 @@ void doPatches() {
     }
 
     hookBranch(0x8025fe1c, cardUnlock_hook, 1, 0);
-    //hookBranch(0x802406dc, _init_hook, 1, 0);
+    //hookBranch(0x80015998, _init_hook, 1, 0);
+    hookBranch(0x80246b64, OSWakeupThread_hook, 1, 0);
 
     //hookBranch(0x802623ac, tempCardHook, 0, 0);
     //hookBranch(0x80014f90, padUpdate_hook, 1, 0);
@@ -238,7 +254,8 @@ void doPatches() {
     hookBranch(0x80246e04, osPrintHook, 0, 0);
     hookBranch(0x802510cc, osPrintHook, 0, 0);
     hookBranch(0x8024091c, OSExceptionInit_hook, 0, 0);
-    hookBranch(0x80242a10, gameExceptionHook, 0, 0);
+    //hookBranch(0x80242a10, gameExceptionHook, 0, 0);
+    hookBranch(0x80242bf8, gameExceptionHook, 1, 0);
     hookBranch(0x80137df8, gameBsodHook, 0, 0);
     hookBranch(0x802406c0, __OSInterruptInit_hook, 1, 0);
     hookBranch(0x80243b44, __OSMaskInterrupts_hook, 0, 0);
@@ -246,6 +263,7 @@ void doPatches() {
     hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0, 0);
     hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
     hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
+    hookBranch(0x80020dbc, LCEnable_hook, 1, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0, 0);
     hookBranch(0x80015850, DVDRead_hook, 0, 0);
     hookBranch(0x80248f9c, DVDReadPrio_hook, 0, 0);

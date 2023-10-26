@@ -18,12 +18,12 @@ void _initIos() {
     SET_SCREEN_SOLID_YUV(255, 0, 148); //yellow
     //udelay(500000);
     initAlloc();
+    __lwp_wkspace_init(1*1024*1024);
     exiPuts("loader2 alloc init OK\r\n");
     initLibc();
     exiPrintf("loader2 libc init OK, IPC buf %p - %p\r\n",
-        __ipcbufferLo, __ipcbufferHi);
-    //__lwp_wkspace_init(1*1024*1024);
-    mtspr(920,(mfspr(920)&~0x40000000)); //DisableWriteGatherPipe();
+        &__ipcbufferLo, &__ipcbufferHi);
+    //mtspr(920,(mfspr(920)&~0x40000000)); //DisableWriteGatherPipe();
     __IPC_ClntInit();
     __IOS_InitializeSubsystems();
     exiPrintf("IOS init OK.\n IPC Buf: 0x%8x - 0x%8x\n Arena1:  0x%8x - 0x%8x\n Arena2:  0x%8x - 0x%8x\n",
@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
     if(argc > 0) isLaunchedFromLoader = true;
     //else we're launched in Dolphin from command line or something
     //and there's no loader to exit to.
+    //L2Enhance();
 
     SET_DEBUG_PORT(0x10);
 
@@ -91,18 +92,12 @@ int main(int argc, char **argv) {
 
     wiiIface.magic = WII_IFACE_MAGIC;
     WII_IFACE_PTR = &wiiIface;
-    L2Enhance();
     SET_DEBUG_PORT(0x15);
 
     exiPuts("boot game\r\n");
     SET_DEBUG_PORT(0x16);
     bootGame(); //doesn't return
     __builtin_unreachable();
-    /*exiPuts("Returned from boot!?\r\n");
-    while(1) {
-        SET_DEBUG_PORT(0x1F); udelay(10000);
-        SET_DEBUG_PORT(0xEE); udelay(10000);
-    }*/
     return 0;
 }
 

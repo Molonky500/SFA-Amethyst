@@ -37,7 +37,7 @@ s32 SYS_CreateAlarm(syswd_t *thealarm)
 
 	*thealarm = idx;
 	//__lwp_thread_dispatchenable();
-    OSEnableScheduler();
+    //OSEnableScheduler();
 	return 0;
 }
 
@@ -53,7 +53,7 @@ void *cbarg)
 	alarm->realCb  = cb;
     OSSetAlarm(&alarm->alarm, timespec_to_ticks(tp), _compatAlarmCb);
 	//__lwp_thread_dispatchenable();
-    OSEnableScheduler();
+    //OSEnableScheduler();
 	return 0;
 }
 
@@ -72,7 +72,7 @@ void *cbarg)
         timespec_to_ticks(tp_start),
         timespec_to_ticks(tp_period),
         _compatAlarmCb);
-	OSEnableScheduler();
+	//OSEnableScheduler();
 	return 0;
 }
 
@@ -82,7 +82,7 @@ s32 SYS_RemoveAlarm(syswd_t thealarm)
 	if(!alarm->used) return -EINVAL;
     alarm->used = false;
     OSCancelAlarm(&alarm->alarm);
-	OSEnableScheduler();
+	//OSEnableScheduler();
 	return 0;
 }
 
@@ -91,6 +91,6 @@ s32 SYS_CancelAlarm(syswd_t thealarm)
 	SysDolAlarm *alarm = &_alarms[thealarm];
 	if(!alarm->used) return -EINVAL;
     OSCancelAlarm(&alarm->alarm);
-	OSEnableScheduler();
+	//OSEnableScheduler();
 	return 0;
 }

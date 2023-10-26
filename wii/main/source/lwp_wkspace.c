@@ -51,6 +51,9 @@ void __lwp_wkspace_init(u32 size)
 	SYS_SetArena2Lo((void*)(arLo+dsize));
 	_CPU_ISR_Restore(level);
 
+	exiPrintf("__lwp_wkspace_init(0x%X -> 0x%X) at 0x%X from 0x%X\r\n", size,
+		dsize, arLo, __builtin_return_address(0));
+
 	memset((void*)arLo,0,dsize);
 	__wkspace_heap_size += __lwp_heap_init(&__wkspace_heap,(void*)arLo,dsize,PPC_ALIGNMENT);
 }

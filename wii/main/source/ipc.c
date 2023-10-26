@@ -55,13 +55,11 @@ void exiPrintf(const char *fmt, ...);
 #define IPC_HEAP_SIZE			4096
 #define IPC_REQUESTSIZE			64
 #define IPC_NUMHEAPS			16
-
 #define IOS_MAXFMT_PARAMS		32
-
-
-
 #define RELNCH_RELAUNCH 1
 #define RELNCH_BACKGROUND 2
+
+static OSMutex _ipcMutex;
 
 struct _ipcreq
 {						//ipc struct size: 32
@@ -105,8 +103,137 @@ struct _ipcreq
 	u32 relnch;			//40
 	OSThreadQueue *syncqueue;	//44
 	u32 magic;			//48 - used to avoid spurious responses, like from zelda.
-	u8 pad1[12];		//52 - 60
+	s32 serial;         //52 - for debug
+	u8 pad1[8]; 		//56 - 60
 };
+
+//debug stuff
+static const char *cmdNames[] = {
+	"INVAL", "OPEN", "CLOSE", "READ", "WRITE", "SEEK", "IOCTL",
+	"IOCTLV", "DONE"};
+#define MAX_SERIAL_LOG 256
+volatile u32 pendingSerials[MAX_SERIAL_LOG];
+volatile struct _ipcreq *serialReqs[MAX_SERIAL_LOG];
+volatile u32 nextSerial = 0;
+
+void printReq(struct _ipcreq *req) {
+	exiPrintf("IPC req @%08x: cmd=%d (%-6s) res=0x%08x fd=%d reqcmd=%d (%-6s)\r\n",
+		req, req->cmd,
+		req->cmd >= 0 && req->cmd < 9 ? cmdNames[req->cmd] : "???",
+		req->result, req->fd, req->req_cmd,
+		req->req_cmd >= 0 && req->req_cmd < 9 ? cmdNames[req->req_cmd] : "???");
+	exiPrintf("cb=0x%08x udata=0x%08x relnch=%d queue=0x%08x ser=%d\r\n",
+		req->cb, req->usrdata, req->relnch, req->syncqueue, req->serial);
+	int cmd = req->cmd;
+	if(cmd == 8) cmd = req->req_cmd;
+	switch(cmd) {
+		case 1: //open
+			exiPrintf("path=%s mode=0x%X\r\n",
+				PTR_VALID(req->open.filepath) ? req->open.filepath : "<INVALID>",
+				req->open.mode);
+			break;
+		case 2: //close
+			break;
+		case 3: //read
+			exiPrintf("into 0x%x, len %d\r\n", req->read.data, req->read.len);
+			break;
+		case 4: //write
+			exiPrintf("from 0x%x, len %d\r\n", req->write.data, req->write.len);
+			break;
+		case 5: //seek
+			exiPrintf("where=0x%x whence=0x%x\r\n", req->seek.where,
+				req->seek.whence);
+			break;
+		case 6: //ioctl
+			exiPrintf("ioctl=%d in=0x%x (%d) io=0x%x (%d)\r\n",
+				req->ioctl.ioctl,
+				req->ioctl.buffer_in, req->ioctl.len_in,
+				req->ioctl.buffer_io, req->ioctl.len_io);
+			break;
+		case 7: { //ioctlv
+			exiPrintf("ioctl=%d in=%d io=%d argv=0x%x (%d)\r\n",
+				req->ioctlv.ioctl, req->ioctlv.argcin, req->ioctlv.argcio,
+				PTR_VALID(req->ioctlv.argv) ? req->ioctlv.argv->data : 0,
+				PTR_VALID(req->ioctlv.argv) ? req->ioctlv.argv->len  : 0);
+			if(PTR_VALID(req->ioctlv.argv) && PTR_VALID(req->ioctlv.argv->data)) {
+				exiPuts("data:");
+				u8 *data = (u8*)req->ioctlv.argv->data;
+				for(u32 i=0; i<req->ioctlv.argv->len; i++) {
+					exiPrintf(" %02X", data[i]);
+				}
+				exiPuts("\r\n");
+			}
+			break;
+		}
+	}
+	exiPuts("RAW DATA:\r\n");
+	u8 *data = (u8*)req;
+	for(int i=0; i<64; i++) {
+		exiPrintf("%02X%s", data[i],
+			((i & 0xF) == 0xF) ? "\r\n" : (
+				((i & 3) == 3) ? " " : ""
+			)
+		);
+	}
+}
+#if 0
+void initSerials() {
+	memset(pendingSerials, 0, sizeof(pendingSerials));
+	memset(serialReqs, 0, sizeof(serialReqs));
+}
+u32 newSerial(struct _ipcreq *req) {
+	if(req->serial) return req->serial;
+	memset(req->pad1, 0, 8);
+	u32 res = ++nextSerial;
+	for(u32 i=0; i<MAX_SERIAL_LOG; i++) {
+		if(pendingSerials[i] == 0) {
+			pendingSerials[i] = res;
+			serialReqs[i] = req;
+			return res;
+		}
+	}
+	exiPrintf("IPC SERIAL OVERFLOW: %d\r\n", res);
+	return res;
+}
+void freeSerial(struct _ipcreq *req) {
+	if(!(req && req->serial > 0)) return;
+	for(u32 i=0; i<MAX_SERIAL_LOG; i++) {
+		if(pendingSerials[i] == req->serial) {
+			pendingSerials[i] = 0;
+			serialReqs[i] = NULL;
+			req->serial = 0;
+			return;
+		}
+	}
+	exiPrintf("IPC serial not found: %d\r\n", req->serial);
+	printReq(req);
+}
+void checkSerials() {
+	u32 count = 0;
+	for(u32 i=0; i<MAX_SERIAL_LOG; i++) {
+		if(pendingSerials[i]) count++;
+	}
+	if(count < 2) return;
+	exiPuts("pending reqs:\r\n");
+	for(u32 i=0; i<MAX_SERIAL_LOG; i++) {
+		if(pendingSerials[i]) {
+			struct _ipcreq *req = serialReqs[i];
+			exiPrintf("%3d: 0x%08X: 0x%08X %-6s 0x%08X %d\r\n", pendingSerials[i],
+				req, req->cmd,
+				req->cmd >= 0 && req->cmd < 9 ? cmdNames[req->cmd] : "???",
+				req->result, req->fd);
+			//printReq(req);
+		}
+	}
+	//exiPuts("\r\n");
+}
+#else
+void initSerials() {}
+u32 newSerial(struct _ipcreq *req) { return 0; }
+void freeSerial(struct _ipcreq *req) {}
+void checkSerials() {}
+#endif
+//end debug stuff
 
 struct _ipcreqres
 {
@@ -173,6 +300,13 @@ extern void* __SYS_GetIPCBufferHi(void);
 
 extern u32 gettick(void);
 
+static void _lockIpcMutex() {
+	if(OSGetCurrentThread()) OSLockMutex(&_ipcMutex);
+}
+static void _unlockIpcMutex() {
+	if(OSGetCurrentThread()) OSUnlockMutex(&_ipcMutex);
+}
+
 static __inline__ u32 IPC_ReadReg(u32 reg)
 {
 	return _ipcReg[reg];
@@ -190,11 +324,19 @@ static __inline__ void ACR_WriteReg(u32 reg,u32 val)
 
 static __inline__ void* __ipc_allocreq(void)
 {
-	return iosAlloc(_ipc_hid,IPC_REQUESTSIZE);
+	struct _ipcreq *req;
+	req = iosAlloc(_ipc_hid,IPC_REQUESTSIZE);
+	if(req) {
+		req->serial = 0;
+		newSerial(req);
+	}
+	return req;
 }
 
 static __inline__ void __ipc_freereq(void *ptr)
 {
+	struct _ipcreq *req = ptr;
+	freeSerial(req);
 	iosFree(_ipc_hid,ptr);
 }
 
@@ -257,6 +399,7 @@ static s32 __ipc_queuerequest(struct _ipcreq *req)
 	exiPrintf("__ipc_queuerequest(%p)\r\n",req);
 #endif
 	level = OSDisableInterrupts();
+	newSerial(req);
 
 	cnt = (_ipc_responses.cnt_queue - _ipc_responses.cnt_sent);
 	if(cnt>=16) {
@@ -283,6 +426,7 @@ static s32 __ipc_syncqueuerequest(struct _ipcreq *req)
 		return IPC_EQUEUEFULL;
 	}
 
+	newSerial(req);
 	_ipc_responses.reqs[_ipc_responses.req_queue_no] = req;
 	_ipc_responses.req_queue_no = ((_ipc_responses.req_queue_no+1)&0x0f);
 	_ipc_responses.cnt_queue++;
@@ -303,6 +447,7 @@ static void __ipc_sendrequest(void)
 		req = _ipc_responses.reqs[_ipc_responses.req_send_no];
 		//exiPrintf("IPC req %08X\n", req);
 		if(req!=NULL) {
+			newSerial(req);
 			req->magic = IPC_REQ_MAGIC;
 			if(req->relnch&RELNCH_RELAUNCH) {
 				_ipc_relnchFl = 1;
@@ -329,17 +474,19 @@ static void __ipc_replyhandler(void)
 	struct _ipcreq *req = NULL;
 	ioctlv *v = NULL;
 #ifdef DEBUG_IPC
-	exiPrintf("__ipc_replyhandler()\r\n");
+	exiPuts("__ipc_replyhandler()\r\n");
 #endif
 	req = (struct _ipcreq*)IPC_ReadReg(2);
 	if(req==NULL) return;
 
-	ipc_ack = ((IPC_ReadReg(1)&0x30)|0x04);
+	ipc_ack = ((IPC_ReadReg(1)&0x30)|0x04); //clear IY1, IY2, Y1 (w1c)
 	IPC_WriteReg(1,ipc_ack);
 	ACR_WriteReg(48,0x40000000);
 
 	req = MEM_PHYSICAL_TO_K0(req);
 	DCInvalidateRange(req,32);
+
+	freeSerial(req);
 
 	if(req->magic==IPC_REQ_MAGIC) {
 #ifdef DEBUG_IPC
@@ -379,13 +526,20 @@ static void __ipc_replyhandler(void)
 		}
 
 		if(req->cb!=NULL) {
+			#ifdef DEBUG_IPC
+				exiPrintf("%08X->cb = %08X(%08X,%08X)\r\n",
+					req, req->cb, req->result,req->usrdata);
+			#endif
 			req->cb(req->result,req->usrdata);
 			__ipc_freereq(req);
-		} else
+		} else {
 			#ifdef DEBUG_IPC
-				exiPrintf("IPC wakeup %p\n", req->syncqueue);
+				exiPrintf("IPC wakeup 0x%x\n", req->syncqueue);
 			#endif
+			if(!req->syncqueue) PANIC("__ipc_replyhandler: NULL queue");
 			OSWakeupThread(req->syncqueue);
+			//XXX do we not free req?
+		}
 	} else {
 		// NOTE: we really want to find out if this ever happens
 		// and take steps to prevent it beforehand (because it will
@@ -411,9 +565,9 @@ static void __ipc_ackhandler(void)
 #ifdef DEBUG_IPC
 	exiPrintf("__ipc_ackhandler()\r\n");
 #endif
-	ipc_ack = ((IPC_ReadReg(1)&0x30)|0x02);
+	ipc_ack = ((IPC_ReadReg(1)&0x30)|0x02); //clear IY1, IY2, Y2 (w1c)
 	IPC_WriteReg(1,ipc_ack);
-	ACR_WriteReg(48,0x40000000);
+	ACR_WriteReg(48,0x40000000); //mystery register
 
 	if(_ipc_mailboxack<1) _ipc_mailboxack++;
 	if(_ipc_mailboxack>0) {
@@ -434,16 +588,24 @@ static void __ipc_ackhandler(void)
 void __ipc_interrupthandler(u32 irq,void *ctx)
 {
 	u32 ipc_int;
-#ifdef DEBUG_IPC
-	exiPrintf("__ipc_interrupthandler(%d)\r\n",irq);
-#endif
+//#ifdef DEBUG_IPC
+//	exiPrintf("__ipc_interrupthandler(%d)\r\n",irq);
+//#endif
 	//SET_DEBUG_PORT(1);
+	//iguanaSetBlueLed(true);
 	ipc_int = IPC_ReadReg(1);
+	//IY1 | Y1 (command was executed)
 	if((ipc_int&0x0014)==0x0014) __ipc_replyhandler();
+	//iguanaSetBlueLed(false);
+	//iguanaSetGreenLed(true);
 
 	ipc_int = IPC_ReadReg(1);
+	//IY2 | Y2 (command acknowledged)
 	if((ipc_int&0x0022)==0x0022) __ipc_ackhandler();
 	//SET_DEBUG_PORT(0);
+	//iguanaSetGreenLed(false);
+
+	checkSerials();
 }
 
 static s32 __ios_ioctlvformat_parse(const char *format,va_list args,struct _ioctlvfmt_cbdata *cbdata,s32 *cnt_in,s32 *cnt_io,struct _ioctlv **argv,s32 hId)
@@ -717,10 +879,12 @@ static s32 __ipc_syncrequest(struct _ipcreq *req)
 	//exiPrintf("%s: disable IRQ\n", __FUNCTION__);
 	ret = __ipc_syncqueuerequest(req);
 	//exiPrintf("IPC sync req done\n");
+	//udelay(10000);
 	if(ret==0) {
 		if(_ipc_mailboxack>0) {
 			//exiPrintf("IPC sync ACK\n");
 			__ipc_sendrequest();
+			//udelay(5000);
 		}
 		#ifdef DEBUG_IPC
 			exiPrintf("IPC sync sleeping(%08X)\n", req->syncqueue);
@@ -738,9 +902,10 @@ static s32 __ipc_syncrequest(struct _ipcreq *req)
 	}
 
 	//free(req->syncqueue);
+	freeSerial(req);
 	iosFree(_ipc_hid, req->syncqueue);
-	OSRestoreInterrupts(level);
 	req->syncqueue = NULL;
+	OSRestoreInterrupts(level);
 	return ret;
 }
 
@@ -751,7 +916,8 @@ s32 iosCreateHeap(s32 size)
 	u32 level;
 	u32 ipclo,ipchi;
 #ifdef DEBUG_IPC
-	exiPrintf("iosCreateHeap(%d)\r\n",size);
+	exiPrintf("iosCreateHeap(%d) from %08x\r\n",size,
+		__builtin_return_address(0));
 #endif
 	level = OSDisableInterrupts();
 
@@ -808,6 +974,9 @@ void iosFree(s32 hid,void *ptr)
 	int level = OSDisableInterrupts();
 	__lwp_heap_free(&_ipc_heaps[hid].heap,ptr);
 	OSRestoreInterrupts(level);
+#ifdef DEBUG_IPC
+	exiPrintf("iosFree(%d,%p) OK\r\n",hid,ptr);
+#endif
 }
 
 void* IPC_GetBufferLo(void)
@@ -836,6 +1005,7 @@ void __IPC_Init(void)
 		_ipc_bufferlo = _ipc_currbufferlo = __SYS_GetIPCBufferLo();
 		_ipc_bufferhi = _ipc_currbufferhi = __SYS_GetIPCBufferHi();
 		_ipc_initialized = 1;
+		OSInitMutex(&_ipcMutex);
 	}
 }
 
@@ -843,6 +1013,7 @@ u32 __IPC_ClntInit(void)
 {
 	if(!_ipc_clntinitialized) {
 		_ipc_clntinitialized = 1;
+		initSerials();
 
 		// generate a random request magic
 		__ipc_srand(gettick());
@@ -863,6 +1034,7 @@ void __IPC_Reinitialize(void)
 {
 	u32 level;
 
+	exiPuts("__IPC_Reinitialize\r\n");
 	level = OSDisableInterrupts();
 
 	IPC_WriteReg(1,56);
@@ -884,8 +1056,12 @@ s32 IOS_Open(const char *filepath,u32 mode)
 	s32 ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	//exiPrintf("%s(%s, %08X)\n", __FUNCTION__, filepath, mode);
-	if(filepath==NULL) return IPC_EINVAL;
+	if(filepath==NULL) {
+		_unlockIpcMutex();
+		return IPC_EINVAL;
+	}
 	/*if(!PTR_VALID(filepath)) {
 		exiPrintf(" *** ERROR *** Invalid IOS_Open(%p)\n", filepath);
 		*(u32*)0 = 0;
@@ -894,6 +1070,7 @@ s32 IOS_Open(const char *filepath,u32 mode)
 	req = __ipc_allocreq();
 	if(req==NULL) {
 		exiPrintf(" *** ERROR *** %s: alloc failed\n", __FUNCTION__);
+		_unlockIpcMutex();
 		return IPC_ENOMEM;
 	}
 
@@ -913,6 +1090,7 @@ s32 IOS_Open(const char *filepath,u32 mode)
 	//exiPrintf("%s: __ipc_syncrequest done\n", __FUNCTION__);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -920,8 +1098,12 @@ s32 IOS_OpenAsync(const char *filepath,u32 mode,ipccallback ipc_cb,void *usrdata
 {
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_OPEN;
 	req->cb = ipc_cb;
@@ -933,7 +1115,9 @@ s32 IOS_OpenAsync(const char *filepath,u32 mode,ipccallback ipc_cb,void *usrdata
 	req->open.filepath	= (char*)MEM_VIRTUAL_TO_PHYSICAL(filepath);
 	req->open.mode		= mode;
 
-	return __ipc_asyncrequest(req);
+	s32 r = __ipc_asyncrequest(req);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_Close(s32 fd)
@@ -941,8 +1125,12 @@ s32 IOS_Close(s32 fd)
 	s32 ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_CLOSE;
 	req->fd = fd;
@@ -952,6 +1140,7 @@ s32 IOS_Close(s32 fd)
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -959,8 +1148,12 @@ s32 IOS_CloseAsync(s32 fd,ipccallback ipc_cb,void *usrdata)
 {
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_CLOSE;
 	req->fd = fd;
@@ -968,7 +1161,9 @@ s32 IOS_CloseAsync(s32 fd,ipccallback ipc_cb,void *usrdata)
 	req->usrdata = usrdata;
 	req->relnch = 0;
 
-	return __ipc_asyncrequest(req);
+	s32 r = __ipc_asyncrequest(req);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_Read(s32 fd,void *buf,s32 len)
@@ -976,8 +1171,12 @@ s32 IOS_Read(s32 fd,void *buf,s32 len)
 	s32 ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_READ;
 	req->fd = fd;
@@ -991,6 +1190,7 @@ s32 IOS_Read(s32 fd,void *buf,s32 len)
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -998,8 +1198,12 @@ s32 IOS_ReadAsync(s32 fd,void *buf,s32 len,ipccallback ipc_cb,void *usrdata)
 {
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_READ;
 	req->fd = fd;
@@ -1011,7 +1215,9 @@ s32 IOS_ReadAsync(s32 fd,void *buf,s32 len,ipccallback ipc_cb,void *usrdata)
 	req->read.data	= (void*)MEM_VIRTUAL_TO_PHYSICAL(buf);
 	req->read.len	= len;
 
-	return __ipc_asyncrequest(req);
+	s32 r = __ipc_asyncrequest(req);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_Write(s32 fd,const void *buf,s32 len)
@@ -1019,8 +1225,12 @@ s32 IOS_Write(s32 fd,const void *buf,s32 len)
 	s32 ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_WRITE;
 	req->fd = fd;
@@ -1034,6 +1244,7 @@ s32 IOS_Write(s32 fd,const void *buf,s32 len)
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -1041,8 +1252,12 @@ s32 IOS_WriteAsync(s32 fd,const void *buf,s32 len,ipccallback ipc_cb,void *usrda
 {
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_WRITE;
 	req->fd = fd;
@@ -1054,7 +1269,9 @@ s32 IOS_WriteAsync(s32 fd,const void *buf,s32 len,ipccallback ipc_cb,void *usrda
 	req->write.data		= (void*)MEM_VIRTUAL_TO_PHYSICAL(buf);
 	req->write.len		= len;
 
-	return __ipc_asyncrequest(req);
+	s32 r = __ipc_asyncrequest(req);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_Seek(s32 fd,s32 where,s32 whence)
@@ -1062,8 +1279,12 @@ s32 IOS_Seek(s32 fd,s32 where,s32 whence)
 	s32 ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_SEEK;
 	req->fd = fd;
@@ -1076,6 +1297,7 @@ s32 IOS_Seek(s32 fd,s32 where,s32 whence)
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -1083,8 +1305,12 @@ s32 IOS_SeekAsync(s32 fd,s32 where,s32 whence,ipccallback ipc_cb,void *usrdata)
 {
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_SEEK;
 	req->fd = fd;
@@ -1095,7 +1321,9 @@ s32 IOS_SeekAsync(s32 fd,s32 where,s32 whence,ipccallback ipc_cb,void *usrdata)
 	req->seek.where		= where;
 	req->seek.whence	= whence;
 
-	return __ipc_asyncrequest(req);
+	s32 r = __ipc_asyncrequest(req);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_Ioctl(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 len_io)
@@ -1103,8 +1331,12 @@ s32 IOS_Ioctl(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 le
 	s32 ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_IOCTL;
 	req->fd = fd;
@@ -1117,12 +1349,13 @@ s32 IOS_Ioctl(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s32 le
 	req->ioctl.buffer_io	= (void*)MEM_VIRTUAL_TO_PHYSICAL(buffer_io);
 	req->ioctl.len_io		= len_io;
 
-	DCFlushRange(buffer_in,len_in);
-	DCFlushRange(buffer_io,len_io);
+	if(buffer_in) DCFlushRange(buffer_in,len_in);
+	if(buffer_io) DCFlushRange(buffer_io,len_io);
 
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -1130,9 +1363,14 @@ s32 IOS_IoctlAsync(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s
 {
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
+	memset(req->pad1, 0, 8);
 	req->cmd = IOS_IOCTL;
 	req->fd = fd;
 	req->cb = ipc_cb;
@@ -1148,7 +1386,9 @@ s32 IOS_IoctlAsync(s32 fd,s32 ioctl,void *buffer_in,s32 len_in,void *buffer_io,s
 	DCFlushRange(buffer_in,len_in);
 	DCFlushRange(buffer_io,len_io);
 
-	return __ipc_asyncrequest(req);
+	s32 r = __ipc_asyncrequest(req);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_Ioctlv(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv)
@@ -1156,8 +1396,12 @@ s32 IOS_Ioctlv(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv)
 	s32 i,ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_IOCTLV;
 	req->fd = fd;
@@ -1191,6 +1435,7 @@ s32 IOS_Ioctlv(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv)
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -1200,8 +1445,12 @@ s32 IOS_IoctlvAsync(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv,ipccallb
 	s32 i;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_IOCTLV;
 	req->fd = fd;
@@ -1233,7 +1482,9 @@ s32 IOS_IoctlvAsync(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv,ipccallb
 	}
 	DCFlushRange(argv,((cnt_in+cnt_io)<<3));
 
-	return __ipc_asyncrequest(req);
+	s32 r = __ipc_asyncrequest(req);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_IoctlvFormat(s32 hId,s32 fd,s32 ioctl,const char *format,...)
@@ -1244,8 +1495,12 @@ s32 IOS_IoctlvFormat(s32 hId,s32 fd,s32 ioctl,const char *format,...)
 	struct _ioctlv *argv;
 	struct _ioctlvfmt_cbdata *cbdata;
 
+	_lockIpcMutex();
 	cbdata = __lwp_wkspace_allocate(sizeof(struct _ioctlvfmt_cbdata));
-	if(cbdata==NULL) return IPC_ENOMEM;
+	if(cbdata==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	memset(cbdata,0,sizeof(struct _ioctlvfmt_cbdata));
 
@@ -1254,12 +1509,14 @@ s32 IOS_IoctlvFormat(s32 hId,s32 fd,s32 ioctl,const char *format,...)
 	va_end(args);
 	if(ret<0) {
 		__lwp_wkspace_free(cbdata);
+		_unlockIpcMutex();
 		return ret;
 	}
 
 	ret = IOS_Ioctlv(fd,ioctl,cnt_in,cnt_io,argv);
 	__ioctlvfmtCB(ret,cbdata);
 
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -1271,8 +1528,12 @@ s32 IOS_IoctlvFormatAsync(s32 hId,s32 fd,s32 ioctl,ipccallback usr_cb,void *usr_
 	struct _ioctlv *argv;
 	struct _ioctlvfmt_cbdata *cbdata;
 
+	_lockIpcMutex();
 	cbdata = __lwp_wkspace_allocate(sizeof(struct _ioctlvfmt_cbdata));
-	if(cbdata==NULL) return IPC_ENOMEM;
+	if(cbdata==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	memset(cbdata,0,sizeof(struct _ioctlvfmt_cbdata));
 
@@ -1281,12 +1542,15 @@ s32 IOS_IoctlvFormatAsync(s32 hId,s32 fd,s32 ioctl,ipccallback usr_cb,void *usr_
 	va_end(args);
 	if(ret<0) {
 		__lwp_wkspace_free(cbdata);
+		_unlockIpcMutex();
 		return ret;
 	}
 
 	cbdata->user_cb = usr_cb;
 	cbdata->user_data = usr_data;
-	return IOS_IoctlvAsync(fd,ioctl,cnt_in,cnt_io,argv,__ioctlvfmtCB,cbdata);
+	s32 r = IOS_IoctlvAsync(fd,ioctl,cnt_in,cnt_io,argv,__ioctlvfmtCB,cbdata);
+	_unlockIpcMutex();
+	return r;
 }
 
 s32 IOS_IoctlvReboot(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv)
@@ -1294,8 +1558,12 @@ s32 IOS_IoctlvReboot(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv)
 	s32 i,ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_IOCTLV;
 	req->fd = fd;
@@ -1329,6 +1597,7 @@ s32 IOS_IoctlvReboot(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *argv)
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 
@@ -1337,8 +1606,12 @@ s32 IOS_IoctlvRebootBackground(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *ar
 	s32 i,ret;
 	struct _ipcreq *req;
 
+	_lockIpcMutex();
 	req = __ipc_allocreq();
-	if(req==NULL) return IPC_ENOMEM;
+	if(req==NULL) {
+		_unlockIpcMutex();
+		return IPC_ENOMEM;
+	}
 
 	req->cmd = IOS_IOCTLV;
 	req->result = 0;
@@ -1373,6 +1646,7 @@ s32 IOS_IoctlvRebootBackground(s32 fd,s32 ioctl,s32 cnt_in,s32 cnt_io,ioctlv *ar
 	ret = __ipc_syncrequest(req);
 
 	if(req!=NULL) __ipc_freereq(req);
+	_unlockIpcMutex();
 	return ret;
 }
 

@@ -71,8 +71,8 @@ void dumpThreads() {
     exiPuts("Thread dump:\r\n");
     OSThread *thread = *(OSThread**)0x800000dc;
     while(thread) {
-        //u32 stackTop = (u32)thread->stackBase; //high addr
-        //u32 stackBot = (u32)thread->stackEnd;  //low  addr
+        u32 stackTop = (u32)thread->stackBase; //high addr
+        u32 stackBot = (u32)thread->stackEnd;  //low  addr
         u32 *sp      = (u32*)thread->context.gpr[1];
         u32 pc       = (u32)thread->context.srr0;
 
@@ -81,7 +81,8 @@ void dumpThreads() {
         if(pState) {
             if(pState->name != NULL) name = pState->name;
         }
-        exiPrintf("Thread %08X (%s): PC=%08x\r\n", thread, name, pc);
+        exiPrintf("Thread %08X (%s): PC=%08x stack=%08x-%08x\r\n", thread, name, pc,
+            stackBot, stackTop);
         for(int i=0; i<32; i += 4) {
             for(int j=0; j<4; j++) {
                 exiPrintf("  r%2d: %08x", (i+j), (u32)thread->context.gpr[i+j]);
@@ -92,6 +93,7 @@ void dumpThreads() {
             exiPrintf(" > %08x\r\n", sp[1]);
             sp = (u32*)*sp;
         }
+        //exiPrintf("next=%08x prev=%08x", thread->linkActive.next, thread->linkActive.prev);
         thread = thread->linkActive.next;
     }
 }

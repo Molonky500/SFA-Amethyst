@@ -5,7 +5,7 @@ void __DVDFSInit_hook(void) {
 
     //since this is the first thing called back into
     //from the game, this is where we init stuff.
-    initGameHooks();
+    //initGameHooks();
 }
 
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
@@ -67,7 +67,7 @@ int DVDRead_hook(DVDFileInfo *info, void *addr, uint size, uint offset) {
         return -EINVAL;
     }
     if(!areInterruptsEnabled()) {
-        exiPrintf(" *** %s with interrupts idsabled @%08X\r\n",
+        exiPrintf(" *** %s with interrupts disabled @%08X\r\n",
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
     info->cb.state = 2; //wait
@@ -113,7 +113,7 @@ s32 length, s32 offset, s32 prio) {
         return false;
     }
     if(!areInterruptsEnabled()) {
-        exiPrintf(" *** %s with interrupts idsabled @%08X\r\n",
+        exiPrintf(" *** %s with interrupts disabled @%08X\r\n",
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
     int r = sendReadToDvdThread(info, addr, length,
@@ -132,7 +132,7 @@ uint offset, DVDCallback callback, int prio) {
         return false;
     }
     if(!areInterruptsEnabled()) {
-        exiPrintf(" *** %s with interrupts idsabled @%08X\r\n",
+        exiPrintf(" *** %s with interrupts disabled @%08X\r\n",
             __FUNCTION__, (u32)RETURN_ADDRESS);
     }
 

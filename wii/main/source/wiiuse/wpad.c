@@ -140,9 +140,12 @@ static void __wpad_timeouthandler(syswd_t alarm,void *cbarg)
 	struct _wpad_cb *wpdcb = NULL;
 
 	if(!__wpads_active) return;
+	exiPuts("__wpad_timeouthandler\r\n");
 
 	//__lwp_thread_dispatchdisable();
+	int level = OSDisableInterrupts();
 	OSDisableScheduler();
+	OSRestoreInterrupts(level);
 	for(i=0;i<WPAD_MAX_WIIMOTES;i++) {
 		wpdcb = &__wpdcb[i];
 		wm = wpdcb->wm;
@@ -156,6 +159,7 @@ static void __wpad_timeouthandler(syswd_t alarm,void *cbarg)
 	}
 	//__lwp_thread_dispatchunnest();
 	OSEnableScheduler();
+	exiPuts("__wpad_timeouthandler OK\r\n");
 }
 
 void __wpad_sounddata_alarmhandler(syswd_t alarm,void *cbarg)

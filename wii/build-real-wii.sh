@@ -32,6 +32,7 @@ if [ $ok -ne 0 ]; then exit $ok; fi
 echo "Zip..."
 cp -r app/* $INSTALL_PATH
 cp $DISCROOT/sys/* $INSTALL_PATH/sys/
+rm $INSTALL_PATH/sys/main.dol.orig
 #cp -ru $DISCROOT/files/* $INSTALL_PATH/files/
 
 echo "Upload..."

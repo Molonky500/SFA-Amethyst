@@ -642,7 +642,7 @@ s32 USB_Initialize(void)
 			exiPrintf("%s:%d\n", __FILE__, __LINE__);
 			u32 *ven_ver = (u32*)iosAlloc(hId, 0x20);
 			if (ven_ver==NULL) goto mem_error;
-			exiPrintf("%s:%d\n", __FILE__, __LINE__);
+			exiPrintf("%s:%d ven_fd=%d ven_ver=%p\n", __FILE__, __LINE__, ven_fd, ven_ver);
 			if (IOS_Ioctl(ven_fd, USBV5_IOCTL_GETVERSION, NULL, 0, ven_ver, 0x20)==0 && ven_ver[0]==0x50001) {
 				exiPrintf("%s:%d\n", __FILE__, __LINE__);
 				IOS_IoctlAsync(ven_fd, USBV5_IOCTL_GETDEVICECHANGE, NULL, 0, ven_host->attached_devices, 0x180, __usbv5_devicechangeCB, ven_host);
@@ -665,6 +665,7 @@ s32 USB_Initialize(void)
 	if (hid_host==NULL) {
 		exiPrintf("%s:%d\n", __FILE__, __LINE__);
 		exiPrintf("%s:%d: IOS_Open(%s)\n", __FILE__, __LINE__, __hid_path);
+		//interactiveDebugger(0);
 		s32 hid_fd = IOS_Open(__hid_path, IPC_OPEN_NONE);
 		exiPrintf("IOS_Open(%s) => %d\n", __hid_path, hid_fd);
 		exiPrintf("%s:%d\n", __FILE__, __LINE__);

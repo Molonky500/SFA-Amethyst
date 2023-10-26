@@ -139,14 +139,14 @@ static __inline__ void __memset(void *dest,s32_t c,s32_t len)
 
 #if LOGGING == 1
 //#include <stdio.h>
-#define LOG(fmt, ...) exiPrintf("[BTLOG] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__)
+#define LOG(fmt, ...) exiPrintf("[BTLOG] " __FILE__ ":%i: " fmt, __LINE__, ##__VA_ARGS__)
 #else
 #define LOG(fmt, ...)
 #endif /* LOGGING == 1 */
 
 #if ERRORING == 1
 #include <stdio.h>
-#define ERROR(fmt,...) exiPrintf("[BTERR] " __FILE__ ":%i: " fmt "\n", __LINE__, ##__VA_ARGS__)
+#define ERROR(fmt,...) exiPrintf("[BTERR] " __FILE__ ":%i: " fmt, __LINE__, ##__VA_ARGS__)
 #else
 #define ERROR(fmt, ...)
 #endif /* ERRORING == 1 */

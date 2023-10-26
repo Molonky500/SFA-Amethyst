@@ -94,11 +94,13 @@ int recvFromDvdThread(HackDvdMsg **msg, u32 flags) {
      *  from another thread.
      */
     while(!dvdThreadReady) OSYieldThread();
+
     OSLockMutex(&dvdMsgMutex);
     int next = (dvdMsgsOutTail + 1) % DVD_MAX_MSGS;
     OSMessage m;
-    //    DVD_DPRINT("recvFromDvdThread h=%d t=%d msg=%08X\n",
-    //        dvdMsgsOutHead, dvdMsgsOutTail, &dvdMsgsOut[dvdMsgsOutTail]);
+    DVD_DPRINT("recvFromDvdThread h=%d t=%d msg=%08X\n",
+        dvdMsgsOutHead, dvdMsgsOutTail, &dvdMsgsOut[dvdMsgsOutTail]);
+
     BOOL r = OSReceiveMessage(&hackDvdThreadMailOut, &m, flags);
     if(!r) {
         OSUnlockMutex(&dvdMsgMutex);
@@ -145,7 +147,10 @@ int offset, DVDCallback callback, int prio, bool async) {
         DVD_DPRINT("Wait for DVD read for file %08X id %d\r\n",
             file, msg.id);
         bool done = false;
+        //u32 tStart = OSTicksToMilliseconds(OSGetTime());
         while(!done) {
+            //u32 now = OSTicksToMilliseconds(OSGetTime());
+            //if(now - tStart > 3000) PANIC("DVD THREAD STUCK");
             OSYieldThread();
             HackDvdMsg *resp;
             r = recvFromDvdThread(&resp, OS_MESSAGE_NOBLOCK);

@@ -1,6 +1,7 @@
 #include "main.h"
 
 #define CMDBUF_SIZE 1024
+bool gDebugConsoleActive = false;
 static char *cmdBuf = NULL;
 static bool redraw, quit;
 
@@ -95,6 +96,35 @@ void cmd_dumpregs(char *param) {
     }
 }
 
+void _printIrqFlags(u32 flags) {
+    static const char *irqBits[] = {
+        "GPERR", "RSW",   "DVD",   "SI",
+        "EXI",   "AI",    "DSP",   "MEM",
+        "VI",    "PETOK", "PEFIN", "CP",
+        "DBG",   "HSP",   "IOS",   NULL,
+        "RSWST", NULL,    NULL,    NULL,
+        NULL,    NULL,    NULL,    NULL,
+        NULL,    NULL,    NULL,    NULL,
+        NULL,    NULL,    NULL,    NULL};
+    for(int i=0; i<32; i++) {
+        if(flags & (1<<i)) {
+            if(irqBits[i]) exiPrintf(" %-5s", irqBits[i]);
+            else exiPrintf(" ?%2d??", i);
+        }
+        else exiPuts(" -----");
+    }
+}
+
+void cmd_irq(char *param) {
+    exiPrintf("Interrupts are %sabled\r\nINTSR: %08X",
+        areInterruptsEnabled() ? "en" : "dis",
+        _piReg[0]);
+    _printIrqFlags(_piReg[0]);
+    exiPrintf("\r\nINTMR: %08X", _piReg[1]);
+    _printIrqFlags(_piReg[1]);
+    exiPuts("\r\n");
+}
+
 void cmd_call(char *param) {
     u32 addr = readHex(param, &param);
     u32 arg0 = readHex(param, &param);
@@ -118,30 +148,36 @@ void cmd_hook(char *param) {
 
 void cmd_break(char *param) {
     u32 addr = readHex(param, &param);
-    addr |= 0xC0000000; //enable bkpt; enable xlate
+    addr |= 0x00000003; //enable bkpt; enable xlate
+    //XXX this still doesn't work?
     __asm__ __volatile__ (
         "mtspr 1010, %0"
         : "=r" (addr) :);
 }
 
 void cmd_reset(char *param) {
+    iguanaSetRedLed(false);
+    iguanaSetGreenLed(false);
+    iguanaSetBlueLed(false);
     _ipcReg[0x194>>2] = 0; //reset system
+    while(1);
 }
 
 DebugConsoleCommand debugConsoleCmds[] = {
-    {"?", "Show help", cmd_help},
-    {"q", "Exit debugger", cmd_quit},
-    {"r", "Read memory", cmd_read},
-    {"w", "Write memory", cmd_write},
-    {"c", "Call function", cmd_call},
-    {"h", "Hook function", cmd_hook},
-    {"regs", "Dump GPRs", cmd_dumpregs},
+    {"?",       "Show help", cmd_help},
+    {"q",       "Exit debugger", cmd_quit},
+    {"r",       "Read memory", cmd_read},
+    {"w",       "Write memory", cmd_write},
+    {"c",       "Call function", cmd_call},
+    {"h",       "Hook function", cmd_hook},
+    {"regs",    "Dump GPRs", cmd_dumpregs},
     {"threads", "Display thread states", cmd_threads},
     {"dumpdvd", "Display DVD state", cmd_dumpdvd},
     {"dumpmem", "Write memdump file", cmd_dumpmem},
-    {"dumpstack", "Display stack", cmd_dumpstack},
-    {"break", "Set instr breakpoint", cmd_break},
-    {"reset", "Reboot system", cmd_reset},
+    {"bt",      "Display backtrace", cmd_dumpstack},
+    {"bp",      "Set instr breakpoint", cmd_break},
+    {"irq",     "Show IRQ status", cmd_irq},
+    {"rst",     "Reboot system", cmd_reset},
     {NULL, NULL, NULL} //end
 };
 
@@ -195,8 +231,9 @@ void handleChr(char chr) {
 
 void interactiveDebugger(int excCode) {
     //if(!haveGecko) return;
-    if(excCode) exiPrintf(" *** ERROR %d ***\r\n", excCode);
-    else exiPuts(" *** DEBUGGER START ***\r\n");
+    gDebugConsoleActive = true;
+    if(excCode > 0) exiPrintf(" *** ERROR %d ***\r\n", excCode);
+    else if(excCode == 0) exiPuts(" *** DEBUGGER START ***\r\n");
     //exiPrintf("MSR: 0x%08X\r\n", mfmsr());
 
     char _buf[CMDBUF_SIZE];
@@ -236,4 +273,5 @@ void interactiveDebugger(int excCode) {
 
     exiPuts(" *** DEBUGGER EXIT ***\r\n");
     cmdBuf = NULL;
+    gDebugConsoleActive = false;
 }

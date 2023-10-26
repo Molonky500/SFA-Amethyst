@@ -27,12 +27,12 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define PANIC(msg) do { \
     exiPrintf(" *** ERROR *** %s:%d: %s\n", __FILE__, __LINE__, msg); \
-    *(u32*)0 = 0; /* crash to get backtrace */ \
+    __builtin_trap(); \
 } while(0)
 //XXX remove
 #define HALT do { \
     exiPrintf(" *** ERROR *** HALT at %s:%d\n", __FILE__, __LINE__); \
-    *(u32*)0 = 0; /* crash to get backtrace */ \
+    __builtin_trap(); \
 } while(0)
 
 //this macro excludes 90xxxxxx (ARAM)
@@ -126,6 +126,7 @@ void checkIntegrity();
 void* checkThreadMain(void *param);
 
 //dbgconsole.c
+extern bool gDebugConsoleActive;
 extern DebugConsoleCommand debugConsoleCmds[];
 void interactiveDebugger(int excCode);
 

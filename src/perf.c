@@ -145,7 +145,7 @@ void sndEndHook() {
 }
 
 void perfMonInit() {
-    //if(IS_WII) return; XXX why? works fine...
+    //if(IS_WII) return; //XXX why? works fine...
     hookBranch(0x80020c40, loopStartHook, 1);
     hookBranch(0x80020d70, loopEndHook, 1);
     hookBranch(0x80020c50, gameLogicStartHook, 1);

@@ -12,6 +12,8 @@ u32 __lwp_heap_init(heap_cntrl *theheap,void *start_addr,u32 size,u32 pg_size)
 	u32 dsize,level;
 	heap_block *block;
 
+	exiPrintf("__lwp_heap_init(%p, %p, 0x%X, 0x%X) from 0x%X\r\n",
+		theheap, start_addr, size, pg_size, __builtin_return_address(0));
 	if(!__lwp_heap_pgsize_valid(pg_size) || size<HEAP_MIN_SIZE) return 0;
 
 	_CPU_ISR_Disable(level);
@@ -119,16 +121,16 @@ BOOL __lwp_heap_free(heap_cntrl *theheap,void *ptr)
 	block = __lwp_heap_usrblockat(ptr);
 	if(!block) {
 		exiPrintf(" *** ERROR *** No heap block for %08x\n", ptr);
-		HALT;
+		PANIC("LWP ERROR");
 	}
 	if(!__lwp_heap_blockin(theheap,block)) {
 		exiPrintf(" *** ERROR *** Heap block %08x not in heap %08x\n",
 			block, theheap);
-		HALT;
+		PANIC("LWP ERROR");
 	}
 	if(__lwp_heap_blockfree(block)) {
 		exiPrintf(" *** ERROR *** Heap block %08x not allocated\n", block);
-		HALT;
+		PANIC("LWP ERROR");
 	}
 	if(!__lwp_heap_blockin(theheap,block) || __lwp_heap_blockfree(block)) {
 		_CPU_ISR_Restore(level);

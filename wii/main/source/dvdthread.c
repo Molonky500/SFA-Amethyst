@@ -30,17 +30,22 @@ void dvdDumpOpenFiles() {
         return;
     }
 
+    //exiPuts("Open files:\n"
+    //    "  Idx#  FileInfo FILE*     ReadPos  FileSize  Path\n");
     exiPuts("Open files:\n"
-        "  Idx#  FileInfo FILE*     ReadPos  FileSize  Path\n");
+        "  Idx#  FileInfo FILE*     Path\n");
     for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
         if(dvdOpenFiles[i].info == NULL || dvdOpenFiles[i].file == NULL) continue;
         FILE *file = dvdOpenFiles[i].file;
-        int pos = ftell(file);
+        /*int pos = ftell(file);
         fseek(file, 0, SEEK_END);
         int size = ftell(file);
         fseek(file, pos, SEEK_SET);
         exiPrintf("  %4d: %08x %08x: %8x/%8x: %s\n",
             i, dvdOpenFiles[i].info, file, pos, size,
+            dvdGetFilePath(&dvdOpenFiles[i]));*/
+        exiPrintf("  %4d: %08x %08x: s\n",
+            i, dvdOpenFiles[i].info, file,
             dvdGetFilePath(&dvdOpenFiles[i]));
     }
     OSUnlockMutex(&dvdFileInfoMutex);
@@ -238,21 +243,15 @@ void dvdIdle() {
 void* hackDvdThreadMain(void *param) {
     /** Main thread for async DVD emulation.
      */
-    __UnmaskIrq(IM_PI_ACR); //enable IOS IPC
-    OSEnableInterrupts();
+    //OSEnableInterrupts();
     exiPuts("DVD thread online\r\n");
     registerThreadForDebug(OSGetCurrentThread(), "dvdhack");
 
-    /*exiPuts("About to init Wiimote\n");
-    if(initWiimote()) {
-        exiPuts("Wiimote init failed\n");
-    }
-    else exiPuts("Wiimote init OK\n");*/
-
-    if(fatInitDefault()) {
+    //XXX why do this here? we already did it before.
+    /*if(fatInitDefault()) {
         exiPrintf("DVD FAT init OK\r\n");
     }
-    else PANIC("DVD FAT init FAIL\r\n");
+    else PANIC("DVD FAT init FAIL\r\n");*/
 
     OSInitMutex(&dvdFileInfoMutex);
     OSInitMutex(&dvdPendingReadCbMutex);

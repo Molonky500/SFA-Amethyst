@@ -163,6 +163,13 @@ void* checkThreadMain(void *param) {
     while(!gIsSystemShuttingDown) {
         OSYieldThread();
         checkIntegrity();
+        if(haveGecko && !gDebugConsoleActive) {
+            //if there's something to receive, enter debugger
+            u32 val = iguanaReadWrite(0);
+            if(val & (1<<26)) interactiveDebugger(0);
+            //if reset button pressed, enter debugger
+            else if(!_ipcReg[0] & (1<<16)) interactiveDebugger(0);
+        }
     }
     exiPuts("checkThread shutting down\n");
     return NULL;

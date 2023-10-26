@@ -193,8 +193,12 @@ void gameExceptionHook(int exceptionCode, OSContext *ctx,
 uint cause, void *addr) {
     //if(haveGecko) iguanaSetRedLed(true);
     if(haveGecko) {
+        //exiPrintf(" *** ERROR %d cause=0x%x addr=0x%x ctx=0x%x\r\n", exceptionCode,
+        //    cause, addr, ctx);
+        //static void (*_OSDumpContext)(OSContext*) = 0x80242554;
+        //_OSDumpContext(ctx);
         iguanaSetRedLed(true);
-        interactiveDebugger(cause);
+        interactiveDebugger(exceptionCode);
     }
     static bool alreadyExc = false;
     if(alreadyExc) flashDiscLedForever();

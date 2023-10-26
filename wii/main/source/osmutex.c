@@ -28,8 +28,14 @@ static void DequeueItem(OSMutexQueue *queue, OSMutex *mutex) {
 }
 
 void OSLockMutex(OSMutex* mutex) {
+    if(!mutex) {
+        PANIC("Invalid mutex!");
+    }
     u32 irq = OSDisableInterrupts();
     OSThread *curThread = OSGetCurrentThread();
+    if(!curThread) {
+        PANIC("No current thread!");
+    }
 
     while(1) {
         OSThread *ownerThread = ((volatile OSMutex*)mutex)->thread;
