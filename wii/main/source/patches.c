@@ -262,7 +262,7 @@ void doPatches() {
     hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0, 0);
     hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0, 0);
     hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
-    hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
+    //hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
     hookBranch(0x80020dbc, LCEnable_hook, 1, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0, 0);
     hookBranch(0x80015850, DVDRead_hook, 0, 0);

@@ -133,7 +133,7 @@ static void bte_reset_all()
 
 static void bt_alarmhandler(OSAlarm *alarm,void *cbarg)
 {
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	int level = OSDisableInterrupts();
 	OSDisableScheduler();
 	OSRestoreInterrupts(level);
@@ -141,7 +141,7 @@ static void bt_alarmhandler(OSAlarm *alarm,void *cbarg)
 	level = OSDisableInterrupts();
 	OSEnableScheduler();
 	OSRestoreInterrupts(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 }
 
 static inline s32 __bte_waitcmdfinish(struct bt_state *state)
@@ -151,13 +151,13 @@ static inline s32 __bte_waitcmdfinish(struct bt_state *state)
 
 	if(!state) return ERR_VAL;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	_CPU_ISR_Disable(level);
 	while(!state->hci_cmddone)
 		OSSleepThread(&state->hci_cmdq);
 	ret = state->last_err;
 	_CPU_ISR_Restore(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 
 	return ret;
 }
@@ -168,7 +168,7 @@ static inline s32 __bte_cmdfinish(struct bt_state *state,err_t err)
 
 	if(!state) return ERR_VAL;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	_CPU_ISR_Disable(level);
 	state->last_err = err;
 	state->hci_cmddone = 1;
@@ -177,7 +177,7 @@ static inline s32 __bte_cmdfinish(struct bt_state *state,err_t err)
 	else
 		OSWakeupThread(&state->hci_cmdq);
 	_CPU_ISR_Restore(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 
 	return err;
 }
@@ -189,7 +189,7 @@ static inline s32 __bte_waitrequest(struct ctrl_req_t *req)
 
 	if(!req || !req->pcb) return ERR_VAL;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	_CPU_ISR_Disable(level);
 	while(req->state!=STATE_SENT
 		&& req->state!=STATE_FAILED)
@@ -198,7 +198,7 @@ static inline s32 __bte_waitrequest(struct ctrl_req_t *req)
 	}
 	err = req->err;
 	_CPU_ISR_Restore(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 
 	return err;
 }
@@ -207,7 +207,7 @@ static inline void __bte_close_ctrl_queue(struct bte_pcb *pcb)
 {
 	struct ctrl_req_t *req;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	while(pcb->ctrl_req_head!=NULL) {
 		req = pcb->ctrl_req_head;
 		req->err = ERR_CLSD;
@@ -221,7 +221,7 @@ static inline void __bte_close_ctrl_queue(struct bte_pcb *pcb)
 		pcb->ctrl_req_head = req->next;
 	}
 	pcb->ctrl_req_tail = NULL;
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 }
 
 static s32 __bte_send_pending_request(struct bte_pcb *pcb)
@@ -231,7 +231,7 @@ static s32 __bte_send_pending_request(struct bte_pcb *pcb)
 
 	if(pcb->ctrl_req_head==NULL) return ERR_OK;
 	if(pcb->state==STATE_DISCONNECTING || pcb->state==STATE_DISCONNECTED) return ERR_CLSD;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 
 	req = pcb->ctrl_req_head;
 	req->state = STATE_SENDING;
@@ -251,7 +251,7 @@ static s32 __bte_send_pending_request(struct bte_pcb *pcb)
 			OSWakeupThread(&pcb->cmdq);
 	}
 
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return err;
 }
 
@@ -264,7 +264,7 @@ static s32 __bte_send_request(struct ctrl_req_t *req)
 	req->err = ERR_VAL;
 	req->state = STATE_READY;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	_CPU_ISR_Disable(level);
 	if(req->pcb->ctrl_req_head==NULL) {
 		req->pcb->ctrl_req_head = req->pcb->ctrl_req_tail = req;
@@ -275,7 +275,7 @@ static s32 __bte_send_request(struct ctrl_req_t *req)
 		err = ERR_OK;
 	}
 	_CPU_ISR_Restore(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 
 	return err;
 }
@@ -286,7 +286,7 @@ static err_t __bte_shutdown_finished(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t
 	struct bt_state *state = (struct bt_state*)arg;
 
 	if(state==NULL) return ERR_OK;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 
 	state->hci_inited = 0;
 	hci_cmd_complete(NULL);
@@ -297,7 +297,7 @@ static err_t __bte_shutdown_finished(void *arg,struct hci_pcb *pcb,u8_t ogf,u8_t
 
 	physbusif_close();
 	err_t r = __bte_cmdfinish(state,err);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return r;
 }
 
@@ -306,7 +306,7 @@ static void bte_process_handshake(struct bte_pcb *pcb,u8_t param,void *buf,u16_t
 	struct ctrl_req_t *req;
 
 	LOG("bte_process_handshake(%p)\n",pcb);
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 
 	switch(param) {
 		case HIDP_HSHK_SUCCESSFULL:
@@ -334,13 +334,13 @@ static void bte_process_handshake(struct bte_pcb *pcb,u8_t param,void *buf,u16_t
 		default:
 			break;
 	}
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 }
 
 static void bte_process_data(struct bte_pcb *pcb,u8_t param,void *buf,u16_t len)
 {
 	LOG("bte_process_data(%p)\n",pcb);
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	switch(param) {
 		case HIDP_DATA_RTYPE_INPUT:
 			if(pcb->recv!=NULL) {
@@ -356,7 +356,7 @@ static void bte_process_data(struct bte_pcb *pcb,u8_t param,void *buf,u16_t len)
 		default:
 			break;
 	}
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 }
 
 static err_t bte_process_input(void *arg,struct l2cap_pcb *pcb,struct pbuf *p,err_t err)
@@ -367,7 +367,7 @@ static err_t bte_process_input(void *arg,struct l2cap_pcb *pcb,struct pbuf *p,er
 	struct bte_pcb *bte = (struct bte_pcb*)arg;
 
 	LOG("bte_process_input(%p,%p)\n",bte,p);
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 
 	if(bte->state==STATE_DISCONNECTING
 	|| bte->state==STATE_DISCONNECTED) {
@@ -400,7 +400,7 @@ static err_t bte_process_input(void *arg,struct l2cap_pcb *pcb,struct pbuf *p,er
 		default:
 			break;
 	}
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return ERR_OK;
 }
 
@@ -631,7 +631,7 @@ s32 bte_inquiry(struct inquiry_info *info,u8 max_cnt,u8 flush)
 	struct inquiry_info_ex *pinfo;
 
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	last_err = ERR_OK;
 
 	_CPU_ISR_Disable(level);
@@ -652,7 +652,7 @@ s32 bte_inquiry(struct inquiry_info *info,u8 max_cnt,u8 flush)
 		}
 	}
 	s32 r = (s32)((last_err==ERR_OK) ? fnd : last_err);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return r;
 }
 
@@ -663,7 +663,7 @@ s32 bte_inquiry_ex(struct inquiry_info_ex *info,u8 max_cnt,u8 flush)
 	err_t last_err;
 	struct inquiry_info_ex *pinfo;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	last_err = ERR_OK;
 
 
@@ -688,7 +688,7 @@ s32 bte_inquiry_ex(struct inquiry_info_ex *info,u8 max_cnt,u8 flush)
 		}
 	}
 	s32 r = (s32)((last_err==ERR_OK) ? fnd : last_err);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return r;
 }
 
@@ -797,11 +797,11 @@ s32 bte_senddata(struct bte_pcb *pcb,void *message,u16 len)
 
 	if(pcb==NULL || message==NULL || len==0) return ERR_VAL;
 	if(pcb->state==STATE_DISCONNECTING || pcb->state==STATE_DISCONNECTED) return ERR_CLSD;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 
 	if((p=btpbuf_alloc(PBUF_RAW,(1 + len),PBUF_RAM))==NULL) {
 		ERROR("bte_senddata: Could not allocate memory for pbuf\n");
-		iguanaSetBlueLed(0);
+		//iguanaSetBlueLed(0);
 		return ERR_MEM;
 	}
 
@@ -810,7 +810,7 @@ s32 bte_senddata(struct bte_pcb *pcb,void *message,u16 len)
 
 	err = l2ca_datawrite(pcb->data_pcb,p);
 	btpbuf_free(p);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 
 	return err;
 }
@@ -826,17 +826,17 @@ s32 bte_sendmessageasync(struct bte_pcb *pcb,void *message,u16 len,s32 (*sent)(v
 	if(pcb==NULL || message==NULL || len==0) return ERR_VAL;
 	if(pcb->state==STATE_DISCONNECTING || pcb->state==STATE_DISCONNECTED) return ERR_CLSD;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	if((req=btmemb_alloc(&bte_ctrl_reqs))==NULL) {
 		ERROR("bte_sendmessageasync: Could not allocate memory for request\n");
-		iguanaSetBlueLed(0);
+		//iguanaSetBlueLed(0);
 		return ERR_MEM;
 	}
 
 	if((p=btpbuf_alloc(PBUF_RAW,(1 + len),PBUF_RAM))==NULL) {
 		ERROR("bte_sendmessageasync: Could not allocate memory for pbuf\n");
 		btmemb_free(&bte_ctrl_reqs,req);
-		iguanaSetBlueLed(0);
+		//iguanaSetBlueLed(0);
 		return ERR_MEM;
 	}
 
@@ -847,7 +847,7 @@ s32 bte_sendmessageasync(struct bte_pcb *pcb,void *message,u16 len,s32 (*sent)(v
 	req->pcb = pcb;
 	req->sent = sent;
 	s32 r = __bte_send_request(req);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return r;
 }
 
@@ -863,17 +863,17 @@ s32 bte_sendmessage(struct bte_pcb *pcb,void *message,u16 len)
 	if(pcb==NULL || message==NULL || len==0) return ERR_VAL;
 	if(pcb->state==STATE_DISCONNECTING || pcb->state==STATE_DISCONNECTED) return ERR_CLSD;
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	if((req=btmemb_alloc(&bte_ctrl_reqs))==NULL) {
 		ERROR("bte_sendmessage: Could not allocate memory for request\n");
-		iguanaSetBlueLed(0);
+		//iguanaSetBlueLed(0);
 		return ERR_MEM;
 	}
 
 	if((p=btpbuf_alloc(PBUF_RAW,(1 + len),PBUF_RAM))==NULL) {
 		ERROR("bte_sendmessage: Could not allocate memory for pbuf\n");
 		btmemb_free(&bte_ctrl_reqs,req);
-		iguanaSetBlueLed(0);
+		//iguanaSetBlueLed(0);
 		return ERR_MEM;
 	}
 
@@ -887,38 +887,38 @@ s32 bte_sendmessage(struct bte_pcb *pcb,void *message,u16 len)
 	if(err==ERR_OK) err = __bte_waitrequest(req);
 
 	btmemb_free(&bte_ctrl_reqs,req);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return err;
 }
 
 void bte_arg(struct bte_pcb *pcb,void *arg)
 {
 	u32 level;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	_CPU_ISR_Disable(level);
 	pcb->cbarg = arg;
 	_CPU_ISR_Restore(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 }
 
 void bte_received(struct bte_pcb *pcb, s32 (*recv)(void *arg,void *buffer,u16 len))
 {
 	u32 level;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	_CPU_ISR_Disable(level);
 	pcb->recv = recv;
 	_CPU_ISR_Restore(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 }
 
 void bte_disconnected(struct bte_pcb *pcb,s32 (disconn_cfm)(void *arg,struct bte_pcb *pcb,u8 err))
 {
 	u32 level;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	_CPU_ISR_Disable(level);
 	pcb->disconn_cfm = disconn_cfm;
 	_CPU_ISR_Restore(level);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 }
 
 err_t acl_wlp_completed(void *arg,struct bd_addr *bdaddr)
@@ -934,9 +934,9 @@ err_t acl_conn_complete(void *arg,struct bd_addr *bdaddr)
 	//printf("acl_conn_complete\n");
 	//memcpy(&(btstate.acl_bdaddr),bdaddr,6);
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	hci_write_link_policy_settings(bdaddr,0x0005);
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return ERR_OK;
 }
 
@@ -953,7 +953,7 @@ err_t l2cap_disconnected_ind(void *arg, struct l2cap_pcb *pcb, err_t err)
 
 
 	if(bte==NULL) return ERR_OK;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 
 	bte->state = (u32)STATE_DISCONNECTING;
 	switch(l2cap_psm(pcb)) {
@@ -972,7 +972,7 @@ err_t l2cap_disconnected_ind(void *arg, struct l2cap_pcb *pcb, err_t err)
 		__bte_close_ctrl_queue(bte);
 		if(bte->disconn_cfm!=NULL) bte->disconn_cfm(bte->cbarg,bte,ERR_OK);
 	}
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return ERR_OK;
 }
 
@@ -982,7 +982,7 @@ err_t l2cap_disconnect_cfm(void *arg, struct l2cap_pcb *pcb)
 
 
 	if(bte==NULL) return ERR_OK;
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 
 	switch(l2cap_psm(pcb)) {
 		case HIDP_CONTROL_CHANNEL:
@@ -1008,7 +1008,7 @@ err_t l2cap_disconnect_cfm(void *arg, struct l2cap_pcb *pcb)
 		hci_disconnect(&(bte->bdaddr),HCI_OTHER_END_TERMINATED_CONN_USER_ENDED);
 	}
 
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return ERR_OK;
 }
 
@@ -1045,7 +1045,7 @@ err_t l2cap_accepted(void *arg,struct l2cap_pcb *l2cappcb,err_t err)
 
 	//exiPrintf("WPAD: %s err=0x%X\n", __FUNCTION__, err);
 	//printf("l2cap_accepted(%02x)\n",err);
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	if(err==ERR_OK) {
 		l2cap_recv(l2cappcb,bte_process_input);
 		l2cap_disconnect_ind(l2cappcb,l2cap_disconnected_ind);
@@ -1069,7 +1069,7 @@ err_t l2cap_accepted(void *arg,struct l2cap_pcb *l2cappcb,err_t err)
 		btepcb->conn_cfm(btepcb->cbarg,btepcb,ERR_CONN);
 	}
 
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return ERR_OK;
 }
 
@@ -1080,7 +1080,7 @@ err_t bte_inquiry_complete(void *arg,struct hci_pcb *pcb,struct hci_inq_res *ire
 	struct bt_state *state = (struct bt_state*)arg;
 
 
-	iguanaSetBlueLed(1);
+	//iguanaSetBlueLed(1);
 	if(result==HCI_SUCCESS) {
 		if(ires!=NULL) {
 
@@ -1115,7 +1115,7 @@ err_t bte_inquiry_complete(void *arg,struct hci_pcb *pcb,struct hci_inq_res *ire
 		} else
 			hci_inquiry(0x009E8B33,0x03,btstate.num_maxdevs,bte_inquiry_complete);
 	}
-	iguanaSetBlueLed(0);
+	//iguanaSetBlueLed(0);
 	return ERR_OK;
 }
 
