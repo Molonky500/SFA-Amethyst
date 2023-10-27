@@ -301,10 +301,10 @@ extern void* __SYS_GetIPCBufferHi(void);
 extern u32 gettick(void);
 
 static void _lockIpcMutex() {
-	if(OSGetCurrentThread()) OSLockMutex(&_ipcMutex);
+	//if(OSGetCurrentThread()) OSLockMutex(&_ipcMutex);
 }
 static void _unlockIpcMutex() {
-	if(OSGetCurrentThread()) OSUnlockMutex(&_ipcMutex);
+	//if(OSGetCurrentThread()) OSUnlockMutex(&_ipcMutex);
 }
 
 static __inline__ u32 IPC_ReadReg(u32 reg)

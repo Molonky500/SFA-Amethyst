@@ -158,7 +158,9 @@ static void __wpad_timeouthandler(syswd_t alarm,void *cbarg)
 		}
 	}
 	//__lwp_thread_dispatchunnest();
+	level = OSDisableInterrupts();
 	OSEnableScheduler();
+	OSRestoreInterrupts(level);
 	exiPuts("__wpad_timeouthandler OK\r\n");
 }
 
@@ -723,11 +725,11 @@ s32 WPAD_Init(void)
 
 		__wiiuse_sensorbar_enable(1);
 
-		exiPrintf("BTE_Init...\n");
+		//exiPrintf("BTE_Init...\n");
 		int r = BTE_Init();
 		if(r) return r;
 		BTE_SetDisconnectCallback(__wpad_disconnectCB);
-		exiPrintf("BTE_InitCore...\n");
+		//exiPrintf("BTE_InitCore...\n");
 		BTE_InitCore(__initcore_finished);
 
 		//exiPrintf("SYS_CreateAlarm...\n");
@@ -742,7 +744,7 @@ s32 WPAD_Init(void)
 
 		tb.tv_sec = 1;
 		tb.tv_nsec = 0;
-		exiPrintf("SYS_SetPeriodicAlarm...\n");
+		//exiPrintf("SYS_SetPeriodicAlarm...\n");
 		SYS_SetPeriodicAlarm(__wpad_timer,&tb,&tb,__wpad_timeouthandler,NULL);
 		__wpads_inited = WPAD_STATE_ENABLING;
 	}

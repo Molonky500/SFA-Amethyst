@@ -13,7 +13,8 @@
 //as the real sector size of a DVD)
 //#define DVD_SECTOR_SIZE 2048
 //#define DVD_SECTOR_SIZE (32*1024*1024) //gotta go fast
-#define DVD_SECTOR_SIZE (327680) //about real speed
+//#define DVD_SECTOR_SIZE (327680) //about real speed
+#define DVD_SECTOR_SIZE 655360
 //since we sleep the DVD thread between reads, using the
 //real sector size is extremely slow.
 
