@@ -142,11 +142,13 @@ void OSRebootHook() {
     u32 flags2 = *(u32*)0x803dcc84;
     exiPrintf("PI flags: %08X %08X\n", flags1, flags2);
     OSCancelThread(&hackDvdThread);
-    SET_SCREEN_SOLID_YUV(106, 139, 94); //teal
-    udelay(500000);
-    WPAD_Shutdown();
+    //SET_SCREEN_SOLID_YUV(106, 139, 94); //teal
+    //udelay(500000);
+    exiPuts("fatUnmount...\r\n");
     fatUnmount("sd");
-    OSDisableInterrupts();
+    //exiPuts("WPAD_Shutdown...\r\n");
+    //WPAD_Shutdown(); //hangs
+    //OSDisableInterrupts();
     exiPuts("Goodbye cruel world!\r\n");
     if(isReset) {
         //if launched from loader, make reset button return
@@ -155,8 +157,11 @@ void OSRebootHook() {
         //XXX make the controller method work...
         if(isLaunchedFromLoader) exit(0);
         else STM_RebootSystem();
+        //else _ipcReg[0x194>>2] = 0; //reset system
+        //else SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
     }
     else { //power off
         STM_ShutdownToStandby();
     }
+    while(1);
 }
