@@ -77,6 +77,10 @@ SaveGame *save, RamSaveData *data, void *callback) {
     FILE *file = fopen(path, "rb");
     if(!file) {
         exiPrintf(" *** Failed opening %s to read: %d\n", path, errno);
+        if(callback == 0x8007E748) {
+            memset(save, 0, sizeof(SaveSettingsAndScores));
+        }
+        else memset(save, 0, sizeof(SaveGame));
         return 0;
     }
     RamSaveData buf;
