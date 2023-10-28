@@ -458,6 +458,7 @@ OSSetThreadPriority = 0x80245eb8;
 OSSleepThread = 0x80246a60;
 OSSuspendThread = 0x802468f0;
 OSWakeupThread = 0x80246b4c;
+PADControlMotor = 0x8024ec10;
 padReadControllers = 0x8024e864;
 padUpdate = 0x80014f40;
 pauseMenuDraw = 0x801262cc;

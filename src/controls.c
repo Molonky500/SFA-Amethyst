@@ -175,8 +175,8 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
     float x = wp->ir[0] - 320.0f;
     float y = wp->ir[1] - 240.0f;
     if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
-        debugPrintf("IR AIM: %f, %f (%f, %f) %04X\n", x, y,
-            prevAimX, prevAimY, wp->flags);
+        debugPrintf("IR AIM: %4d, %4d (%4d, %4d) %04X\n", (int)x, (int)y,
+            (int)prevAimX, (int)prevAimY, wp->flags);
     }
     //XXX apparently this flag isn't set when aiming
     //toward the right edge of the screen, even though
@@ -421,6 +421,7 @@ void applyWiimoteInputs(int iPad, PADStatus *pad) {
             //XXX on-screen display
             if(nowFlags & WM_FLAG_WORKING) {
                 OSReport("Wiimote connected\n");
+                PADControlMotor(0, 2); //stop motor
             }
             else OSReport("Wiimote connecting...\n");
         }
@@ -546,8 +547,24 @@ int padGetStickYHook(int pad) {
     return result;
 }
 
+void PADControlMotor_hook(int chan, int cmd) {
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    GameWiimoteState *wp = &wii->wiimote[chan];
+    if(!(wp->flags & WM_FLAG_WORKING)) {
+        //Wiimote not in use
+        PADControlMotor(chan, cmd);
+        return;
+    }
+    if(cmd == 1) wp->flags |= WM_FLAG_RUMBLE;
+    else wp->flags &= ~WM_FLAG_RUMBLE;
+}
+
 void wiiControlsInit() {
     hookBranch(0x80014f90, padUpdate_hook, 1);
     hookBranch(0x8022a6bc, arwingGetStickXHook, 1);
     hookBranch(0x8022a6f0, arwingGetStickYHook, 1);
+    hookBranch(0x80014a48, PADControlMotor_hook, 1);
+    hookBranch(0x80014a84, PADControlMotor_hook, 1);
+    hookBranch(0x80014ad8, PADControlMotor_hook, 1);
+    hookBranch(0x80014fec, PADControlMotor_hook, 1);
 }

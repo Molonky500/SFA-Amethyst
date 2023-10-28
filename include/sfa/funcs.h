@@ -227,6 +227,7 @@ GLOBALFN OSTime OSGetTime(void);
 GLOBALFN void OSReport(const char *fmt, ...);
 GLOBALFN BOOL OSRestoreInterrupts(BOOL level); //wtf Nintendo why a bool param?
 GLOBALFN OSInterruptMask OSSetInterruptMask(OSInterruptMask mask);
+GLOBALFN void PADControlMotor(int chan, u32 cmd);
 GLOBALFN s8 padGetCX(int pad);
 GLOBALFN s8 padGetCY(int pad);
 GLOBALFN s8 padGetStickX(int pad);
