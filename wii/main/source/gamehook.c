@@ -31,7 +31,6 @@ void printConsoleInfo() {
 }
 
 void initGameHooks() {
-    //memset(0x90000000, 0, 16*1024*1024);
     //_dspReg[5] = 0x801; //DSP reset
 
     exiPuts("Game init hook OK!\n");
@@ -71,23 +70,8 @@ void initGameHooks() {
     registerThreadForDebug((OSThread*)0x803A8348, "THPvideo");
     initStreamThread();
 
-    //CONF_Init();
-    //initWiimote();
     exiPuts("loader2 IPC init OK\r\n");
-
-    /*exiPrintf("IOS reload... (cur ver %d)\n", IOS_GetVersion());
-    int r = IOS_ReloadIOS(36);
-    //int r = IOS_ReloadIOS(IOS_GetVersion());
-    exiPrintf("=> %d\n", r);
-    udelay(1000000);
-    exiPrintf("Now on IOS %d\n", IOS_GetVersion());*/
-
     printConsoleInfo();
-    //exiPuts("Open hid...\n");
-    //static const char __hid_path[] ATTRIBUTE_ALIGN(32) = "/dev/usb/hid";
-    //int r = IOS_Open(__hid_path, 0);
-    //exiPrintf("HID: %d\n", r);
-    //IOS_Close(r);
 
     SET_SCREEN_SOLID_YUV(104, 212, 144); //purple
     //udelay(500000);

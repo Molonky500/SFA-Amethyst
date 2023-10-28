@@ -37,6 +37,7 @@ void dvdDumpOpenFiles() {
     for(int i=0; i<DVD_MAX_OPEN_FILES; i++) {
         if(dvdOpenFiles[i].info == NULL || dvdOpenFiles[i].file == NULL) continue;
         FILE *file = dvdOpenFiles[i].file;
+        //these can hang in some situations
         /*int pos = ftell(file);
         fseek(file, 0, SEEK_END);
         int size = ftell(file);
@@ -117,7 +118,6 @@ int sendFromDvdThread(HackDvdMsg *msg) {
     //exiPrintf("sendFromDvdThread h=%d t=%d msg=%08X\n",
     //    dvdMsgsOutHead, dvdMsgsOutTail, &dvdMsgsOut[dvdMsgsOutHead]);
     void *buf = (void*)&dvdMsgsOut[dvdMsgsOutHead];
-    //void *buf = malloc(sizeof(HackDvdMsg));
     memcpy(buf, msg, sizeof(HackDvdMsg));
     bool r = OSSendMessage(&hackDvdThreadMailOut, (OSMessage)buf, OS_MESSAGE_NOBLOCK);
     if(!r) {
@@ -228,30 +228,15 @@ void dvdThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
     OSWakeupThread(&dvdThreadQueue);
 }
 
-void _updateBusyFlag() {
-    bool busy = dvdAnyPendingCallbacks();
-    DVD_BUSY = 0;
-    SET_DISC_LED(busy);
-}
-
 void dvdIdle() {
-    _updateBusyFlag();
     OSYieldThread();
-    _updateBusyFlag();
 }
 
 void* hackDvdThreadMain(void *param) {
     /** Main thread for async DVD emulation.
      */
-    //OSEnableInterrupts();
     exiPuts("DVD thread online\r\n");
     registerThreadForDebug(OSGetCurrentThread(), "dvdhack");
-
-    //XXX why do this here? we already did it before.
-    /*if(fatInitDefault()) {
-        exiPrintf("DVD FAT init OK\r\n");
-    }
-    else PANIC("DVD FAT init FAIL\r\n");*/
 
     OSInitMutex(&dvdFileInfoMutex);
     OSInitMutex(&dvdPendingReadCbMutex);
@@ -267,7 +252,6 @@ void* hackDvdThreadMain(void *param) {
                 //exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
             //SET_DISC_LED(0);
-            //DVD_BUSY = 0;
             dvdIdle();
             OSSleepThread(&dvdThreadQueue);
             err = recvToDvdThread(&msg, OS_MESSAGE_NOBLOCK);
@@ -278,7 +262,6 @@ void* hackDvdThreadMain(void *param) {
         }
 
         //SET_DISC_LED(1);
-        //DVD_BUSY = 1; //DVD drive is busy
         DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\r\n", msg->cmd, msg->id);
 
         switch(msg->cmd) {
@@ -331,7 +314,6 @@ void* hackDvdThreadMain(void *param) {
                 break;
             }
         }
-        //free(msg);
     }
     exiPuts("DVD thread shutdown\r\n");
     if(!gIsSystemShuttingDown) {

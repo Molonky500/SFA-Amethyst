@@ -125,7 +125,7 @@ void doDspPatch() {
     PatchAX_Dsp(0x80330840, 0x5A8, 0x65D, 0x707, 0x8F );
     DCStoreRange(0x80330840, 0x2000);
 	//doCardPatch();
-	exiPuts(" *** WROTE DSP PATCH\n");
+	//exiPuts(" *** WROTE DSP PATCH\n");
 }
 
 void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL) {

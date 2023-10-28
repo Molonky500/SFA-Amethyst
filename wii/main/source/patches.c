@@ -93,59 +93,23 @@ uint32_t hookBranch(uint32_t addr, void *target, bool isBl, bool forceTrampoline
     return addr + (oldOp & 0x03FFFFFC);
 }
 
-int tempCardHook(int chan, void *work, void *cb) {
-    exiPrintf("CARDMount(%d, %p, %p)\r\n", chan, work, cb);
-    //initWiimote();
-    return 0;
-}
-
-void wiimoteInitHook() {
-    initWiimote();
-}
-
 void mainLoopHook() {
-    /*static u32 startAddr = 0x91000000;
-    u32 buttons = *(u32*)0x803398e0;
-    if(buttons & 0x8) startAddr -= (8*12); //up
-    if(buttons & 0x4) startAddr += (8*12); //down
-    if(buttons & 0x1) startAddr -= 0x1000; //left
-    if(buttons & 0x2) startAddr += 0x1000; //right
-
-    u32 addr = startAddr;
-    static char msg[4096];
-    strcpy(msg, "\x1B[H");
-    int n = strlen(msg);
-    for(int iLine=0; iLine<12; iLine++) {
-        putHex(&msg[n], addr); n += 8;
-        msg[n++] = ':';
-        msg[n++] = ' ';
-        for(int iCol=0; iCol<8; iCol++) {
-            putHex(&msg[n], *(u32*)addr); n += 8;
-            msg[n++] = ' ';
-            addr++;
-        }
-        msg[n++] = ' ';
-        msg[n++] = '\n';
-    }
-    msg[n++] = 0;
-    exiPuts(msg);*/
-
     gFrameCount++;
     __UnmaskIrq(IM_EXI1); //we need this for debug
 
-    extern u8 __ipcbufferLo[], __ipcbufferHi[];
+    //extern u8 __ipcbufferLo[], __ipcbufferHi[];
     //exiPrintf("IPC BUF %08X %08X  Arena1 %08X %08X  Arena2  %08X %08X\n",
     //    __ipcbufferLo, __ipcbufferHi,
     //    SYS_GetArena1Lo(), SYS_GetArena1Hi(),
     //    _mem2_heap_start, _mem2_heap_end);
 
-    static bool triedInit = false;
+    /*static bool triedInit = false;
     //curMap == warlock
     if((!triedInit) && (*(u32*)0x803dcec8) == 0xB) {
         triedInit = true;
         exiPuts("Telling thread to init Wiimote\r\n");
         bInitWiimote = 1;
-    }
+    }*/
 }
 
 void cardUnlock_hook(void *addr, u32 size) {
@@ -153,17 +117,6 @@ void cardUnlock_hook(void *addr, u32 size) {
     *(u32*)(addr+0xC) = 0x10000000;
     DCFlushRange(addr, size); //replaced
 }
-
-/*void updateFrameTime_hook(void *param) {
-    void (*origFunc)(void*) = 0x80245ba4; //OSResetStopwatch
-    origFunc(param);
-    //ensure msecsThisFrame is > 0
-    float *msecs = (float*)0x803dccc0;
-    if(*msecs < 8.0f) {
-        exiPrintf("Previous frame took less than 8ms\n");
-        *msecs = 8.0f;
-    }
-}*/
 
 void LCEnable_hook() {
     exiPuts("REACHED LCEnable_hook\r\n");
@@ -243,18 +196,13 @@ void doPatches() {
     }
 
     hookBranch(0x8025fe1c, cardUnlock_hook, 1, 0);
-    //hookBranch(0x80015998, _init_hook, 1, 0);
     hookBranch(0x80246b64, OSWakeupThread_hook, 1, 0);
 
-    //hookBranch(0x802623ac, tempCardHook, 0, 0);
-    //hookBranch(0x80014f90, padUpdate_hook, 1, 0);
-    //hookBranch(0x800212a4, wiimoteInitHook, 1, 0); //patch unused init func
     hookBranch(0x80020c60, mainLoopHook, 1, 0); //patch unused main loop func
     hookBranch(0x8007d6dc, osPrintHook, 0, 0);
     hookBranch(0x80246e04, osPrintHook, 0, 0);
     hookBranch(0x802510cc, osPrintHook, 0, 0);
     hookBranch(0x8024091c, OSExceptionInit_hook, 0, 0);
-    //hookBranch(0x80242a10, gameExceptionHook, 0, 0);
     hookBranch(0x80242bf8, gameExceptionHook, 1, 0);
     hookBranch(0x80137df8, gameBsodHook, 0, 0);
     hookBranch(0x802406c0, __OSInterruptInit_hook, 1, 0);
@@ -262,12 +210,10 @@ void doPatches() {
     hookBranch(0x80243bcc, __OSUnmaskInterrupts_hook, 0, 0);
     hookBranch(0x80243fe4, gameExtIrqHandler_hook, 0, 0);
     hookBranch(0x802408ac, OSEnableInterrupts_hook, 1, 0);
-    //hookBranch(0x80248870, __DVDFSInit_hook, 0, 0);
     hookBranch(0x80020dbc, LCEnable_hook, 1, 0);
     hookBranch(0x80248b9c, DVDOpen_hook, 0, 0);
     hookBranch(0x80015850, DVDRead_hook, 0, 0);
     hookBranch(0x80248f9c, DVDReadPrio_hook, 0, 0);
-    //hookBranch(0x80248c64, DVDClose_hook, 0, 0);
     hookBranch(0x8024b428, DVDCancelAsync_hook, 0, 0);
     hookBranch(0x80248eac, DVDReadAsyncPrio_hook, 0, 0);
     hookBranch(0x802490d8, DVDPrepareStreamAsync_hook, 0, 0);
@@ -280,7 +226,6 @@ void doPatches() {
     hookBranch(0x80009be4, mainLoopUpdateStream_hook, 1, 0);
     hookBranch(0x80020604, dvdMainLoopHook, 0, 1);
     hookBranch(0x8025400c, exiInterrupt_hook, 0, 0);
-    //hookBranch(0x8004a8d8, updateFrameTime_hook, 1, 0);
     hookBranch(0x802456c4, OSGetSoundMode_hook, 0, 0);
 
     static const u32 patches[] = {
@@ -298,7 +243,7 @@ void doPatches() {
         //0x8014a8bc, 0x38600000,
         //0x8006edcc, 0x4E800020,
         //0x80240608, 0x38000042, //don't change debug flags
-        0x802543f8, 0x60000000, //don't change EXI1 settings, we're using it
+        0x802543f8, 0x60000000, //don't change EXI1 settings, we're using it for debug
         //0x80240758, 0x60000000, //always call memInit
         //0x80241a14, 0x60000000, //don't syscall
         //0x80241a48, 0x60000000, //don't syscall
@@ -309,20 +254,12 @@ void doPatches() {
         0x80000008, 0x01000000, //streaming params
         0x800000d0, 0x01000000, //ARAM size
         0x800000f0, 0x01800000, //simulated RAM size
-        //0x800000f4, 0x817e8240, //pDVDBI2
         0x800030c0, 0xE2D383C1, //memory card is present
-
-        //0x80245980, 0x4E800020, //OSSetWirelessID
 
         //don't call __check_pad3 since it's not there anymore
         0x80003260, 0x60000000,
 
-        //use the pad3 value to instead store a magic value to
-        //tell Amethyst hooks that we're in Wii mode.
-        //0x800030e4, 0xACAB7511,
-
         //disable some DVD stuff
-        //0x802491f4, 0x4E800020, //DVDInit
         0x802408fc, 0x60000000, //DVDInquiryAsync
         0x80015624, 0x4E800020, //dvdCheckError
         0x8004a900, 0x38000000, //don't set timeDelta to zero thinking
@@ -347,22 +284,6 @@ void doPatches() {
         0x800e8554, 0x60000000, //don't clear default savedata
             //XXX this might cause an issue on quitting from pause menu?
 
-        //titleTryLoadSaveFiles
-        //0x8007dbc0, 0x38600000,
-        //0x8007dbc4, 0x4E800020,
-
-        //loadSaveGame
-        //0x8007dc5c, 0x38600000,
-        //0x8007dc60, 0x4E800020,
-
-        //titleCreateCardFile
-        //0x8007dd04, 0x38600000,
-        //0x8007dd08, 0x4E800020,
-
-        //_saveGame
-        //0x8007db24, 0x38600000,
-        //0x8007db28, 0x4E800020,
-
         0 //end of list
     };
     for(int i=0; patches[i]; i += 2) {
@@ -374,8 +295,4 @@ void doPatches() {
     //Nintendont does this. this is AR_REFRESH.
     //doesn't seem to make much difference though.
     // *(vu16*)0xCC00501A = 156;
-
-    //ICFlashInvalidate();
-    //DCFlashInvalidate();
-    //L2GlobalInvalidate();
 }

@@ -83,15 +83,6 @@ void OSExceptionInit_hook() {
     SET_DEBUG_PORT(__LINE__);
     iguanaPutsNoFlush("OSExceptionInit_hook done\r\n");
     SET_DEBUG_PORT(__LINE__);
-
-    /*exiPrintf("INTSR=%08X INTMR=%08X DAR=%08X DSISR=%08X\r\n",
-        *(vu32*)0xCC003000, *(vu32*)0xCC003004,
-        mfspr(19), mfspr(18));
-    for(u32 addr = 0x80003000; addr < 0x800030C0; addr += 16) {
-        u32 *d = (u32*)addr;
-        exiPrintf("%08X: %08X %08X %08X %08X\r\n", addr,
-            d[0], d[1], d[2], d[3]);
-    }*/
 }
 
 void gameExceptionInit() {
@@ -191,7 +182,6 @@ uint cause, void *addr, u32 msr) {
 
 void gameExceptionHook(int exceptionCode, OSContext *ctx,
 uint cause, void *addr) {
-    //if(haveGecko) iguanaSetRedLed(true);
     if(haveGecko) {
         //exiPrintf(" *** ERROR %d cause=0x%x addr=0x%x ctx=0x%x\r\n", exceptionCode,
         //    cause, addr, ctx);

@@ -78,8 +78,8 @@ void* _sbrk_r( struct _reent *ptr, ptrdiff_t incr) {
         if(pad) _mem2_heap_start += 32 - pad;
     }
 
-    exiPrintf("sbrk(%08X, %d) => %08X, %d\n", (u32)ptr, incr,
-        (u32)result, ptr->_errno);
+    //exiPrintf("sbrk(%08X, %d) => %08X, %d\n", (u32)ptr, incr,
+    //    (u32)result, ptr->_errno);
 
     _CPU_ISR_Restore(level);
     return (void*)result;

@@ -1,13 +1,5 @@
 #include "main.h"
 
-void __DVDFSInit_hook(void) {
-    exiPuts("reached __DVDFSInit_hook\r\n");
-
-    //since this is the first thing called back into
-    //from the game, this is where we init stuff.
-    //initGameHooks();
-}
-
 bool DVDOpen_hook(const char *path, DVDFileInfo *info) {
     char newPath[1024];
     snprintf(newPath, sizeof(newPath), "%s/files/%s",
@@ -94,8 +86,6 @@ int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback) {
     }
     info->cb.state = 10; //cancelled
 
-    //deadlocks if called from a callback
-    //while(DVD_BUSY) OSYieldThread();
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     if(callback) dvdAddPendingCancelCallback(callback, info);
     else if(file) {

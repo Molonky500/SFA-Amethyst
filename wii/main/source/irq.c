@@ -367,7 +367,6 @@ void __OSInterruptInit_hook() {
     __OSInterruptInit();
 	iguanaPutsNoFlush("Exit __OSInterruptInit\r\n");
 	gameIrqHandlers[IRQ_PI_ACR] = __ipc_interrupthandler;
-    //gameIrqHandlers[IRQ_PI_ACR] = acrIrq; //set ACR IRQ handler (IOS IPC)
 }
 
 void __OSMaskInterrupts_hook(u32 mask) {

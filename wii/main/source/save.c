@@ -4,8 +4,8 @@ char saveFilePath[1024];
 char profileName[64];
 
 static void writeStub(u32 addr, s16 ret) {
-    *(u32*)(addr  ) = 0x38600000 | ret;
-    *(u32*)(addr+4) = 0x4E800020;
+    *(u32*)(addr  ) = 0x38600000 | ret; //li r3, ret
+    *(u32*)(addr+4) = 0x4E800020; //blr
 }
 
 void initSaveHacks() {
@@ -94,16 +94,6 @@ SaveGame *save, RamSaveData *data, void *callback) {
     else { //this is one of the three loads at the file select menu.
         memcpy(save, &buf.save, sizeof(SaveGame));
     }
-
-    //temp
-    /*FILE *dump1 = fopen("sd:/mem1.raw", "wb");
-    exiPrintf("Writing dump1 %x\n", dump1);
-    fwrite(0x80000000, 1, 24*1024*1024, dump1);
-    fclose(dump1);
-    FILE *dump2 = fopen("sd:/mem2.raw", "wb");
-    exiPrintf("Writing dump2 %x\n", dump2);
-    fwrite(0x90000000, 1, 16*1024*1024, dump2);
-    fclose(dump2);*/
 
     return 1;
 }

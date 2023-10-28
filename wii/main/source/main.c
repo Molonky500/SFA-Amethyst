@@ -40,14 +40,7 @@ int main(int argc, char **argv) {
     //else we're launched in Dolphin from command line or something
     //and there's no loader to exit to.
     //L2Enhance();
-
     SET_DEBUG_PORT(0x10);
-
-    //SET_DEBUG_PORT((((u32)_exiReg) >> 24) & 0xFF); udelay(10000);
-    //SET_DEBUG_PORT((((u32)_exiReg) >> 16) & 0xFF); udelay(10000);
-    //SET_DEBUG_PORT((((u32)_exiReg) >>  8) & 0xFF); udelay(10000);
-    //SET_DEBUG_PORT((((u32)_exiReg) >>  0) & 0xFF); udelay(10000);
-    //SET_DEBUG_PORT(0x99);
 
     //init debug prints
     exiPrintInit();
@@ -67,15 +60,6 @@ int main(int argc, char **argv) {
     ICInvalidateRange(text0_dst, text0_len);
     exiPuts("Moved text0 OK\r\n");
     SET_DEBUG_PORT(0x13);
-
-    //SET_DEBUG_PORT(0x12);
-    //exiPrintf(" ---- loader2 start ---- \r\nstack: %08X - %08X\r\n",
-    //    &__crt0stack_end, &__crt0stack);
-    //SET_DEBUG_PORT(0x13);
-
-    //no longer used
-    //DolHeader header;
-    //loadGameDol(&header);
 
     exiPrintf("game loader start; argc=%d\r\n", argc);
     for(int i=0; i<argc; i++) {

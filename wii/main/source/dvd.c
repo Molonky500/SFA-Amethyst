@@ -73,7 +73,6 @@ int sendToDvdThread(HackDvdMsg *msg) {
     }
     msg->id = dvdCmdId++;
     void *buf = (void*)&dvdMsgsIn[dvdMsgsInHead];
-    //void *buf = malloc(sizeof(HackDvdMsg));
     memcpy(buf, msg, sizeof(HackDvdMsg));
     //send the pointer to the message
     bool r = OSSendMessage(&hackDvdThreadMailIn, (OSMessage)buf, OS_MESSAGE_NOBLOCK);
@@ -84,7 +83,6 @@ int sendToDvdThread(HackDvdMsg *msg) {
     }
     dvdMsgsInHead = next;
     DVD_DPRINT("wakeup DVD\r\n");
-    //LWP_ThreadSignal(dvdThreadQueue);
     OSUnlockMutex(&dvdMsgMutex);
     return 0;
 }
@@ -118,7 +116,6 @@ int recvFromDvdThread(HackDvdMsg **msg, u32 flags) {
 
 int sendReadToDvdThread(DVDFileInfo *info, void *addr, uint length,
 int offset, DVDCallback callback, int prio, bool async) {
-    //DVD_BUSY = 1;
     HackDvdMsg msg;
     HackDvdOpenFile *file = (HackDvdOpenFile*)dvd_getFileByInfo(info);
     msg.cmd = DVDCMD_READ;
@@ -162,7 +159,6 @@ int offset, DVDCallback callback, int prio, bool async) {
             DVD_DPRINT("recvFromDvdThread m=%d id=%d file=%08X\r\n",
                 resp->cmd, resp->id, resp->read.file);
             if(resp->id == msg.id) done = true;
-            //free(resp);
         }
     }
     //OSYieldThread();

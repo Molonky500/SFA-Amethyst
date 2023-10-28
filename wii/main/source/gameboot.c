@@ -25,6 +25,7 @@ void bootGame() {
 
     exiPrintf("Jumping to game entry point: %08X\r\n", gameEntry);
     //dumpMem(gameEntry, 256);
+    //cache stuff is weird. changing this will cause random bugs.
     IRQ_Disable();
     iguanaSetBlueLed(true);
     LCDisable();
@@ -91,10 +92,6 @@ void bootGame() {
         0;
     _ipcReg[0x194>>2] &= ~RESET_BITS; //clear = reset
 
-    //SET_SCREEN_SOLID_YUV(141, 191, 26); //light blue
-    //udelay(500000);
-    //SET_SCREEN_SOLID_YUV(255, 0, 148); //yellow
-    //udelay(500000);
     //_viReg[1] = 0; //unsure, but official code does it on reset
     _viReg[0] = 0; //reset
     // *(u16*)0xCC00500a = 1 | (1 << 11); //reset DSP
@@ -107,7 +104,7 @@ void bootGame() {
     __asm__ __volatile__ ("sync\n" "isync");
     gameEntry();
     //should never reach here...
-    //SET_SCREEN_SOLID_YUV(76, 84, 255); //red
+    SET_SCREEN_SOLID_YUV(76, 84, 255); //red
     while(1);
 
     //tell the compiler we're not coming back from this one.

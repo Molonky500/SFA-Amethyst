@@ -140,7 +140,6 @@ void dumpThreads();
 
 //dol.c
 void printDolHeader(DolHeader *header);
-void loadGameDol(DolHeader *header);
 
 //dvd.c
 extern volatile HackDvdOpenFile dvdOpenFiles[DVD_MAX_OPEN_FILES];
@@ -167,7 +166,6 @@ void dvdDoPendingCancelCallbacks();
 bool dvdAnyPendingCallbacks();
 
 //dvdhook.c
-void __DVDFSInit_hook(void);
 bool DVDOpen_hook(const char *path, DVDFileInfo *info);
 int DVDRead_hook(DVDFileInfo *file, void *addr, uint size, uint offset);
 int DVDCancelAsync_hook(DVDFileInfo *info, DVDCBCallback callback);

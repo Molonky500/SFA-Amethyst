@@ -30,7 +30,6 @@
 #define DVD_MAX_STREAM_CALLBACKS 64
 
 typedef void (*DVDCallback)(s32 result, void* fileInfo);
-#define DVD_BUSY (*(vu8*)0x803dc950)
 
 typedef struct DVDDiskID DVDDiskID;
 

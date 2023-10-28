@@ -29,6 +29,9 @@ distribution.
 -------------------------------------------------------------*/
 
 
+/** This is needed for Bluetooth for Wiimote. */
+
+
 /*  Note: There are 3 types of USB interfaces here, the early ones
  *  (V0: /dev/usb/oh0 and /dev/usb/oh1) and two later ones (V5: /dev/usb/ven
  *  and /dev/usb/hid) which are similar but have some small

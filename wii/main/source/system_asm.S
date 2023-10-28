@@ -74,18 +74,6 @@ startup2:
 	li      r3,  0x69
 	bl      WriteDebugPort
 
-	/* //dump PC
-	mr      r15, r14
-	li      r16, 4 //number of bytes to dump
-.nextbyte:
-	srwi    r3,  r14, 24
-	slwi    r14, r14,  8
-	bl      WriteDebugPort
-
-	subi    r16, r16, 1
-	cmpwi   r16, 0
-	bne     .nextbyte */
-
 	//bl		__InitBATS     # Initialize BATs to a clear and known state
 	//li      r3,  0xB9
 	//bl      WriteDebugPort
@@ -97,10 +85,6 @@ startup2:
 	bl		__InitSystem   # Initialize more cache aspects, clear a few SPR's, and disable interrupts.
 	li      r3,  0x6B
 	bl      WriteDebugPort
-
-	//this works, so the code IS running...
-	//lis     r4,  0
-	//stw     r4,  0x0194(r20) //reboot
 
 	//load DOL
 	li      r0,  0 //I don't *think* this is needed for cache ops?
@@ -178,28 +162,6 @@ startup2:
 	sync
 	isync
 	//bl		__InitBATS     # Initialize BATs to a clear and known state
-
-	//dump the entry point out the debug port...
-	//note, this isn't great because there's no way to tell
-	//when there's two or more of the same byte in a row.
-	/*
-	lwz     r15, 8(r14) //the bytes at the entry point
-	//addi    r15, r14, 8 //the entry point itself
-	subi    r15, r15, 1 //for lbzu
-	//lis     r4,  0x7FFF
-	//ori     r4,  r4,  0xFFFF
-	//and     r15, r15, r4
-	li      r16, 16 //number of bytes to dump
-.nextbyte:
-	lbzu    r3,  1(r15)
-	bl      WriteDebugPort
-	lis     r3,  0x00FF
-	mtctr   r3
-.delay:
-	bdnz    .delay
-	subi    r16, r16, 1
-	cmpwi   r16, 0
-	bne     .nextbyte */
 
 	li      r3,  0x42
 	bl      WriteDebugPort

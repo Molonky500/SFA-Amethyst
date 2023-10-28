@@ -255,9 +255,9 @@ void* streamThreadMain(void *param) {
 		streamDecodeBuf, nSamples);
 
 	//HACK to fix volume resetting to 0 on load
-	void (*audioSetVolumes)(uint volume,uint scale,int bMusic,
-		int bSfx,int bCutscenes) = 0x80009a28;
-	audioSetVolumes(100, 1000, 1, 1, 1); //no idea what scale is
+	//void (*audioSetVolumes)(uint volume,uint scale,int bMusic,
+	//	int bSfx,int bCutscenes) = 0x80009a28;
+	//audioSetVolumes(100, 1000, 1, 1, 1); //no idea what scale is
 
 	bool restart = true;
 	u32 iSample = 0;

@@ -31,11 +31,12 @@ size_t fixCrlf(const char *bufIn, char *bufOut, size_t lenOut) {
 //XXX any reason we can't do this on the GC side instead?
 //only the lack of vsnprintf which we could port?
 void osPrintHook(const char *fmt, ...) {
-    char buf[1024];
+    char buf[1024], buf2[1024];
     va_list args;
     va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
-    exiPuts(buf);
+    fixCrlf(buf, buf2, sizeof(buf2));
+    exiPuts(buf2);
     va_end(args);
     //dumpStack();
 }

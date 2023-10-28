@@ -1,4 +1,8 @@
 #include "main.h"
+/** This thread runs in the background when there's nothing
+ *  more important to do, and just checks on some things to
+ *  make sure things are working correctly.
+ */
 
 #define CHECK_THREAD_STACK_SIZE 8192
 #define CHECK_THREAD_PRIO 30 //31=lowest 0=highest
