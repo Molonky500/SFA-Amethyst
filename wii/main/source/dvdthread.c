@@ -169,6 +169,7 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
     #endif
 
     void *readDest = addr;
+    SET_DISC_LED(1);
     while(nRead < size) {
         DCInvalidateRange(readDest, size-nRead);
         //memset(readDest, 0xBBBBBBBB, MIN(DVD_SECTOR_SIZE, size-nRead));
@@ -191,6 +192,7 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
             DVD_DPRINT("DVD thread resume\n");
         }*/
     }
+    SET_DISC_LED(0);
     if(nRead < size) {
         DVD_DPRINT("DVDRead(%08X): want %d but got %d\r\n",
             file, size, nRead);
@@ -251,7 +253,6 @@ void* hackDvdThreadMain(void *param) {
             #if DVD_DEBUG
                 //exiPrintf("DVD thread waiting, q=%08X\n", dvdThreadQueue);
             #endif
-            //SET_DISC_LED(0);
             dvdIdle();
             OSSleepThread(&dvdThreadQueue);
             err = recvToDvdThread(&msg, OS_MESSAGE_NOBLOCK);
@@ -261,9 +262,7 @@ void* hackDvdThreadMain(void *param) {
             #endif
         }
 
-        //SET_DISC_LED(1);
         DVD_DPRINT("DVD thread cmd 0x%X id 0x%X\r\n", msg->cmd, msg->id);
-
         switch(msg->cmd) {
             case DVDCMD_SHUTDOWN: {
                 run = false;
