@@ -33,6 +33,37 @@ void _lookAtTarget() {
     pCamera->pos.xf.rotation.y = atan2fi(targetPos.y, targetXZ);
 }
 
+void _camDoNunchuk(GameWiimoteState *wp, s8 *outX, s8 *outY) {
+    static float prevX[4] = {0};
+    static float prevY[4] = {0};
+    float x = wp->exp.nunchuk.orient[2];
+    float y = wp->exp.nunchuk.orient[1];
+    if(ABS(x) >= 10.0f || ABS(y) >= 10.0f) {
+        //x = (float)(((int)x) & ~15);
+        //y = (float)(((int)y) & ~15);
+        prevX[0] = prevX[1];
+        prevX[1] = prevX[2];
+        prevX[2] = prevX[3];
+        prevX[3] = x;
+        prevY[0] = prevY[1];
+        prevY[1] = prevY[2];
+        prevY[2] = prevY[3];
+        prevY[3] = y;
+        float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
+        float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
+        if(sx < -1.0) sx = -1.0; if(sx >  1.0) sx =  1.0;
+        if(sy < -1.0) sy = -1.0; if(sy >  1.0) sy =  1.0;
+        s32 ox = (outX ? *outX : 0) + sx;
+        s32 oy = (outY ? *outY : 0) + sy;
+        if(ox < -127) ox = -127;
+        if(ox >  127) ox =  127;
+        if(oy < -127) oy = -127;
+        if(oy >  127) oy =  127;
+        if(outX) *outX = ox;
+        if(outY) *outY = oy;
+    }
+}
+
 void _camGetStickInput(s8 *outX, s8 *outY) {
     int pad = (cameraFlags & CAM_FLAG_PAD3) ? 2 : 0;
     s8 stickX = controllerStates[pad].substickX & 0xFC;
@@ -57,35 +88,7 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
     GameWiimoteState *wp = &wii->wiimote[0];
     if(!(wp->flags & WM_FLAG_WORKING)) return;
     switch(wp->expType) {
-        case WPAD_EXP_NUNCHUK: {
-            static float prevX[4] = {0};
-            static float prevY[4] = {0};
-            float x = wp->exp.nunchuk.orient[2];
-            float y = wp->exp.nunchuk.orient[1];
-            if(ABS(x) >= 10.0f || ABS(y) >= 10.0f) {
-                //x = (float)(((int)x) & ~15);
-                //y = (float)(((int)y) & ~15);
-                prevX[0] = prevX[1];
-                prevX[1] = prevX[2];
-                prevX[2] = prevX[3];
-                prevX[3] = x;
-                prevY[0] = prevY[1];
-                prevY[1] = prevY[2];
-                prevY[2] = prevY[3];
-                prevY[3] = y;
-                float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
-                float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
-                s32 ox = (outX ? *outX : 0) + sx;
-                s32 oy = (outY ? *outY : 0) + sy;
-                if(ox < -127) ox = -127;
-                if(ox >  127) ox =  127;
-                if(oy < -127) oy = -127;
-                if(oy >  127) oy =  127;
-                if(outX) *outX = ox;
-                if(outY) *outY = oy;
-            }
-            break;
-        }
+        case WPAD_EXP_NUNCHUK: _camDoNunchuk(wp, outX, outY); break;
         default: break;
     }
     #endif

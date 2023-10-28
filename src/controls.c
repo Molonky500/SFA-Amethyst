@@ -105,6 +105,7 @@ void adjustPlayerRotation(s16 x, s16 y, PADStatus *pad) {
             //pad->stickY += y;
             //XXX IR aiming
         }
+        //XXX EarthWalker
     }
 }
 
@@ -512,9 +513,9 @@ int padGetStickXHook(int pad) {
     if(stateNo == 0x1D) return result;
 
     if((cameraFlags & CAM_FLAG_INVERT_X) && !(buttons & PAD_TRIGGER_L)) {
-        if(cameraMode == 0x52    //staff aiming
-        || cameraMode == 0x44    //viewfinder
-        || cameraMode == 0x51) { //aim cannon
+        if(cameraMode == CAM_DLL_FORCE_BEHIND //staff aiming
+        || cameraMode == CAM_DLL_VIEWFINDER   //viewfinder
+        || cameraMode == CAM_DLL_CANNON) {    //aim cannon
             return -result;
         }
     }
@@ -532,12 +533,12 @@ int padGetStickYHook(int pad) {
     //don't invert controls when pushing a block
     if(stateNo == 0x1D) return result;
 
-    if(cameraMode == 0x44) { //viewfinder
+    if(cameraMode == CAM_DLL_VIEWFINDER) {
         //already inverted by default, so do opposite
         if(!(cameraFlags & CAM_FLAG_INVERT_Y)) return -result;
     }
     else if((cameraFlags & CAM_FLAG_INVERT_Y) && !(buttons & PAD_TRIGGER_L) && (
-    cameraMode == 0x52 || cameraMode == 0x51)) {
+    cameraMode == CAM_DLL_FORCE_BEHIND || cameraMode == CAM_DLL_CANNON)) {
         return -result;
     }
     return result;
