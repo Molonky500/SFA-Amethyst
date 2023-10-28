@@ -34,6 +34,7 @@ void _lookAtTarget() {
 }
 
 void _camDoNunchuk(GameWiimoteState *wp, s8 *outX, s8 *outY) {
+    if(cameraMode == CAM_DLL_VIEWFINDER) return;
     static float prevX[4] = {0};
     static float prevY[4] = {0};
     float x = wp->exp.nunchuk.orient[2];
@@ -53,16 +54,15 @@ void _camDoNunchuk(GameWiimoteState *wp, s8 *outX, s8 *outY) {
         float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
         //clamp to avoid noise spikes causing the camera to go to space
         if(sx < -64.0f) sx = -64.0f; if(sx > 64.0f) sx = 64.0f;
-        if(sy < -16.0f) sy = -16.0f; if(sy > 16.0f) sy = 16.0f;
+        if(sy < -32.0f) sy = -32.0f; if(sy > 32.0f) sy = 32.0f;
         //ignore very small movements to reduce jitter
         if(sx > -1.0f && sx < 1.0f) sx = 0.0f;
         if(sy > -1.0f && sy < 1.0f) sy = 0.0f;
         s32 ox = (outX ? *outX : 0) + sx;
         s32 oy = (outY ? *outY : 0) + sy;
-        if(ox < -127) ox = -127;
-        if(ox >  127) ox =  127;
-        if(oy < -127) oy = -127;
-        if(oy >  127) oy =  127;
+        //clamp to valid joystick range
+        if(ox < -127) ox = -127; if(ox > 127) ox = 127;
+        if(oy < -127) oy = -127; if(oy > 127) oy = 127;
         if(outX) *outX = ox;
         if(outY) *outY = oy;
     }
