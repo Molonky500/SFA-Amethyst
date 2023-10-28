@@ -49,8 +49,8 @@ void _camDoNunchuk(GameWiimoteState *wp, s8 *outX, s8 *outY) {
         prevY[1] = prevY[2];
         prevY[2] = prevY[3];
         prevY[3] = y;
-        float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
-        float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/2.0f;
+        float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/8.0f;
+        float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
         //clamp to avoid noise spikes causing the camera to go to space
         if(sx < -64.0f) sx = -64.0f; if(sx > 64.0f) sx = 64.0f;
         if(sy < -16.0f) sy = -16.0f; if(sy > 16.0f) sy = 16.0f;
