@@ -249,11 +249,13 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
     //swing to attack
     switch(stateNo) {
         case 0x01: //idle
-        case 0x02: { //moving
+        case 0x02: //moving
+        case 0x24: //idle in combat
+        case 0x25: { //moving in combat
             if(*(u8*)(pPlayer->state+0x8B3) != 0) { //staff in hand
                 if(ABS(wp->gforce[0]) +
                 ABS(wp->gforce[1]) +
-                ABS(wp->gforce[2]) >= 8.0f) {
+                ABS(wp->gforce[2]) >= 6.0f) {
                     OSReport("swing it!\n");
                     *bDown |= PAD_BUTTON_A;
                 }
