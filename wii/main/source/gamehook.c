@@ -38,6 +38,7 @@ void initGameHooks() {
     __UnmaskIrq(IM_PI_ACR); //enable IOS IPC
     _initIos();
 
+    //if we init Wiimote after FAT, it likes to fail.
     exiPuts("About to init Wiimote\n");
     if(initWiimote()) {
         exiPuts("Wiimote init failed\n");
