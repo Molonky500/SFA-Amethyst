@@ -50,9 +50,13 @@ void _camDoNunchuk(GameWiimoteState *wp, s8 *outX, s8 *outY) {
         prevY[2] = prevY[3];
         prevY[3] = y;
         float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
-        float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
-        if(sx < -8.0) sx = -8.0; if(sx >  8.0) sx =  8.0;
-        if(sy < -8.0) sy = -8.0; if(sy >  8.0) sy =  8.0;
+        float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/2.0f;
+        //clamp to avoid noise spikes causing the camera to go to space
+        if(sx < -64.0f) sx = -64.0f; if(sx > 64.0f) sx = 64.0f;
+        if(sy < -16.0f) sy = -16.0f; if(sy > 16.0f) sy = 16.0f;
+        //ignore very small movements to reduce jitter
+        if(sx > -1.0f && sx < 1.0f) sx = 0.0f;
+        if(sy > -1.0f && sy < 1.0f) sy = 0.0f;
         s32 ox = (outX ? *outX : 0) + sx;
         s32 oy = (outY ? *outY : 0) + sy;
         if(ox < -127) ox = -127;
