@@ -48,7 +48,7 @@ ASFLAGS := $(MACHDEP) -mregnames -D_LANGUAGE_ASSEMBLY $(INCLUDES)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS := -lfatx -lm
+LIBS := -lfat -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

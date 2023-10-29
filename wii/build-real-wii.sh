@@ -1,11 +1,36 @@
 #!/bin/sh
-# Build mod and send via wiiload.
+
 BUILD_PATH=./build
 DISCROOT=/home/rena/projects/sfa/DATA/
 NEWDOL=$DISCROOT/sys/main.dol
 INSTALL_PATH=$BUILD_PATH/SFA
 
+# for Dolphin
+SD_MOUNT_PATH=/home/rena/.local/share/dolphin-emu/Load/WiiSDSync
+
+TARGET=$1
+if [ "$TARGET" == "" ]; then TARGET='build'; fi
+if [ "$TARGET" == "clean" ]; then
+    pushd libfat
+        make ogc-clean
+    popd
+    pushd main
+        make clean
+    popd
+    pushd ..
+        ./build.sh clean
+    popd
+    exit
+fi
+
 mkdir -p $INSTALL_PATH/sys
+
+echo "Build libfat..."
+pushd libfat
+    make wii-release && cp libogc/lib/wii/libfat.a ../main/lib/
+    ok=$?
+popd
+if [ $ok -ne 0 ]; then exit $ok; fi
 
 echo "Build main..."
 pushd main
@@ -29,14 +54,36 @@ echo "Combine..."
 ok=$?
 if [ $ok -ne 0 ]; then exit $ok; fi
 
-echo "Zip..."
-cp -r app/* $INSTALL_PATH
-cp $DISCROOT/sys/* $INSTALL_PATH/sys/
-rm $INSTALL_PATH/sys/main.dol.orig
-#cp -ru $DISCROOT/files/* $INSTALL_PATH/files/
+if [ "$TARGET" == "build" ]; then
+    # Build but don't run
+    exit
 
-echo "Upload..."
-pushd $BUILD_PATH
-zip -r sfa.zip ./SFA
-popd
-/opt/devkitpro/tools/bin/wiiload $BUILD_PATH/sfa.zip
+elif [ "$TARGET" == "dolphin" ]; then
+    # Build and run in Dolphin
+
+    if [ -e $SD_MOUNT_PATH/apps ]
+    then cp -r app/* $SD_MOUNT_PATH/apps/SFA/
+    else
+        echo "SD not mounted!"
+        exit 1
+    fi
+    cp -ru $DISCROOT/* $SD_MOUNT_PATH/apps/SFA/files/
+    # this variable runs Dolphin on the primary AMD GPU,
+    # instead of the weaker embedded one.
+    DRI_PRIME=1 dolphin-emu -d ./app/boot.dol
+
+elif [ "$TARGET" == "real" ]; then
+    # Build and send via wiiload
+
+    echo "Zip..."
+    cp -r app/* $INSTALL_PATH
+    cp $DISCROOT/sys/* $INSTALL_PATH/sys/
+    rm $INSTALL_PATH/sys/main.dol.orig
+    #cp -ru $DISCROOT/files/* $INSTALL_PATH/files/
+
+    echo "Upload..."
+    pushd $BUILD_PATH
+        zip -r sfa.zip ./SFA
+    popd
+    /opt/devkitpro/tools/bin/wiiload $BUILD_PATH/sfa.zip
+fi
