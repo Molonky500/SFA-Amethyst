@@ -29,11 +29,6 @@
     exiPrintf(" *** ERROR *** %s:%d: %s\n", __FILE__, __LINE__, msg); \
     __builtin_trap(); \
 } while(0)
-//XXX remove
-#define HALT do { \
-    exiPrintf(" *** ERROR *** HALT at %s:%d\n", __FILE__, __LINE__); \
-    __builtin_trap(); \
-} while(0)
 
 //this macro excludes 90xxxxxx (ARAM)
 #define PTR_VALID(p) (((u32)(p) >= 0x80000000 && (u32)(p) <= 0x817FFFFF) || \
