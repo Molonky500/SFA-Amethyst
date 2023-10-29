@@ -409,6 +409,7 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
 
 static u8  prevWiimoteFlags[4] = {0};
 static u32 wiimoteBatteryMsgTimer[4] = {0};
+static char wiimoteMsg[4][64];
 void applyWiimoteInputs(int iPad, PADStatus *pad) {
     //only called when the Wiimote is connected.
     //overrides the GC controller state.
@@ -420,29 +421,36 @@ void applyWiimoteInputs(int iPad, PADStatus *pad) {
     u8 clrFlags  = prevFlags & ~nowFlags;
     if(setFlags || clrFlags) {
         if(setFlags & WM_FLAG_WORKING) {
-            addOsdMessage("Wii Remote connected", 300);
+            //using this buffer lets us add the number and means
+            //previous messages will be replaced.
+            sprintf(wiimoteMsg[iPad], "Wii Remote %d connected", iPad+1);
+            addOsdMessage(wiimoteMsg[iPad], 300);
             OSReport("Wiimote connected\n");
             PADControlMotor(0, 2); //stop motor
             wiimoteBatteryMsgTimer[iPad] = 0;
         }
         else if(setFlags & WM_FLAG_PRESENT) {
-            addOsdMessage("Wii Remote connecting...", 180);
+            sprintf(wiimoteMsg[iPad], "Wii Remote %d connecting...", iPad+1);
+            addOsdMessage(wiimoteMsg[iPad], 180);
             OSReport("Wiimote connecting...\n");
         }
         else if(clrFlags) {
-            addOsdMessage("Wii Remote disconnected", 300);
+            sprintf(wiimoteMsg[iPad], "Wii Remote %d disconnected", iPad+1);
+            addOsdMessage(wiimoteMsg[iPad], 300);
             OSReport("Wiimote disconnected\n");
         }
     }
     prevWiimoteFlags[iPad] = nowFlags;
     //battery reads 0 at first
-    if(wp->battery < 32 && wp->battery > 0) { //0-255, so about 20%
-        OSReport("Battery %d at %d\r\n", iPad, wp->battery);
+    if(wp->battery < 50 && wp->battery > 0) { //0-255
+        //OSReport("Battery %d at %d\r\n", iPad, wp->battery);
         if(wiimoteBatteryMsgTimer[iPad]) wiimoteBatteryMsgTimer[iPad]--;
         if(!wiimoteBatteryMsgTimer[iPad]) {
-            addOsdMessage("Low Wii Remote battery", 300);
+            sprintf(wiimoteMsg[iPad], "Wii Remote %d battery %d%%", iPad+1,
+                (int)((float)wp->battery / 2.55f));
+            addOsdMessage(wiimoteMsg[iPad], 300);
             wiimoteBatteryMsgTimer[iPad] = 300 * 60; //5 minutes
-            audioPlaySound(NULL, 0x37F); //low health alarm
+            audioPlaySound(NULL, 0x38D); //warning beep
         }
     }
 

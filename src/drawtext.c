@@ -434,6 +434,14 @@ void initOsd() {
 }
 
 void addOsdMessage(const char *str, int frames) {
+    //is this message already shown?
+    for(int i=0; i<MAX_OSD_MSGS; i++) {
+        if(osdMessages[i].text == str) {
+            osdMessages[i].frames = frames;
+            return;
+        }
+    }
+    //find a free slot
     for(int i=0; i<MAX_OSD_MSGS; i++) {
         if(osdMessages[i].frames < 1) {
             osdMessages[i].frames = frames;
