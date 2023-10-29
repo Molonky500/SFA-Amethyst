@@ -12,13 +12,11 @@
 //how much to read at once (doesn't need to be the same
 //as the real sector size of a DVD)
 //#define DVD_SECTOR_SIZE 2048
-//#define DVD_SECTOR_SIZE (32*1024*1024) //gotta go fast
-#define DVD_SECTOR_SIZE (327680) //about real speed in Dolphin
+#define DVD_SECTOR_SIZE (32*1024*1024) //gotta go fast
+//#define DVD_SECTOR_SIZE (327680) //about real speed in Dolphin
 //#define DVD_SECTOR_SIZE 40960
 //since we sleep the DVD thread between reads, using the
 //real sector size is extremely slow.
-//but too big will cause the game to stutter since the CPU
-//is busy reading, unlike the real disc drive.
 
 #define DVD_MAX_MSGS 1024
 #define DVD_THREAD_PRIO 2 //31=lowest 0=highest

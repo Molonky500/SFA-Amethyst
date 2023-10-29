@@ -185,12 +185,6 @@ int _dvdDoRead(DVDFileInfo *info, void *addr, uint size) {
         info->cb.offset += r;
         //the game dislikes us reading too fast
         OSYieldThread();
-
-        /*if(OSGetCurrentThread() == &hackDvdThread) {
-            DVD_DPRINT("DVD thread pause, q=%08X\n", dvdThreadQueue);
-            OSSleepThread(&dvdThreadQueue);
-            DVD_DPRINT("DVD thread resume\n");
-        }*/
     }
     SET_DISC_LED(0);
     if(nRead < size) {
