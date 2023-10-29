@@ -359,6 +359,7 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
     allocFailLogIdx++;
     if(allocFailLogIdx >= ALLOC_FAIL_LOG_SIZE) allocFailLogIdx = 0;
     OSUnlockMutex(&allocMutex);
+    addOsdMessage("LOW MEMORY", 120);
     return NULL;
 }
 

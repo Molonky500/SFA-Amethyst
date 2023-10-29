@@ -229,6 +229,7 @@ void mainLoopHook() {
 
     doHudHacks();
     raceTimerUpdate();
+    updateOsd();
 
     if(curMapId != 0x3F) {
         //if not on title screen, reset this flag, so we can
@@ -402,6 +403,8 @@ void _start(void) {
     seqHooksInit();
     textHookInit();
     tweaks_init();
+    initOsd();
+    OSReport("updateOsd=%08x\r\n", updateOsd);
 
     if(IS_WII) {
         OSReport("Booting in Wii mode\n");

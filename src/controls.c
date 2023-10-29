@@ -25,8 +25,8 @@ void displayControllerState(int iPad, PADStatus *pad) {
 }
 
 void displayWiimoteState(GameWiimoteState *wp) {
-    debugPrintf(DPRINT_FIXED " B%3d%% IR%d, %d, %dcm ang%d ",
-        (int)(((float)wp->battery / 255.0f) * 100.0f),
+    debugPrintf(DPRINT_FIXED " B%3d%% F%04X IR%d, %d, %dcm ang%d ",
+        (int)(((float)wp->battery / 255.0f) * 100.0f), wp->flags,
         (int)wp->ir[0], (int)wp->ir[1], (int)(wp->ir[2] * 100.0f),
         (int)(wp->irAngle));
     debugPrintf("A %3d,%3d,%3d ",
@@ -262,7 +262,7 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
             }
             break;
         }
-        case 0x18: { //riding a bike/CloudRunner
+        case 0x18: { //riding a bike/CloudRunner/mammoth
             if(wp->expType == WPAD_EXP_NUNCHUK) {
                 //XXX is the orientation sensor broken
                 //or is it normal that X is always 0?
@@ -407,28 +407,44 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
 
 }
 
-static u8 prevWiimoteFlags[4];
+static u8  prevWiimoteFlags[4] = {0};
+static u32 wiimoteBatteryMsgTimer[4] = {0};
 void applyWiimoteInputs(int iPad, PADStatus *pad) {
     //only called when the Wiimote is connected.
     //overrides the GC controller state.
     GameWiiInterface *wii = WII_IFACE_PTR;
     GameWiimoteState *wp = &wii->wiimote[iPad];
-    u8 nowFlags = wp->flags & (WM_FLAG_PRESENT | WM_FLAG_WORKING);
-    if(nowFlags != prevWiimoteFlags[iPad]) {
-        u8 prevFlags = prevWiimoteFlags[iPad];
-        if((  nowFlags & WM_FLAG_PRESENT)
-        && !(prevFlags & WM_FLAG_PRESENT)) {
-            //XXX on-screen display
-            if(nowFlags & WM_FLAG_WORKING) {
-                OSReport("Wiimote connected\n");
-                PADControlMotor(0, 2); //stop motor
-            }
-            else OSReport("Wiimote connecting...\n");
+    u8 nowFlags  = wp->flags & (WM_FLAG_PRESENT | WM_FLAG_WORKING);
+    u8 prevFlags = prevWiimoteFlags[iPad];
+    u8 setFlags  = nowFlags & ~prevFlags;
+    u8 clrFlags  = prevFlags & ~nowFlags;
+    if(setFlags || clrFlags) {
+        if(setFlags & WM_FLAG_WORKING) {
+            addOsdMessage("Wii Remote connected", 300);
+            OSReport("Wiimote connected\n");
+            PADControlMotor(0, 2); //stop motor
+            wiimoteBatteryMsgTimer[iPad] = 0;
         }
-        else OSReport("Wiimote disconnected\n");
-        prevWiimoteFlags[iPad] = nowFlags;
+        else if(setFlags & WM_FLAG_PRESENT) {
+            addOsdMessage("Wii Remote connecting...", 180);
+            OSReport("Wiimote connecting...\n");
+        }
+        else if(clrFlags) {
+            addOsdMessage("Wii Remote disconnected", 300);
+            OSReport("Wiimote disconnected\n");
+        }
     }
-    if(!(nowFlags & WM_FLAG_WORKING)) return;
+    prevWiimoteFlags[iPad] = nowFlags;
+    //battery reads 0 at first
+    if(wp->battery < 32 && wp->battery > 0) { //0-255, so about 20%
+        OSReport("Battery %d at %d\r\n", iPad, wp->battery);
+        if(wiimoteBatteryMsgTimer[iPad]) wiimoteBatteryMsgTimer[iPad]--;
+        if(!wiimoteBatteryMsgTimer[iPad]) {
+            addOsdMessage("Low Wii Remote battery", 300);
+            wiimoteBatteryMsgTimer[iPad] = 300 * 60; //5 minutes
+            audioPlaySound(NULL, 0x37F); //low health alarm
+        }
+    }
 
     u32 bHeld = pad->button;
     u32 bDown = pad->button;

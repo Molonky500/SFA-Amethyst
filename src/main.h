@@ -38,6 +38,12 @@
 //than retail consoles.
 #define IS_WII (*((u32*)0x80003118) >= 0x04000000)
 
+typedef struct {
+    int frames; //frame count, remove when zero
+    const char *text; //text to display
+} OsdMessage;
+#define MAX_OSD_MSGS 8
+
 //main.c
 extern volatile u16 *_viReg;
 extern volatile u32 *_piReg;
@@ -151,9 +157,13 @@ void drawSphere(vec3f pos, float radius, Color4b color);
 #define TEXT_COLORED (1 << 1) //enable color
 #define TEXT_SHADOW  (1 << 2) //enable drop shadow
 #define TEXT_MEASURE (1 << 3) //don't render, only measure
+extern OsdMessage osdMessages[MAX_OSD_MSGS];
 int drawText(const char *str, int x, int y, int *outX, int *outY, u32 flags, Color4b color, float scale);
 int drawColorText(const char *str, int x, int y, Color4b color);
 int drawSimpleText(const char *str, int x, int y);
+void initOsd();
+void addOsdMessage(const char *str, int frames);
+void updateOsd();
 
 //drawWii.c
 void drawWiiInputs();

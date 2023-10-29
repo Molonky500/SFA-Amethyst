@@ -1,6 +1,8 @@
 #include "main.h"
 #include "revolution/os.h"
 
+OsdMessage osdMessages[MAX_OSD_MSGS];
+
 static int _readHex(const char *str, int len, const char **out) {
     int result = 0;
     while(len--) {
@@ -422,4 +424,55 @@ int drawColorText(const char *str, int x, int y, Color4b color) {
 int drawSimpleText(const char *str, int x, int y) {
     Color4b color = {.r=192, .g=192, .b=192, .a=255};
     return drawText(str, x, y, NULL, NULL, TEXT_COLORED | TEXT_SHADOW, color, 1.0);
+}
+
+static bool isOsdInit = false;
+void initOsd() {
+    if(isOsdInit) return;
+    isOsdInit = true;
+    memset(osdMessages, 0, sizeof(osdMessages));
+}
+
+void addOsdMessage(const char *str, int frames) {
+    for(int i=0; i<MAX_OSD_MSGS; i++) {
+        if(osdMessages[i].frames < 1) {
+            osdMessages[i].frames = frames;
+            osdMessages[i].text   = str;
+            return;
+        }
+    }
+    OSReport("Too many OSD msgs, dropped: %s\r\n", str);
+}
+
+static int CompareOsdMsgs(const void *itemA, const void *itemB) {
+    /*if(!(itemA && itemB)) {
+        OSReport(" *** CompareOsdMsgs NULL ptr\r\n");
+    }*/
+    if(!itemA) return 1;
+    if(!itemB) return -1;
+    const OsdMessage *msgA = (const OsdMessage*)itemA;
+    const OsdMessage *msgB = (const OsdMessage*)itemB;
+    return msgB->frames - msgA->frames;
+}
+
+void updateOsd() {
+    if(!isOsdInit) return;
+    OsdMessage *msgs[MAX_OSD_MSGS];
+    for(int i=0; i<MAX_OSD_MSGS; i++) {
+        msgs[i] = &osdMessages[i];
+    }
+    quicksort(msgs, 0, MAX_OSD_MSGS-1, CompareOsdMsgs);
+
+    bool japanese = (curLanguage == LANG_JAPANESE);
+    int height = (japanese ? LINE_HEIGHT_JAPANESE : LINE_HEIGHT) + 4;
+    int y = SCREEN_HEIGHT - (height*4);
+    for(int i=0; i<MAX_OSD_MSGS; i++) {
+        if(msgs[i]->frames <= 0) continue;
+        int alpha = msgs[i]->frames;
+        if(alpha > 63) alpha = 63;
+        Color4b color = {.r=192, .g=192, .b=192, .a=alpha << 2};
+        drawColorText(msgs[i]->text, 30, y, color);
+        y -= height;
+        msgs[i]->frames--;
+    }
 }

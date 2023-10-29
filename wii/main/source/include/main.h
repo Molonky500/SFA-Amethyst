@@ -12,7 +12,7 @@
 
 //1 = use custom hardware for debug print on real console
 //0 = use "official" UART for Dolphin/real devkit
-#define USE_CUSTOM_GECKO 1
+#define USE_CUSTOM_GECKO 0
 
 //useful for diag, but interferes with game
 //#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)

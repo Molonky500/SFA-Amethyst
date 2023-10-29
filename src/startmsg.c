@@ -58,7 +58,7 @@ void startMsg_initDoneHook() {
     //check current and previous frame
     u16 buttons = controllerStates[0].button | controllerStates[4].button;
     if(!(buttons & PAD_TRIGGER_Z)) {
-        enableDebugText = 0;
+        //enableDebugText = 0;
         //DPRINT("Turning debug text off");
     }
     //else DPRINT("Leaving debug text on");

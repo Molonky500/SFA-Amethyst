@@ -210,7 +210,7 @@ void updateWiimotes() {
         int err = WPAD_Probe(iPad, NULL);
         if(err == WPAD_ERR_NONE) {
             state->flags |= WM_FLAG_PRESENT | WM_FLAG_WORKING;
-            //debugPrintf("WP%d OK\n", iPad);
+            debugPrintf("WP%d OK %02X\n", iPad, state->flags);
 			wpads[iPad] = WPAD_Data(iPad);
             updateGameWiimoteIface(wpads[iPad], iPad);
         } else if(err == -1) {
