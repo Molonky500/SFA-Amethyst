@@ -279,18 +279,23 @@ void krystalDoModelOverrides() {
     pPlayer->curModel = playerNo; //set model
     *((u16*)(pPlayer->state + 0x81A)) = playerNo; //voice, backpack
 
-    //set some animation variables.
+    //set some animation/sound variables.
     float v1, v2;
+    u16 blockPushSound;
     if(playerNo == PLAYER_ID_KRYSTAL) {
         v1 = 28.8; //unknown
         v2 = 33.0; //ledge grab height
+        blockPushSound = 0x2d3;
     }
     else {
         v1 = 25.3;
         v2 = 27.8;
+        blockPushSound = 0x2b;
     }
     *((float*)(pPlayer->state + 0x7DC)) = v1;
     *((float*)(pPlayer->state + 0x874)) = v2;
+    *(u16*)0x8029e0c6 = blockPushSound;
+    ICInvalidateRange(0x8029e0c0, 32);
 
     if(pBackpack) {
         if(backpackMode == BACKPACK_ON
