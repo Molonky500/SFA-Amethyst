@@ -441,6 +441,11 @@ void applyWiimoteInputs(int iPad, PADStatus *pad) {
         }
     }
     prevWiimoteFlags[iPad] = nowFlags;
+    if(!(nowFlags & WM_FLAG_WORKING)) {
+        //OSReport("buttons=%X\r\n", pad->button);
+        return;
+    }
+
     //battery reads 0 at first
     if(wp->battery < 50 && wp->battery > 0) { //0-255
         //OSReport("Battery %d at %d\r\n", iPad, wp->battery);
