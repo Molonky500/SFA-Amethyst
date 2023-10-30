@@ -58,7 +58,7 @@ void minimapMainLoopHook() {
     WRITE16   (0x80132A92, prevX); //texture stuff
     WRITE16   (0x80132A96, prevX); //texture stuff
     WRITEFLOAT(0x803E2210, (float)xpos); //box clip offset
-    iCacheFlush((void*)0x801324CA, 0x80132A98 - 0x801324CA);
+    ICInvalidateRange((void*)0x801324CA, 0x80132A98 - 0x801324CA);
 
     //override opacity
     if(overrideMinimapAlpha != 255) {

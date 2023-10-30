@@ -196,7 +196,7 @@ void _camDoRotateAroundPlayer(s8 stickX, s8 stickY) {
             WRITE16(0x8010c5d6, ((int)stickX * 256) + 0x8000);
             WRITE16(0x8010c5e2, ((int)stickX * 256) + 0x8000);
             WRITE_NOP(0x8010c614);
-            iCacheFlush((void*)0x8010c5d4, 0x8010c614 - 0x8010c5d4);
+            ICInvalidateRange((void*)0x8010c5d4, 0x8010c614 - 0x8010c5d4);
             _lookAtTarget();
             break;
         }*/
@@ -216,7 +216,7 @@ void _camDoRotateAroundPlayer(s8 stickX, s8 stickY) {
             //let the camera circle 360 degrees, not 180
             WRITE_NOP(0x8010fda4);
             WRITE_NOP(0x8010fdb8);
-            iCacheFlush((void*)0x8010fda4, 0x8010fdbc-0x8010fda4);
+            ICInvalidateRange((void*)0x8010fda4, 0x8010fdbc-0x8010fda4);
             break;
         }
         default:
@@ -226,7 +226,7 @@ void _camDoRotateAroundPlayer(s8 stickX, s8 stickY) {
             //undo 360 patch
             WRITE32(0x8010fda4, 0x7C000E70); //srawi r0,r0,0x1
             WRITE32(0x8010fdb8, 0x7C000E70); //srawi r0,r0,0x1
-            iCacheFlush((void*)0x8010fda4, 0x8010fdbc-0x8010fda4);
+            ICInvalidateRange((void*)0x8010fda4, 0x8010fdbc-0x8010fda4);
     }
 }
 

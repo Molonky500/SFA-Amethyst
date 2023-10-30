@@ -137,7 +137,7 @@ GLOBALFN void hudDrawAirMeter(void);
 GLOBALFN void hudDrawButtons(int,int,int); //XXX params
 GLOBALFN void hudDrawRect(int x1,int y1,int x2,int y2,Color4b *color);
 GLOBALFN void hudDrawTriangle(float x1,float y1,float x2,float y2,float x3, float y3,Color4b *color); //WARNING: changes color->a
-GLOBALFN void* iCacheFlush(void* dest, uint size);
+GLOBALFN void ICInvalidateRange(void* dest, u32 size);
 GLOBALFN void initFn_800534f8(void);
 GLOBALFN bool isCheatActive(uint);
 GLOBALFN bool isCheatUnlocked(uint);

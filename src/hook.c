@@ -36,7 +36,7 @@ uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
             *(trampoline++) = 0x618C0000 | ((u32)target & 0xFFFF); //ori r12, r12, aaaa
             *(trampoline++) = 0x7D8903A6; //mtspr CTR,r12
             *(trampoline++) = 0x4E800420; //bctr
-            iCacheFlush((void*)&trampoline[-4], 32);
+            ICInvalidateRange((void*)&trampoline[-4], 32);
         }
         else {
             OSReport("direct long jump at %08X (bl=%d)\n",
@@ -46,7 +46,7 @@ uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
             *(code++) = 0x7D8903A6; //mtspr CTR,r12
             *(code++) = 0x4E800420 | (isBl ? 1 : 0); //bctr or bctrl
         }
-        iCacheFlush((void*)addr, 32);
+        ICInvalidateRange((void*)addr, 32);
     }
     else {
         //make b or bl opcode
@@ -54,7 +54,7 @@ uint32_t hookBranch(uint32_t addr, void *target, int isBl) {
         *(uint32_t*)addr = (relDest & 0x03FFFFFC) | (isBl ? 1 : 0) | 0x48000000;
         OSReport("patch short jump at 0x%08X op 0x%08X (bl=%d)\n",
             addr, *(uint32_t*)addr, isBl);
-        iCacheFlush((void*)addr, 32);
+        ICInvalidateRange((void*)addr, 32);
     }
 
     //decode original instruction and return original destination

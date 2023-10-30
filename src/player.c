@@ -63,11 +63,11 @@ void playerMainLoopHook() {
     WRITE32(0x8029B068, bNoAimSnap    ? 0x60000000 : 0xEC210028);
     WRITE32(0x8029B074, bSensitiveAim ? 0x60000000 : 0x4BD862FD);
     WRITE32(0x8029B0C4, bSensitiveAim ? 0x60000000 : 0x4BD862AD);
-    iCacheFlush((void*)0x8029B0E8, 4);
-    iCacheFlush((void*)0x8029B100, 4);
-    iCacheFlush((void*)0x8029B068, 4);
-    iCacheFlush((void*)0x8029B074, 4);
-    iCacheFlush((void*)0x8029B0C4, 4);
+    ICInvalidateRange((void*)0x8029B0E8, 4);
+    ICInvalidateRange((void*)0x8029B100, 4);
+    ICInvalidateRange((void*)0x8029B068, 4);
+    ICInvalidateRange((void*)0x8029B074, 4);
+    ICInvalidateRange((void*)0x8029B0C4, 4);
 }
 
 void firstPersonHook(void *param1, void *param2) {

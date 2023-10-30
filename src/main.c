@@ -107,16 +107,16 @@ static inline void doFurFx() {
         case FURFX_NORMAL:
             WRITE16(0x800414E2, 0);
             WRITE32(0x800414B4, 0x9421FFE0); //original opcode
-            iCacheFlush((void*)0x800414B4, 0x40);
+            ICInvalidateRange((void*)0x800414B4, 0x40);
             break;
         case FURFX_ALWAYS:
             WRITE16(0x800414E2, 0x1312); //arbitrary constant
             WRITE32(0x800414B4, 0x9421FFE0); //original opcode
-            iCacheFlush((void*)0x800414B4, 0x40);
+            ICInvalidateRange((void*)0x800414B4, 0x40);
             break;
         default: //case FURFX_NEVER:
             WRITE_BLR(0x800414B4);
-            iCacheFlush((void*)0x800414B4, 0x40);
+            ICInvalidateRange((void*)0x800414B4, 0x40);
     }
 }
 
@@ -159,7 +159,7 @@ static inline void doCheats() {
         WRITE32(0x8002b048, 0x38600001);
     }
     else WRITE32(0x8002b048, 0x540307FE);
-    iCacheFlush((void*)0x8002b048, 4);
+    ICInvalidateRange((void*)0x8002b048, 4);
 
     if(debugCheats & DBGCHT_INF_TRICKY) {
         saveData.curSaveGame.trickyEnergy = saveData.curSaveGame.maxTrickyEnergy;
@@ -167,7 +167,7 @@ static inline void doCheats() {
 
     if(arwingState) {
         WRITE32(0x8022D518, (debugCheats & DBGCHT_10_RINGS) ? 0x3860000A : 0x88630470);
-        iCacheFlush((void*)0x8022D518, 4);
+        ICInvalidateRange((void*)0x8022D518, 4);
         if(debugCheats & DBGCHT_ARW_INF_BOMBS) {
             arwingState[0x44C] = 3; //nBombs = 3
         }
@@ -190,16 +190,16 @@ void mainLoopHook() {
     doFurFx();
 
     WRITE32(0x800a4df4, bDisableParticleFx ? 0x4E800020 : 0x9421FED0);
-    iCacheFlush((void*)0x800a4df4, 4);
+    ICInvalidateRange((void*)0x800a4df4, 4);
 
     WRITE32(0x80148bc8, (debugTextFlags & DEBUGTEXT_TRICKY) ? 0x4BFEED80 : 0x9421FF90);
-    iCacheFlush((void*)0x80148bc8, 4);
+    ICInvalidateRange((void*)0x80148bc8, 4);
 
     WRITE32(0x8000E398, (cameraFlags & CAM_FLAG_NO_LETTERBOX) ? 0x38000000 : 0xA80D96A6);
-    iCacheFlush((void*)0x8000E398, 4);
+    ICInvalidateRange((void*)0x8000E398, 4);
 
     WRITE32(0x8005ED10, (debugRenderFlags & DEBUGRENDER_DEBUG_MAP_GEOM) ? 0x60000000 : 0x408204B8);
-    iCacheFlush((void*)0x8005ED10, 4);
+    ICInvalidateRange((void*)0x8005ED10, 4);
 
     minimapMainLoopHook();
     mainLoopDebugPrint();
