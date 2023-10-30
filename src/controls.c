@@ -409,7 +409,7 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
 
 static u8  prevWiimoteFlags[4] = {0};
 static u32 wiimoteBatteryMsgTimer[4] = {0};
-static char wiimoteMsg[4][64];
+static char wiimoteMsg[4][32];
 void applyWiimoteInputs(int iPad, PADStatus *pad) {
     //only called when the Wiimote is connected.
     //overrides the GC controller state.
