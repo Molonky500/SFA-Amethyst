@@ -238,7 +238,8 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
     s16 stateNo = *(s16*)(pPlayer->state+0x274);
 
     //swing to roll
-    if(wp->expType == WPAD_EXP_NUNCHUK && (
+    if((wiiOptions & WII_SHAKE_TO_ROLL) &&
+    wp->expType == WPAD_EXP_NUNCHUK && (
     ABS(wp->exp.nunchuk.gforce[0]) +
     ABS(wp->exp.nunchuk.gforce[1]) +
     ABS(wp->exp.nunchuk.gforce[2]) >= 1.1f)) {
@@ -246,14 +247,15 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
         *bDown |= PAD_BUTTON_X;
     }
 
-    //swing to attack
     switch(stateNo) {
         case 0x01: //idle
         case 0x02: //moving
         case 0x24: //idle in combat
         case 0x25: { //moving in combat
+            //swing to attack
             if(*(u8*)(pPlayer->state+0x8B3) != 0) { //staff in hand
-                if(ABS(wp->gforce[0]) +
+                if((wiiOptions & WII_SHAKE_TO_SWING) &&
+                ABS(wp->gforce[0]) +
                 ABS(wp->gforce[1]) +
                 ABS(wp->gforce[2]) >= 6.0f) {
                     OSReport("swing it!\n");
@@ -263,7 +265,7 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
             break;
         }
         case 0x18: { //riding a bike/CloudRunner/mammoth
-            if(wp->expType == WPAD_EXP_NUNCHUK) {
+            if(wp->expType == WPAD_EXP_NUNCHUK && (wiiOptions & WII_NUNCHUK_STEER)) {
                 //XXX is the orientation sensor broken
                 //or is it normal that X is always 0?
                 adjustPlayerRotation(
@@ -274,7 +276,7 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
             break;
         }
         case 0x1A: { //riding CloudRunner (DragRock?)
-            if(wp->expType == WPAD_EXP_NUNCHUK) {
+            if(wp->expType == WPAD_EXP_NUNCHUK && (wiiOptions & WII_NUNCHUK_STEER)) {
                 pad->stickX += wp->exp.nunchuk.orient[2];
                 pad->stickY += wp->exp.nunchuk.orient[1];
             }
@@ -309,8 +311,8 @@ void doAimControls(PADStatus *pad) {
 void applyWiimoteToArwing(ObjInstance *arwing,
 GameWiimoteState *wp, PADStatus *pad,
 u32 *bHeld, u32 *bDown, u32 *bUp) {
+    if(!(wiiOptions & WII_NUNCHUK_STEER)) return;
     void *state = arwing->state;
-
     *bHeld = mapWiimoteButtons(wp, wp->btnsHeld);
     *bDown = mapWiimoteButtons(wp, wp->btnsDown);
     *bUp   = mapWiimoteButtons(wp, wp->btnsUp);
@@ -346,6 +348,7 @@ s8 arwingGetStickXHook(int whichPad) {
     //return padGetStickX(whichPad);
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!wii) return padGetStickX(whichPad);
+    if(!(wiiOptions & WII_NUNCHUK_STEER)) return padGetStickX(whichPad);
     GameWiimoteState *wp = &wii->wiimote[whichPad];
     if(!(wp->flags & WM_FLAG_WORKING)) {
         return padGetStickX(whichPad);
@@ -366,6 +369,7 @@ s8 arwingGetStickYHook(int whichPad) {
     //return padGetStickY(whichPad);
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!wii) return padGetStickY(whichPad);
+    if(!(wiiOptions & WII_NUNCHUK_STEER)) return padGetStickY(whichPad);
     GameWiimoteState *wp = &wii->wiimote[whichPad];
     if(!(wp->flags & WM_FLAG_WORKING)) {
         return padGetStickY(whichPad);

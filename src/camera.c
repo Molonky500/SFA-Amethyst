@@ -3,6 +3,10 @@
 u8 cameraFlags = CAM_FLAG_PLAYER_AXIS; //CameraFlags
 s8 debugCameraMode = CAM_MODE_NORMAL; //CameraMode
 
+float nunchukXScale =  0.8f, nunchukYScale =  0.8f;
+float nunchukXMax   = 64.0f, nunchukYMax   = 32.0f;
+float nunchukXMin   =  8.0f, nunchukYMin   =  8.0f;
+
 //static void (*origFunc)(Camera *self);
 
 //previous distance when not modifying it
@@ -50,14 +54,16 @@ void _camDoNunchuk(GameWiimoteState *wp, s8 *outX, s8 *outY) {
         prevY[1] = prevY[2];
         prevY[2] = prevY[3];
         prevY[3] = y;
-        float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/8.0f;
+        float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
         float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
+        sx *= nunchukXScale;
+        sy *= nunchukYScale;
         //clamp to avoid noise spikes causing the camera to go to space
-        if(sx < -64.0f) sx = -64.0f; if(sx > 64.0f) sx = 64.0f;
-        if(sy < -32.0f) sy = -32.0f; if(sy > 32.0f) sy = 32.0f;
+        if(sx < -nunchukXMax) sx = -nunchukXMax; if(sx > nunchukXMax) sx = nunchukXMax;
+        if(sy < -nunchukYMax) sy = -nunchukYMax; if(sy > nunchukYMax) sy = nunchukYMax;
         //ignore very small movements to reduce jitter
-        if(sx > -1.0f && sx < 1.0f) sx = 0.0f;
-        if(sy > -1.0f && sy < 1.0f) sy = 0.0f;
+        if(sx > -nunchukXMin && sx < nunchukXMin) sx = 0.0f;
+        if(sy > -nunchukYMin && sy < nunchukYMin) sy = 0.0f;
         s32 ox = (outX ? *outX : 0) + sx;
         s32 oy = (outY ? *outY : 0) + sy;
         //clamp to valid joystick range
@@ -86,7 +92,7 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
     u16 stateId = pState ? *(u16*)((u32)pState + 0x274) : 0;
     if(stateId == 24) return; //riding bike
 
-    if(!IS_WII) return;
+    if(!(IS_WII && (wiiOptions & WII_NUNCHUK_CAMERA))) return;
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!(wii && wii->magic == WII_IFACE_MAGIC)) return;
     GameWiimoteState *wp = &wii->wiimote[0];
@@ -112,7 +118,7 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
     //we don't need dx and dz here but we can't pass NULL for them.
 
     dy = pCamera->pos.xf.pos.y - (target->pos.pos.y + height);
-    float *paramsCombat = *(float**)0x803dd568;
+    /*float *paramsCombat = *(float**)0x803dd568;
     if(paramsCombat) {
         dxz = paramsCombat[0];
     }
@@ -120,7 +126,7 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
         dx  = pCamera->pos.xf.pos.x -  target->pos.pos.x;
         dz  = pCamera->pos.xf.pos.z -  target->pos.pos.z;
         dxz = sqrtf((dx*dx)+(dz*dz));
-    }
+    }*/
     //static float prev_dxz = 0.0f;
     //debugPrintf("CAMERA dy=%f dxz=%f (%f)\n", dy, dxz, ABS(dxz - prev_dxz));
     //prev_dxz = dxz;
@@ -144,7 +150,7 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
     float cosx, cosy, sinx, siny;
     sinx = sinf(pi * (rx - 0x4000) / 32768.0);
     cosx = cosf(pi * (rx - 0x4000) / 32768.0);
-    siny = sinf(pi *  ry / 32768.0);
+    //siny = sinf(pi *  ry / 32768.0);
     cosy = cosf(pi *  ry / 32768.0) * dxz;
 
     pCamera->pos.xf.pos.x = target->pos.pos.x + cosy * cosx;
@@ -222,7 +228,7 @@ void _camDoRotateAroundPlayer(s8 stickX, s8 stickY) {
             break;
         }
         default:
-            if(ABS(stickX) < 1 && ABS(stickY) < 1) return;
+            //if(ABS(stickX) < 1 && ABS(stickY) < 1) return;
             _camDoRotateAroundPlayerDefault(stickX, stickY);
             _lookAtTarget();
             //undo 360 patch

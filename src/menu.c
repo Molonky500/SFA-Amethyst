@@ -151,6 +151,41 @@ void genericMenu_run(Menu *self) {
         menuInputDelayTimer = MENU_INPUT_DELAY_ADJUST;
         curMenu->items[sel].select(&curMenu->items[sel], 0x80);
     }
+    else if(IS_WII) {
+        GameWiiInterface *wii = WII_IFACE_PTR;
+        GameWiimoteState *wp = wii ? &wii->wiimote[0] : NULL;
+        if(wp && wp->flags & WM_FLAG_WORKING) {
+            if(wp->btnsHeld & WPAD_BUTTON_MINUS) {
+                self->items[sel].select(&self->items[sel], -1);
+            }
+            else if(wp->btnsHeld & WPAD_BUTTON_PLUS) {
+                self->items[sel].select(&self->items[sel], 1);
+            }
+            else if(wp->btnsDown & WPAD_BUTTON_LEFT) {
+                menuInputDelayTimer = MENU_INPUT_DELAY_ADJUST;
+                self->items[sel].select(&self->items[sel], -10);
+            }
+            else if(wp->btnsDown & WPAD_BUTTON_RIGHT) {
+                menuInputDelayTimer = MENU_INPUT_DELAY_ADJUST;
+                self->items[sel].select(&self->items[sel], 10);
+            }
+            else if(wp->btnsDown & WPAD_BUTTON_UP) {
+                menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
+                if(sel == 0) {
+                    while(self->items[sel].name) sel++;
+                }
+                self->selected = sel - 1;
+                audioPlaySound(NULL, MENU_MOVE_SOUND);
+            }
+            else if(wp->btnsDown & WPAD_BUTTON_DOWN) {
+                menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
+                sel++;
+                if(!self->items[sel].name) sel = 0;
+                self->selected = sel;
+                audioPlaySound(NULL, MENU_MOVE_SOUND);
+            }
+        }
+    }
 }
 
 void menuDrawText(const char *str, int x, int y, bool selected) {

@@ -2,6 +2,23 @@
  */
 #include "main.h"
 
+void controlSubMenu_close(const Menu *self) {
+    //Close function for submenus of the Control Settings menu
+    curMenu = &menuControlSettings;
+    audioPlaySound(NULL, MENU_CLOSE_SOUND);
+}
+
+
+void menuWiimote_select(const MenuItem *self, int amount) {
+    if(amount) return;
+    if(!IS_WII) {
+        audioPlaySound(NULL, MENU_FAIL_SOUND);
+        return;
+    }
+    curMenu = &menuWiimote;
+    audioPlaySound(NULL, MENU_OPEN_SOUND);
+}
+
 void menuRumble_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     sprintf(str, self->fmt, T(self->name), enableRumble ? T("On") : T("Off"));
@@ -105,6 +122,7 @@ void menuAimSensitive_select(const MenuItem *self, int amount) {
 Menu menuControlSettings = {
     "Control Settings", 0,
     genericMenu_run, genericMenu_draw, mainSubMenu_close,
+    "Wii Remote",     "%s",        genericMenuItem_draw,  menuWiimote_select,
     "Rumble",         "%s: %s",    menuRumble_draw,       menuRumble_select,
     "Rumble Blur",    "%s: %s",    menuRumbleBlur_draw,   menuRumbleBlur_select,
     "Camera Control", "%s: %s %d", menuCamCtrl_draw,      menuCamCtrl_select,

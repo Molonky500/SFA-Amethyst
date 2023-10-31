@@ -100,6 +100,15 @@ typedef enum { //for savedata (field unused01)
     EXTRA_FEATURE_SENSITIVE_AIM = (1 << 3), //disable staff aim interpolation
 } ExtraFeatureFlag;
 
+//not part of savedata because only used on Wii,
+//where we can use a separate config file.
+typedef enum {
+    WII_SHAKE_TO_SWING = (1 <<  0), //shake remote to swing staff
+    WII_SHAKE_TO_ROLL  = (1 <<  1), //shake nunchuk to roll
+    WII_NUNCHUK_CAMERA = (1 <<  2), //tilt nunchuk to move camera
+    WII_NUNCHUK_STEER  = (1 <<  3), //tilt nunchuk to steer mounts
+} WiiOptionFlag;
+
 //see also CameraFlags in camera.h
 
 typedef struct {
@@ -335,6 +344,7 @@ Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a);
 bool isDllValid(int id);
 
 //wii.c
+extern u32 wiiOptions; //WiiOptionFlag
 void wiiHooksInit();
 
 //worldmap.c

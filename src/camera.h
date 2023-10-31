@@ -52,6 +52,9 @@ typedef enum {
 //camera.c
 extern u8 cameraFlags; //CameraFlags
 extern s8 debugCameraMode; //DebugCameraMode
+extern float nunchukXScale, nunchukYScale;
+extern float nunchukXMax, nunchukYMax;
+extern float nunchukXMin, nunchukYMin;
 void cameraUpdateHook();
 u32 minimapButtonHeldHook(int pad);
 u32 minimapButtonPressedHook(int pad);

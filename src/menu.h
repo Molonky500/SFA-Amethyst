@@ -74,6 +74,9 @@ void genericMenu_run(Menu *self);
 void menuDrawText(const char *str, int x, int y, bool selected);
 void genericMenuItem_draw(const MenuItem *self, int x, int y, bool selected);
 
+//menuControlSettings.c
+void controlSubMenu_close(const Menu *self);
+
 //menuDebug.c
 void debugSubMenu_close(const Menu *self);
 
@@ -134,6 +137,7 @@ extern Menu menuMain;
 extern Menu menuPdaSettings;
 extern Menu menuPlayerSettings;
 extern Menu menuVideoSettings;
+extern Menu menuWiimote;
 
 extern u8  menuState;
 extern u8  menuAnimFrame;
