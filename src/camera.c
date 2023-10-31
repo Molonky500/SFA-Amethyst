@@ -104,9 +104,9 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
     float dx, dy, dz, dxz;
     ObjInstance *target = NULL;
     if(!pCamera) return;
-    if(pCamera->overrideTarget) target = pCamera->overrideTarget;
+    /*if(pCamera->overrideTarget) target = pCamera->overrideTarget;
     else if(pCamera->target) target = pCamera->target;
-    else target = pCamera->focus;
+    else*/ target = pCamera->focus;
 
     //cameraGetFocusObjDistance(height, pCamera, &dx, &dy, &dz, &dxz, true);
     //we don't need dx and dz here but we can't pass NULL for them.
@@ -121,7 +121,9 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
         dz  = pCamera->pos.xf.pos.z -  target->pos.pos.z;
         dxz = sqrtf((dx*dx)+(dz*dz));
     }
-    //debugPrintf("dy=%f dxz=%f\n", dy, dxz);
+    //static float prev_dxz = 0.0f;
+    //debugPrintf("CAMERA dy=%f dxz=%f (%f)\n", dy, dxz, ABS(dxz - prev_dxz));
+    //prev_dxz = dxz;
 
     //calculate the angle
     s16 rx = pCamera->pos.xf.rotation.x;
