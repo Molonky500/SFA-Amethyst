@@ -29,11 +29,11 @@ void displayWiimoteState(GameWiimoteState *wp) {
         (int)(((float)wp->battery / 255.0f) * 100.0f), wp->flags,
         (int)wp->ir[0], (int)wp->ir[1], (int)(wp->ir[2] * 100.0f),
         (int)(wp->irAngle));
-    debugPrintf("A %3d,%3d,%3d ",
+    debugPrintf("A " DPRINT_FIXED "%3d,%3d,%3d" DPRINT_NOFIXED " ",
         (int)wp->accel[0], (int)wp->accel[1], (int)wp->accel[2]);
-    debugPrintf("O %3d,%3d,%3d ",
+    debugPrintf("O " DPRINT_FIXED "%3d,%3d,%3d" DPRINT_NOFIXED " ",
         (int)wp->orient[0], (int)wp->orient[1], (int)wp->orient[2]);
-    debugPrintf("G %3d,%3d,%3d = %d ",
+    debugPrintf("G " DPRINT_FIXED "%3d,%3d,%3d = %d" DPRINT_NOFIXED " ",
         (int)wp->gforce[0], (int)wp->gforce[1], (int)wp->gforce[2],
         (int)(ABS(wp->gforce[0])+
             ABS(wp->gforce[1])+
@@ -42,17 +42,23 @@ void displayWiimoteState(GameWiimoteState *wp) {
 
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            debugPrintf("\nNC: J %3d,%3d A %3d,%3d,%3d ",
+            vec3f orient;
+            wiiGetNunchukNormalizedOrient(0, &orient);
+            debugPrintf("\nNC: J " DPRINT_FIXED "%3d,%3d" DPRINT_NOFIXED
+            " Acel " DPRINT_FIXED "%3d,%3d,%3d" DPRINT_NOFIXED " ",
                 wp->exp.nunchuk.joystick[0],
                 wp->exp.nunchuk.joystick[1],
                 (int)wp->exp.nunchuk.accel[0],
                 (int)wp->exp.nunchuk.accel[1],
                 (int)wp->exp.nunchuk.accel[2]);
-            debugPrintf("O %3d,%3d,%3d ",
-                (int)wp->exp.nunchuk.orient[0],
-                (int)wp->exp.nunchuk.orient[1],
-                (int)wp->exp.nunchuk.orient[2]);
-            debugPrintf("G %3d,%3d,%3d = %d\n",
+            debugPrintf("Ornt " DPRINT_FIXED "%4d,%4d,%4d" DPRINT_NOFIXED " ",
+                //(int)wp->exp.nunchuk.orient[0],
+                //(int)wp->exp.nunchuk.orient[1],
+                //(int)wp->exp.nunchuk.orient[2]
+                (int)(orient.x * 100.0f),
+                (int)(orient.y * 100.0f),
+                (int)(orient.z * 100.0f));
+            debugPrintf("Gfrc " DPRINT_FIXED "%3d,%3d,%3d = %d" DPRINT_NOFIXED "\n",
                 (int)(wp->exp.nunchuk.gforce[0] * 100.0f),
                 (int)(wp->exp.nunchuk.gforce[1] * 100.0f),
                 (int)(wp->exp.nunchuk.gforce[2] * 100.0f),

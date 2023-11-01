@@ -228,7 +228,7 @@ void _camDoRotateAroundPlayer(s8 stickX, s8 stickY) {
             break;
         }
         default:
-            //if(ABS(stickX) < 1 && ABS(stickY) < 1) return;
+            if((!IS_WII) && ABS(stickX) < 1 && ABS(stickY) < 1) return;
             _camDoRotateAroundPlayerDefault(stickX, stickY);
             _lookAtTarget();
             //undo 360 patch

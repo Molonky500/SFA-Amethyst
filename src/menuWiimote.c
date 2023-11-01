@@ -119,6 +119,12 @@ void menuWiimoteCamMaxY_select(const MenuItem *self, int amount) {
     wiiSaveConfig();
 }
 
+void menuWiimoteCalibrate_select(const MenuItem *self, int amount) {
+    if(amount) return;
+    curMenu = &menuWiiCalibrate;
+    audioPlaySound(NULL, MENU_OPEN_SOUND);
+}
+
 Menu menuWiimote = {
     "Wii Remote", 0,
     genericMenu_run, genericMenu_draw, controlSubMenu_close,
@@ -132,5 +138,6 @@ Menu menuWiimote = {
     "Cam Tilt Y Min","%s: %1.1fx", menuWiimoteCamMinY_draw, menuWiimoteCamMinY_select,
     "Cam Tilt X Max","%s: %1.1fx", menuWiimoteCamMaxX_draw, menuWiimoteCamMaxX_select,
     "Cam Tilt Y Max","%s: %1.1fx", menuWiimoteCamMaxY_draw, menuWiimoteCamMaxY_select,
+    "Calibrate", "%s", genericMenuItem_draw, menuWiimoteCalibrate_select,
     NULL,
 };

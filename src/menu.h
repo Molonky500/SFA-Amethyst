@@ -137,6 +137,7 @@ extern Menu menuMain;
 extern Menu menuPdaSettings;
 extern Menu menuPlayerSettings;
 extern Menu menuVideoSettings;
+extern Menu menuWiiCalibrate;
 extern Menu menuWiimote;
 
 extern u8  menuState;

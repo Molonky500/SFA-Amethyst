@@ -345,6 +345,13 @@ bool isDllValid(int id);
 
 //wii.c
 extern u32 wiiOptions; //WiiOptionFlag
+extern vec3s nunchukNeutralPos; //orient when held normally
+extern vec3s nunchukDeadzoneMin; //minimum values for "held normally"
+extern vec3s nunchukDeadzoneMax; //maximum values for "held normally"
+extern vec3s nunchukLeftPos; //orient when tilted left
+extern vec3s nunchukRightPos;
+extern vec3s nunchukForwardPos;
+extern vec3s nunchukBackPos;
 void wiiHooksInit();
 
 //worldmap.c
