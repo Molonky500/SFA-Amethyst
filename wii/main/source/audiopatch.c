@@ -132,6 +132,7 @@ void ARStartDMA_Hook(int type, u32 mmaddr, u32 araddr, u32 cntL) {
 	//type: 0: RAM -> ARAM; 1: ARAM -> RAM
 	//exiPrintf("AR DMA RAM:0x%8x %c ARAM:0x%8x len 0x%8x\n", mmaddr,
 	//	type ? '<' : '>', araddr, cntL);
+	//dumpStack();
 	int level = OSDisableInterrupts();
 	if(type) { //ARAM to main
 		DCInvalidateRange((void*)mmaddr, cntL);

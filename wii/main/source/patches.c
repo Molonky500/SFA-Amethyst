@@ -247,6 +247,8 @@ void doPatches() {
         //0x80240758, 0x60000000, //always call memInit
         //0x80241a14, 0x60000000, //don't syscall
         //0x80241a48, 0x60000000, //don't syscall
+        0x802308e8, 0x60000000, //something to do with arwing audio streams.
+            //crashes with it, seems to work fine without...
 
         //set some header values that apploader should set
         0x80000000, 0x47534145, //disc ID

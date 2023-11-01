@@ -16,6 +16,7 @@ int16_t *streamDecodeBuf; //-> decoded samples to be played
 //game variables for tracking stream position, in seconds
 float *pStreamPos    = (float*)0x803dc858; //current pos
 float *pStreamEndPos = (float*)0x803dc84c; //end pos
+static bool streamPaused = false;
 
 //tDelta is frames passed this tick
 float *ptDelta = (float*)0x803db414;
@@ -128,6 +129,7 @@ DVDCBCallback callback) {
 
 void AISetStreamPlayState_hook(int param) {
     exiPrintf("AISetStreamPlayState(%d)\n", param);
+	streamPaused = !param;
 	if(!param) _finishStream();
 }
 
@@ -156,9 +158,9 @@ void playStream_hook() {
 	streamEndTime = OSMillisecondsToTicks((totalSamples*1000)/STREAM_SAMPLE_RATE);
 	streamTime = 0;
 	streamPrevTime = OSGetTime();
-	//exiPrintf("Stream file size: %d bytes = %d samples = %d frames\r\n",
-	//	ftell(curStreamFile), totalSamples,
-	//	totalSamples / (STREAM_SAMPLE_RATE/60));
+	exiPrintf("Stream file size: %d bytes = %d samples = %d frames\r\n",
+		ftell(curStreamFile), totalSamples,
+		totalSamples / (STREAM_SAMPLE_RATE/60));
 	fseek(curStreamFile, 0, SEEK_SET);
 
 	//(*(int*)0x803dc868) = streamNo + 1; //curStream
@@ -288,6 +290,13 @@ void* streamThreadMain(void *param) {
 
 		s32 iStartBlock = (*pStreamPos) * STREAM_BLOCK_RATE;
 		iSample = (iStartBlock * STREAM_SAMPLES_PER_BLOCK) % nSamples;
+
+		if(streamPaused) {
+			memset(&streamDecodeBuf[iSample], 0, STREAM_SAMPLES_PER_BLOCK * STREAM_SAMPLE_SIZE);
+			DCFlushRange(&streamDecodeBuf[iSample],
+				STREAM_SAMPLES_PER_BLOCK * STREAM_SAMPLE_SIZE);
+			continue;
+		}
 
 		//read a few blocks ahead.
 		u8 block[STREAM_BLOCK_SIZE];

@@ -574,11 +574,11 @@ static void printStreams() {
             streamPos, stream->name);
         if(stream != prevStream) {
             prevStream = stream;
-            OSReport("Started stream: %s", stream->name);
+            OSReport("Started stream: %s\r\n", stream->name);
         }
     }
     else if(prevStream) {
-        OSReport("Stopped stream: %s", prevStream->name);
+        OSReport("Stopped stream: %s\r\n", prevStream->name);
         prevStream = NULL;
     }
     debugPrintf("ARAM free: %5dK\n", (*(u32*)0x800000D0 - *(u32*)0x803de384) / 1024);
