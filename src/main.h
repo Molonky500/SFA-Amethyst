@@ -55,6 +55,7 @@ extern volatile u32 *_aiReg;
 
 #include "../gameWiiIface.h"
 #include "wpad.h"
+#include "wii.h"
 #include "alloc.h"
 #include "args.h"
 #include "camera.h"
@@ -99,15 +100,6 @@ typedef enum { //for savedata (field unused01)
     EXTRA_FEATURE_NO_AIM_SNAP   = (1 << 2), //disable staff aim snapback
     EXTRA_FEATURE_SENSITIVE_AIM = (1 << 3), //disable staff aim interpolation
 } ExtraFeatureFlag;
-
-//not part of savedata because only used on Wii,
-//where we can use a separate config file.
-typedef enum {
-    WII_SHAKE_TO_SWING = (1 <<  0), //shake remote to swing staff
-    WII_SHAKE_TO_ROLL  = (1 <<  1), //shake nunchuk to roll
-    WII_NUNCHUK_CAMERA = (1 <<  2), //tilt nunchuk to move camera
-    WII_NUNCHUK_STEER  = (1 <<  3), //tilt nunchuk to steer mounts
-} WiiOptionFlag;
 
 //see also CameraFlags in camera.h
 
@@ -344,15 +336,10 @@ Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a);
 bool isDllValid(int id);
 
 //wii.c
-extern u32 wiiOptions; //WiiOptionFlag
-extern vec3s nunchukNeutralPos; //orient when held normally
-extern vec3s nunchukDeadzoneMin; //minimum values for "held normally"
-extern vec3s nunchukDeadzoneMax; //maximum values for "held normally"
-extern vec3s nunchukLeftPos; //orient when tilted left
-extern vec3s nunchukRightPos;
-extern vec3s nunchukForwardPos;
-extern vec3s nunchukBackPos;
 void wiiHooksInit();
+void wiiLoadConfig();
+void wiiSaveConfig();
+bool wiiGetNunchukNormalizedOrient(int iPad, vec3f *result);
 
 //worldmap.c
 void worldMapHook();

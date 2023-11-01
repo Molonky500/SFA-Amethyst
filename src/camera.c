@@ -3,9 +3,9 @@
 u8 cameraFlags = CAM_FLAG_PLAYER_AXIS; //CameraFlags
 s8 debugCameraMode = CAM_MODE_NORMAL; //CameraMode
 
-float nunchukXScale =  0.8f, nunchukYScale =  0.8f;
-float nunchukXMax   = 64.0f, nunchukYMax   = 32.0f;
-float nunchukXMin   =  8.0f, nunchukYMin   =  8.0f;
+float nunchukXScale =  0.4f, nunchukYScale =  0.4f;
+float nunchukXMax   = 64.0f, nunchukYMax   = 64.0f;
+float nunchukXMin   = 16.0f, nunchukYMin   = 16.0f;
 
 //static void (*origFunc)(Camera *self);
 
@@ -41,37 +41,39 @@ void _camDoNunchuk(GameWiimoteState *wp, s8 *outX, s8 *outY) {
     if(cameraMode == CAM_DLL_VIEWFINDER) return;
     static float prevX[4] = {0};
     static float prevY[4] = {0};
-    float x = wp->exp.nunchuk.orient[2];
-    float y = wp->exp.nunchuk.orient[1];
-    if(ABS(x) >= 10.0f || ABS(y) >= 10.0f) {
-        //x = (float)(((int)x) & ~15);
-        //y = (float)(((int)y) & ~15);
-        prevX[0] = prevX[1];
-        prevX[1] = prevX[2];
-        prevX[2] = prevX[3];
-        prevX[3] = x;
-        prevY[0] = prevY[1];
-        prevY[1] = prevY[2];
-        prevY[2] = prevY[3];
-        prevY[3] = y;
-        float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
-        float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
-        sx *= nunchukXScale;
-        sy *= nunchukYScale;
-        //clamp to avoid noise spikes causing the camera to go to space
-        if(sx < -nunchukXMax) sx = -nunchukXMax; if(sx > nunchukXMax) sx = nunchukXMax;
-        if(sy < -nunchukYMax) sy = -nunchukYMax; if(sy > nunchukYMax) sy = nunchukYMax;
-        //ignore very small movements to reduce jitter
-        if(sx > -nunchukXMin && sx < nunchukXMin) sx = 0.0f;
-        if(sy > -nunchukYMin && sy < nunchukYMin) sy = 0.0f;
-        s32 ox = (outX ? *outX : 0) + sx;
-        s32 oy = (outY ? *outY : 0) + sy;
-        //clamp to valid joystick range
-        if(ox < -127) ox = -127; if(ox > 127) ox = 127;
-        if(oy < -127) oy = -127; if(oy > 127) oy = 127;
-        if(outX) *outX = ox;
-        if(outY) *outY = oy;
-    }
+    vec3f orient;
+    if(!wiiGetNunchukNormalizedOrient(0, &orient)) return;
+    //x=yaw y=pitch z=roll (yaw is always zero)
+    float x = orient.z * 127.0f; //not x
+    float y = orient.y * 127.0f;
+    //debugPrintf("CAM TILT " DPRINT_FIXED "%4d, %4d ", (int)x, (int)y);
+
+    //average the readings
+    prevX[0]=prevX[1]; prevX[1]=prevX[2]; prevX[2]=prevX[3]; prevX[3]=x;
+    prevY[0]=prevY[1]; prevY[1]=prevY[2]; prevY[2]=prevY[3]; prevY[3]=y;
+    float sx = (prevX[0]+prevX[1]+prevX[2]+prevX[3])/4.0f;
+    float sy = (prevY[0]+prevY[1]+prevY[2]+prevY[3])/4.0f;
+
+    //scale
+    sx *= nunchukXScale;
+    sy *= nunchukYScale;
+    //debugPrintf("-> %4d, %4d\n" DPRINT_NOFIXED, (int)sx, (int)sy);
+
+    //clamp to avoid noise spikes causing the camera to go to space
+    sx = CLAMP(sx, -nunchukXMax, nunchukXMax);
+    sy = CLAMP(sy, -nunchukYMax, nunchukYMax);
+
+    //ignore very small movements to reduce jitter
+    if(sx > -nunchukXMin && sx < nunchukXMin) sx = 0.0f;
+    if(sy > -nunchukYMin && sy < nunchukYMin) sy = 0.0f;
+    s32 ox = (outX ? *outX : 0) + (s32)sx;
+    s32 oy = (outY ? *outY : 0) + (s32)sy;
+
+    //clamp to valid joystick range
+    if(ox < -127) ox = -127; if(ox > 127) ox = 127;
+    if(oy < -127) oy = -127; if(oy > 127) oy = 127;
+    if(outX) *outX = ox;
+    if(outY) *outY = oy;
 }
 
 void _camGetStickInput(s8 *outX, s8 *outY) {
@@ -92,7 +94,7 @@ void _camGetStickInput(s8 *outX, s8 *outY) {
     u16 stateId = pState ? *(u16*)((u32)pState + 0x274) : 0;
     if(stateId == 24) return; //riding bike
 
-    if(!(IS_WII && (wiiOptions & WII_NUNCHUK_CAMERA))) return;
+    if(!(IS_WII && (wiimoteCfg[0].options & WII_NUNCHUK_CAMERA))) return;
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!(wii && wii->magic == WII_IFACE_MAGIC)) return;
     GameWiimoteState *wp = &wii->wiimote[0];

@@ -24,7 +24,7 @@ void displayControllerState(int iPad, PADStatus *pad) {
     debugPrintf("L%3d R%3d\n", pad->triggerLeft, pad->triggerRight);
 }
 
-void displayWiimoteState(GameWiimoteState *wp) {
+void displayWiimoteState(int iPad, GameWiimoteState *wp) {
     debugPrintf(DPRINT_FIXED " B%3d%% F%04X IR%d, %d, %dcm ang%d ",
         (int)(((float)wp->battery / 255.0f) * 100.0f), wp->flags,
         (int)wp->ir[0], (int)wp->ir[1], (int)(wp->ir[2] * 100.0f),
@@ -35,15 +35,13 @@ void displayWiimoteState(GameWiimoteState *wp) {
         (int)wp->orient[0], (int)wp->orient[1], (int)wp->orient[2]);
     debugPrintf("G " DPRINT_FIXED "%3d,%3d,%3d = %d" DPRINT_NOFIXED " ",
         (int)wp->gforce[0], (int)wp->gforce[1], (int)wp->gforce[2],
-        (int)(ABS(wp->gforce[0])+
-            ABS(wp->gforce[1])+
-            ABS(wp->gforce[2]))
+        (int)(ABS(wp->gforce[0])+ABS(wp->gforce[1])+ABS(wp->gforce[2]))
         );
 
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
             vec3f orient;
-            wiiGetNunchukNormalizedOrient(0, &orient);
+            wiiGetNunchukNormalizedOrient(iPad, &orient);
             debugPrintf("\nNC: J " DPRINT_FIXED "%3d,%3d" DPRINT_NOFIXED
             " Acel " DPRINT_FIXED "%3d,%3d,%3d" DPRINT_NOFIXED " ",
                 wp->exp.nunchuk.joystick[0],
@@ -83,7 +81,7 @@ void displayWiimoteState(GameWiimoteState *wp) {
     debugPrintf("\n" DPRINT_NOFIXED);
 }
 
-void adjustPlayerRotation(s16 x, s16 y, PADStatus *pad) {
+void adjustPlayerRotation(int iPad, s16 x, s16 y, PADStatus *pad) {
     pPlayer->pos.rotation.x -= x;
     pPlayer->pos.rotation.y -= y;
     *(s16*)(pPlayer->state + 0x01A) -= x;
@@ -115,14 +113,14 @@ void adjustPlayerRotation(s16 x, s16 y, PADStatus *pad) {
     }
 }
 
-u32 mapNunchukButtons(GameWiimoteState *wp, u32 btns) {
+u32 mapNunchukButtons(int iPad, GameWiimoteState *wp, u32 btns) {
     u32 result = 0;
     if(btns & WPAD_NUNCHUK_BUTTON_Z) result |= PAD_TRIGGER_L;
     if(btns & WPAD_NUNCHUK_BUTTON_C) result |= PAD_BUTTON_Y;
     return result;
 }
 
-u32 mapClassicButtons(GameWiimoteState *wp, u32 btns) {
+u32 mapClassicButtons(int iPad, GameWiimoteState *wp, u32 btns) {
     u32 result = 0;
     //Nintendo pls what is consistency
     if(btns & WPAD_CLASSIC_BUTTON_A)     result |= PAD_BUTTON_X;
@@ -139,18 +137,18 @@ u32 mapClassicButtons(GameWiimoteState *wp, u32 btns) {
     return result;
 }
 
-u32 mapWiimoteButtons(GameWiimoteState *wp, u32 btns) {
+u32 mapWiimoteButtons(int iPad, GameWiimoteState *wp, u32 btns) {
     //generate GC button mask corresponding to Wii button
     //state on given pad.
     //mapping chosen arbitrarily to fit the game.
     u32 result = 0;
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
-            result |= mapNunchukButtons(wp, btns);
+            result |= mapNunchukButtons(iPad, wp, btns);
             break;
         }
         case WPAD_EXP_CLASSIC: {
-            result |= mapClassicButtons(wp, btns);
+            result |= mapClassicButtons(iPad, wp, btns);
             return result; //do not use the regular Wiimote buttons
         }
         default: break;
@@ -171,7 +169,7 @@ u32 mapWiimoteButtons(GameWiimoteState *wp, u32 btns) {
 
 static float prevAimX = SCREEN_WIDTH  / 2.0f;
 static float prevAimY = SCREEN_HEIGHT / 2.0f;
-bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
+bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     if(!pPlayer) return false;
     //don't apply to title screen Fox, Arwing, etc
     if(pPlayer->catId != ObjCatId_Player) return false;
@@ -219,7 +217,7 @@ bool applyAimToStaff(GameWiimoteState *wp, PADStatus *pad) {
     }
 }
 
-void applyJoystickInputs(GameWiimoteState *wp, PADStatus *pad) {
+void applyJoystickInputs(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
             pad->stickX = CLAMP(wp->exp.nunchuk.joystick[0] * 2, -127, 127);
@@ -239,12 +237,13 @@ void applyJoystickInputs(GameWiimoteState *wp, PADStatus *pad) {
     }
 }
 
-void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
+void doSwingGestures(int iPad, GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
+    vec3f orient;
     if((!pPlayer) || pPlayer->catId != ObjCatId_Player) return;
     s16 stateNo = *(s16*)(pPlayer->state+0x274);
 
     //swing to roll
-    if((wiiOptions & WII_SHAKE_TO_ROLL) &&
+    if((wiimoteCfg[iPad].options & WII_SHAKE_TO_ROLL) &&
     wp->expType == WPAD_EXP_NUNCHUK && (
     ABS(wp->exp.nunchuk.gforce[0]) +
     ABS(wp->exp.nunchuk.gforce[1]) +
@@ -260,7 +259,7 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
         case 0x25: { //moving in combat
             //swing to attack
             if(*(u8*)(pPlayer->state+0x8B3) != 0) { //staff in hand
-                if((wiiOptions & WII_SHAKE_TO_SWING) &&
+                if((wiimoteCfg[iPad].options & WII_SHAKE_TO_SWING) &&
                 ABS(wp->gforce[0]) +
                 ABS(wp->gforce[1]) +
                 ABS(wp->gforce[2]) >= 6.0f) {
@@ -271,20 +270,20 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
             break;
         }
         case 0x18: { //riding a bike/CloudRunner/mammoth
-            if(wp->expType == WPAD_EXP_NUNCHUK && (wiiOptions & WII_NUNCHUK_STEER)) {
-                //XXX is the orientation sensor broken
-                //or is it normal that X is always 0?
-                adjustPlayerRotation(
-                    wp->exp.nunchuk.orient[2] * 12,
-                    wp->exp.nunchuk.orient[1] * 10, pad);
+            if(wp->expType == WPAD_EXP_NUNCHUK
+            && (wiimoteCfg[iPad].options & WII_NUNCHUK_STEER)) {
+                wiiGetNunchukNormalizedOrient(iPad, &orient);
+                adjustPlayerRotation(iPad, orient.z * 12, orient.y * 10, pad);
                 //maybe forward tilt can be accel/brake instead
             }
             break;
         }
         case 0x1A: { //riding CloudRunner (DragRock?)
-            if(wp->expType == WPAD_EXP_NUNCHUK && (wiiOptions & WII_NUNCHUK_STEER)) {
-                pad->stickX += wp->exp.nunchuk.orient[2];
-                pad->stickY += wp->exp.nunchuk.orient[1];
+            if(wp->expType == WPAD_EXP_NUNCHUK
+            && (wiimoteCfg[iPad].options & WII_NUNCHUK_STEER)) {
+                wiiGetNunchukNormalizedOrient(iPad, &orient);
+                pad->stickX += orient.z;
+                pad->stickY += orient.y;
             }
             break;
         }
@@ -292,7 +291,7 @@ void doSwingGestures(GameWiimoteState *wp, PADStatus *pad, u32 *bDown) {
     }
 }
 
-void doAimControls(PADStatus *pad) {
+void doAimControls(int iPad, PADStatus *pad) {
     if((!pPlayer) || pPlayer->catId != ObjCatId_Player) return;
     //try to let player walk around in this state.
     //this doesn't work...
@@ -311,18 +310,20 @@ void doAimControls(PADStatus *pad) {
     func(pPlayer, pPlayer->state);*/
 
     //XXX this should also tilt the camera up/down
-    adjustPlayerRotation(pad->stickX * 16, pad->stickY * 16, pad);
+    adjustPlayerRotation(iPad, pad->stickX * 16, pad->stickY * 16, pad);
 }
 
-void applyWiimoteToArwing(ObjInstance *arwing,
+void applyWiimoteToArwing(int iPad, ObjInstance *arwing,
 GameWiimoteState *wp, PADStatus *pad,
 u32 *bHeld, u32 *bDown, u32 *bUp) {
-    if(!(wiiOptions & WII_NUNCHUK_STEER)) return;
+    //XXX this is using the Wiimote itself, not the Nunchuk;
+    //should be a separate flag
+    if(!(wiimoteCfg[iPad].options & WII_NUNCHUK_STEER)) return;
     void *state = arwing->state;
-    *bHeld = mapWiimoteButtons(wp, wp->btnsHeld);
-    *bDown = mapWiimoteButtons(wp, wp->btnsDown);
-    *bUp   = mapWiimoteButtons(wp, wp->btnsUp);
-    applyJoystickInputs(wp, pad);
+    *bHeld = mapWiimoteButtons(iPad, wp, wp->btnsHeld);
+    *bDown = mapWiimoteButtons(iPad, wp, wp->btnsDown);
+    *bUp   = mapWiimoteButtons(iPad, wp, wp->btnsUp);
+    applyJoystickInputs(iPad, wp, pad);
 
     static float prevTilt = 0;
     float tilt =  (wp->orient[2]+prevTilt) / 2.0f;
@@ -350,70 +351,76 @@ u32 *bHeld, u32 *bDown, u32 *bUp) {
     //XXX IR aiming; be able to use joystick instead of gyro
 }
 
-s8 arwingGetStickXHook(int whichPad) {
-    //return padGetStickX(whichPad);
+s8 arwingGetStickXHook(int iPad) {
     GameWiiInterface *wii = WII_IFACE_PTR;
-    if(!wii) return padGetStickX(whichPad);
-    if(!(wiiOptions & WII_NUNCHUK_STEER)) return padGetStickX(whichPad);
-    GameWiimoteState *wp = &wii->wiimote[whichPad];
+    if(!wii) return padGetStickX(iPad);
+    if(!(wiimoteCfg[iPad].options & WII_NUNCHUK_STEER)) return padGetStickX(iPad);
+    GameWiimoteState *wp = &wii->wiimote[iPad];
     if(!(wp->flags & WM_FLAG_WORKING)) {
-        return padGetStickX(whichPad);
+        return padGetStickX(iPad);
     }
 
     static float prevTilt = 0;
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
             //float tilt = (wp->exp.nunchuk.orient[2]+prevTilt) / 2.0f;
-            float tilt = wp->exp.nunchuk.orient[2];
+            vec3f orient;
+            if(!wiiGetNunchukNormalizedOrient(iPad, &orient)) {
+                return padGetStickX(iPad);
+            }
+            float tilt = orient.x;
             prevTilt = tilt;
             return CLAMP(tilt * 2.0f, -127, 127);
         }
-        default: return padGetStickX(whichPad);
+        default: return padGetStickX(iPad);
     }
 }
-s8 arwingGetStickYHook(int whichPad) {
-    //return padGetStickY(whichPad);
+s8 arwingGetStickYHook(int iPad) {
     GameWiiInterface *wii = WII_IFACE_PTR;
-    if(!wii) return padGetStickY(whichPad);
-    if(!(wiiOptions & WII_NUNCHUK_STEER)) return padGetStickY(whichPad);
-    GameWiimoteState *wp = &wii->wiimote[whichPad];
+    if(!wii) return padGetStickY(iPad);
+    if(!(wiimoteCfg[iPad].options & WII_NUNCHUK_STEER)) return padGetStickY(iPad);
+    GameWiimoteState *wp = &wii->wiimote[iPad];
     if(!(wp->flags & WM_FLAG_WORKING)) {
-        return padGetStickY(whichPad);
+        return padGetStickY(iPad);
     }
 
     static float prevTilt = 0;
     switch(wp->expType) {
         case WPAD_EXP_NUNCHUK: {
             //float tilt = (wp->exp.nunchuk.orient[1]+prevTilt) / 2.0f;
-            float tilt = wp->exp.nunchuk.orient[1];
+            vec3f orient;
+            if(!wiiGetNunchukNormalizedOrient(iPad, &orient)) {
+                return padGetStickY(iPad);
+            }
+            float tilt = orient.y;
             prevTilt = tilt;
             return CLAMP(tilt * 2.0f, -127, 127);
         }
-        default: return padGetStickY(whichPad);
+        default: return padGetStickY(iPad);
     }
 }
 
-void applyWiimoteToPlayer(GameWiimoteState *wp, PADStatus *pad,
+void applyWiimoteToPlayer(int iPad, GameWiimoteState *wp, PADStatus *pad,
 u32 *bHeld, u32 *bDown, u32 *bUp) {
-    bool isAim = applyAimToStaff(wp, pad);
+    bool isAim = applyAimToStaff(iPad, wp, pad);
 
-    *bHeld = mapWiimoteButtons(wp, wp->btnsHeld);
-    *bDown = mapWiimoteButtons(wp, wp->btnsDown);
-    *bUp   = mapWiimoteButtons(wp, wp->btnsUp);
+    *bHeld = mapWiimoteButtons(iPad, wp, wp->btnsHeld);
+    *bDown = mapWiimoteButtons(iPad, wp, wp->btnsDown);
+    *bUp   = mapWiimoteButtons(iPad, wp, wp->btnsUp);
 
     if((*bHeld | *bDown) & PAD_TRIGGER_R) {
         //the digital input doesn't trigger the shield
         pad->triggerRight = 255;
     }
-    applyJoystickInputs(wp, pad);
+    applyJoystickInputs(iPad, wp, pad);
     if(isAim) {
         //HACK: don't calculate staff aim coordinates
         WRITE32(0x8029b1fc, 0x60000000);
         WRITE32(0x8029b270, 0x60000000);
         WRITE32(0x8029b238, 0x60000000);
     }
-    doSwingGestures(wp, pad, bDown);
-    if(isAim) doAimControls(pad);
+    doSwingGestures(iPad, wp, pad, bDown);
+    if(isAim) doAimControls(iPad, pad);
 
 }
 
@@ -474,12 +481,12 @@ void applyWiimoteInputs(int iPad, PADStatus *pad) {
     u32 bUp   = 0;
 
     ObjInstance *arwing = getArwing();
-    if(arwing) applyWiimoteToArwing(arwing, wp, pad,
+    if(arwing) applyWiimoteToArwing(iPad, arwing, wp, pad,
         &bHeld, &bDown, &bUp);
-    else applyWiimoteToPlayer(wp, pad, &bHeld, &bDown, &bUp);
+    else applyWiimoteToPlayer(iPad, wp, pad, &bHeld, &bDown, &bUp);
 
     if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
-        displayWiimoteState(wp);
+        displayWiimoteState(iPad, wp);
     }
     pad->button = bHeld | bDown;
 }
@@ -507,7 +514,7 @@ u32 padUpdate_hook(PADStatus *state) {
 
     state->err = 0; //present, even if no GC pad connected
     wii->updateWiimotes();
-    applyWiimoteInputs(0, state);
+    applyWiimoteInputs(0, state); //XXX ensure this is actually pad 0
     if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
         displayControllerState(0, state);
     }

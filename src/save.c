@@ -97,6 +97,7 @@ void saveLoadHook() {
     DPRINT("Data: %s", str); */
     //DPRINT("Load savedata: player=%d FOV=%d alpha=%d map=%d lang=%d\n",
     //    overridePlayerNo, overrideFov, overrideMinimapAlpha, minimapMode, curLanguage);
+    wiiLoadConfig();
 }
 
 //Update the extra fields in the save data.
@@ -208,4 +209,5 @@ void saveShowMsgHook(int param) {
     autoSaveMsgTimer = 60;
     tLastSave = getSystemTimeSecs();
     DPRINT("Trigger save msg");
+    wiiSaveConfig();
 }

@@ -2,7 +2,7 @@
  */
 #include "main.h"
 
-#define CAL_MENU_WIDTH  400
+#define CAL_MENU_WIDTH  500
 #define CAL_MENU_HEIGHT 150
 #define CAL_MENU_XPOS ((SCREEN_WIDTH/2) - (CAL_MENU_WIDTH / 2))
 #define CAL_MENU_YPOS ((SCREEN_HEIGHT/2) - (CAL_MENU_HEIGHT / 2))
@@ -14,19 +14,23 @@ typedef enum {
     CAL_STEP_NC_RIGHT,
     CAL_STEP_NC_FWD,
     CAL_STEP_NC_BACK,
+    CAL_STEP_COMPLETE,
     NUM_CAL_STEPS
 } CalibStep;
 static u8 calibStep = 0;
 static u8 calibHistIdx = 0;
+static u8 calibWrapCnt = 0;
 static bool enoughData = false;
 static s16 ncOrientHist[CAL_HIST_LENGTH][3];
+static u8 iPad = 0;
 
 static const char *calInstrs[] = {
-    "Hold the Nunchuk normally.",
-    "Tilt the Nunchuk fully to the left.",
-    "Tilt the Nunchuk fully to the right.",
-    "Tilt the Nunchuk fully forward.",
-    "Tilt the Nunchuk fully back.",
+    "Point the Nunchuk forward, with the\r\nanalog stick pointed up.",
+    "Point the Nunchuk forward, with the\r\nanalog stick pointed left.",
+    "Point the Nunchuk forward, with the\r\nanalog stick pointed right.",
+    "Point the Nunchuk toward the ground, with the\r\nanalog stick pointed forward.",
+    "Point the Nunchuk toward the sky, with the\r\nanalog stick pointed at you.",
+    "Calibration successful."
 };
 
 static vec3s getNunchukOrientAvg(vec3s *outMin, vec3s *outMax) {
@@ -65,7 +69,7 @@ static void menu_draw(Menu *self) {
 
 static void updateCalibStep() {
     GameWiiInterface *wii = WII_IFACE_PTR;
-    GameWiimoteState *wp = wii ? &wii->wiimote[0] : NULL;
+    GameWiimoteState *wp = wii ? &wii->wiimote[iPad] : NULL;
     if(!(wp && wp->flags & WM_FLAG_WORKING)) return;
     switch(calibStep) {
         case CAL_STEP_NC_STRAIGHT:
@@ -78,10 +82,15 @@ static void updateCalibStep() {
             ncOrientHist[calibHistIdx][2] = wp->exp.nunchuk.orient[2];
             calibHistIdx++;
             if(calibHistIdx >= CAL_HIST_LENGTH) {
-                enoughData = true;
+                calibWrapCnt++;
+                if(calibWrapCnt > 1) enoughData = true;
                 calibHistIdx = 0;
             }
-        break;
+            break;
+
+        case CAL_STEP_COMPLETE:
+            enoughData = true;
+            break;
     }
 
     vec3s pos, vMin, vMax;
@@ -95,31 +104,34 @@ static void updateCalibStep() {
 
 static void applyCalibStep() {
     switch(calibStep) {
-        case CAL_STEP_NC_STRAIGHT:
-            nunchukNeutralPos = getNunchukOrientAvg(
-                &nunchukDeadzoneMin, &nunchukDeadzoneMax);
+        case CAL_STEP_NC_STRAIGHT: {
+            getNunchukOrientAvg(
+                &wiimoteCfg[iPad].calNunchuk.deadMin,
+                &wiimoteCfg[iPad].calNunchuk.deadMax);
             break;
+        }
 
         case CAL_STEP_NC_LEFT:
-            nunchukLeftPos = getNunchukOrientAvg(NULL, NULL);
+            wiimoteCfg[iPad].calNunchuk.rollMin = getNunchukOrientAvg(NULL, NULL).z;
             break;
 
         case CAL_STEP_NC_RIGHT:
-            nunchukRightPos = getNunchukOrientAvg(NULL, NULL);
+            wiimoteCfg[iPad].calNunchuk.rollMax = getNunchukOrientAvg(NULL, NULL).z;
             break;
 
         case CAL_STEP_NC_FWD:
-            nunchukForwardPos = getNunchukOrientAvg(NULL, NULL);
+            wiimoteCfg[iPad].calNunchuk.pitchMax = getNunchukOrientAvg(NULL, NULL).y;
             break;
 
         case CAL_STEP_NC_BACK:
-            nunchukBackPos = getNunchukOrientAvg(NULL, NULL);
+            wiimoteCfg[iPad].calNunchuk.pitchMin = getNunchukOrientAvg(NULL, NULL).y;
             break;
     }
 }
 
 static void resetCalData() {
     calibHistIdx = 0;
+    calibWrapCnt = 0;
     enoughData = false;
 }
 
@@ -136,19 +148,19 @@ static void nextStep(Menu *self) {
         calibStep = 0;
         self->close(curMenu);
         OSReport("DeadMin = %+3d %+3d %+3d\r\n",
-            nunchukDeadzoneMin.x, nunchukDeadzoneMin.y, nunchukDeadzoneMin.z);
+            wiimoteCfg[iPad].calNunchuk.deadMin.x,
+            wiimoteCfg[iPad].calNunchuk.deadMin.y,
+            wiimoteCfg[iPad].calNunchuk.deadMin.z);
         OSReport("DeadMax = %+3d %+3d %+3d\r\n",
-            nunchukDeadzoneMax.x, nunchukDeadzoneMax.y, nunchukDeadzoneMax.z);
-        OSReport("Neutral = %+3d %+3d %+3d\r\n",
-            nunchukNeutralPos.x, nunchukNeutralPos.y, nunchukNeutralPos.z);
-        OSReport("Left    = %+3d %+3d %+3d\r\n",
-            nunchukLeftPos.x, nunchukLeftPos.y, nunchukLeftPos.z);
-        OSReport("Right   = %+3d %+3d %+3d\r\n",
-            nunchukRightPos.x, nunchukRightPos.y, nunchukRightPos.z);
-        OSReport("Forward = %+3d %+3d %+3d\r\n",
-            nunchukForwardPos.x, nunchukForwardPos.y, nunchukForwardPos.z);
-        OSReport("Back    = %+3d %+3d %+3d\r\n",
-            nunchukBackPos.x, nunchukBackPos.y, nunchukBackPos.z);
+            wiimoteCfg[iPad].calNunchuk.deadMax.x,
+            wiimoteCfg[iPad].calNunchuk.deadMax.y,
+            wiimoteCfg[iPad].calNunchuk.deadMax.z);
+        OSReport("Pitch   = %+3d %+3d\r\n",
+            wiimoteCfg[iPad].calNunchuk.pitchMin,
+            wiimoteCfg[iPad].calNunchuk.pitchMax);
+        OSReport("Roll    = %+3d %+3d\r\n",
+            wiimoteCfg[iPad].calNunchuk.rollMin,
+            wiimoteCfg[iPad].calNunchuk.rollMax);
     }
 }
 
@@ -164,8 +176,7 @@ static void menu_run(Menu *self) {
 }
 
 static void menu_close(const Menu *self) {
-    //Close function for Light List menu
-    curMenu = &menuDebugMapEnv;
+    curMenu = &menuWiimote;
     audioPlaySound(NULL, MENU_CLOSE_SOUND);
 }
 

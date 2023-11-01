@@ -5,11 +5,11 @@
 void menuWiimoteShakeSwing_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     sprintf(str, self->fmt, T(self->name),
-        (wiiOptions & WII_SHAKE_TO_SWING) ? T("On") : T("Off"));
+        (wiimoteCfg[0].options & WII_SHAKE_TO_SWING) ? T("On") : T("Off"));
     menuDrawText(str, x, y, selected);
 }
 void menuWiimoteShakeSwing_select(const MenuItem *self, int amount) {
-    wiiOptions ^= WII_SHAKE_TO_SWING;
+    wiimoteCfg[0].options ^= WII_SHAKE_TO_SWING;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
     wiiSaveConfig();
 }
@@ -17,11 +17,11 @@ void menuWiimoteShakeSwing_select(const MenuItem *self, int amount) {
 void menuWiimoteShakeRoll_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     sprintf(str, self->fmt, T(self->name),
-        (wiiOptions & WII_SHAKE_TO_ROLL) ? T("On") : T("Off"));
+        (wiimoteCfg[0].options & WII_SHAKE_TO_ROLL) ? T("On") : T("Off"));
     menuDrawText(str, x, y, selected);
 }
 void menuWiimoteShakeRoll_select(const MenuItem *self, int amount) {
-    wiiOptions ^= WII_SHAKE_TO_ROLL;
+    wiimoteCfg[0].options ^= WII_SHAKE_TO_ROLL;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
     wiiSaveConfig();
 }
@@ -29,11 +29,11 @@ void menuWiimoteShakeRoll_select(const MenuItem *self, int amount) {
 void menuWiimoteNunCam_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     sprintf(str, self->fmt, T(self->name),
-        (wiiOptions & WII_NUNCHUK_CAMERA) ? T("On") : T("Off"));
+        (wiimoteCfg[0].options & WII_NUNCHUK_CAMERA) ? T("On") : T("Off"));
     menuDrawText(str, x, y, selected);
 }
 void menuWiimoteNunCam_select(const MenuItem *self, int amount) {
-    wiiOptions ^= WII_NUNCHUK_CAMERA;
+    wiimoteCfg[0].options ^= WII_NUNCHUK_CAMERA;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
     wiiSaveConfig();
 }
@@ -41,11 +41,11 @@ void menuWiimoteNunCam_select(const MenuItem *self, int amount) {
 void menuWiimoteNunSteer_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     sprintf(str, self->fmt, T(self->name),
-        (wiiOptions & WII_NUNCHUK_STEER) ? T("On") : T("Off"));
+        (wiimoteCfg[0].options & WII_NUNCHUK_STEER) ? T("On") : T("Off"));
     menuDrawText(str, x, y, selected);
 }
 void menuWiimoteNunSteer_select(const MenuItem *self, int amount) {
-    wiiOptions ^= WII_NUNCHUK_STEER;
+    wiimoteCfg[0].options ^= WII_NUNCHUK_STEER;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
     wiiSaveConfig();
 }
