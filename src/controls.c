@@ -273,7 +273,7 @@ void doSwingGestures(int iPad, GameWiimoteState *wp, PADStatus *pad, u32 *bDown)
             if(wp->expType == WPAD_EXP_NUNCHUK
             && (wiimoteCfg[iPad].options & WII_NUNCHUK_STEER)) {
                 wiiGetNunchukNormalizedOrient(iPad, &orient);
-                adjustPlayerRotation(iPad, orient.z * 12, orient.y * 10, pad);
+                adjustPlayerRotation(iPad, orient.z * 127 * 8, orient.y * 127 * 5, pad);
                 //maybe forward tilt can be accel/brake instead
             }
             break;
@@ -282,8 +282,8 @@ void doSwingGestures(int iPad, GameWiimoteState *wp, PADStatus *pad, u32 *bDown)
             if(wp->expType == WPAD_EXP_NUNCHUK
             && (wiimoteCfg[iPad].options & WII_NUNCHUK_STEER)) {
                 wiiGetNunchukNormalizedOrient(iPad, &orient);
-                pad->stickX += orient.z;
-                pad->stickY += orient.y;
+                pad->stickX += orient.z * 127.0f;
+                pad->stickY += orient.y * 127.0f;
             }
             break;
         }
@@ -368,9 +368,9 @@ s8 arwingGetStickXHook(int iPad) {
             if(!wiiGetNunchukNormalizedOrient(iPad, &orient)) {
                 return padGetStickX(iPad);
             }
-            float tilt = orient.x;
+            float tilt = orient.z * 127.0f; //not x
             prevTilt = tilt;
-            return CLAMP(tilt * 2.0f, -127, 127);
+            return CLAMP(tilt, -127, 127);
         }
         default: return padGetStickX(iPad);
     }
@@ -392,9 +392,9 @@ s8 arwingGetStickYHook(int iPad) {
             if(!wiiGetNunchukNormalizedOrient(iPad, &orient)) {
                 return padGetStickY(iPad);
             }
-            float tilt = orient.y;
+            float tilt = orient.y * 127.0f;
             prevTilt = tilt;
-            return CLAMP(tilt * 2.0f, -127, 127);
+            return CLAMP(tilt, -127, 127);
         }
         default: return padGetStickY(iPad);
     }
