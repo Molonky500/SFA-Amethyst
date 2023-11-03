@@ -69,4 +69,7 @@ void tweaks_init() {
 
     //disable getLActions() since the file isn't loaded anymore
     WRITE_BLR(getLActions);
+
+    //make crates destroyed by one hit
+    WRITE8(0x80184397, 0);
 }
