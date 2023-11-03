@@ -42,7 +42,7 @@ BOOL gameBitHook(uint bit, int val) {
         else ignoreList[bit]++;
     }
 
-    DPRINT("GameBit 0x%04X (%s) set to %d", bit, getBitName(bit), val);
+    DPRINT("GameBit 0x%04X (%s) set to %d\r\n", bit, getBitName(bit), val);
     /* if(bit == 0x94E) {
         OSReport("BREAKPOINT");
         while(1) {
@@ -51,7 +51,7 @@ BOOL gameBitHook(uint bit, int val) {
     } */
 
     if(ignoreList && ignoreList[bit] == 0xFF) {
-        DPRINT(" - ignoring further changes to this bit!");
+        DPRINT(" - ignoring further changes to this bit!\r\n");
     }
 
     //log the change

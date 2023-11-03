@@ -115,8 +115,13 @@ static void printCoords() {
     //debugPrintf doesn't support eg '%+7.2f'
     char buf[256];
     if(pPlayer) {
-        sprintf(buf, "%+7.2f %+7.2f %+7.2f",
-            pPlayer->pos.pos.x, pPlayer->pos.pos.y, pPlayer->pos.pos.z);
+        vec3f pos = pPlayer->pos.pos;
+        if(pPlayer->heldBy) {
+            pos.x += pPlayer->heldBy->pos.pos.x;
+            pos.y += pPlayer->heldBy->pos.pos.y;
+            pos.z += pPlayer->heldBy->pos.pos.z;
+        }
+        sprintf(buf, "%+7.2f %+7.2f %+7.2f", pos.x, pos.y, pos.z);
         debugPrintf("P:" DPRINT_FIXED "%s" DPRINT_NOFIXED, buf);
     }
 
@@ -411,33 +416,40 @@ static void printPlayerState() {
     }
     player = pPlayer;
     debugPrintf("Player=%08X: ", player);
-    printObjName("%s\n", player);
+    printObjName("%s", player);
     if(!(player && player->file)) return;
     if(player->catId != ObjCatId_Player) return; //don't apply to title screen Fox, Arwing
 
     void *pState = player ? player->state : NULL;
     if(!pState) return;
-    PlayerCharState *cState = *(PlayerCharState**)(pState + 0x35C);
+    //PlayerCharState *cState = *(PlayerCharState**)(pState + 0x35C);
+
+    debugPrintf("; St" DPRINT_FIXED "%02X " DPRINT_NOFIXED
+        "Ft" DPRINT_FIXED "%02X" DPRINT_NOFIXED "\n",
+        *(u16*)(pState + 0x274),  //state number
+        *(u8*)(pState + 0x86C)  //floor type
+    );
 
     float onFire = *(float*)(pState + 0x79C);
-    if(onFire) debugPrintf("On fire %f\n", onFire);
+    if(onFire) debugPrintf("On fire %f, next hit %f, vel %f\n", onFire,
+        *(float*)(pState+0x7A0), *(float*)(pState+0x7A4));
     //float castTimer = *(float*)(pState + 0x85C); //always 0?
     //if(castTimer) debugPrintf("Cast spell %f\n", castTimer);
 
     //most of these are unknown
-    debugPrintf(DPRINT_FIXED "%02X %08X %08X %08X %08X ",
+    /*debugPrintf(DPRINT_FIXED "%02X %08X %08X %08X %08X ",
         *(u16*)(pState + 0x274),  //state number
         *(u32*)(pState + 0x310),  //various flags
         *(u32*)(pState + 0x314),  //various flags
         *(u32*)(pState + 0x318),  //various flags
-        *(u32*)(pState + 0x31C)); //various flags
+        *(u32*)(pState + 0x31C)); //various flags*/
 
-    debugPrintf("%08X %08X %08X %04X %02X" DPRINT_NOFIXED "\n",
+    /*debugPrintf("%08X %08X %08X %04X %02X" DPRINT_NOFIXED "\n",
         *(u32*)(pState + 0x360),
         *(u32*)(pState + 0x3F0),
         *(u32*)(pState + 0x3F4),
         cState ? ((cState->flags02 << 8) | cState->field_03) : 0,
-        cState ? cState->field_0B : 0);
+        cState ? cState->field_0B : 0);*/
 
     float waterCurrentRelX = *(float*)(pState + 0x43C); //water current, player-relative
     float waterCurrentRelZ = *(float*)(pState + 0x440);
@@ -485,6 +497,9 @@ static void printPlayerState() {
     for(int i=0; objPtrs[i].name; i++) {
         printPlayerObj(objPtrs[i].name,
             *(ObjInstance**)(pState + objPtrs[i].offset));
+    }
+    if(player->heldBy) {
+        printPlayerObj("HeldBy", player->heldBy);
     }
 }
 
