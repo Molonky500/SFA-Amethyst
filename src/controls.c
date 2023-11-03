@@ -176,8 +176,8 @@ bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     void *state = pPlayer->state;
     if(!state) return false;
 
-    float x = wp->ir[0] - 320.0f;
-    float y = wp->ir[1] - 240.0f;
+    float x = wp->ir[0] - (float)(SCREEN_WIDTH / 2);
+    float y = wp->ir[1] - (float)(SCREEN_HEIGHT / 2);
     if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
         debugPrintf("IR AIM: %4d, %4d (%4d, %4d) %04X\n", (int)x, (int)y,
             (int)prevAimX, (int)prevAimY, wp->flags);
@@ -186,9 +186,21 @@ bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     //toward the right edge of the screen, even though
     //it works just fine...
     if(!(wp->flags & WM_FLAG_IR_VALID)) {
-        x = prevAimX;
-        y = prevAimY;
+        if(wp->expType == WPAD_EXP_NUNCHUK) {
+            x = ((float)wp->exp.nunchuk.joystick[0]) / 128.0f;
+            y = ((float)wp->exp.nunchuk.joystick[1]) / 128.0f;
+            x = (x + 0.5) * (float)(SCREEN_WIDTH / 2);
+            y = (y + 0.5) * (float)(SCREEN_HEIGHT / 2);
+        }
+        else {
+            x = prevAimX;
+            y = prevAimY;
+        }
     }
+    if(x < 0) x = 0;
+    if(y < 0) y = 0;
+    if(x > SCREEN_WIDTH) x = SCREEN_WIDTH;
+    if(y > SCREEN_HEIGHT) y = SCREEN_HEIGHT;
     x = (x + prevAimX) / 2.0f; //smoothing
     y = (y + prevAimY) / 2.0f;
     prevAimX = x;
@@ -198,20 +210,30 @@ bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     switch(stateNo) {
         case 0x2C: { //aiming
             //set the staff aim coordinates
-            *(float*)(state+0x788) = x;
-            *(float*)(state+0x78C) = y;
+            *(float*)(state+0x788) = x; //aimXRelToScreen
+            *(float*)(state+0x78C) = y; //aimYRelToScreen
+            *(float*)(state+0x6D8) = x; //stickXfloat (-128.0f .. 127.0f)
+            *(float*)(state+0x6DC) = y; //stickYfloat
+            *(int*)(state+0x6D0) = (int)x; //stickX
+            *(int*)(state+0x6D4) = (int)y; //stickY
+            //prevents you turning left/right with the stick
+            // *(s16*)(state+0x478) = (int)x;
+            //seemingly does nothing
+            *(s16*)(state+0x484) = (int)x;
             //adjust the physical staff motion
-            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -2.0f, 2.0f);
-            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -2.0f, 2.0f);
+            //7B8 = aimX, 7BC = aimY
+            *(float*)(state+0x7B8) = CLAMP(x/(float)SCREEN_WIDTH,  -2.0f, 2.0f);
+            *(float*)(state+0x7BC) = CLAMP(y/(float)SCREEN_HEIGHT, -2.0f, 2.0f);
+            //XXX figure out how to still let us tilt the camera with the analog stick
             return true; //we are in an aiming state
         }
         default: {
             //adjust the physical staff motion
             //this also affects the camera...
-            // *(float*)(state+0x7B8) = CLAMP(((x/640.0f)-0.75f)*2.0f, -1.0f, 1.0f);
-            // *(float*)(state+0x7BC) = CLAMP((y/480.0f)-0.5f, -1.0f, 1.0f);
-            *(float*)(state+0x7B8) = CLAMP(x/640.0f, -2.0f, 2.0f);
-            *(float*)(state+0x7BC) = CLAMP(y/480.0f, -2.0f, 2.0f);
+            // *(float*)(state+0x7B8) = CLAMP(((x/(float)SCREEN_WIDTH)-0.75f)*2.0f, -1.0f, 1.0f);
+            // *(float*)(state+0x7BC) = CLAMP( (y/(float)SCREEN_HEIGHT)-0.5f, -1.0f, 1.0f);
+            *(float*)(state+0x7B8) = CLAMP(x/(float)SCREEN_WIDTH,  -2.0f, 2.0f);
+            *(float*)(state+0x7BC) = CLAMP(y/(float)SCREEN_HEIGHT, -2.0f, 2.0f);
             return false;
         }
     }
