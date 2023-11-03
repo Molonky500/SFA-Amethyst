@@ -474,13 +474,12 @@ static void printPlayerState() {
         {"Obj4C0",      0x4C0},
         {"Obj4C4",      0x4C4},
         {"Collect obj", 0x684},
-        {"Obj67C",      0x67C},
+        {"Push obj",    0x67C},
         {"Obj700",      0x700},
         {"Obj7B0",      0x7B0},
         {"Ride obj",    0x7F0},
         {"Obj7F4",      0x7F4},
         {"Hold obj",    0x7F8},
-        {"Push obj",    0x7FC},
         {NULL,          0}
     };
     for(int i=0; objPtrs[i].name; i++) {
