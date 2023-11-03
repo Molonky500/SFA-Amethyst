@@ -120,8 +120,8 @@ DVDCBCallback callback) {
 
 BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
 DVDCBCallback callback) {
-    //exiPrintf("DVDStopStreamAtEndAsync(%p, %p)\n",
-    //    block, callback);
+    exiPrintf("DVDStopStreamAtEndAsync(%p, %p)\n",
+        block, callback);
     OSYieldThread();
     if(callback) callback(0, block);
     return true;
@@ -278,6 +278,8 @@ void* streamThreadMain(void *param) {
 			restart = false;
 			iSample = 0;
 			*pStreamPos = 0;
+			streamTime = 0;
+			prevTime = OSGetTime();
 		}
 
 		int samplePos = (*pStreamPos    * (float)STREAM_SAMPLE_RATE);
