@@ -4,7 +4,7 @@ u8 cameraFlags = CAM_FLAG_PLAYER_AXIS; //CameraFlags
 s8 debugCameraMode = CAM_MODE_NORMAL; //CameraMode
 
 float nunchukXScale =  0.4f, nunchukYScale =  0.4f;
-float nunchukXMax   = 64.0f, nunchukYMax   = 64.0f;
+float nunchukXMax   = 32.0f, nunchukYMax   = 32.0f;
 float nunchukXMin   = 16.0f, nunchukYMin   = 16.0f;
 
 //static void (*origFunc)(Camera *self);
