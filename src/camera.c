@@ -243,7 +243,12 @@ void _camDoRotateAroundPlayer(s8 stickX, s8 stickY) {
 void _camDoCStick() {
     s8 stickX, stickY;
     _camGetStickInput(&stickX, &stickY);
-    if(!bFreeMove) {
+    if(!bFreeMove && !(
+           cameraMode == 0x4B //climb
+        || cameraMode == 0x4C //cutscene
+        || cameraMode == 0x4D //speaking
+        || cameraMode == 0x50 //crawling
+    )) {
         if(!(stickX || stickY)) {
             float dx, dy, dz;
             float height = cameraMtxVar57 ? cameraMtxVar57->targetHeight : 0;
@@ -259,10 +264,10 @@ void _camDoCStick() {
         (cameraMode == 0x42) //normal
         || (cameraMode == 0x45) //bike
         || (cameraMode == 0x49) //combat
-        || (cameraMode == 0x4B) //climb
-        || (cameraMode == 0x4C) //cutscene
-        || (cameraMode == 0x4D) //speaking
-        || (cameraMode == 0x50) //crawling
+        //|| (cameraMode == 0x4B) //climb
+        //|| (cameraMode == 0x4C) //cutscene
+        //|| (cameraMode == 0x4D) //speaking
+        //|| (cameraMode == 0x50) //crawling
         || (cameraMode == 0x52) //aiming, holding L
         || (cameraMode == 0x53) //Drakor, riding CloudRunner in DR
         || (cameraMode == 0x56) //Arwing
