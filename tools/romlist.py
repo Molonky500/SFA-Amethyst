@@ -39,9 +39,9 @@ types = {
     'ubyte': 'B',
     'uint': 'I',
     'ushort': 'H',
-    'unk8': 'b',
-    'unk16': 'h',
-    'unk32': 'i',
+    'unk8': 'B',
+    'unk16': 'H',
+    'unk32': 'I',
     'vec3s': '3h',
     'vec3f': '3f',
 }
@@ -280,6 +280,13 @@ class ObjDef:
             'id':            str(self.id),
         }
 
+    def __str__(self) -> str:
+        attrs = self.toXmlAttrs()
+        result = []
+        for k, v in attrs.items():
+            result.append("%s=%s" % (k, str(v)))
+        return "ObjDef(%s)" % (', '.join(result))
+
 
 class RomlistHandler:
     """Base for classes that operate on romlists."""
@@ -389,22 +396,36 @@ class RomlistDecoder(RomlistHandler):
             except:
                 print("Error unpacking param", repr(param))
                 raise
-            objdef.params[name] = lol
+            objdef.params[name] = {
+                'value':  lol,
+                'offset': param.offset,
+                'type':   param.type,
+            }
 
         # fill in unknowns
         for i in range(ObjDef._structLen, paramLen+ObjDef._structLen):
             if i not in seenOffsets:
-                objdef.params['param%02X' % i] = struct.unpack_from(
+                val = struct.unpack_from(
                     '>B', data, i - ObjDef._structLen)[0] # grumble
+                objdef.params['param%02X' % i] = {
+                    'value':  val,
+                    'offset': i,
+                    'type':   'unk8',
+                }
 
     def unpackRomlist(self, inFile:BinaryIO) -> list[ObjDef]:
         """Unpack binary romlist file."""
         result = []
         while True:
+            offs = inFile.tell() # debug
             data = inFile.read(ObjDef._structLen)
             if (not data) or len(data) < ObjDef._structLen: break
             objdef = ObjDef.fromBytes(data)
-            self.decodeObjdefParams(objdef, inFile)
+            try: self.decodeObjdefParams(objdef, inFile)
+            except:
+                print("Error decoding objdef at 0x%X: %s" % (
+                    offs, objdef))
+                raise
             result.append(objdef)
         return result
 
@@ -421,9 +442,14 @@ class RomlistDecoder(RomlistHandler):
             # create the objdef element
             eObjdef = ET.SubElement(root, 'objdef', objdef.toXmlAttrs())
             for name, val in objdef.params.items():
+                if val['type'] == 'vec3s': # HACK
+                    value = '%d %d %d' % val['value']
+                else: value = str(val['value'])
                 ET.SubElement(eObjdef, 'param', {
                     'name':  str(name),
-                    'value': str(val),
+                    'type':  str(val['type']),
+                    'offset': '0x%X' % val['offset'],
+                    'value': value,
                 })
         ET.ElementTree(root).write(path)
 
@@ -450,7 +476,19 @@ class RomlistEncoder(RomlistHandler):
         for name, func in attrs.items():
             result[name] = func(eObjdef.get(name))
         for eParam in eObjdef.findall('./param'):
-            result['params'][eParam.get('name')] = int(eParam.get('value'), 0)
+            typ = eParam.get('type')
+            val = eParam.get('value')
+            if typ == 'float': val = float(val)
+            elif typ == 'vec3s':
+                val = val.split()
+                val = (int(val[0]), int(val[1]), int(val[2]))
+                typ = '3h'
+            else: val = int(val, 0)
+            result['params'][eParam.get('name')] = {
+                'value':  val,
+                'type':   typ,
+                'offset': int(eParam.get('offset'), 0),
+            }
         return ObjDef(**result)
 
     def readRomlistXml(self, path:os.PathLike) -> list[ObjDef]:
@@ -466,22 +504,54 @@ class RomlistEncoder(RomlistHandler):
         """Write binary romlist."""
         for objdef in objdefs:
             outFile.write(objdef.toBytes())
-            dll = self.getObjDll(objdef.objType)
-            objParams = dll.objParams if dll else {}
+            # we need this if we write the params without type and offset.
+            # but doing that means we need to have the params for every DLL.
+            #dll = self.getObjDll(objdef.objType)
+            #objParams = dll.objParams if dll else {}
 
             # ensure the parameters are accounted for
-            for name in objdef.params.keys():
-                if name not in objParams:
-                    print("ERROR: Missing parameter '%s' for DLL %s" % (
-                        name, dll))
+            #for name in objdef.params.keys():
+            #    if name not in objParams:
+            #        print("ERROR: Missing parameter '%s' for DLL %s" % (
+            #            name, dll))
 
             # write the parameters
+            seenOffsets = set()
             paramData = {}
-            for name, param in objParams.items():
-                paramData[param.offset] = struct.pack(
-                    param.structFmt, objdef.params[name])
+            for name, param in objdef.params.items():
+                try:
+                    typ = '>' + types.get(param['type'], param['type'])
+                    tSize = struct.calcsize(typ)
+                    for i in range(tSize):
+                        seenOffsets.add(i+param['offset'])
+                    val = param['value']
+                    #if param['offset'] in paramData:
+                    #    print("Warning: overlapping params for %s at 0x%X" % (
+                    #        str(objdef), param['offset']))
+                    if type(val) in (list, tuple): # lol
+                        paramData[param['offset']] = struct.pack(typ, *val)
+                    else: paramData[param['offset']] = struct.pack(typ, val)
+                except:
+                    print("Error packing param", param)
+                    raise
+            for i in range(ObjDef._structLen, objdef.allocatedSize * 4):
+                if i not in seenOffsets:
+                    print("ERROR: No value for offset 0x%X of %s" % (
+                        i, str(objdef)))
+                    raise ValueError("Missing value")
+            # overlapping parameters are valid (some objdefs have unions)
+            # but if they're different size, we need to ensure we don't
+            # write too many bytes.
+            # eg if we have union { struct {u16 x, u16 y}; u32 z}
+            # then we'd put x at 0x00, y at 0x02, z at 0x00.
+            # if we see z last, it will replace x in paramData, but
+            # won't replace y, so we'd end up writing both y and z
+            # sequentially, when one should replace the other.
+            # XXX properly handle unions somehow.
+            base = outFile.tell()
             for i in range(ObjDef._structLen, objdef.allocatedSize * 4):
                 if i not in paramData: continue
+                outFile.seek(base+i-ObjDef._structLen)
                 outFile.write(paramData[i])
 
 
