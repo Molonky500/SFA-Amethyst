@@ -152,7 +152,8 @@ class App:
         """Modify a GameText bin file, adding all font characters from a set."""
         lang = os.path.basename(inPath).split('.')[0]
         if '_' in lang: lang = lang.split('_')[1]
-        lang   = LangEnum[lang]
+        try: lang   = LangEnum[lang]
+        except KeyError: lang = LangEnum.English
         reader = GameTextReader(inPath)
         writer = GameTextWriter(lang)
         for f in reader.textures: writer.addFont(f)

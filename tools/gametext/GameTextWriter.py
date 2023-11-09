@@ -119,7 +119,7 @@ class GameTextWriter:
         self.textures = []
         for i, builder in enumerate(self.texBuilder):
             self.textures.append(FontTexture.readImage(builder.build()))
-            self.textures[-1].image.save('tmp/built%d.png' % i) # debug
+            self.textures[-1].image.save('/tmp/built%d.png' % i) # debug
 
     def _generateCharStructs(self):
         """Generate the CharacterStruct table."""

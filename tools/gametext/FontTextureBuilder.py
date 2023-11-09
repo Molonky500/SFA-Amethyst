@@ -71,8 +71,8 @@ class FontTextureBuilder:
                         char, FontEnum(fontNo).name, path))
             else:
                 #print("Generate image for char", self.language, char)
-                size = self.font.getsize(char, language=LangCodes[self.language])
-                imgChr = Image.new('RGBA', size)
+                bbox = self.font.getbbox(char, language=LangCodes[self.language])
+                imgChr = Image.new('RGBA', (bbox[2], bbox[3]))
                 draw = ImageDraw.Draw(imgChr)
                 draw.text((0, 0), char, font=self.font)
                 self._imgCache[cacheKey] = imgChr
