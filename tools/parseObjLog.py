@@ -30,8 +30,9 @@ def main(inPath:str) -> None:
                 'id':            data[18],
                 'params':        data[19:],
             })
+    print("Obj#│ Timestamp│   PlayerX    PlayerY    PlayerZ Ly│Mp    Flags Sz A1 LF A2 Bd  ?    ObjectX    ObjectY    ObjectZ UniqueID Params")
     for i, entry in enumerate(entries):
-        print("%02X %10d %+10.2f %+10.2f %+10.2f %2d %02X %08X %2d %02X %02X %02X %02X %02X %+10.2f %+10.2f %+10.2f %08X %s" % (i,
+        print("%04X│%10d│%+10.2f %+10.2f %+10.2f %2d│%02X %08X %2d %02X %02X %02X %02X %02X %+10.2f %+10.2f %+10.2f %08X %s" % (i,
             entry['time'], entry['playerPos'][0], entry['playerPos'][1],
             entry['playerPos'][2], entry['mapLayer'],
             entry['mapId'], entry['flags'], entry['allocatedSize'],

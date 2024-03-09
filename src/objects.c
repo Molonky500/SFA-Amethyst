@@ -76,8 +76,7 @@ void objLogWrite() {
         OSReport("ERR: Failed to open obj log to write\r\n");
         return;
     }
-    DPRINT("Writing obj log %p to %p (%d x %d)\r\n", objLog, file,
-        sizeof(ObjLogEntry), MAX_OBJ_TYPE+1);
+    DPRINT("Writing obj log\r\n");
     wii->fwrite(objLog, sizeof(ObjLogEntry), MAX_OBJ_TYPE+1, file);
     wii->fclose(file);
     logNeedsWrite = false;

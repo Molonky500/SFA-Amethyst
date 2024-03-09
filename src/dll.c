@@ -86,8 +86,7 @@ void dllLogWrite() {
         OSReport("ERR: Failed to open DLL log to write\r\n");
         return;
     }
-    DPRINT("Writing DLL log %p to %p (%d x %d)\r\n", dllLog, file,
-        sizeof(DllLogEntry), NUM_DLLS);
+    DPRINT("Writing DLL log\r\n");
     wii->fwrite(dllLog, sizeof(DllLogEntry), NUM_DLLS, file);
     wii->fclose(file);
     logNeedsWrite = false;

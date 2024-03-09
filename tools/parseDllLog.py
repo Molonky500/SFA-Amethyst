@@ -28,8 +28,9 @@ def main(inPath:str) -> None:
                 'mapLayer':   data[5],
                 'ra':         data[6],
             })
+    print("Dll#│Parm│ Timestamp│   PlayerX    PlayerY    PlayerZ Ly│RtrnAddr")
     for i, dll in enumerate(dlls):
-        print("%04X %04X %10d %+10.2f %+10.2f %+10.2f %2d %08X" % (
+        print("%04X│%04X│%10d│%+10.2f %+10.2f %+10.2f %2d│%08X" % (
             i, dll['param'], dll['time'],
             dll['playerPos'][0], dll['playerPos'][1], dll['playerPos'][2],
             dll['mapLayer'], dll['ra']))
