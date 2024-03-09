@@ -188,6 +188,7 @@ void doAutoSave() {
 
     //technically the message appears after we save, but oh well
     autoSaveMsgTimer = 60;
+    tLastSave = getSystemTimeSecs();
 }
 
 void* saveMapLoadHook(MapDirIdx32 map, DataFileEnum file) {
