@@ -4,6 +4,7 @@ BUILD_PATH=./build
 DISCROOT=/home/rena/projects/sfa/DATA/
 NEWDOL=$DISCROOT/sys/main.dol
 INSTALL_PATH=$BUILD_PATH/SFA
+REAL_SD_PATH=/run/media/rena/WII
 
 # for Dolphin
 SD_MOUNT_PATH=/home/rena/.local/share/dolphin-emu/Load/WiiSDSync
@@ -71,6 +72,19 @@ elif [ "$TARGET" == "dolphin" ]; then
     # this variable runs Dolphin on the primary AMD GPU,
     # instead of the weaker embedded one.
     DRI_PRIME=1 dolphin-emu -d ./app/boot.dol
+
+elif [ "$TARGET" == "realsd" ]; then
+    # Build and install to SD card for real Wii
+
+    if [ -e $REAL_SD_PATH/apps ]
+    then cp -r app/* $REAL_SD_PATH/apps/SFA/
+    else
+        echo "SD not mounted!"
+        exit 1
+    fi
+    echo "Copying files..."
+    cp -vru $DISCROOT/* $REAL_SD_PATH/apps/SFA/files/
+    umount $REAL_SD_PATH
 
 elif [ "$TARGET" == "real" ]; then
     # Build and send via wiiload
