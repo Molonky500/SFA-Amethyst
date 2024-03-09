@@ -255,6 +255,8 @@ void* streamThreadMain(void *param) {
 
 	exiPrintf("Decoding stream to 0x%08X, %d samples  \r\n",
 		streamDecodeBuf, nSamples);
+	//avoid static at start of first stream
+	memset(streamDecodeBuf, 0, STREAM_DECODE_BUF_SIZE);
 
 	//HACK to fix volume resetting to 0 on load
 	//void (*audioSetVolumes)(uint volume,uint scale,int bMusic,
@@ -262,6 +264,7 @@ void* streamThreadMain(void *param) {
 	//audioSetVolumes(100, 1000, 1, 1, 1); //no idea what scale is
 
 	bool restart = true;
+	bool justStarted = false;
 	u32 iSample = 0;
 	static u64 prevTime = 0; //must be a constant
 	if(!prevTime) prevTime = OSGetTime(); //ugh
@@ -274,7 +277,7 @@ void* streamThreadMain(void *param) {
 		} while(!curStreamFile);
 		if(restart) {
 			exiPrintf("Starting stream\r\n");
-			audioPlaySound(NULL, STREAM_REPLACE_SFX_ID);
+			justStarted = true;
 			restart = false;
 			iSample = 0;
 			*pStreamPos = 0;
@@ -327,6 +330,10 @@ void* streamThreadMain(void *param) {
 			}
 			DCFlushRange(&streamDecodeBuf[iSample],
 				STREAM_SAMPLES_PER_BLOCK * STREAM_SAMPLE_SIZE);
+			if(justStarted) {
+				audioPlaySound(NULL, STREAM_REPLACE_SFX_ID);
+				justStarted = false;
+			}
 		}
 
 		if(remain <= 0) {
