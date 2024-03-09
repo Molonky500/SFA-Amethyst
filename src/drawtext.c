@@ -261,6 +261,8 @@ Color4b color, float scale) {
     int FW = japanese ? FIXED_CHR_WIDTH_JAPANESE : FIXED_CHR_WIDTH;
     int LH = japanese ? LINE_HEIGHT_JAPANESE : LINE_HEIGHT;
 
+    if(!PTR_VALID(str)) str = "<???>";
+
     //OSReport("Draw text: %08X %s", str, str);
     while(true) {
         int cSize = 0;
