@@ -5,17 +5,18 @@
 //and the GC-side mod code.
 #define WII_IFACE_MAGIC 0xF0C5BABE
 
-#define WM_FLAG_PRESENT 0x01 //Wiimote is present
-#define WM_FLAG_WORKING 0x02 //Wiimote is connected and working
-#define WM_FLAG_MPLUS   0x04 //MotionPlus is connected
+#define WM_FLAG_PRESENT   0x0001 //Wiimote is present
+#define WM_FLAG_WORKING   0x0002 //Wiimote is connected and working
+#define WM_FLAG_MPLUS     0x0004 //MotionPlus is connected
 //following can be set by GC code
-#define WM_FLAG_RUMBLE  0x08 //Motor is on
-#define WM_FLAG_LED1    0x10 //LED 1 is on
-#define WM_FLAG_LED2    0x20 //LED 2 is on
-#define WM_FLAG_LED3    0x40 //LED 4 is on
-#define WM_FLAG_LED4    0x80 //LED 8 is on
-#define WM_FLAG_LED_MASK 0xF0
-#define WM_FLAG_IR_VALID 0x100
+#define WM_FLAG_RUMBLE    0x0008 //Motor is on
+#define WM_FLAG_LED1      0x0010 //LED 1 is on
+#define WM_FLAG_LED2      0x0020 //LED 2 is on
+#define WM_FLAG_LED3      0x0040 //LED 4 is on
+#define WM_FLAG_LED4      0x0080 //LED 8 is on
+#define WM_FLAG_LED_MASK  0x00F0
+#define WM_FLAG_IR_VALID  0x0100
+#define WM_FLAG_IR_SMOOTH 0x0200
 #define WM_FLAG_GC_CONTROLLED_MASK (WM_FLAG_RUMBLE | WM_FLAG_LED_MASK)
 #define GAME_MAX_WIIMOTES 4
 
@@ -23,6 +24,7 @@ typedef struct {
     //readable - the Wiimote itself
     u16 flags; //WM_FLAG_*
     u8  battery; //0-255
+    u8  irNumDots;
     u32 btnsDown, btnsHeld, btnsUp;
     float accel[3], orient[3], gforce[3];
     float ir[3], irAngle;
@@ -52,7 +54,19 @@ typedef struct {
 
     //function pointers filled in by loader for game to use.
     void (*updateWiimotes)(void);
+    FILE* (*fopen)(const char *filename, const char *mode);
+    int (*fclose)(FILE *stream);
+    size_t (*fread)(void *buffer, size_t size, size_t count, FILE *stream);
+    size_t (*fwrite)(const void *buffer, size_t size, size_t count, FILE *stream);
+    DIR* (*opendir)(const char *dirname);
+    int (*closedir)(DIR *dirp);
+    struct dirent* (*readdir)(DIR *dirp);
+    void (*rewinddir)(DIR *dirp);
+    void (*seekdir)(DIR *dirp, long loc);
+    long (*telldir)(DIR *dirp);
+    int (*stat)(const char *path, struct stat *buf);
 
+    const char *gameRootDir;
     u8 language; //read from Wii config
 } GameWiiInterface;
 

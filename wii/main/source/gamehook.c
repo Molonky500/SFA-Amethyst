@@ -101,7 +101,21 @@ void initGameHooks() {
     exiPuts("Init Wii iface...\n");
     GameWiiInterface *wii = WII_IFACE_PTR;
     wii->updateWiimotes = updateWiimotes;
-    wii->magic = WII_IFACE_MAGIC;
+    wii->magic          = WII_IFACE_MAGIC;
+    wii->fopen          = fopen;
+    wii->fclose         = fclose;
+    wii->fread          = fread;
+    wii->fwrite         = fwrite;
+    wii->opendir        = opendir;
+    wii->closedir       = closedir;
+    wii->readdir        = readdir;
+    wii->rewinddir      = rewinddir;
+    wii->seekdir        = seekdir;
+    wii->telldir        = telldir;
+    wii->stat           = stat;
+    wii->gameRootDir    = gameRootDir;
+
+    exiPrintf("sizeof(FILE) = %d, DIR=%d\n", sizeof(FILE), sizeof(DIR));
 
     //Get some of the Wii's system settings and
     //apply them to the game's defaults.

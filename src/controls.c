@@ -39,6 +39,7 @@ void displayWiimoteState(int iPad, GameWiimoteState *wp) {
         );
 
     switch(wp->expType) {
+        //case EXP_MOTION_PLUS_NUNCHUK:
         case WPAD_EXP_NUNCHUK: {
             vec3f orient;
             wiiGetNunchukNormalizedOrient(iPad, &orient);
@@ -179,8 +180,9 @@ bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     float x = wp->ir[0] - (float)(SCREEN_WIDTH / 2);
     float y = wp->ir[1] - (float)(SCREEN_HEIGHT / 2);
     if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
-        debugPrintf("IR AIM: %4d, %4d (%4d, %4d) %04X\n", (int)x, (int)y,
-            (int)prevAimX, (int)prevAimY, wp->flags);
+        debugPrintf("IR AIM: %4d, %4d (prev %4d, %4d) d=%d f=%04X\n",
+            (int)x, (int)y, (int)prevAimX, (int)prevAimY,
+            wp->irNumDots, wp->flags);
     }
     //XXX apparently this flag isn't set when aiming
     //toward the right edge of the screen, even though

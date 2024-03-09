@@ -4,8 +4,8 @@ u8 cameraFlags = CAM_FLAG_PLAYER_AXIS; //CameraFlags
 s8 debugCameraMode = CAM_MODE_NORMAL; //CameraMode
 
 float nunchukXScale =  0.4f, nunchukYScale =  0.4f;
-float nunchukXMax   = 32.0f, nunchukYMax   = 32.0f;
-float nunchukXMin   = 16.0f, nunchukYMin   = 16.0f;
+float nunchukXMax   = 16.0f, nunchukYMax   = 16.0f;
+float nunchukXMin   =  6.0f, nunchukYMin   =  6.0f;
 
 //static void (*origFunc)(Camera *self);
 
@@ -116,26 +116,37 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
     else if(pCamera->target) target = pCamera->target;
     else*/ target = pCamera->focus;
 
+    vec3f tgtPos = target->pos.pos;
+    if(target->heldBy) {
+        tgtPos.x += target->heldBy->pos.pos.x;
+        tgtPos.y += target->heldBy->pos.pos.y;
+        tgtPos.z += target->heldBy->pos.pos.z;
+    }
+
     //cameraGetFocusObjDistance(height, pCamera, &dx, &dy, &dz, &dxz, true);
     //we don't need dx and dz here but we can't pass NULL for them.
 
-    dy = pCamera->pos.xf.pos.y - (target->pos.pos.y + height);
+    dy = pCamera->pos.xf.pos.y - (tgtPos.y + height);
     /*float *paramsCombat = *(float**)0x803dd568;
     if(paramsCombat) {
         dxz = paramsCombat[0];
     }
-    else {
-        dx  = pCamera->pos.xf.pos.x -  target->pos.pos.x;
-        dz  = pCamera->pos.xf.pos.z -  target->pos.pos.z;
+    else {*/
+        dx  = pCamera->pos.xf.pos.x - tgtPos.x;
+        dz  = pCamera->pos.xf.pos.z - tgtPos.z;
         dxz = sqrtf((dx*dx)+(dz*dz));
-    }*/
-    //static float prev_dxz = 0.0f;
-    //debugPrintf("CAMERA dy=%f dxz=%f (%f)\n", dy, dxz, ABS(dxz - prev_dxz));
-    //prev_dxz = dxz;
+    //}
+    static float prev_dxz = 0.0f;
+    debugPrintf("CAMERA dy=%f dxz=%f (%f)\n", dy, dxz, ABS(dxz - prev_dxz));
+    prev_dxz = dxz;
 
     //calculate the angle
     s16 rx = pCamera->pos.xf.rotation.x;
     s16 ry = pCamera->pos.xf.rotation.y;
+    /*if(target->heldBy) {
+        rx += target->heldBy->pos.rotation.x;
+        ry += target->heldBy->pos.rotation.y;
+    }*/
     rx += stickX * 16.0 * framesThisStep;
     ry += stickY * 16.0 * framesThisStep;
     dy += (float)stickY * (1.0 / 32.0) * framesThisStep;
@@ -155,9 +166,9 @@ void _camDoRotateAroundPlayerDefault(float stickX, float stickY) {
     //siny = sinf(pi *  ry / 32768.0);
     cosy = cosf(pi *  ry / 32768.0) * dxz;
 
-    pCamera->pos.xf.pos.x = target->pos.pos.x + cosy * cosx;
-    pCamera->pos.xf.pos.y = target->pos.pos.y + height + dy;
-    pCamera->pos.xf.pos.z = target->pos.pos.z + cosy * sinx;
+    pCamera->pos.xf.pos.x = tgtPos.x + cosy * cosx;
+    pCamera->pos.xf.pos.y = tgtPos.y + height + dy;
+    pCamera->pos.xf.pos.z = tgtPos.z + cosy * sinx;
 
     /*pCamera->prevPos = pCamera->pos.pos;
     pCamera->prevPos44 = pCamera->pos.pos;

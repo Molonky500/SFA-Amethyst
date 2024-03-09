@@ -22,6 +22,7 @@ s16 overrideColorScale = -1;
 u8 overrideFov = 60;
 u8 furFxMode = 0; //FurFxMode
 u16 dayOfYear, curYear;
+u32 curTimeStamp;
 bool bRumbleBlur = false;
 bool bDisableParticleFx = false;
 bool bNoAimSnap = false;
@@ -38,6 +39,7 @@ static inline void checkTime() {
     //everything says this should be / 4 but I only get anything
     //sensible with / 2.
     float secs = fTicks / ((double)__OSBusClock / 2.0);
+    curTimeStamp = (u32)secs;
     int days  = secs / 86400.0f; //non-leap days
     curYear = secs / 31556908.8f; //approximate average
     dayOfYear = days % 365 - (curYear / 4);
@@ -235,6 +237,9 @@ void mainLoopHook() {
         //if not on title screen, reset this flag, so we can
         //load args again on next reset.
         didTryLoadArgs = 0;
+        #if LOG_DLLS
+            dllLogWrite();
+        #endif
     }
 }
 
@@ -394,7 +399,7 @@ void _start(void) {
     debugObjsInit();
     titleHooksInit();
     logHitsInit();
-    hitboxHooksInit();
+    renderHooksInit();
     initMapHacks();
     staffFxInit();
     _initDebugPrintHacks();

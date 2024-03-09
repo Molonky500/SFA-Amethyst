@@ -154,10 +154,12 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
     if(pad->ir.smooth_valid) {
         state->ir[0] = pad->ir.sx;
         state->ir[1] = pad->ir.sy;
+        state->flags |= WM_FLAG_IR_SMOOTH;
     }
     else if(pad->ir.raw_valid) {
         state->ir[0] = pad->ir.ax;
         state->ir[1] = pad->ir.ay;
+        state->flags &= ~WM_FLAG_IR_SMOOTH;
     }
     //even a single dot is enough for basic motion
     //tracking, though two are needed for angle.
@@ -165,9 +167,11 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
     else state->flags &= ~WM_FLAG_IR_VALID;
     state->ir[2] = pad->ir.z;
     state->irAngle = pad->ir.angle;
+    state->irNumDots = pad->ir.num_dots;
 
     state->expType = pad->exp.type;
     switch(state->expType) {
+        //case EXP_MOTION_PLUS_NUNCHUK:
         case WPAD_EXP_NUNCHUK: {
             state->exp.nunchuk.btnsDown = pad->exp.nunchuk.btns;
             state->exp.nunchuk.btnsHeld = pad->exp.nunchuk.btns_held;
@@ -201,21 +205,30 @@ void updateGameWiimoteIface(WPADData *pad, int iPad) {
 void updateWiimotes() {
     for(int iPad=0; iPad < GAME_MAX_WIIMOTES; iPad++) {
         GameWiimoteState *state = &wiiIface.wiimote[iPad];
-        state->flags &= ~(WM_FLAG_PRESENT | WM_FLAG_WORKING);
+        state->flags &= ~(WM_FLAG_PRESENT | WM_FLAG_WORKING |
+            WM_FLAG_IR_VALID | WM_FLAG_IR_SMOOTH);
     }
     if(!checkWpads()) return;
 
+    static bool wasInit[GAME_MAX_WIIMOTES] = {false};
     for(int iPad=0; iPad < GAME_MAX_WIIMOTES; iPad++) {
         GameWiimoteState *state = &wiiIface.wiimote[iPad];
         int err = WPAD_Probe(iPad, NULL);
         if(err == WPAD_ERR_NONE) {
             state->flags |= WM_FLAG_PRESENT | WM_FLAG_WORKING;
             //debugPrintf("WP%d OK %02X\n", iPad, state->flags);
+            if(!wasInit[iPad]) {
+                wasInit[iPad] = true;
+                WPAD_SetDataFormat(iPad, WPAD_FMT_BTNS_ACC_IR);
+                WPAD_SetVRes(iPad, 640 + 128, 480 + 128);
+                //WPAD_SetMotionPlus(iPad, 2); //Nunchuk passthru
+            }
 			wpads[iPad] = WPAD_Data(iPad);
             updateGameWiimoteIface(wpads[iPad], iPad);
-        } else if(err == -1) {
-            //not connected; nothing to do here
+        } else if(err == -1) { //not connected
+            wasInit[iPad] = false;
 		} else { //not ready
+            wasInit[iPad] = false;
             state->flags |= WM_FLAG_PRESENT;
             debugPrintf("WP%d err %d\n", iPad, err);
 			wpads[iPad] = NULL;
