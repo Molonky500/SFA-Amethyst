@@ -227,7 +227,7 @@ void mapStatesMenu_draw(Menu *self) {
             str[0] = '\e'; str[1] = 'F'; //fixed width
             u32 groups = mainGetBit(mapObjGroupBit[iMap]);
             for(int iBit=0; iBit<32; iBit++) {
-                str[iBit+2] = ((groups >> (31 - iBit)) & 1) + 0x30;
+                str[iBit+2] = ((groups >> iBit) & 1) + 0x30;
                 str[iBit+3] = 0;
             }
             menuDrawText(str, x + 220, y, selected);
@@ -267,7 +267,7 @@ void mapStatesMenu_run(Menu *self) {
         }
         else { //change obj group
             if(mapObjGroupBit[iMap]) {
-                int iBit = 31 - (cursorX - 1);
+                int iBit = (cursorX - 1);
                 u32 groups = mainGetBit(mapObjGroupBit[iMap]);
                 groups = (groups >> iBit) & 1;
                 gplaySetObjGroupStatus(iMap, iBit, groups ^ 1);
