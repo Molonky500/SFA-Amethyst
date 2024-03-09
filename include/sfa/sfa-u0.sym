@@ -345,6 +345,7 @@ isDvdDriveBusy = 0x803dc950;
 isJapanese = 0x803dc968;
 joypadDisable = 0x803dc908;
 levelLockBuckets = 0x803db5b0;
+loadCharacter = 0x8002d55c;
 loadFileByPath = 0x80015ab4;
 loadedFileMapIds = 0x8035f548;
 loadedObjects = 0x803dcb88;

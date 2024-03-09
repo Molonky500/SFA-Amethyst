@@ -143,6 +143,7 @@ GLOBALFN void ICInvalidateRange(void* dest, u32 size);
 GLOBALFN void initFn_800534f8(void);
 GLOBALFN bool isCheatActive(uint);
 GLOBALFN bool isCheatUnlocked(uint);
+GLOBALFN ObjInstance* loadCharacter(ObjDef *def,uint flags,int mapId,s16 objNo,ObjInstance *heldBy);
 GLOBALFN void* loadFileByPath(char *path,uint *outSize);
     // Returns pointer to allocated buffer of contents.
     // outSize: if not NULL, receives file size.

@@ -3,6 +3,7 @@
 
 //file logging for game code analysis. only works on Wii.
 #define LOG_DLLS 1 //log when each DLL is first loaded
+#define LOG_OBJS 1 //log when each object is first instantiated
 
 typedef enum {
     DEBUGTEXT_TRICKY            = (1 <<  0),

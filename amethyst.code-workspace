@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "../../../../micros/teensy/gecko"
+		},
+		{
+			"path": "../../../../micros/arduino/Gecko"
 		}
 	],
 	"settings": {

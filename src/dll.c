@@ -2,7 +2,7 @@
 #include "revolution/os.h"
 
 #if LOG_DLLS
-typedef struct {
+typedef struct PACKED {
     u16 param;
     u32 time;
     float playerPos[3];
@@ -21,8 +21,6 @@ void dllLogInit() {
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!wii) return;
     DPRINT("game root = %s\n", wii->gameRootDir);
-
-    char path[1024];
     sprintf(dllLogPath, "%s/dlllog.bin", wii->gameRootDir);
 
     /*DPRINT("fopen     = %p\r\n", wii->fopen);

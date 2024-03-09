@@ -10,6 +10,7 @@
 #define SCREEN_WIDTH  640
 #define SCREEN_HEIGHT 480
 #define MAX_POPUP_MSGS 8
+#define MAX_OBJ_TYPE 0x889
 
 //text sizing
 #define LINE_HEIGHT 16
@@ -241,7 +242,11 @@ extern u8 overrideMinimapAlpha;
 void minimapMainLoopHook();
 
 //objects.c
+#if LOG_OBJS
+void objLogWrite();
+#endif
 bool isObjectEnabled(ObjInstance *obj);
+void objHooksinit();
 
 //pdahook.c
 void pdaHookInit();

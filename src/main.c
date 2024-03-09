@@ -240,6 +240,9 @@ void mainLoopHook() {
         #if LOG_DLLS
             dllLogWrite();
         #endif
+        #if LOG_OBJS
+            objLogWrite();
+        #endif
     }
 }
 
@@ -373,6 +376,7 @@ void _start(void) {
     initBootHacks();
     initBugFixes();
     dllHooksInit();
+    objHooksinit();
     if(!runLoadingScreens_replaced) {
         runLoadingScreens_replaced = (void(*)())hookBranch(0x80020f2c,
             runLoadingScreens_hook, 1);
