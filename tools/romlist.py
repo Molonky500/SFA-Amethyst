@@ -288,7 +288,16 @@ class ObjDef:
         return "ObjDef(%s)" % (', '.join(result))
 
 
-class RomlistHandler:
+class XmlHandler:
+    """Base for classes that operate on the xml files."""
+
+    _xmlPath: os.PathLike
+    """Path to the directory containing objects.xml and dlls.xml."""
+
+    def __init__(self, xmlPath:os.PathLike) -> None:
+        self._xmlPath = Path(xmlPath)
+
+class RomlistHandler(XmlHandler):
     """Base for classes that operate on romlists."""
 
     objTypes: dict[int, ObjClass]
@@ -297,11 +306,8 @@ class RomlistHandler:
     dlls: dict[int, DLL]
     """The DLLs, indexed by ID."""
 
-    _xmlPath: os.PathLike
-    """Path to the directory containing objects.xml and dlls.xml."""
-
     def __init__(self, xmlPath:os.PathLike) -> None:
-        self._xmlPath = Path(xmlPath)
+        super().__init__(xmlPath)
         self._readObjectsXml()
         self._readDllsXml()
 
@@ -553,6 +559,73 @@ class RomlistEncoder(RomlistHandler):
                 if i not in paramData: continue
                 outFile.seek(base+i-ObjDef._structLen)
                 outFile.write(paramData[i])
+        # write EOF marker
+        #outFile.write(b'\0\0\0\xFF')
+
+        # pad file to 32 bytes
+        #offs = outFile.tell()
+        #nPad = offs & 31
+        #if nPad:
+        #    nPad = 32 - nPad
+        #    outFile.write(b'\0' * nPad)
+
+
+class MapsBinRomlistUpdater(XmlHandler):
+    """Updates romlist sizes in MAPS.bin."""
+
+    romlistMapIds: dict[str,int]
+    """Dict of romlist name => map ID."""
+
+    root: Path
+    """Path to game's root directory."""
+
+    def __init__(self, xmlPath:os.PathLike, root:os.PathLike) -> None:
+        super().__init__(xmlPath)
+        self.root = Path(root)
+        self._readMapsXml()
+
+    def _readMapsXml(self) -> None:
+        """Read map data from maps.xml.
+
+        Populate self.romlistMapIds with the read data.
+        """
+        root = ET.parse(self._xmlPath / 'maps.xml').getroot()
+        self.romlistMapIds = {}
+        for eMap in root.findall('./map'):
+            try:
+                romlist = eMap.get('romlist', None)
+                id = eMap.get('id', None) # not dirid
+                if id is None or romlist is None: continue
+                self.romlistMapIds[romlist] = int(id, 0)
+            except:
+                print("Error parsing map element:", eMap.tag)
+                for k, v in eMap.attrib.items(): print("", k, v)
+                raise
+
+    def getMapIdForRomlist(self, romlist:str) -> int:
+        """Get the map ID for the romlist name."""
+        return self.romlistMapIds.get(romlist, None)
+
+    def calcTabEntryOffset(self, mapId:int) -> int:
+        """Calculate the location in MAPS.tab of this map's offsets."""
+        return mapId * 7 * 4 # 7 u32 values
+        #infoOffset, blockTable, rects1, rects2, rects3, rects4, listSize
+
+    def setMapRomlistSize(self, mapId:int, size:int) -> None:
+        """Write the romlist size in MAPS.bin."""
+        assert size < 65536, "Romlist too large (max 65535 bytes)"
+        with open(self.root / 'MAPS.tab', 'rb') as mapsTab:
+            mapsTab.seek(self.calcTabEntryOffset(mapId))
+            offsInfo = struct.unpack('>I', mapsTab.read(4))[0] # grumble
+            mapsTab.seek(self.calcTabEntryOffset(mapId) + (6*4))
+            offsFacefeed = struct.unpack('>I', mapsTab.read(4))[0] # grumble
+
+        #print("MAPS.bin offset: 0x%X" % offsInfo)
+        with open(self.root / 'MAPS.bin', 'r+b') as mapsBin:
+            mapsBin.seek(offsInfo+8)
+            mapsBin.write(struct.pack('>H', size))
+            mapsBin.seek(offsFacefeed+4)
+            mapsBin.write(struct.pack('>I', size))
 
 
 class App:
@@ -563,8 +636,11 @@ class App:
 
     def showUsage(self) -> None:
         print("Usage: %s MODE XMLPATH INPATH OUTPATH" % sys.argv[0])
-        print("MODE is 'pack' or 'unpack'")
-        print("XMLPATH points to directory containing dlls.xml and objects.xml")
+        print(
+            "MODE is 'pack', 'unpack', or 'updateSize'.\n"
+            "XMLPATH points to directory containing dlls.xml and objects.xml\n"
+            "For updateSize, INPATH is the romlist.bin file, and OUTPATH is\n"
+            "the game's root directory.")
 
     def pack(self, inPath:os.PathLike, outPath:os.PathLike) -> None:
         """Pack romlist from XML."""
@@ -580,6 +656,25 @@ class App:
             objdefs = decoder.unpackRomlist(inFile)
         decoder.writeRomListXml(objdefs, outPath)
 
+    def updateSize(self, romlist:os.PathLike, root:os.PathLike) -> None:
+        """Set a map's romlist size to match the file.
+
+        :param romlist: The path to the uncompressed romlist.bin file.
+        :param root: The path to the game's root directory.
+
+        Writes the romlist file's size into the MAPS.bin entry corresponding
+        to the romlist file's name.
+        """
+        updater = MapsBinRomlistUpdater(self._xmlPath, root)
+        romlist = Path(romlist)
+        mapName = romlist.name.split('.')[0]
+        mapId   = updater.getMapIdForRomlist(mapName)
+        if mapId is None:
+            raise ValueError("No such map: '%s'" % str(mapName))
+        size = os.stat(romlist).st_size
+        #print("Set size of map ID 0x%X to 0x%X (%s)" % (mapId, size, mapName))
+        updater.setMapRomlistSize(mapId, size)
+
     def main(self, args:list[str]) -> None:
         try:
             mode = args.pop(0)
@@ -592,6 +687,7 @@ class App:
 
         if   mode == 'unpack': self.unpack(inPath, outPath)
         elif mode == 'pack':   self.pack  (inPath, outPath)
+        elif mode == 'updateSize': self.updateSize(inPath, outPath)
         else: self.showUsage()
 
 if __name__ == '__main__':
