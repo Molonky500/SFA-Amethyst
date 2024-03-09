@@ -22,6 +22,14 @@ typedef struct PACKED {
 } SaveGameObjectPos;
 
 typedef struct PACKED {
+    u32 id; //ObjUniqueId
+    float time;
+} SaveGameTimeLog;
+
+#define MAX_OBJECT_SAVES 63 //not 64
+#define MAX_TIME_SAVES 256
+
+typedef struct PACKED {
     PlayerCharState   charState[2];     //0x00
     u8                trickyEnergy;     //0x18
     u8                maxTrickyEnergy;  //0x19 HUD always shows 5 shrooms
@@ -33,7 +41,7 @@ typedef struct PACKED {
     byte              flag_0x22;        //0x22
     byte              unk23;            //0x23
     u8                gameBits2[324];   //0x24
-    SaveGameObjectPos objs[63];         //0x168
+    SaveGameObjectPos objs[MAX_OBJECT_SAVES]; //0x168
     u8                texts[5];	        //0x558 hint texts (+0xF4 = text ID)
     byte              completion;	    //0x55d percent = (this / 187) * 100
     byte              numTexts;         //0x55e number of hint texts?

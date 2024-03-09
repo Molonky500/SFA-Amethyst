@@ -21,6 +21,9 @@
 
 typedef void (*CARDCallback)(s32 chan, s32 result);
 
+#define MAX_OBJECT_SAVES 63 //not 64
+#define MAX_TIME_SAVES 256
+
 typedef struct {
     u8  exists;
     u8  unused01; //Amethyst: extra options
@@ -81,6 +84,11 @@ typedef struct {
     vec3f pos;
 } SaveGameObjectPos;
 
+typedef struct PACKED {
+    u32 id; //ObjUniqueId
+    float time;
+} SaveGameTimeLog;
+
 typedef struct {
     vec3f pos;
     s8 rotX; //high byte of vec3s.x
@@ -107,24 +115,24 @@ typedef struct {
 } SaveGameEnvState;
 
 typedef struct {
-   PlayerCharState charState[2];
-   SavedTrickyState tricky;
-   char saveFileName[4]; //null terminated
-   s8 character;
-   u8 flags21; //80=erase me; 60=save slot
-   u8 flag_0x22;
-   u8 unk23;
-   u8 gameBits2[324];
-   SaveGameObjectPos objs[63];
-   u8 texts[5]; //hint texts
-   u8 completion; //percent = (this / 187) * 100
-   u8 numTexts;
-   float playTime; //frame count
-   u8 gameBits1[116];
-   u8 gameBits3[172];
-   PlayerCharPos charPos[2];
-   s16 camVar6A4; //related to camera actions?
-   SaveGameEnvState env; //environment settings
+    PlayerCharState charState[2];
+    SavedTrickyState tricky;
+    char saveFileName[4]; //null terminated
+    s8 character;
+    u8 flags21; //80=erase me; 60=save slot
+    u8 flag_0x22;
+    u8 unk23;
+    u8 gameBits2[324];
+    SaveGameObjectPos objs[63];
+    u8 texts[5]; //hint texts
+    u8 completion; //percent = (this / 187) * 100
+    u8 numTexts;
+    float playTime; //frame count
+    u8 gameBits1[116];
+    u8 gameBits3[172];
+    PlayerCharPos charPos[2];
+    s16 camVar6A4; //related to camera actions?
+    SaveGameEnvState env; //environment settings
 } SaveGame;
 
 typedef struct {

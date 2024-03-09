@@ -111,7 +111,7 @@
 .global _restfpr_31
 .global _restfpr_31_x
 
-# there are copies of these (except the _x versiosn) in the game,
+# there are copies of these (except the _x versions) in the game,
 # but because we don't know what address our code will load at,
 # it would take more instructions to call those than to just
 # duplicate them here. these are used by -Os and that still saves

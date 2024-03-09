@@ -89,7 +89,7 @@ void iguanaPutsNoFlush(const char *str) {
             (3 << 4) | //4 bytes
             (1 << 0); //start now
         while(exi[3] & 1); //wait for transfer
-        udelay(500);
+        udelay(500); //XXX properly check if transfer succeeded
     }
 
     //exi[0] |= (1 << 1) | (1 << 11); //clear interrupt flags

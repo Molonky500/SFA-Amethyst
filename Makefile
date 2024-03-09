@@ -30,7 +30,7 @@ $(BUILDDIR)/bootstrap.bin: $(BUILDDIR) $(BUILDDIR)/bootstrap.elf
 	@$(TOOL)objcopy -O binary $(BUILDDIR)/bootstrap.elf $(BUILDDIR)/bootstrap.bin
 	#@rm $(BUILDDIR)/bootstrap.elf
 
-$(BUILDDIR)/%.elf: $(BUILDDIR) %/main.c
+$(BUILDDIR)/%.elf: $(BUILDDIR) %/*.c
 	@$(MAKE) --eval="NAME=$*" -f elf.mk
 
 $(BUILDDIR)/%.elf: $(BUILDDIR) $(BUILDDIR)/symbols.s %/main.s
