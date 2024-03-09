@@ -79,6 +79,18 @@ void menuDebugRenderDebugMapGeom_select(const MenuItem *self, int amount) {
 }
 
 
+void menuDebugRenderCurves_draw(const MenuItem *self, int x, int y, bool selected) {
+    char str[256];
+    sprintf(str, self->fmt, T(self->name), (debugRenderFlags & DEBUGRENDER_CURVES) ?
+        T("On") : T("Off"));
+    menuDrawText(str, x, y, selected);
+}
+void menuDebugRenderCurves_select(const MenuItem *self, int amount) {
+    debugRenderFlags ^= DEBUGRENDER_CURVES;
+    audioPlaySound(NULL, MENU_ADJUST_SOUND);
+}
+
+
 void menuDebugRenderPlayerVel_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     sprintf(str, self->fmt, T(self->name), (debugRenderFlags & DEBUGRENDER_PLAYER_VEL) ?
@@ -162,6 +174,7 @@ Menu menuDebugRender = {
     "Debug Objects",      _FMT, menuDebugRenderDebugObjs_draw,    menuDebugRenderDebugObjs_select,
     "Hide Disabled",      _FMT, menuDebugRenderHideDisabled_draw, menuDebugRenderHideDisabled_select,
     "Hidden Polys",       _FMT, menuDebugRenderDebugMapGeom_draw, menuDebugRenderDebugMapGeom_select,
+    "Curves",             _FMT, menuDebugRenderCurves_draw,       menuDebugRenderCurves_select,
     "Player Velocity",    _FMT, menuDebugRenderPlayerVel_draw,    menuDebugRenderPlayerVel_select,
     "Hitboxes",           _FMT, menuDebugRenderHitboxes_draw,     menuDebugRenderHitboxes_select,
     "Attach Points",      _FMT, menuDebugRenderAttachPoints_draw, menuDebugRenderAttachPoints_select,

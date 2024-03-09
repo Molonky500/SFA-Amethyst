@@ -53,6 +53,10 @@ extern volatile u32 *_ipcReg;
 extern volatile u32 *_exiReg;
 extern volatile u32 *_aiReg;
 
+//some defs to make Wii stdlib stuff work.
+#include <stdio.h>
+typedef struct {u8 _dummy[272];} DIR;
+
 #include "../gameWiiIface.h"
 #include "wpad.h"
 #include "wii.h"
@@ -128,12 +132,17 @@ int padGetStickYHook(int pad);
 void wiiControlsInit();
 
 //dll.c
+void dllLogWrite();
 void dllHooksInit();
 
 //draw.c
+void beginDebugRender();
+void endDebugRender();
 void begin2D(Color4b *color);
 void write2Dvtx(float x, float y);
 void draw2Dbox(float x, float y, float w, float h, const Color4b *color);
+void renderObjsHook(u8 param);
+void renderHooksInit();
 
 //drawarrow.c
 void drawArrow(vec3f pos, vec3s rot, float scale, Color4b color);
@@ -182,7 +191,11 @@ void gameBitHookInit();
 void gameBitHookUpdate();
 
 //hitbox.c
-void hitboxHooksInit();
+void drawHitbox(ObjInstance *obj);
+void drawAttachPoints(ObjInstance *obj);
+void drawFocusPoints(ObjInstance *obj);
+void drawUnkPoints(ObjInstance *obj);
+void _renderObjHitboxes(ObjInstance *obj);
 
 //hook.c
 uint32_t hookBranch(uint32_t addr, void *target, int isBl);
@@ -202,6 +215,7 @@ extern s16 overrideColorScale;
 extern u8 overrideFov;
 extern u8 furFxMode;
 extern u16 dayOfYear, curYear;
+extern u32 curTimeStamp;
 extern bool bRumbleBlur;
 extern bool bDisableParticleFx;
 extern bool bNoAimSnap;

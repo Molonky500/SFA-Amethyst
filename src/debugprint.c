@@ -33,6 +33,8 @@ u32 debugRenderFlags =
     //DEBUGRENDER_ATTACH_POINTS |
     //DEBUGRENDER_FOCUS_POINTS |
     //DEBUGRENDER_UNK_POINTS |
+    //DEBUGRENDER_PLAYER_VEL |
+    DEBUGRENDER_CURVES |
     0;
 
 ObjInstance *dprintObjs[MAX_DPRINT_OBJS];
@@ -114,32 +116,34 @@ static void printCoords() {
     //Display player coords
     //debugPrintf doesn't support eg '%+7.2f'
     char buf[256];
+    vec3f pos;
     if(pPlayer) {
-        vec3f pos = pPlayer->pos.pos;
+        pos = pPlayer->pos.pos;
         if(pPlayer->heldBy) {
             pos.x += pPlayer->heldBy->pos.pos.x;
             pos.y += pPlayer->heldBy->pos.pos.y;
             pos.z += pPlayer->heldBy->pos.pos.z;
         }
-        sprintf(buf, "%+7.2f %+7.2f %+7.2f", pos.x, pos.y, pos.z);
+        sprintf(buf, "%+7.2f %+7.2f %+7.2f (%+7.2f %+7.2f)", pos.x, pos.y, pos.z,
+            pos.x + playerMapOffsetX, pos.z + playerMapOffsetZ);
         debugPrintf("P:" DPRINT_FIXED "%s" DPRINT_NOFIXED, buf);
     }
 
     //Display map coords
     int mapNo = curMapId;
     if(mapNo >= NUM_MAP_DIRS) mapNo = mapActLut[mapNo];
-    debugPrintf(" M:" DPRINT_FIXED "%3d,%3d,%d #%02X T%X %08X" DPRINT_NOFIXED,
+    debugPrintf("\nM:" DPRINT_FIXED "%3d,%3d,%d #%02X T%X %08X\n" DPRINT_NOFIXED,
         (int)(mapCoords.mapX / MAP_CELL_SCALE), (int)(mapCoords.mapZ / MAP_CELL_SCALE),
         curMapLayer, curMapId,
         mainGetBit(mapActBitIdx[mapNo]),
         mainGetBit(mapObjGroupBit[mapNo]));
 
     //Display locked map IDs
-    debugPrintf(" L:"DPRINT_FIXED "%02X%02X %02X%02X\n" DPRINT_NOFIXED,
+    /*debugPrintf(" L:"DPRINT_FIXED "%02X%02X %02X%02X\n" DPRINT_NOFIXED,
         loadedFileMapIds[FILE_BLOCKS_BIN] & 0xFF,
         loadedFileMapIds[FILE_BLOCKS_BIN2] & 0xFF,
         //buckets are int, but we really only need lowest byte.
-        levelLockBuckets[0] & 0xFF, levelLockBuckets[1] & 0xFF);
+        levelLockBuckets[0] & 0xFF, levelLockBuckets[1] & 0xFF);*/
 
     //display velocity and angle
     ObjInstance *player = getArwing();
@@ -408,6 +412,137 @@ static void printArwingState(ObjInstance *arwing) {
     debugPrintf("%s", buf);
 }
 
+static void printPlayerFlags() {
+    ObjInstance *player = pPlayer;
+    if(!(player && player->file)) return;
+    if(player->catId != ObjCatId_Player) return; //don't apply to title screen Fox, Arwing
+
+    typedef struct {
+        uint16_t offset;
+        const char *name[8];
+    } PlayerStateFlags;
+    static const PlayerStateFlags flags[] = {
+        {0x360,
+            "Stopping",
+            "CanWalk",
+            "",
+            "ShadowFlg",
+            "",
+            "",
+            "",
+            ""},
+        {0x361,
+            "",
+            "SplashFx",
+            "GoldSpark",
+            "",
+            "",
+            "Disable",
+            "",
+            "CantHold"},
+        {0x362,
+            "CanPushOb",
+            "PushingOb",
+            "ShowAimCr",
+            "Shielding",
+            "",
+            "Climbing",
+            "Invis4000",
+            ""},
+        {0x363,
+            "Invis0001",
+            "BcomeHeld",
+            "",
+            "",
+            "CmbatMode",
+            "Knockback",
+            "",
+            ""},
+        {0x3F0,
+            "Landing",
+            "Shielding",
+            "Falling",
+            "Jumping",
+            "Rolling",
+            "Swimming",
+            "TurnFast",
+            "Stopping"},
+        {0x3F1,
+            "OnGround",
+            "",
+            "",
+            "NotMoved",
+            "HoldingL",
+            "HoldLRlat",
+            "",
+            ""},
+        {0x3F2,
+            "QTurn01",
+            "FallDmg",
+            "QTurn04",
+            "FallRecvr",
+            "StartMove",
+            "InCutscen",
+            "DoEyeAnim",
+            ""},
+        {0x3F3,
+            "",
+            "IsDead",
+            "Revived",
+            "Disguised",
+            "QuakeSpel",
+            "BgFalRcvr",
+            "",
+            ""},
+        {0x3F4,
+            "",
+            "",
+            "",
+            "StafOnBck",
+            "Flailing",
+            "StafAnim",
+            "CnUseStaf",
+            ""},
+        {0x3F5,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""},
+        {0x3F6,
+            "",
+            "",
+            "",
+            "",
+            "ShldBlkd",
+            "ShldCmbt",
+            "Aiming",
+            ""},
+        {0},
+    };
+    u8 *state = (u8*)player->state;
+    for(int iByte=0; flags[iByte].offset; iByte++) {
+        PlayerStateFlags *flg = &flags[iByte];
+        u8 val = state[flg->offset];
+        debugPrintSetColor(255, 255, 255, 255);
+        debugPrintSetPos(0, (iByte*12)+32);
+        debugPrintf(DPRINT_FIXED "%04X" DPRINT_NOFIXED, flg->offset);
+        for(int iBit=0; iBit<8; iBit++) {
+            uint8_t mask = (1 << iBit);
+            if(val & mask) debugPrintSetColor(255, 255, 255, 255);
+            else debugPrintSetColor(64, 64, 64, 64);
+            debugPrintSetPos((iBit*56)+24, (iByte*12)+32);
+            if(flg->name[iBit][0] == 0) debugPrintf("%02X", mask);
+            else debugPrintf("%s", flg->name[iBit]);
+        }
+    }
+    debugPrintSetColor(255, 255, 255, 255);
+    debugPrintf(DPRINT_NOFIXED);
+}
+
 static void printPlayerState() {
     ObjInstance *player = getArwing();
     if(player) {
@@ -595,7 +730,7 @@ static void printStreams() {
         OSReport("Stopped stream: %s\r\n", prevStream->name);
         prevStream = NULL;
     }
-    debugPrintf("ARAM free: %5dK\n", (*(u32*)0x800000D0 - *(u32*)0x803de384) / 1024);
+    //debugPrintf("ARAM free: %5dK\n", (*(u32*)0x800000D0 - *(u32*)0x803de384) / 1024);
 }
 
 static void printSFX() {
@@ -808,6 +943,7 @@ void mainLoopDebugPrint() {
     if(debugTextFlags & DEBUGTEXT_ENVIRONMENT)       printEnvironment();
     if(debugTextFlags & DEBUGTEXT_OBJSEQ)            printObjSeq();
     if(debugTextFlags & DEBUGTEXT_TRICKY)            printTrickyInfo();
+    //printPlayerFlags();
 
     //not sure what these are, seem to never be used?
     /* extern ObjInstance *objVar_802cada0[5];

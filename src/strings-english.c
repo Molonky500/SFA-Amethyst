@@ -54,6 +54,7 @@ const char *strings_English[] = {
     "Cur HP", //current health
     "Cur Lives", //current extra lives
     "Cur MP", //current magic power
+    "Curves", //curves
     "CutScene Volume", //audio volume during scenes
     "Day", //day of month
     "Debug", //debug menu

@@ -1,6 +1,9 @@
 //for debugging the hacks, this can be toggled
 #define DPRINT OSReport
 
+//file logging for game code analysis. only works on Wii.
+#define LOG_DLLS 1 //log when each DLL is first loaded
+
 typedef enum {
     DEBUGTEXT_TRICKY            = (1 <<  0),
     DEBUGTEXT_PLAYER_COORDS     = (1 <<  1),
@@ -34,6 +37,7 @@ typedef enum {
     DEBUGRENDER_PLAYER_VEL     = (1 <<  8),
     DEBUGRENDER_HIDE_DISABLED  = (1 <<  9),
     DEBUGRENDER_DEBUG_MAP_GEOM = (1 << 10),
+    DEBUGRENDER_CURVES         = (1 << 11),
 } DebugRenderFlags;
 
 typedef enum {

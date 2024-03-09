@@ -42,6 +42,7 @@ const char *strings_Japanese[] = {
     "現在HP", //current health
     "現在ライフ", //current extra lives
     "現在MP", //current magic power
+    "曲線", //curves
     "カットシーン音量", //audio volume during scenes
     "Day", //day of month
     "デバッグ", //debug menu

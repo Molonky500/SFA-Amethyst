@@ -1525,16 +1525,21 @@ typedef struct PACKED ObjSeqItem {
 	u16 objDef; //0x06 ObjDefEnum
 } ObjSeqItem;
 
+#define MAX_ROMCURVES 1300
+#define ROMCURVE_FLAG_NO_PREV (1 << 0)
+#define ROMCURVE_FLAG_NO_NEXT (1 << 1)
+#define ROMCURVE_FLAG_NO_ID24 (1 << 2)
+#define ROMCURVE_FLAG_NO_ID28 (1 << 3)
 typedef struct PACKED RomCurve {
 	ObjDef def;    //0x00
 	byte   action; //0x18
 	byte   type;   //0x19
 	byte   unk1A;  //0x1A
-	byte   unk1B;  //0x1B
+	byte   flags;  //0x1B
 	int    idPrev; //0x1C
 	int    idNext; //0x20
-	int    unk24;  //0x24
-	float  unk28;  //0x28
+	int    id24;   //0x24
+	int    id28;   //0x28
 	byte   rotZ;   //0x2C
 	byte   rotY;   //0x2D
 	byte   rotX;   //0x2E
