@@ -10,6 +10,9 @@ import struct
 import enum
 import xml.etree.ElementTree as ET
 
+def ASSERT_DATA_LEN(data, n):
+    assert len(data) >= n, f"Need {n} bytes but have {len(data)}"
+
 class AnimCurvCommand(enum.IntEnum):
     """Values for the Action Command parameter."""
     SETTIME           = 0x00
@@ -28,7 +31,6 @@ class AnimCurvCommand(enum.IntEnum):
     ENVFX             = 0x0D
     STORYBOARD        = 0x0E
     SFX_WITH_DURATION = 0x0F
-    UNK27             = 0x27 # found in curve 154 in snowmines2 (BGCMD param?)
     EXTPARAM          = 0x7F
     ENDTIME           = 0xFF
 
@@ -54,6 +56,49 @@ class AnimCurvField(enum.IntEnum):
     OPEN_MOUTH  = 0x11 # Z rotation
     UNK_SOUND   = 0x12
 
+class AnimCurvSubCommand:
+    """Base class for subcommands."""
+
+    def toXmlElems(self) -> dict:
+        """Return dict for XML attributes."""
+        raise NotImplementedError
+
+class AnimCurvSubCmd0B(AnimCurvSubCommand):
+    """Subcommand 0x0B, BGCMD."""
+
+    param: int = None
+    """The parameter."""
+
+    index: int = None
+    """The 'index' value."""
+
+    op: int = None
+    """The opcode."""
+
+    def __init__(self, param:int=None, index:int=None, op:int=None):
+        self.param = param
+        self.index = index
+        self.op    = op
+
+    @classmethod
+    def fromBytes(cls, data:bytes) -> AnimCurvSubCmd0B:
+        ASSERT_DATA_LEN(data, 4)
+        param, idx = struct.unpack_from('>HH', data)
+        op = idx & 0x3F
+        if op in (2, 3): # param is signed
+            param = struct.unpack_from('>h', data)[0] # grumble
+        # re-read idx as signed
+        idx = struct.unpack_from('>h', data[2:])[0] >> 6 # grumble
+        return cls(param, idx, op)
+
+    def toXmlElems(self) -> dict:
+        """Return dict for XML attributes."""
+        return {
+            'op':    str(self.op),
+            'param': str(self.param),
+            'idx':   str(self.index),
+        }
+
 class AnimCurvAction:
     """One action in a curve."""
 
@@ -66,13 +111,18 @@ class AnimCurvAction:
     param: int = None
     """The parameter."""
 
+    subCommands: list[AnimCurvSubCommand] = None
+    """The subcommands, if any."""
+
     def __init__(self, command:AnimCurvCommand=None, time:int=None, param:int=None):
         self.command = AnimCurvCommand(command)
         self.time = time
         self.param = param
+        self.subCommands = []
 
     @classmethod
     def fromBytes(cls, data:bytes) -> AnimCurv:
+        ASSERT_DATA_LEN(data, 4)
         return cls(*struct.unpack('>BBh', data))
 
 class AnimCurvPoint:
@@ -106,6 +156,7 @@ class AnimCurvPoint:
 
     @classmethod
     def fromBytes(cls, data:bytes) -> AnimCurvPoint:
+        ASSERT_DATA_LEN(data, 8)
         return cls(*struct.unpack('>fBBh', data))
 
 class AnimCurv:
@@ -134,20 +185,38 @@ class AnimCurv:
             size, nActions = struct.unpack_from('>HH', data[4:])
             data = data[8:]
             #print(f"size={size} nAct={nActions} data={data}")
-            for i in range(nActions):
-                self.actions.append(AnimCurvAction.fromBytes(data[0:4]))
-                data = data[4:]
+            data = self._readActions(data, nActions)
             while len(data) > 0:
                 point = AnimCurvPoint.fromBytes(data[0:8])
                 data = data[8:]
                 if point.field not in self.points:
                     self.points[point.field] = []
                 self.points[point.field].append(point)
-        else: # only some commands
+        else: # only some commands.
+            # XXX this isn't entirely correct. there are points following,
+            # but I don't know how to tell where they begin. not sure if
+            # the game even uses this data?
             self.signature = None
-            for i in range(0, len(data), 4):
-                self.actions.append(AnimCurvAction.fromBytes(data[i:i+4]))
+            self._readActions(data, len(data) // 4)
         return self
+
+    def _readActions(self, data:bytes, nActions:int) -> bytes:
+        """Read the actions from the data. Return the data that follows."""
+        i = 0
+        while i < nActions: # not using range() because i can increment more than once
+            i += 1
+            act = AnimCurvAction.fromBytes(data[0:4])
+            self.actions.append(act)
+            data = data[4:]
+            # not the most elegant way to handle this, oh well.
+            if act.command == AnimCurvCommand.BGCMD:
+                for _ in range(act.param):
+                    i += 1
+                    sub = AnimCurvSubCmd0B.fromBytes(data)
+                    act.subCommands.append(sub)
+                    data = data[4:]
+
+        return data
 
 class AnimCurvReader:
     """Parses ANIMCURV binary files."""
@@ -215,11 +284,13 @@ class AnimCurvXmlWriter:
             if curve.signature:
                 eCurve.attrib['signature'] = curve.signature
             for action in curve.actions:
-                ET.SubElement(eCurve, 'action', {
+                eAction = ET.SubElement(eCurve, 'action', {
                     'time':  str(action.time),
                     'cmd':   action.command.name,
                     'param': str(action.param),
                 })
+                for subcmd in action.subCommands:
+                    ET.SubElement(eAction, 'subcmd', subcmd.toXmlElems())
             for field, points in curve.points.items():
                 for point in points:
                     ET.SubElement(eCurve, 'point', {
