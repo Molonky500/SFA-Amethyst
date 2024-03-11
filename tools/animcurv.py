@@ -56,6 +56,19 @@ class AnimCurvField(enum.IntEnum):
     OPEN_MOUTH  = 0x11 # Z rotation
     UNK_SOUND   = 0x12
 
+class AnimCurvBgCmd(enum.IntEnum):
+    """Values for the op parameter of BGCMD."""
+    JUMPTOTIME   = 0x01
+    SUBCMD02     = 0x02
+    COUNTER_ADD  = 0x03
+    PAUSE        = 0x04
+    CONTINUE     = 0x05
+    SUBCMD06     = 0x06
+    MESSAGE      = 0x07
+    DECISION     = 0x08
+    JUMPTOTARGET = 0x09
+    JUMPTOLABEL  = 0x0A
+
 class AnimCurvSubCommand:
     """Base class for subcommands."""
 
@@ -78,7 +91,7 @@ class AnimCurvSubCmd0B(AnimCurvSubCommand):
     def __init__(self, param:int=None, index:int=None, op:int=None):
         self.param = param
         self.index = index
-        self.op    = op
+        self.op    = AnimCurvBgCmd(op)
 
     @classmethod
     def fromBytes(cls, data:bytes) -> AnimCurvSubCmd0B:
@@ -94,7 +107,7 @@ class AnimCurvSubCmd0B(AnimCurvSubCommand):
     def toXmlElems(self) -> dict:
         """Return dict for XML attributes."""
         return {
-            'op':    str(self.op),
+            'op':    self.op.name,
             'param': str(self.param),
             'idx':   str(self.index),
         }
@@ -162,6 +175,9 @@ class AnimCurvPoint:
 class AnimCurv:
     """One animation curve."""
 
+    id: int = None
+    """The curve ID."""
+
     signature: str = None
     """Either SEQA or SEQB, or None."""
 
@@ -174,11 +190,13 @@ class AnimCurv:
     offset: int = None
     """Offset of this curve in the binary, for debugging."""
 
+    def __init__(self):
+        self.actions = []
+        self.points  = {}
+
     @classmethod
     def fromBytes(cls, data:bytes) -> AnimCurv:
         self = cls()
-        self.actions = []
-        self.points  = {}
         self.signature = struct.unpack_from('4s', data)[0] # grumble
         if self.signature in (b'SEQA', b'SEQB'):
             self.signature = self.signature.decode('utf-8')
@@ -211,11 +229,10 @@ class AnimCurv:
             # not the most elegant way to handle this, oh well.
             if act.command == AnimCurvCommand.BGCMD:
                 for _ in range(act.param):
-                    i += 1
+                    i += 1 # nActions includes the parameter bytes
                     sub = AnimCurvSubCmd0B.fromBytes(data)
                     act.subCommands.append(sub)
                     data = data[4:]
-
         return data
 
 class AnimCurvReader:
@@ -265,8 +282,72 @@ class AnimCurvReader:
                     # don't have the high bit set.
                     if not offs & 0x80000000: continue
                 curv = AnimCurv.fromBytes(data)
+                curv.id = i
                 curv.offset = offs & 0xFFFFFF
                 self.curves.append(curv)
+
+class AnimCurvXmlReader:
+    """Reads ANIMCURV XML files."""
+
+    def __init__(self, xmlPath:os.PathLike):
+        self.xmlPath = xmlPath
+
+    def read(self) -> list[AnimCurv]:
+        """Read the file."""
+        root = ET.parse(self.xmlPath).getroot()
+        result = []
+        for eSeq in root.findall('./seq'):
+            seq = self._readSeqElem(eSeq)
+            result.append(seq)
+        return result
+
+    def _readSeqElem(self, eSeq:ET.Element) -> AnimCurv:
+        """Read XML seq element."""
+        curve = AnimCurv()
+        curve.signature = eSeq.get('signature', None)
+        curve.id = int(eSeq.get('id'))
+        for eAction in eSeq.findall('./action'):
+            curve.actions.append(self._readActionElem(eAction))
+        for eCurve in eSeq.findall('./curve'):
+            field = AnimCurvField[eCurve.get('field')]
+            curve.points = self._readCurveElem(eCurve, field)
+        return curve
+
+    def _readActionElem(self, eAction:ET.Element) -> AnimCurvAction:
+        """Read XML action element."""
+        act = AnimCurvAction(
+            command=AnimCurvCommand[eAction.get('cmd')],
+            time=int(eAction.get('time')),
+            param=int(eAction.get('param'))
+        )
+        for eSubCmd in eAction.findall('./subcmd'):
+            act.subCommands.append(self._readSubCmdElem(eSubCmd, act))
+        return act
+
+    def _readSubCmdElem(self, eSubCmd:ET.Element, action:AnimCurvAction) -> AnimCurvSubCommand:
+        """Read XML subcmd element."""
+        if action.command == AnimCurvCommand.BGCMD:
+            return AnimCurvSubCmd0B(
+                param = int(eSubCmd.get('param')),
+                index = int(eSubCmd.get('idx')),
+                op    = AnimCurvBgCmd[eSubCmd.get('op')],
+            )
+        else:
+            raise NotImplementedError(action.command.name)
+
+    def _readCurveElem(self, eCurve:ET.Element, field:AnimCurvField) -> list[AnimCurvPoint]:
+        """Read XML curve element."""
+        points = []
+        for ePoint in eCurve.findall('./point'):
+            scale = int(float(ePoint.get('scale')) * 16)
+            point = AnimCurvPoint(
+                y            = float(ePoint.get('y')),
+                typeAndScale = int(ePoint.get('type')) | (scale << 2),
+                field        = field,
+                x            = int(ePoint.get('x')), # x is int, y is float
+            )
+            points.append(point)
+        return points
 
 class AnimCurvXmlWriter:
     """Writes ANIMCURV XML files."""
@@ -280,11 +361,11 @@ class AnimCurvXmlWriter:
         for i, curve in enumerate(curves):
             if curve is None: continue
             self.root.append(ET.Comment(" 0x%08X " % ( curve.offset )))
-            eCurve = ET.SubElement(self.root, 'curve', {'id':str(i)})
+            eSeq = ET.SubElement(self.root, 'seq', {'id':str(i)})
             if curve.signature:
-                eCurve.attrib['signature'] = curve.signature
+                eSeq.attrib['signature'] = curve.signature
             for action in curve.actions:
-                eAction = ET.SubElement(eCurve, 'action', {
+                eAction = ET.SubElement(eSeq, 'action', {
                     'time':  str(action.time),
                     'cmd':   action.command.name,
                     'param': str(action.param),
@@ -292,9 +373,9 @@ class AnimCurvXmlWriter:
                 for subcmd in action.subCommands:
                     ET.SubElement(eAction, 'subcmd', subcmd.toXmlElems())
             for field, points in curve.points.items():
+                eCurve = ET.SubElement(eSeq, 'curve', {'field':field.name})
                 for point in points:
                     ET.SubElement(eCurve, 'point', {
-                        'field': field.name,
                         'x': str(point.x),
                         'y': str(point.y),
                         'type': str(point.type),
@@ -311,10 +392,10 @@ class App:
 
     def pack(self, xmlPath:os.PathLike, binPath:os.PathLike, tabPath:os.PathLike) -> None:
         """Pack animcurv from XML."""
-        encoder = RomlistEncoder(self._xmlPath)
-        objdefs = encoder.readRomlistXml(inPath)
-        with open(outPath, 'wb') as outFile:
-            encoder.packRomlist(objdefs, outFile)
+        reader  = AnimCurvXmlReader(xmlPath)
+        curves  = reader.read()
+        #with open(outPath, 'wb') as outFile:
+        #    encoder.packRomlist(objdefs, outFile)
 
     def unpack(self, xmlPath:os.PathLike, binPath:os.PathLike, tabPath:os.PathLike) -> None:
         """Unpack animcurv to XML."""
