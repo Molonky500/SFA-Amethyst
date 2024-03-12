@@ -76,6 +76,10 @@ class AnimCurvSubCommand:
         """Return dict for XML attributes."""
         raise NotImplementedError
 
+    def toBytes(self) -> bytes:
+        """Convert subcommand to bytes."""
+        raise NotImplementedError
+
 class AnimCurvSubCmd0B(AnimCurvSubCommand):
     """Subcommand 0x0B, BGCMD."""
 
@@ -112,6 +116,15 @@ class AnimCurvSubCmd0B(AnimCurvSubCommand):
             'idx':   str(self.index),
         }
 
+    def toBytes(self) -> bytes:
+        """Convert subcommand to bytes."""
+        if self.op in (AnimCurvBgCmd.SUBCMD02, AnimCurvBgCmd.COUNTER_ADD):
+            return struct.pack('>hH', self.param,
+                ((self.index << 6) | self.op) & 0xFFFF)
+        else:
+            return struct.pack('>HH', self.param, # unsigned param
+                ((self.index << 6) | self.op) & 0xFFFF)
+
 class AnimCurvAction:
     """One action in a curve."""
 
@@ -137,6 +150,14 @@ class AnimCurvAction:
     def fromBytes(cls, data:bytes) -> AnimCurv:
         ASSERT_DATA_LEN(data, 4)
         return cls(*struct.unpack('>BBh', data))
+
+    def toBytes(self) -> bytes:
+        """Convert action to bytes."""
+        result = struct.pack('>BBh', self.command.value,
+            self.time, self.param)
+        for cmd in self.subCommands:
+            result += cmd.toBytes()
+        return result
 
 class AnimCurvPoint:
     """One point in a curve."""
@@ -171,6 +192,13 @@ class AnimCurvPoint:
     def fromBytes(cls, data:bytes) -> AnimCurvPoint:
         ASSERT_DATA_LEN(data, 8)
         return cls(*struct.unpack('>fBBh', data))
+
+    def toBytes(self) -> bytes:
+        """Convert point to bytes."""
+        return struct.pack('>fBBh', self.y,
+            self.type | (int(self.scale * 16) << 2),
+            self.field.value | (self.unk05 << 5),
+            self.x)
 
 class AnimCurv:
     """One animation curve."""
@@ -207,9 +235,7 @@ class AnimCurv:
             while len(data) > 0:
                 point = AnimCurvPoint.fromBytes(data[0:8])
                 data = data[8:]
-                if point.field not in self.points:
-                    self.points[point.field] = []
-                self.points[point.field].append(point)
+                self.addPoint(point.field, point)
         else: # only some commands.
             # XXX this isn't entirely correct. there are points following,
             # but I don't know how to tell where they begin. not sure if
@@ -217,6 +243,25 @@ class AnimCurv:
             self.signature = None
             self._readActions(data, len(data) // 4)
         return self
+
+    def toBytes(self) -> bytes:
+        """Convert curve to bytes."""
+        result = b''.join([action.toBytes() for action in self.actions])
+        nActions = len(result) // 4 # includes subcommand parameters
+        for field in AnimCurvField:
+            points = self.points.get(field, [])
+            result += b''.join([point.toBytes() for point in points])
+        size = len(result) # excludes header
+        if self.signature is not None:
+            result = struct.pack('>4shh', self.signature.encode('utf-8'),
+                size, nActions) + result
+        return result
+
+    def addPoint(self, field:AnimCurvField, point:AnimCurvPoint) -> None:
+        """Add a point."""
+        if field not in self.points:
+            self.points[field] = []
+        self.points[field].append(point)
 
     def _readActions(self, data:bytes, nActions:int) -> bytes:
         """Read the actions from the data. Return the data that follows."""
@@ -286,6 +331,34 @@ class AnimCurvReader:
                 curv.offset = offs & 0xFFFFFF
                 self.curves.append(curv)
 
+class AnimCurvWriter:
+    """Writes ANIMCURV binary files."""
+
+    def __init__(self, binPath:os.PathLike, tabPath:os.PathLike):
+        self.binPath = binPath
+        self.tabPath = tabPath
+
+    def write(self, curves:list[AnimCurv]) -> None:
+        """Write the .bin and .tab files."""
+        curveData = b''
+        offsets   = [0]
+        prevId    = 0
+        for curve in curves:
+            for i in range(prevId, curve.id-1):
+                offsets.append(len(curveData))
+            offsets.append(len(curveData) | 0x80000000)
+            curveData += curve.toBytes()
+            prevId = curve.id
+        offsets.append(len(curveData))
+        offsets.append(0xFFFFFFFF)
+        offsets.append(0xFFFFFFFF) # again
+        while len(offsets) & 7: offsets.append(0) # pad
+        with open(self.binPath, 'wb') as file:
+            file.write(curveData)
+        with open(self.tabPath, 'wb') as file:
+            for offs in offsets:
+                file.write(struct.pack('>I', offs))
+
 class AnimCurvXmlReader:
     """Reads ANIMCURV XML files."""
 
@@ -310,7 +383,8 @@ class AnimCurvXmlReader:
             curve.actions.append(self._readActionElem(eAction))
         for eCurve in eSeq.findall('./curve'):
             field = AnimCurvField[eCurve.get('field')]
-            curve.points = self._readCurveElem(eCurve, field)
+            for point in self._readCurveElem(eCurve, field):
+                curve.addPoint(field, point)
         return curve
 
     def _readActionElem(self, eAction:ET.Element) -> AnimCurvAction:
@@ -361,7 +435,7 @@ class AnimCurvXmlWriter:
         for i, curve in enumerate(curves):
             if curve is None: continue
             self.root.append(ET.Comment(" 0x%08X " % ( curve.offset )))
-            eSeq = ET.SubElement(self.root, 'seq', {'id':str(i)})
+            eSeq = ET.SubElement(self.root, 'seq', {'id':str(curve.id)})
             if curve.signature:
                 eSeq.attrib['signature'] = curve.signature
             for action in curve.actions:
@@ -392,10 +466,8 @@ class App:
 
     def pack(self, xmlPath:os.PathLike, binPath:os.PathLike, tabPath:os.PathLike) -> None:
         """Pack animcurv from XML."""
-        reader  = AnimCurvXmlReader(xmlPath)
-        curves  = reader.read()
-        #with open(outPath, 'wb') as outFile:
-        #    encoder.packRomlist(objdefs, outFile)
+        curves = AnimCurvXmlReader(xmlPath).read()
+        AnimCurvWriter(binPath, tabPath).write(curves)
 
     def unpack(self, xmlPath:os.PathLike, binPath:os.PathLike, tabPath:os.PathLike) -> None:
         """Unpack animcurv to XML."""
