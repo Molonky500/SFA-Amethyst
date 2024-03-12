@@ -42,7 +42,7 @@ SaveGame *save, RamSaveData *data, void *callback) {
     }
 
     char path[1024];
-    snprintf(path, sizeof(path), "%s/%s%d.sav", saveFilePath,
+    snprintf(path, sizeof(path), "%s/%s/slot%d.sav", saveFilePath,
         profileName, slot+1);
     FILE *file = fopen(path, "wb");
     if(!file) {
@@ -72,7 +72,7 @@ SaveGame *save, RamSaveData *data, void *callback) {
     }
 
     char path[1024];
-    snprintf(path, sizeof(path), "%s/%s%d.sav", saveFilePath,
+    snprintf(path, sizeof(path), "%s/%s/slot%d.sav", saveFilePath,
         profileName, slot+1);
     FILE *file = fopen(path, "rb");
     if(!file) {
