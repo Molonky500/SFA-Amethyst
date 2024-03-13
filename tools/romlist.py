@@ -24,6 +24,7 @@ types = {
     'GameBit16': 'h',
     'GameBit32': 'i',
     'int': 'i',
+    'MapDirIdx8': 'b',
     'ObjDefEnum': 'h',
     'ObjectId': 'i',
     'pad8': 'b',
@@ -44,6 +45,7 @@ types = {
     'unk32': 'I',
     'vec3s': '3h',
     'vec3f': '3f',
+    'WarpEnum8': 'B',
 }
 
 class Vec3f:

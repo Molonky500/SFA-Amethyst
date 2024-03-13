@@ -27,6 +27,7 @@ GLOBALFN void CameraModeNormal_FollowPlayerVertically(Camera *this, ObjInstance 
 GLOBALFN void camera_overridePos(float x, float y, float z);
 GLOBALFN void cameraUpdate(int frames);
 GLOBALFN void cameraUpdateViewMtx(Camera *camera);
+GLOBALFN void checkReset(void);
 GLOBALFN void ClearArena(void);
 GLOBALFN void cardShowLoadingMsg(int);
 GLOBALFN float cosf(float);
@@ -76,6 +77,7 @@ GLOBALFN int getControlCharLen(int chr);
 GLOBALFN void getEnvfxAct(ObjInstance *obj, ObjInstance *obj2, uint idx, int range);
 GLOBALFN void getEnvfxActImmediately(ObjInstance *obj, ObjInstance *obj2, uint idx, int range);
 GLOBALFN int getLActions(ObjInstance *obj, ObjInstance *obj2, int idx);
+GLOBALFN Texture* getLastRenderedFrame(void);
 GLOBALFN Texture* getLoadedTexture(int id);
 GLOBALFN void* getTabEntry(void *buf, DataFileEnum32 fileId, uint idx, int size);
 GLOBALFN void gplayClearRestartPoint(void);
@@ -137,6 +139,7 @@ GLOBALFN void* heapAlloc(int region, uint size, AllocTag tag, const char* name);
 GLOBALFN void heapFree(int iHeap, int iEntry);
 GLOBALFN void hudDrawAirMeter(void);
 GLOBALFN void hudDrawButtons(int,int,int); //XXX params
+GLOBALFN void hudDrawColored(Texture *texture,int x,int y,u8 *tint,uint scale,BOOL bJustDrawSolidColor);
 GLOBALFN void hudDrawRect(int x1,int y1,int x2,int y2,Color4b *color);
 GLOBALFN void hudDrawTriangle(float x1,float y1,float x2,float y2,float x3, float y3,Color4b *color); //WARNING: changes color->a
 GLOBALFN void ICInvalidateRange(void* dest, u32 size);
@@ -169,6 +172,7 @@ GLOBALFN void mapUnload(MapDirIdx32 map, uint flags);
 GLOBALFN void* memcpy(void *dest, void *src, int len); // clobbers: r0, r4, r5, r6
 GLOBALFN void* memset(void *dest, u8 val, int len); // clobbers: r0, r6, r7
 GLOBALFN void mm_free(void*); // wrapper for free()
+GLOBALFN void mmFreeTick(void);
 GLOBALFN Mtx44 * modelGetBoneMatrix (Model * model, int iBone);
 GLOBALFN ModelFileHeader* modelLoad(
     int modelNum,ModelFlags_loadCharacter flags,uint *outSize);

@@ -66,6 +66,15 @@ typedef struct {
     long (*telldir)(DIR *dirp);
     int (*stat)(const char *path, struct stat *buf);
 
+    //filled in by game for Wii code to use.
+    //these are functions that are part of the mod code and thus don't load
+    //at a fixed address.
+    int (*drawText)(const char *str, int x, int y, int *outX, int *outY, u32 flags,
+        u32 color, float scale);
+    void (*addOsdMessage)(const char *str, int frames);
+    void (*drawBox)(float x, float y, int w, int h, u8 opacity, bool fill);
+    int (*showPopupMessage)(const char *text, const char **options);
+
     const char *gameRootDir;
     u8 language; //read from Wii config
 } GameWiiInterface;

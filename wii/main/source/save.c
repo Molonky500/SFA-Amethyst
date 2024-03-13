@@ -32,6 +32,30 @@ void initSaveHacks() {
     }
 }
 
+//TODO: translations
+FILE* openSaveFile(const char *path, const char *mode, bool notExistOk) {
+    static const char *msgs[3];
+    msgs[0] = "Try Again"; //lol can't do {} init here
+    msgs[1] = "Continue Without Saving";
+    msgs[2] = NULL;
+    while(1) {
+        FILE *file = fopen(path, mode);
+        if(file) return file;
+        int err = errno;
+        exiPrintf("Failed fopen(%s, %s): %d.\r\n", path, mode, err);
+        if(notExistOk && err == ENOENT) return NULL;
+        //TODO: try to create directories
+
+        GameWiiInterface *wii = WII_IFACE_PTR;
+        int result = wii->showPopupMessage(
+            "Failed to open the save file.\n"
+            "Try turning off the console and checking the\n"
+            "SD card to ensure it's set up correctly.\n", //end with blank line
+            msgs);
+        if(result != 0) return NULL; //cancelled or selected "don't save"
+    }
+}
+
 BOOL saveGameSave_hook(BOOL bNoCreate, int slot, void *cbParam,
 SaveGame *save, RamSaveData *data, void *callback) {
     if(saveFilePath[0] == 0) { //use GC card
@@ -44,13 +68,8 @@ SaveGame *save, RamSaveData *data, void *callback) {
     char path[1024];
     snprintf(path, sizeof(path), "%s/%s/slot%d.sav", saveFilePath,
         profileName, slot+1);
-    FILE *file = fopen(path, "wb");
-    if(!file) {
-        //TODO display error to user.
-        //also, create the directory first.
-        exiPrintf(" *** Failed opening %s to write: %d\n", path, errno);
-        return 1;
-    }
+    FILE *file = openSaveFile(path, "wb", false);
+    if(!file) return 1;
     exiPuts("Writing save file!\n");
     exiPrintf("Writing save file \"%s\"\n", data->save.saveFileName);
     //exiPrintf("Volume m=%d s=%d c=%d\n", data->global.settings.musicVolume,
@@ -74,9 +93,8 @@ SaveGame *save, RamSaveData *data, void *callback) {
     char path[1024];
     snprintf(path, sizeof(path), "%s/%s/slot%d.sav", saveFilePath,
         profileName, slot+1);
-    FILE *file = fopen(path, "rb");
+    FILE *file = openSaveFile(path, "rb", true);
     if(!file) {
-        exiPrintf(" *** Failed opening %s to read: %d\n", path, errno);
         if(callback == 0x8007E748) {
             memset(save, 0, sizeof(SaveSettingsAndScores));
         }

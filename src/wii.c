@@ -23,6 +23,12 @@ void wiiHooksInit() {
         wiimoteCfg[i].calNunchuk.rollMin   = -34;
         wiimoteCfg[i].calNunchuk.rollMax   =  72;
     }
+
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    wii->drawText = drawText;
+    wii->addOsdMessage = addOsdMessage;
+    wii->drawBox = drawBox;
+    wii->showPopupMessage = showPopupMessage;
 }
 
 void wiiLoadConfig() {

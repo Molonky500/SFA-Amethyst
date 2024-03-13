@@ -236,6 +236,9 @@ extern const char *bitNames;
 BitTableEntry* getBitTableEntry(int bit);
 const char* getBitName(int bit);
 
+//message.c
+int showPopupMessage(const char *text, const char **options);
+
 //minimap.c
 extern u8 overrideMinimapSize;
 extern u8 overrideMinimapAlpha;
