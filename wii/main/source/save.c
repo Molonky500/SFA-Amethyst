@@ -32,26 +32,70 @@ void initSaveHacks() {
     }
 }
 
+int mkdirRecursive(const char *path) {
+    char dirName[8192];
+    strncpy(dirName, path, sizeof(dirName));
+    for(int i=0; dirName[i]; i++) {
+        if(dirName[i] == '/') {
+            dirName[i] = 0;
+            int err = mkdir(dirName, S_IRWXU | S_IRWXG | S_IRWXO);
+            if(err) {
+                err = errno;
+                exiPrintf("mkdir(%s) => %d.\r\n", dirName, err);
+                if(err != EEXIST) return err;
+            }
+            else exiPrintf("mkdir(%s) OK\r\n", dirName);
+            dirName[i] = '/';
+        }
+    }
+    return 0;
+}
+
 //TODO: translations
 FILE* openSaveFile(const char *path, const char *mode, bool notExistOk) {
     static const char *msgs[3];
     msgs[0] = "Try Again"; //lol can't do {} init here
     msgs[1] = "Continue Without Saving";
     msgs[2] = NULL;
+    const char *defaultMsg = "%s (Error %d)\n"
+        "Try turning off the console and checking the\n"
+        "SD card to ensure it's set up correctly.\n"; //end with blank line;
+    char msg[1024];
+
     while(1) {
         FILE *file = fopen(path, mode);
         if(file) return file;
         int err = errno;
-        exiPrintf("Failed fopen(%s, %s): %d.\r\n", path, mode, err);
+        exiPrintf("Failed fopen(%s, %s): %d\r\n", path, mode, err);
         if(notExistOk && err == ENOENT) return NULL;
-        //TODO: try to create directories
+        if(err == ENOTDIR) {
+            char dirName[1024];
+            char *slash = strrchr(path, '/');
+            memcpy(dirName, path, slash-path);
+            dirName[slash-path] = 0;
+            err = mkdirRecursive(path);
+            if(!err) continue;
+        }
+
+        const char *detail = "Failed to open the save file.";
+        switch(err) {
+            case ENOTDIR:
+                detail = "Unable to create the save file directory.";
+                break;
+            case EIO:
+                detail = "I/O error accessing save file.";
+                break;
+            case ENOSPC:
+                detail = "Not enough space on the SD card to create a save file.";
+                break;
+            case EROFS:
+                detail = "Unable to write to the SD card.";
+                break;
+        }
+        sprintf(msg, defaultMsg, detail, err);
 
         GameWiiInterface *wii = WII_IFACE_PTR;
-        int result = wii->showPopupMessage(
-            "Failed to open the save file.\n"
-            "Try turning off the console and checking the\n"
-            "SD card to ensure it's set up correctly.\n", //end with blank line
-            msgs);
+        int result = wii->showPopupMessage(msg, msgs);
         if(result != 0) return NULL; //cancelled or selected "don't save"
     }
 }
