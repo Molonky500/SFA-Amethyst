@@ -29,9 +29,9 @@ u32 readHex(char *in, char **out) {
 
 void cmd_help(char *param) {
     for(int i=0; debugConsoleCmds[i].cmd; i++) {
-        exiPrintf("%-10s %s %s\r\n",
-            debugConsoleCmds[i].cmd, debugConsoleCmds[i].params,
-            debugConsoleCmds[i].help);
+        exiPrintf("%-10s %s: %s %s\r\n",
+            debugConsoleCmds[i].cmd, debugConsoleCmds[i].help,
+            debugConsoleCmds[i].cmd, debugConsoleCmds[i].params);
     }
 }
 
@@ -164,6 +164,13 @@ void cmd_reset(char *param) {
     while(1);
 }
 
+void cmd_shutdown(char *param) {
+    iguanaSetRedLed(false);
+    iguanaSetGreenLed(false);
+    iguanaSetBlueLed(false);
+    STM_ShutdownToStandby();
+}
+
 DebugConsoleCommand debugConsoleCmds[] = {
     {"?",       "", "Show help", cmd_help},
     {"q",       "", "Exit debugger", cmd_quit},
@@ -179,6 +186,7 @@ DebugConsoleCommand debugConsoleCmds[] = {
     {"bp",      "addr", "Set instr breakpoint", cmd_break},
     {"irq",     "", "Show IRQ status", cmd_irq},
     {"rst",     "", "Reboot system", cmd_reset},
+    {"shutdown","", "Power off system", cmd_shutdown},
     {NULL, NULL, NULL} //end
 };
 

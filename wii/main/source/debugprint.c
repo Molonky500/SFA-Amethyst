@@ -68,6 +68,16 @@ void dumpStack() {
     exiPuts("-- end\r\n");
 }
 
+const char* getThreadStateName(int state) {
+    switch(state) {
+        case OS_THREAD_STATE_READY:    return "Ready";
+        case OS_THREAD_STATE_RUNNING:  return "Running";
+        case OS_THREAD_STATE_WAITING:  return "Waiting";
+        case OS_THREAD_STATE_MORIBUND: return "Moribund";
+        default: return "?";
+    }
+}
+
 void dumpThreads() {
     exiPuts("Thread dump:\r\n");
     OSThread *thread = *(OSThread**)0x800000dc;
@@ -84,6 +94,10 @@ void dumpThreads() {
         }
         exiPrintf("Thread %08X (%s): PC=%08x stack=%08x-%08x\r\n", thread, name, pc,
             stackBot, stackTop);
+        exiPrintf("State: %02X %s; detach: %s; err: 0x%08X; exit: 0x%08X; prio: %d (base %d)\r\n",
+            thread->state, getThreadStateName(thread->state),
+            (thread->attr & 1) ? "yes" : "no",
+            thread->error, (u32)thread->val, thread->priority, thread->base);
         for(int i=0; i<32; i += 4) {
             for(int j=0; j<4; j++) {
                 exiPrintf("  r%2d: %08x", (i+j), (u32)thread->context.gpr[i+j]);
