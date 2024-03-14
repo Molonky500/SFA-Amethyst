@@ -182,7 +182,7 @@ uint cause, void *addr, u32 msr) {
 
 void gameExceptionHook(int exceptionCode, OSContext *ctx,
 uint cause, void *addr) {
-    if(haveGecko) {
+    if(debugDeviceType) {
         //exiPrintf(" *** ERROR %d cause=0x%x addr=0x%x ctx=0x%x\r\n", exceptionCode,
         //    cause, addr, ctx);
         //static void (*_OSDumpContext)(OSContext*) = 0x80242554;

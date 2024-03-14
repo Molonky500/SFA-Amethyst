@@ -89,7 +89,7 @@ void MyStmHandler(u32 event) {
     //exiPrintf("STM event %d\r\n", event);
     switch(event) {
         case STM_EVENT_POWER:
-            if(haveGecko) {
+            if(debugDeviceType) {
                 interactiveDebugger(0);
                 return;
             }

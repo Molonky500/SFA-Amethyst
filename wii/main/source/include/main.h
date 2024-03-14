@@ -10,9 +10,9 @@
 #include <stdarg.h>
 #include "gcc-macros.h"
 
-//1 = use custom hardware for debug print on real console
-//0 = use "official" UART for Dolphin/real devkit
-#define USE_CUSTOM_GECKO 0
+#define DBG_DEV_NONE 0
+#define DBG_DEV_GECKO 1
+#define DBG_DEV_IGUANA 2
 
 //useful for diag, but interferes with game
 //#define SET_SCREEN_SOLID_YUV(y,u,v) (_ipcReg[9] = ((y) << 8) | ((v) << 16) | ((u) << 24) | 1)
@@ -201,7 +201,7 @@ void gameBsodHook();
 
 //exi.c
 extern u8 exiDmaBuf[4096];
-extern bool haveGecko;
+extern u8 debugDeviceType; //DBG_DEV_*
 void exiPuts(const char *str);
 void exiPrintf(const char *fmt, ...);
 void exiPrintInit();
@@ -219,7 +219,6 @@ void updateWiimotes();
 //gamehook.c
 void initGameHooks();
 
-#if USE_CUSTOM_GECKO
 //iguana.c
 void iguanaPuts(const char *str);
 void iguanaPutsNoFlush(const char *str);
@@ -229,7 +228,6 @@ void iguanaSetRedLed(bool on);
 void iguanaSetGreenLed(bool on);
 void iguanaSetBlueLed(bool on);
 void iguanaInit();
-#endif
 
 //init.c
 void initGameFiles(const char *appPath);

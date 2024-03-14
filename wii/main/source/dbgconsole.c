@@ -29,8 +29,9 @@ u32 readHex(char *in, char **out) {
 
 void cmd_help(char *param) {
     for(int i=0; debugConsoleCmds[i].cmd; i++) {
-        exiPrintf("%-10s %s\r\n",
-            debugConsoleCmds[i].cmd, debugConsoleCmds[i].help);
+        exiPrintf("%-10s %s %s\r\n",
+            debugConsoleCmds[i].cmd, debugConsoleCmds[i].params,
+            debugConsoleCmds[i].help);
     }
 }
 
@@ -137,9 +138,9 @@ void cmd_call(char *param) {
 }
 
 void cmd_hook(char *param) {
-    u32 addr = readHex(param, &param);
+    u32 addr   = readHex(param, &param);
     u32 target = readHex(param, &param);
-    u32 isBl = readHex(param, &param);
+    u32 isBl   = readHex(param, &param);
     u32 forceTrampoline = readHex(param, &param);
     u32 oldVal = *(u32*)addr;
     hookBranch(addr, target, isBl, forceTrampoline);
@@ -164,20 +165,20 @@ void cmd_reset(char *param) {
 }
 
 DebugConsoleCommand debugConsoleCmds[] = {
-    {"?",       "Show help", cmd_help},
-    {"q",       "Exit debugger", cmd_quit},
-    {"r",       "Read memory", cmd_read},
-    {"w",       "Write memory", cmd_write},
-    {"c",       "Call function", cmd_call},
-    {"h",       "Hook function", cmd_hook},
-    {"regs",    "Dump GPRs", cmd_dumpregs},
-    {"threads", "Display thread states", cmd_threads},
-    {"dumpdvd", "Display DVD state", cmd_dumpdvd},
-    {"dumpmem", "Write memdump file", cmd_dumpmem},
-    {"bt",      "Display backtrace", cmd_dumpstack},
-    {"bp",      "Set instr breakpoint", cmd_break},
-    {"irq",     "Show IRQ status", cmd_irq},
-    {"rst",     "Reboot system", cmd_reset},
+    {"?",       "", "Show help", cmd_help},
+    {"q",       "", "Exit debugger", cmd_quit},
+    {"r",       "addr count", "Read memory", cmd_read},
+    {"w",       "addr data", "Write memory", cmd_write},
+    {"c",       "addr arg0 arg1 arg2 arg3", "Call function", cmd_call},
+    {"h",       "addr target isBl forceTrampoline", "Hook function", cmd_hook},
+    {"regs",    "", "Dump GPRs", cmd_dumpregs},
+    {"threads", "", "Display thread states", cmd_threads},
+    {"dumpdvd", "", "Display DVD state", cmd_dumpdvd},
+    {"dumpmem", "", "Write memdump file", cmd_dumpmem},
+    {"bt",      "", "Display backtrace", cmd_dumpstack},
+    {"bp",      "addr", "Set instr breakpoint", cmd_break},
+    {"irq",     "", "Show IRQ status", cmd_irq},
+    {"rst",     "", "Reboot system", cmd_reset},
     {NULL, NULL, NULL} //end
 };
 
@@ -230,7 +231,7 @@ void handleChr(char chr) {
 }
 
 void interactiveDebugger(int excCode) {
-    //if(!haveGecko) return;
+    if(debugDeviceType != DBG_DEV_IGUANA) return; //XXX support Gecko
     gDebugConsoleActive = true;
     if(excCode > 0) exiPrintf(" *** ERROR %d ***\r\n", excCode);
     else if(excCode == 0) exiPuts(" *** DEBUGGER START ***\r\n");

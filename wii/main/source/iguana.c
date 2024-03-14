@@ -7,7 +7,7 @@ static u32 lastHwctl = 0x70000001; //HWCTL msg, INT enabled
 static volatile u32 *exi = (volatile u32*)0xCD006814; //channel 1
 
 void iguanaPuts(const char *str) {
-    if(!haveGecko) return;
+    if(debugDeviceType != DBG_DEV_IGUANA) return;
     u32 irq = IRQ_Disable();
     ssize_t len;
     if(str != exiDmaBuf) {
@@ -58,7 +58,7 @@ void iguanaPuts(const char *str) {
 
 void iguanaPutsNoFlush(const char *str) {
     //write string using IMM transfers and no cache flushes
-    if(!haveGecko) return;
+    if(debugDeviceType != DBG_DEV_IGUANA) return;
     u32 irq = IRQ_Disable();
     char buf[1024];
     size_t len = fixCrlf(str, buf, sizeof(buf));
@@ -106,6 +106,7 @@ static u32 _iguanaReadWrite32(u32 val) {
 }
 
 u32 iguanaReadWrite(u32 val) {
+    if(debugDeviceType != DBG_DEV_IGUANA) return 0xFFFFFFFF;
     u32 res = _iguanaReadWrite32(val);
     for(int tries=0; tries<100; tries++) {
         if(res & 0xF0000000) break;
@@ -115,7 +116,7 @@ u32 iguanaReadWrite(u32 val) {
 }
 
 void iguanaSetHwctl(int bit, bool on) {
-    if(!haveGecko) return;
+    if(debugDeviceType != DBG_DEV_IGUANA) return;
     if(on) lastHwctl |=  (1 << bit);
     else   lastHwctl &= ~(1 << bit);
     iguanaReadWrite(lastHwctl);
@@ -131,22 +132,24 @@ void iguanaSetBlueLed(bool on) {
 }
 
 void iguanaInit() {
+    debugDeviceType = DBG_DEV_GECKO; //XXX test for Gecko
     exi[0] =
         (1 << 13) | //ROMDIS
         (1 << 10) | //enable EXT interrupt
         (0 <<  4) | //1MHz
         (1 <<  7) | //device 0 (Gecko)
         (1 <<  0);  //enable EXI interrupt
-    for(int tries=0; tries<100; tries++) {
+    for(int tries=0; tries<10; tries++) {
         u32 resp = exiReadWrite32(exi, 0x01230ABC);
         if(resp == 0x90000001) {
-            haveGecko = true;
+            debugDeviceType = DBG_DEV_IGUANA;
             break;
         }
-        else if(resp & 0xFF000000) {
-            haveGecko = false;
+        /*else if(resp & 0xFF000000) {
+            debugDeviceType = DBG_DEV_NONE;
             return;
-        }
+        }*/
+        udelay(10000);
     }
 
     //query protocol version

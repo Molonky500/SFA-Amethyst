@@ -6,22 +6,22 @@
 
 u32 debugTextFlags =
     //DEBUGTEXT_TRICKY |
-    DEBUGTEXT_PLAYER_COORDS |
-    DEBUGTEXT_CAMERA_COORDS |
+    //DEBUGTEXT_PLAYER_COORDS |
+    //DEBUGTEXT_CAMERA_COORDS |
     //DEBUGTEXT_RESTART_POINT |
     DEBUGTEXT_MEMORY_INFO |
     DEBUGTEXT_INTERACT_OBJ_INFO |
     //DEBUGTEXT_HEAP_STATE |
-    DEBUGTEXT_GAMEBIT_LOG |
+    //DEBUGTEXT_GAMEBIT_LOG |
     //DEBUGTEXT_PLAYER_STATE |
-    //DEBUGTEXT_PERFORMANCE |
+    DEBUGTEXT_PERFORMANCE |
     DEBUGTEXT_FPS |
     //DEBUGTEXT_RNG |
     DEBUGTEXT_AUDIO_STREAMS |
     //DEBUGTEXT_AUDIO_SFX |
     //DEBUGTEXT_ENVIRONMENT |
     //DEBUGTEXT_OBJSEQ |
-    DEBUGTEXT_WIIMOTE |
+    //DEBUGTEXT_WIIMOTE |
     DEBUGTEXT_DPRINT_OBJS |
     0;
 u32 debugRenderFlags =
@@ -34,7 +34,7 @@ u32 debugRenderFlags =
     //DEBUGRENDER_FOCUS_POINTS |
     //DEBUGRENDER_UNK_POINTS |
     //DEBUGRENDER_PLAYER_VEL |
-    DEBUGRENDER_CURVES |
+    //DEBUGRENDER_CURVES |
     0;
 
 ObjInstance *dprintObjs[MAX_DPRINT_OBJS];
@@ -956,6 +956,7 @@ void mainLoopDebugPrint() {
     } */
 
     //temporary
+    debugPrintf("Viewport shake %f\n", *(float*)0x803381fc);
     #if 0
     for(int iObj=0; iObj<numLoadedObjs; iObj++) {
         ObjInstance *obj = loadedObjects[iObj];

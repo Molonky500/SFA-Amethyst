@@ -2,7 +2,7 @@
 
 //mutex_t exiMutex;
 __attribute__ ((aligned (32))) u8 exiDmaBuf[4096];
-bool haveGecko = false;
+u8 debugDeviceType = DBG_DEV_NONE;
 
 u32 exiReadWrite32(volatile u32 *exi, u32 val) {
     exi[4] = val;
@@ -13,17 +13,16 @@ u32 exiReadWrite32(volatile u32 *exi, u32 val) {
     return exi[4];
 }
 
-#if USE_CUSTOM_GECKO
-void exiPuts(const char *str) {
-    //iguanaPuts(str);
-    iguanaPutsNoFlush(str);
-}
-
-#else //not USE_CUSTOM_GECKO
 void exiPuts(const char *str) {
     /** Send a string to the EXI UART.
      */
     //LWP_MutexLock(exiMutex);
+    if(debugDeviceType == DBG_DEV_IGUANA) {
+        iguanaPutsNoFlush(str);
+        return;
+    }
+    else if(debugDeviceType == DBG_DEV_NONE) return;
+
     u32 irq = IRQ_Disable();
     memset(exiDmaBuf, 0, sizeof(exiDmaBuf));
 
@@ -111,16 +110,10 @@ void exiPuts(const char *str) {
     IRQ_Restore(irq);
     //LWP_MutexUnlock(exiMutex);
 }
-#endif
 
 void exiPrintf(const char *fmt, ...) {
-    #if USE_CUSTOM_GECKO
-        char *buf = (char*)exiDmaBuf;
-        size_t len = sizeof(exiDmaBuf);
-    #else
-        char buf[1024];
-        size_t len = sizeof(buf);
-    #endif
+    char  *buf = (char*)exiDmaBuf;
+    size_t len = sizeof(exiDmaBuf);
     memset(buf, 0, len);
     //DCFlushRange(buf, len);
     va_list args;
@@ -139,9 +132,7 @@ void exiPrintInit() {
     _exiReg[3] = 0;
     //(*(volatile uint32_t*)0xCD00643C) = 0; //enable 32MHz
 
-    #if USE_CUSTOM_GECKO
-        iguanaInit();
-    #endif
+    iguanaInit();
 
     //SET_DEBUG_PORT(0xD2);
     IRQ_Restore(irq);

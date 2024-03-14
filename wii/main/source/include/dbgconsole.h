@@ -3,6 +3,7 @@
 
 typedef struct _DebugConsoleCommand {
     const char *cmd;
+    const char *params;
     const char *help;
     void (*func)(char*);
 } DebugConsoleCommand;

@@ -167,7 +167,7 @@ void* checkThreadMain(void *param) {
     while(!gIsSystemShuttingDown) {
         OSYieldThread();
         checkIntegrity();
-        if(haveGecko && !gDebugConsoleActive) {
+        if(debugDeviceType && !gDebugConsoleActive) {
             //if there's something to receive, enter debugger
             u32 val = iguanaReadWrite(0);
             if(val & (1<<26)) interactiveDebugger(0);
