@@ -13,6 +13,7 @@ typedef struct PACKED {
 DllLogEntry dllLog[NUM_DLLS];
 static bool logIsInit = false;
 static bool logNeedsWrite = false;
+static u32  logWriteDelay = 0;
 static char dllLogPath[1024];
 
 void dllLogInit() {
@@ -78,6 +79,10 @@ void dllLogUpdate(int dll_id, u16 param, void *ra) {
 void dllLogWrite() {
     if(!logNeedsWrite) return;
     if(!IS_WII) return;
+    if(logWriteDelay > 0) {
+        logWriteDelay--;
+        return;
+    }
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!(wii && wii->fopen)) return;
 
@@ -90,6 +95,7 @@ void dllLogWrite() {
     wii->fwrite(dllLog, sizeof(DllLogEntry), NUM_DLLS, file);
     wii->fclose(file);
     logNeedsWrite = false;
+    logWriteDelay = 3600; //60 frames * 60 seconds = 1 minute
 }
 #endif
 

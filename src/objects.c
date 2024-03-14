@@ -15,6 +15,7 @@ typedef struct PACKED {
 ObjLogEntry objLog[MAX_OBJ_TYPE+1];
 static bool logIsInit = false;
 static bool logNeedsWrite = false;
+static u32  logWriteDelay = 0;
 static char objLogPath[1024];
 
 void objLogInit() {
@@ -68,6 +69,10 @@ void objLogUpdate(ObjDef *def,uint flags,int mapId,s16 objNo) {
 void objLogWrite() {
     if(!logNeedsWrite) return;
     if(!IS_WII) return;
+    if(logWriteDelay > 0) {
+        logWriteDelay--;
+        return;
+    }
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!(wii && wii->fopen)) return;
 
@@ -80,6 +85,7 @@ void objLogWrite() {
     wii->fwrite(objLog, sizeof(ObjLogEntry), MAX_OBJ_TYPE+1, file);
     wii->fclose(file);
     logNeedsWrite = false;
+    logWriteDelay = 3600; //60 frames * 60 seconds = 1 minute
 }
 #endif
 
