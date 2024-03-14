@@ -124,6 +124,7 @@ void initGameFiles(const char *appPath) {
                 return;
             }
         }
+        SET_SCREEN_SOLID_YUV(76, 84, 255); //red
         PANIC("Game files not found.\n");
     }
 }
