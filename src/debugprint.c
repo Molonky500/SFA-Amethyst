@@ -956,7 +956,6 @@ void mainLoopDebugPrint() {
     } */
 
     //temporary
-    debugPrintf("Viewport shake %f\n", *(float*)0x803381fc);
     #if 0
     for(int iObj=0; iObj<numLoadedObjs; iObj++) {
         ObjInstance *obj = loadedObjects[iObj];
