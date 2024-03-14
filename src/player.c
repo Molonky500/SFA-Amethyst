@@ -29,6 +29,14 @@ PlayerStateEnum playerStateClimbWallHook(double dT, ObjInstance *player, void *s
 }
 
 void playerMainLoopHook() {
+    //HACK to stop camera randomly going to space. find out why this is happening!
+    //of course, it only happens on console...
+    float shake = *(float*)0x803381fc; //viewport shake
+    if(shake >= 10000.0f || shake <= -10000.0f) {
+        OSReport("Fixing bogus viewport shake value %f\r\n", shake);
+        *(float*)0x803381fc = 100.0f;
+    }
+
     //hold Z on controller 3 to fast forward
     static float prevSpeed = 0;
     u16 buttons = controllerStates[2].button;
