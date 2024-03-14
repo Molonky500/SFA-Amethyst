@@ -69,6 +69,7 @@ elif [ "$TARGET" == "dolphin" ]; then
         exit 1
     fi
     cp -ru $DISCROOT/* $SD_MOUNT_PATH/apps/SFA/files/
+    cp -vrf ../patchfiles/* $SD_MOUNT_PATH/apps/SFA/files/
     # this variable runs Dolphin on the primary AMD GPU,
     # instead of the weaker embedded one.
     DRI_PRIME=1 dolphin-emu -d ./app/boot.dol
@@ -84,6 +85,7 @@ elif [ "$TARGET" == "realsd" ]; then
     fi
     echo "Copying files..."
     cp -vru $DISCROOT/* $REAL_SD_PATH/apps/SFA/files/
+    cp -vrf ../patchfiles/* $REAL_SD_PATH/apps/SFA/files/
     umount $REAL_SD_PATH
 
 elif [ "$TARGET" == "real" ]; then
