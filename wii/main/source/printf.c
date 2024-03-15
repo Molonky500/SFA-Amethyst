@@ -426,7 +426,6 @@ int _printf_internal(printf_context *ctxt) {
 	return ctxt->nChars;
 }
 
-/*
 int fprintf(FILE *file, const char *format, ...) {
 	printf_context ctxt;
 	memset((void*)&ctxt, 0, sizeof(ctxt));
@@ -445,11 +444,10 @@ int vfprintf(FILE *file, const char *format, va_list args) {
 	ctxt.format = format;
 	ctxt.write  = printf_write_file;
 	ctxt.file   = file;
-	ctxt.args   = args;
+	memcpy(&ctxt.args, &args, sizeof(ctxt.args));
 	int r = _printf_internal(&ctxt);
 	return r;
 }
-*/
 
 int sprintf(char *dest, const char *format, ...) {
 	printf_context ctxt;
@@ -508,7 +506,7 @@ int printf(const char *format, ...) {
 	memset((void*)&ctxt, 0, sizeof(ctxt));
 	ctxt.format = format;
 	ctxt.write  = printf_write_file;
-	//ctxt.file   = stdout;
+	ctxt.file   = stdout;
 	va_start(ctxt.args, format);
 	int r = _printf_internal(&ctxt);
 	va_end(ctxt.args);

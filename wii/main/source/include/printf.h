@@ -14,8 +14,8 @@
 #include <limits.h> //INT_MAX
 #include <ctype.h>  //isdigit
 
-//extern int fprintf  (FILE *file, const char *format, ...);
-//extern int vfprintf (FILE *file, const char *format, va_list args);
+extern int fprintf  (FILE *file, const char *format, ...);
+extern int vfprintf (FILE *file, const char *format, va_list args);
 extern int sprintf  (char *dest, const char *format, ...);
 extern int vsprintf (char *dest, const char *format, va_list args);
 extern int snprintf (char *dest, size_t len, const char *format, ...);
@@ -38,7 +38,7 @@ typedef struct printf_context {
 	unsigned int uppercase    :1; //use uppercase
 	unsigned int isPointer    :1; //is a pointer (write (nil) instead of 0)
 	union {
-		//FILE  *file; //destination file
+		FILE  *file; //destination file
 		char  *dest; //destination buffer
 	};
 	void (*write)(printf_context*, const char*, size_t); //write func
