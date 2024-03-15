@@ -21,10 +21,15 @@ static void printf_write_file(
 printf_context *ctxt, const char *str, size_t len) {
 	//ctxt->file->cls->write(ctxt->file, str, len);
 	//write(ctxt->file, str, len);
-	char buf[512];
-	memset(buf, 0, sizeof(buf));
-	strncpy(buf, str, MIN(len, sizeof(buf)));
-	exiPuts(buf);
+	if(ctxt->file == stdout) {
+		char buf[2048];
+		memset(buf, 0, sizeof(buf));
+		strncpy(buf, str, MIN(len, sizeof(buf)));
+		exiPuts(buf);
+	}
+	else {
+		exiPuts(" *** ERROR: fprintf to files other than stdout not implemented\r\n");
+	}
 }
 
 static void printf_write_str(
@@ -449,6 +454,7 @@ int vfprintf(FILE *file, const char *format, va_list args) {
 	return r;
 }
 
+
 int sprintf(char *dest, const char *format, ...) {
 	printf_context ctxt;
 	memset((void*)&ctxt, 0, sizeof(ctxt));
@@ -518,7 +524,7 @@ int vprintf(const char *format, va_list args) {
 	memset((void*)&ctxt, 0, sizeof(ctxt));
 	ctxt.format = format;
 	ctxt.write  = printf_write_file;
-	//ctxt.file   = stdout;
+	ctxt.file   = stdout;
 	va_copy(ctxt.args, args);
 	int r = _printf_internal(&ctxt);
 	return r;

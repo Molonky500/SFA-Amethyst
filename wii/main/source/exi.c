@@ -112,14 +112,10 @@ void exiPuts(const char *str) {
 }
 
 void exiPrintf(const char *fmt, ...) {
-    char  *buf = (char*)exiDmaBuf;
-    size_t len = sizeof(exiDmaBuf);
-    memset(buf, 0, len);
-    //DCFlushRange(buf, len);
+    //our printf() eventually just calls exiPuts()
     va_list args;
     va_start(args, fmt);
-    vsnprintf(buf, len, fmt, args);
-    exiPuts(buf);
+    vprintf(fmt, args);
     va_end(args);
 }
 
@@ -137,6 +133,7 @@ void exiPrintInit() {
     //SET_DEBUG_PORT(0xD2);
     IRQ_Restore(irq);
     exiPuts("EXI init OK\r\n");
+    exiPuts("The message \"Unknown USBGecko command 1230abc\" can be safely ignored.\r\n");
 }
 
 void exiInterrupt_hook() {
