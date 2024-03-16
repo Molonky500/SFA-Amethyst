@@ -99,7 +99,7 @@ static void updateCounts() {
     memset(tagCounts,     0, sizeof(tagCounts));
     memset(tagBytes,      0, sizeof(tagBytes));
 
-    for(int iHeap=0; iHeap<NUM_HEAPS; iHeap++) {
+    for(int iHeap=0; iHeap<heapCount; iHeap++) {
         SfaHeap *heap = &heaps[iHeap];
         u32 used = heap->used;
         for(u32 iEntry=0; iEntry<used; iEntry++) {
@@ -131,7 +131,7 @@ static void drawCounts(bool all) {
     updateCounts();
     debugPrintf(DPRINT_FIXED "Tag      ");
     if(all) {
-        for(int iHeap=0; iHeap<NUM_HEAPS; iHeap++) {
+        for(int iHeap=0; iHeap<heapCount; iHeap++) {
             debugPrintf("|Blk%d KByte%d ", iHeap, iHeap);
         }
     }
@@ -253,7 +253,7 @@ static void drawHeapBytes(int iHeap) {
 void printHeaps() {
     //print heap table to stdout
     OSReport(";heap;block;loc;size;type;prev;next;stack;col;lr;id\n");
-    for(int iHeap=0; iHeap<NUM_HEAPS; iHeap++) {
+    for(int iHeap=0; iHeap<heapCount; iHeap++) {
         SfaHeap *heap = &heaps[iHeap];
         for(u32 iBlock=0; iBlock<heap->used; iBlock++) {
             SfaHeapEntry *block = &heap->data[iBlock];
@@ -268,12 +268,12 @@ void printHeaps() {
 void drawHeaps() {
     switch(heapDrawMode) {
         case HEAP_DRAW_BLOCK_GRAPH: {
-            for(int i=0; i<NUM_HEAPS; i++) drawHeapBlocks(i);
+            for(int i=0; i<heapCount; i++) drawHeapBlocks(i);
             break;
         }
 
         case HEAP_DRAW_BYTE_GRAPH: {
-            for(int i=0; i<NUM_HEAPS; i++) drawHeapBytes(i);
+            for(int i=0; i<heapCount; i++) drawHeapBytes(i);
             break;
         }
 

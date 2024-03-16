@@ -57,7 +57,8 @@ void initCheckThread() {
 void checkGameHeaps() {
     //we can't check for a magic value because our alloc hook
     //runs late, so some allocations won't have it.
-    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+    //if(heapCount > 5 || heapCount < 0) return; //not set up yet
+    for(int iHeap=0; iHeap<heapCount; iHeap++) {
         GameHeap *heap = &gameHeaps[iHeap];
         int iEntry = 0;
         while(iEntry >= 0) {

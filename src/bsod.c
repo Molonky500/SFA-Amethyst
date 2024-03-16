@@ -89,7 +89,7 @@ static void drawPageGeneral() {
 static void drawPageMemory() {
     //show heap info
     debugPrintfxy(26, 20, "HEAP ADR/B USED/B TOTL/BLKU/BLKT");
-    for(int i=0; i<NUM_HEAPS; i++) {
+    for(int i=0; i<heapCount; i++) {
         debugPrintfxy(26, 31+(i*BSOD_LINE_HEIGHT), "%08X %06X %06X %04X %04X",
             &heaps[i],
             heaps[i].size, heaps[i].dataSize, heaps[i].used, heaps[i].avail);

@@ -26,9 +26,9 @@ void SYS_Init(void) {
 	//SET_DEBUG_PORT(__LINE__);
 	//_V_EXPORTNAME();
 	//__lowmem_init();
-	SYS_SetArena1Lo((void*)0x92000000);
-	SYS_SetArena1Hi((void*)0x92100000);
-	SYS_SetArena2Lo((void*)0x92100000);
+	SYS_SetArena1Lo((void*)0x91800000);
+	SYS_SetArena1Hi((void*)0x92F00000);
+	SYS_SetArena2Lo((void*)0x92F00000);
 	SYS_SetArena2Hi((void*)0x93000000);
     __ipcbufferlo = (void*)__ipcbufferLo; //what the fuck
 	__ipcbufferhi = (void*)__ipcbufferHi;

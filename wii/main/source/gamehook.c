@@ -98,10 +98,9 @@ void initGameHooks() {
     exiPuts("Init DSP...\n");
     doDspPatch();
 
-    exiPuts("Init Wii iface...\n");
+    exiPuts("Init Wii iface...\r\n");
     GameWiiInterface *wii = WII_IFACE_PTR;
     wii->updateWiimotes = updateWiimotes;
-    wii->magic          = WII_IFACE_MAGIC;
     wii->fopen          = fopen;
     wii->fclose         = fclose;
     wii->fread          = fread;
@@ -114,8 +113,8 @@ void initGameHooks() {
     wii->telldir        = telldir;
     wii->stat           = stat;
     wii->gameRootDir    = gameRootDir;
-
-    exiPrintf("sizeof(FILE) = %d, DIR=%d\n", sizeof(FILE), sizeof(DIR));
+    wii->magic          = WII_IFACE_MAGIC;
+    exiPrintf("sizeof(FILE) = %d, DIR=%d.\r\n", sizeof(FILE), sizeof(DIR));
 
     //Get some of the Wii's system settings and
     //apply them to the game's defaults.
@@ -134,6 +133,24 @@ void initGameHooks() {
     //patch default option in progressive scan prompt
     (*(u32*)0x8001fa6c) = 0x3ba00000 | (CONF_GetProgressiveScan() ? 1 : 0);
 
+    exiPuts("Patching allocator\r\n");
+    //attempt to fix heap metrics
+    //but only breaks allocation instead
+    /*u32 patches[] = {
+        0x800239ec, 0x38A5FFFC, //subi      r5,r5,0x4
+        0x80023a0c, 0x8003FFF8, //lwz       r0,-0x8(size2)
+        0x80023f18, 0x9085FFF8, //stw       size,-0x8(slots)
+        0x80023f1c, 0x9005FFFC, //stw       r0,-0x4(slots)
+        0};
+    for(int i=0; patches[i]; i += 2) {
+        *(u32*)patches[i] = patches[i+1];
+        DCFlushRange((void*)patches[i], 4);
+        ICInvalidateRange((void*)patches[i], 4);
+    }*/
+    hookBranch(0x80020e58, initHeaps_hook, 1, 0);
+    *(u32*)0x80253628 = 0x578300F4; //EXIDma: use full Wii address space
+
+    exiPuts("Init STM...\r\n");
     STM_RegisterEventHandler(MyStmHandler);
     exiPuts("Init OK\n");
 }

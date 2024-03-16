@@ -254,7 +254,7 @@ static void printObjCount() {
 static void printMemory() {
     //Display memory used percentages
     u32 totalBlocks=0, totalBytes=0, usedBlocks=0, usedBytes=0;
-    for(int i=0; i<NUM_HEAPS; i++) {
+    for(int i=0; i<heapCount; i++) {
         totalBytes  += heaps[i].dataSize;
         totalBlocks += heaps[i].avail;
         usedBytes   += heaps[i].size;
@@ -273,7 +273,7 @@ static void printMemory() {
 static void printHeapInfo() {
     //Display detailed heap info
     debugPrintf(DPRINT_FIXED "Free Blocks   Free KBytes\n" DPRINT_NOFIXED);
-    for(int i=0; i<NUM_HEAPS; i++) {
+    for(int i=0; i<heapCount; i++) {
         debugPrintf(DPRINT_FIXED "%5d/%5d %6d/%6d\n" DPRINT_NOFIXED,
             heaps[i].avail - heaps[i].used, heaps[i].avail, //blocks
             (heaps[i].dataSize - heaps[i].size) / 1024, heaps[i].dataSize / 1024 //bytes
@@ -293,7 +293,7 @@ static void printHeapInfo() {
     }
 
     u32 totalBlocks=0, totalBytes=0;
-    for(int i=0; i<NUM_HEAPS; i++) {
+    for(int i=0; i<heapCount; i++) {
         totalBytes  += heaps[i].dataSize;
         totalBlocks += heaps[i].avail;
     }

@@ -69,10 +69,19 @@ void _printTrace() {
         __builtin_return_address(10));
 }
 
+void dumpHeapInfo() {
+    OSReport("Heap count = %d\n", heapCount);
+    for(int i=0; i<heapCount; i++) {
+        OSReport("Heap %d used %d/%d bytes %d/%d blocks\n", i,
+            heaps[i].size, heaps[i].dataSize,
+            heaps[i].used, heaps[i].avail);
+    }
+}
+
 void getFreeMemory(u32 *outTotalBlocks, u32 *outTotalBytes,
 u32 *outUsedBlocks, u32 *outUsedBytes, int *outBlocksPct, int *outBytesPct) {
     u32 totalBlocks=0, totalBytes=0, usedBlocks=0, usedBytes=0;
-    for(int i=0; i<NUM_HEAPS; i++) {
+    for(int i=0; i<heapCount; i++) {
         totalBytes  += heaps[i].dataSize;
         totalBlocks += heaps[i].avail;
         usedBytes   += heaps[i].size;
@@ -194,12 +203,12 @@ bool doEmergencyFree(int attempt) {
 void checkNoOverlap(void *addr, u32 size) {
     //ensure the given region belongs to exactly one heap entry.
     SfaHeapEntry *prevEntry = NULL;
-    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+    for(int iHeap=0; iHeap<heapCount; iHeap++) {
         SfaHeap *heap = &heaps[iHeap];
         int iEntry = 0;
         while(iEntry >= 0) {
             SfaHeapEntry *entry = &heap->data[iEntry];
-            if(entry->loc <= addr
+            if(PTR_VALID(entry) && entry->loc <= addr
             && entry->loc+size >= addr+size
             && entry->type != HEAP_ENTRY_TYPE_FREE) {
                 if(prevEntry) {
@@ -221,7 +230,9 @@ void checkNoOverlap(void *addr, u32 size) {
 void* _doAlloc(int iRegion, u32 size, AllocTag tag, const char *name,
 SfaHeapEntry **outEntry, int *outRegion) {
     if(outRegion) *outRegion = iRegion;
+    //OSReport("alloc region %d size %d out=%p, %p\n", iRegion, size, outEntry, outRegion);
     void *res = heapAlloc(iRegion, size, tag, name);
+    //OSReport(" => %08X\n", res);
     if(!res) {
         if(outEntry) *outEntry = NULL;
         return NULL;
@@ -253,7 +264,7 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
 
     //name is almost never set and isn't stored
     u32 lr = (u32)__builtin_return_address(0);
-    //DPRINT("alloc size=%8X tag=%08X lr=%08X name=%s", size, tag, lr, name);
+    //DPRINT("alloc size=%8X tag=%08X lr=%08X name=%s\n", size, tag, lr, name);
 
     //mostly copied game code
     if(size == 0) return NULL;
@@ -265,6 +276,7 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
     }
 
     OSLockMutex(&allocMutex);
+    //dumpHeapInfo();
 
     int count = 0;
     void *buf = NULL;
@@ -292,9 +304,14 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
             buf = _doAlloc(0, size, tag, name, &entry, &successfulRegion);
             if(buf == NULL) buf = _doAlloc(1, size, tag, name, &entry, &successfulRegion);
         }
+        if(buf == NULL && heapCount > 4) {
+            //OSReport("alloc from heap 4\n");
+            buf = _doAlloc(4, size, tag, name, &entry, &successfulRegion);
+            //if(buf) OSReport("Alloc success size %d => %08X\n", size, buf);
+        }
         if(buf) {
             checkNoOverlap(buf, size);
-            //DPRINT("alloc success, %08X, entry %08X (type=%d prev=%04X stack=%04X next=%04X id=%08X reg=%d) lr=%08x < %08x < %08x",
+            //DPRINT("alloc success, %08X, entry %08X (type=%d prev=%04X stack=%04X next=%04X id=%08X reg=%d) lr=%08x < %08x < %08x\n",
             //    buf, entry, entry->type, entry->prev, entry->stack, entry->next,
             //    entry->mmUniqueIdent, successfulRegion, lr,
             //    __builtin_return_address(1), __builtin_return_address(2));
@@ -334,7 +351,7 @@ void* allocTaggedHook(u32 size, AllocTag tag, const char *name) {
                     size, tag, totalBlocks - usedBlocks, (totalBytes - usedBytes)/1024);
                 _printTrace();
                 OSReport("force heaps 1/2=%d 3=%d\n", bOnlyUseHeaps1and2, bOnlyUseHeap3);
-                for(int i=0; i<NUM_HEAPS; i++) {
+                for(int i=0; i<heapCount; i++) {
                     OSReport("Heap %d free Blocks %5d/%5d KBytes %5d/%5d\n", i,
                         heaps[i].avail - heaps[i].used, heaps[i].avail,
                         (heaps[i].dataSize - heaps[i].size) / 1024, heaps[i].dataSize / 1024);
@@ -374,7 +391,7 @@ void freeHook(void *addr) {
     //not same logic the game uses, but this works,
     //whereas the original didn't. no idea why, maybe
     //wasn't decompiled correctly
-    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+    for(int iHeap=0; iHeap<heapCount; iHeap++) {
         SfaHeap *heap = &heaps[iHeap];
         int iEntry = 0;
         while(iEntry >= 0) {
@@ -404,7 +421,7 @@ void freeHook(void *addr) {
         (u32)__builtin_return_address(0),
         (u32)__builtin_return_address(1),
         (u32)__builtin_return_address(2));
-    for(int iHeap=0; iHeap<GAME_NUM_HEAPS; iHeap++) {
+    for(int iHeap=0; iHeap<heapCount; iHeap++) {
         SfaHeap *heap = &heaps[iHeap];
         SfaHeapEntry *last = &heap->data[heap->used-1];
         OSReport("heap %d data %08X-%08X size=%08X used=%08X blocks=%08X used=%08X\n",

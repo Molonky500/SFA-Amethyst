@@ -1,7 +1,7 @@
 #ifndef __GAMEHEAP_H__
 #define __GAMEHEAP_H__
 
-#define GAME_NUM_HEAPS 4
+#define GAME_NUM_HEAPS 5
 
 typedef enum {
     HEAP_ENTRY_TYPE_FREE = 0, //free block

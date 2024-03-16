@@ -46,6 +46,8 @@ extern int _argc;
 
 #define IPC_QUEUE_MAX 256
 #define USB_ALIGN __attribute__ ((aligned(32)))
+typedef int OSHeapHandle;
+#define heapCount (*(u8*)0x803dcb42)
 
 #include "asminline.h"
 #include "lwpnode.h"
@@ -90,6 +92,7 @@ int fatInitDefault();
 void dumpGameHeaps();
 bool checkAddrInheap(void *addr, u32 len);
 void* _sbrk_r(struct _reent *ptr, ptrdiff_t incr);
+void initHeaps_hook();
 
 //audiopatch.c
 void doDspPatch();

@@ -324,6 +324,7 @@ gxTextureFn_8025b6f0 = 0x8025b6f0;
 gxTextureFn_8025c2a0 = 0x8025c2a0;
 gxWaitFn_80258330 = 0x80258330;
 heapAlloc = 0x80023850;
+heapCount = 0x803dcb42;
 heapFree = 0x80023134;
 heaps = 0x80340698;
 heatEffectIntensity = 0x803dcdfc;

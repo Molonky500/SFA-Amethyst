@@ -6,7 +6,7 @@ typedef struct TextureHeader TextureHeader;
 
 #define NUM_DLLS 0x2C2
 #define NUM_FILES 0x5A
-#define NUM_HEAPS 4
+#define NUM_HEAPS 5 //actually 4 but Wii adds a 5th
 #define NUM_MAPS 120
 #define NUM_MAP_DIRS 73
 #define OBJ_SEQ_MAX 0x54

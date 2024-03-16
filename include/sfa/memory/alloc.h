@@ -51,7 +51,8 @@ typedef enum { //names extracted from default.dol
 //in some places the game specifies the color directly.
 extern const u32 allocTagColorTbl[]; //drawheap.c
 
-#define GAME_NUM_HEAPS 4
+#define GAME_NUM_HEAPS 5 //actually 4, but Wii adds a 5th
+extern u8 heapCount;
 
 typedef enum {
     HEAP_ENTRY_TYPE_FREE = 0, //free block
