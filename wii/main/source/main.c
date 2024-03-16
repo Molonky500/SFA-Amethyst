@@ -26,7 +26,8 @@ void _initIos() {
     //mtspr(920,(mfspr(920)&~0x40000000)); //DisableWriteGatherPipe();
     __IPC_ClntInit();
     __IOS_InitializeSubsystems();
-    exiPrintf("IOS init OK.\n IPC Buf: 0x%8x - 0x%8x\n Arena1:  0x%8x - 0x%8x\n Arena2:  0x%8x - 0x%8x\n",
+    exiPrintf("IOS init OK.\n IPC Buf: 0x%8x - 0x%8x\n "
+    "Arena1:  0x%8x - 0x%8x\n Arena2:  0x%8x - 0x%8x\n",
         __SYS_GetIPCBufferLo(), __SYS_GetIPCBufferHi(),
         *(u32*)0x8000310C, *(u32*)0x80003110,
         *(u32*)0x80003124, *(u32*)0x80003128);

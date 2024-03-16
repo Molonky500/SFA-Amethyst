@@ -40,7 +40,7 @@
 
 _start_hack:
 	b startup2
-	.long	0x5f617267
+	.long	0x5f617267 # magic
 __argv: //XXX use this
 	.long 0 # argv magic
 	.long 0 # command line

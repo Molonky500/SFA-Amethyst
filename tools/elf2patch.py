@@ -399,13 +399,16 @@ def main():
         gotOffs+outOffs, gotSize, outOffs)
 
     # write code
-    for phdr in elf.progHdrs:
+    for iHdr, phdr in enumerate(elf.progHdrs):
         elf.file.seek(phdr['offset'])
         outBin.write(elf.file.read(phdr['fSize']))
 
         # write padding for empty areas.
         # since the patches stay in memory all the time anyway, this method
         # greatly simplifies the code at the expense of some disc space.
+        printf('[*] PHDR %d: mSize=%9d fSize=%d pad=%d\n', iHdr,
+            phdr['mSize'], phdr['fSize'],
+            phdr['mSize'] - phdr['fSize'])
         outBin.write(b'\0' * (phdr['mSize'] - phdr['fSize']))
 
         # align
