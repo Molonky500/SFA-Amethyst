@@ -21,14 +21,17 @@ static void printf_write_file(
 printf_context *ctxt, const char *str, size_t len) {
 	//ctxt->file->cls->write(ctxt->file, str, len);
 	//write(ctxt->file, str, len);
-	if(ctxt->file == stdout) {
+	if(ctxt->file == stdout || ctxt->file == stderr) {
+		//output only the specified length.
+		//the string may be longer, but we'll ignore the rest.
 		char buf[2048];
 		memset(buf, 0, sizeof(buf));
 		strncpy(buf, str, MIN(len, sizeof(buf)));
 		exiPuts(buf);
 	}
 	else {
-		exiPuts(" *** ERROR: fprintf to files other than stdout not implemented\r\n");
+		//exiPuts(" *** ERROR: fprintf to files other than stdout not implemented\r\n");
+		fwrite(str, 1, len, ctxt->file);
 	}
 }
 
