@@ -1,7 +1,7 @@
 /** Draw heap usage on screen.
  */
 #include "main.h"
-#define BYTE_SCALE 4096
+#define BYTE_SCALE 1024
 #define GRAPH_HEIGHT 6
 u8 heapDrawMode = HEAP_DRAW_NONE;
 
@@ -104,7 +104,7 @@ static void updateCounts() {
         u32 used = heap->used;
         for(u32 iEntry=0; iEntry<used; iEntry++) {
             SfaHeapEntry *entry = &heap->data[iEntry];
-            if(!entry) break;
+            if(!PTR_VALID(entry)) break;
 
             u32 tag = entry->col;
             if(tag >= NUM_ALLOC_TAGS) {
@@ -131,7 +131,7 @@ static void drawCounts(bool all) {
     updateCounts();
     debugPrintf(DPRINT_FIXED "Tag      ");
     if(all) {
-        for(int iHeap=0; iHeap<heapCount; iHeap++) {
+        for(int iHeap=0; iHeap<NUM_HEAPS; iHeap++) {
             debugPrintf("|Blk%d KByte%d ", iHeap, iHeap);
         }
     }
@@ -278,7 +278,7 @@ void drawHeaps() {
         }
 
         case HEAP_DRAW_TOTALS: drawCounts(false); break;
-        case HEAP_DRAW_TABLE:  drawCounts(true); break;
+        //case HEAP_DRAW_TABLE:  drawCounts(true); break; //broken
 
         default: return;
     }
