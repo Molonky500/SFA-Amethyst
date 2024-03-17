@@ -104,7 +104,6 @@ void checkThreads() {
                 pState->stackTop = stackTop;
             }
         }
-
         if(!(PTR_VALID(stackTop) && PTR_VALID(stackBot))) {
             exiPrintf(" *** ERROR *** thread %08X (%s) invalid stack (%08X-%08X) PC=%08X\n",
                 (u32)thread, name, stackBot, stackTop, pc);
