@@ -14,12 +14,15 @@ FILE *curStreamFile = NULL;
 int16_t *streamDecodeBuf; //-> decoded samples to be played
 
 //game variables for tracking stream position, in seconds
-float *pStreamPos    = (float*)0x803dc858; //current pos
-float *pStreamEndPos = (float*)0x803dc84c; //end pos
+volatile float *pStreamPos    = (volatile float*)0x803dc858; //current pos
+volatile float *pStreamEndPos = (volatile float*)0x803dc84c; //end pos
 static bool streamPaused = false;
+static DVDCBCallback stopAtEndCb = NULL;
+static DVDCommandBlock *stopAtEndCbParam = NULL;
+static bool callStopAtEndCb = false;
 
 //tDelta is frames passed this tick
-float *ptDelta = (float*)0x803db414;
+volatile float *ptDelta = (volatile float*)0x803db414;
 
 //some ADP decoding code copied from Dolphin
 static s32 histl1 = 0;
@@ -88,11 +91,12 @@ void initStreamThread() {
 
 static void _finishStream() {
 	audioStopSound(STREAM_REPLACE_SFX_ID);
+	callStopAtEndCb = true;
 	if(curStreamFile) {
 		fclose(curStreamFile);
 		curStreamFile = NULL;
 		exiPrintf("Stream stopped! %d/%d\r\n",
-			(int)*pStreamPos, (int)*pStreamEndPos);
+			(int)(*pStreamPos), (int)(*pStreamEndPos));
 	}
 }
 
@@ -122,8 +126,9 @@ BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
 DVDCBCallback callback) {
     exiPrintf("DVDStopStreamAtEndAsync(%p, %p)\n",
         block, callback);
+	stopAtEndCb = callback;
+	stopAtEndCbParam = block;
     OSYieldThread();
-    if(callback) callback(0, block);
     return true;
 }
 
@@ -173,6 +178,13 @@ void mainLoopUpdateStream_hook() {
 	//void (*origFunc)() = 0x8000d55c;
 	//origFunc();
 	dvdDoPendingStreamCallbacks();
+	if(callStopAtEndCb) {
+		if(stopAtEndCb) {
+			stopAtEndCb(0, stopAtEndCbParam);
+		}
+		stopAtEndCb = NULL;
+		callStopAtEndCb = false;
+	}
 }
 
 void streamThreadAlarmCb(OSAlarm *alarm, OSContext *ctx) {
@@ -285,11 +297,14 @@ void* streamThreadMain(void *param) {
 			prevTime = OSGetTime();
 		}
 
-		int samplePos = (*pStreamPos    * (float)STREAM_SAMPLE_RATE);
-		int sampleEnd = (*pStreamEndPos * (float)STREAM_SAMPLE_RATE);
-		int remain = sampleEnd - samplePos;
+		u32 samplePos = (u32)((*pStreamPos    * (float)STREAM_SAMPLE_RATE));
+		u32 sampleEnd = (u32)((*pStreamEndPos * (float)STREAM_SAMPLE_RATE));
+		u32 remain = sampleEnd - samplePos;
 		//sampleEnd isn't reliable because some streams inexplicably
 		//have a length of 0, which defaults to 9 billion.
+		//I think that's meant to act as effectively no time limit, ie just
+		//play the stream until EOF.
+		//my Wii truncates that to a huge negative number, so we must use u32.
 		//exiPrintf("Stream pos %d / %d\n",
 		//	samplePos, sampleEnd);
 
@@ -344,6 +359,6 @@ void* streamThreadMain(void *param) {
 		u64 dt  = OSTicksToMilliseconds(now - prevTime);
 		prevTime = now;
 		*pStreamPos += ((float)dt) * 0.001f * (physicsTimeScale/60.0f);
-		//OSYieldThread();
+		OSYieldThread();
 	}
 }
