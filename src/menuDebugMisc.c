@@ -64,7 +64,7 @@ void menuDebugMiscAramTest_select(const MenuItem *self, int amount) {
 
 void menuDebugFpTest_select(const MenuItem *self, int amount) {
     if(amount) return;
-    while(1) {
+    for(int i=0; i<10000; i++) {
         volatile float a = 1.0f;
         volatile float b = 2.0f;
         volatile float c = 3.0f;
@@ -74,8 +74,10 @@ void menuDebugFpTest_select(const MenuItem *self, int amount) {
         float f = a+b+c+d+e;
         if(f > 15.0001f || f < 14.9999f) {
             OSReport("FPU FAIL\n");
+            return;
         }
     }
+    OSReport("FPU test OK\n");
 }
 void menuDebugCopyTest_select(const MenuItem *self, int amount) {
     if(amount) return;
@@ -103,21 +105,23 @@ void menuDebugCopyTest_select(const MenuItem *self, int amount) {
         "All your base are belong to us.";
     int len = strlen(test);
     if(len > 1024) len = 1024;
-    while(1) {
+    for(int iTest=0; iTest<10000; iTest++) {
         volatile char msg[1024];
         memcpy(msg, test, sizeof(msg));
         waitNextFrame();
         for(int i=0; i<len; i++) {
             if(msg[i] != test[i]) {
                 OSReport("COPY FAIL\n");
+                return;
             }
         }
     }
+    OSReport("Copy test OK\n");
 }
 void menuDebugHeapTest_select(const MenuItem *self, int amount) {
     if(amount) return;
     u32 size = 32768;
-    while(1) {
+    for(int iTest=0; iTest<10000; iTest++) {
         u32 *buf = allocTagged(size, 0xD06FECE5, "test");
         waitNextFrame();
         for(int i=0; i<size/4; i++) {
@@ -127,18 +131,20 @@ void menuDebugHeapTest_select(const MenuItem *self, int amount) {
         for(int i=0; i<size/4; i++) {
             if(buf[i] != i) {
                 OSReport("HEAP FAIL\n");
+                return;
             }
         }
         free(buf);
         size <<= 1;
         if(size >= 2097152) size = 256;
     }
+    OSReport("Heap test OK\n");
 }
 void menuDebugFileTest_select(const MenuItem *self, int amount) {
     if(amount) return;
     DVDFileInfo file1, file2, file3;
     u8 canVal1 = 0x00, canVal2 = 0xFF;
-    while(1) {
+    for(int iTest=0; iTest<10000; iTest++) {
         canVal1++;
         canVal2--;
         u8 *canary1 = (u8*)allocTagged(128, 0xD00D00A0, "canary1");
@@ -202,9 +208,10 @@ void menuDebugFileTest_select(const MenuItem *self, int amount) {
             }
         }
 
-        OSReport("Check OK\n");
+        //OSReport("Check OK\n");
         //waitNextFrame();
     }
+    OSReport("File test OK\n");
 }
 void menuDebugFileTest2_select(const MenuItem *self, int amount) {
     if(amount) return;
@@ -217,7 +224,7 @@ void menuDebugFileTest2_select(const MenuItem *self, int amount) {
         NULL
     };
     int iFile = 0;
-    while(1) {
+    for(int iTest=0; iTest<10000; iTest++) {
         waitNextFrame();
         u32 size;
         u32 *data = loadFileByPath(files[iFile], &size);
@@ -246,6 +253,7 @@ void menuDebugFileTest2_select(const MenuItem *self, int amount) {
             //allocTagged(128, 0xDEADDEAD, "waste");
         }
     }
+    OSReport("File test OK");
 }
 void menuDebugGprTest_select(const MenuItem *self, int amount) {
     if(amount) return;
@@ -344,12 +352,12 @@ Menu menuDebugMisc = {
     "RNG Test", "%s",    genericMenuItem_draw,  menuDebugMiscRNGTest_select,
     "Kill Player", "%s", genericMenuItem_draw,  menuDebugMiscDie_select,
     "Crash Game",  "%s", genericMenuItem_draw,  menuDebugMiscCrash_select,
-    "ARAM Test", "%s: %08X %08X",   menuDebugMiscAramTest_draw,  menuDebugMiscAramTest_select,
+    //"ARAM Test", "%s: %08X %08X",   menuDebugMiscAramTest_draw,  menuDebugMiscAramTest_select,
     "FPU Test",  "%s",   genericMenuItem_draw,  menuDebugFpTest_select,
     "Copy Test",  "%s",  genericMenuItem_draw,  menuDebugCopyTest_select,
     "Heap Test",  "%s",  genericMenuItem_draw,  menuDebugHeapTest_select,
     "File Test",  "%s",  genericMenuItem_draw,  menuDebugFileTest_select,
     "File Test2", "%s",  genericMenuItem_draw,  menuDebugFileTest2_select,
-    "GPR Test",   "%s",  genericMenuItem_draw,  menuDebugGprTest_select,
+    //"GPR Test",   "%s",  genericMenuItem_draw,  menuDebugGprTest_select,
     NULL,
 };
