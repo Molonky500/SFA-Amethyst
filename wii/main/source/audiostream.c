@@ -328,6 +328,7 @@ void* streamThreadMain(void *param) {
 		}
 
 		//read a few blocks ahead.
+		bool reportedEof = false;
 		u8 block[STREAM_BLOCK_SIZE];
 		fseek(curStreamFile, iStartBlock * STREAM_BLOCK_SIZE, SEEK_SET);
 		for(int i=0; i<STREAM_BUF_FRAMES * STREAM_SAMPLE_RATE;
@@ -337,10 +338,14 @@ void* streamThreadMain(void *param) {
 			SET_DISC_LED(0);
 			if(r < STREAM_BLOCK_SIZE) { //we're at EOF (or something broke)
 				if(r < 0) exiPrintf("Stream read error %d\n", errno);
+				else {
+					if(!reportedEof) exiPuts("Stream reached EOF\n");
+					reportedEof = true;
+				}
 				memset(block, 0, sizeof(block)); //"read" silence from the file
 				remain = 0; //and stop trying to read
 			}
-			for(int ibs = 0; ibs < STREAM_SAMPLES_PER_BLOCK; ibs++) { //decode the samples we read
+			for(int ibs=0; ibs < STREAM_SAMPLES_PER_BLOCK; ibs++) { //decode the samples we read
 				s32 a = ADPDecodeSample(block[ibs + (STREAM_BLOCK_SIZE - STREAM_SAMPLES_PER_BLOCK)] & 0xf, block[0], &histl1, &histl2);
 				s32 b = ADPDecodeSample(block[ibs + (STREAM_BLOCK_SIZE - STREAM_SAMPLES_PER_BLOCK)] >> 4,  block[1], &histr1, &histr2);
 				streamDecodeBuf[iSample] = (a+b)/2;
