@@ -32,10 +32,36 @@ void wiiHooksInit() {
 }
 
 void wiiLoadConfig() {
-    //TODO: read wiiOptions from a file
+    if(!IS_WII) return;
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    if(!wii) return;
+
+    char path[4096];
+    sprintf(path, "%s/wiicfg.bin", wii->saveFilePath);
+    FILE *file = wii->fopen(path, "rb");
+    if(!file) {
+        DPRINT("No wiicfg\r\n");
+        return;
+    }
+    DPRINT("Reading Wii config\r\n");
+    wii->fread(&wiimoteCfg, sizeof(WiimoteConfig), GAME_MAX_WIIMOTES, file);
+    wii->fclose(file);
 }
 void wiiSaveConfig() {
-    //TODO: write wiiOptions to a file
+    if(!IS_WII) return;
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    if(!wii) return;
+
+    char path[4096];
+    sprintf(path, "%s/wiicfg.bin", wii->saveFilePath);
+    FILE *file = wii->fopen(path, "wb");
+    if(!file) {
+        OSReport("Can't open wiicfg.bin, error %d\r\n", wii->getErrno());
+        return;
+    }
+    DPRINT("Saving Wii config\r\n");
+    wii->fwrite(&wiimoteCfg, sizeof(WiimoteConfig), GAME_MAX_WIIMOTES, file);
+    wii->fclose(file);
 }
 
 //this is working.

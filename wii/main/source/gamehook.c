@@ -30,6 +30,10 @@ void printConsoleInfo() {
     exiPrintf("Console name: \"%s\"\n", name);
 }
 
+int getErrno() {
+    return errno;
+}
+
 void initGameHooks() {
     //_dspReg[5] = 0x801; //DSP reset
 
@@ -112,6 +116,7 @@ void initGameHooks() {
     wii->seekdir        = seekdir;
     wii->telldir        = telldir;
     wii->stat           = stat;
+    wii->getErrno       = getErrno;
     wii->gameRootDir    = gameRootDir;
     wii->magic          = WII_IFACE_MAGIC;
     exiPrintf("sizeof(FILE) = %d, DIR=%d.\r\n", sizeof(FILE), sizeof(DIR));

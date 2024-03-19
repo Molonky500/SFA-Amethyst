@@ -65,6 +65,7 @@ typedef struct {
     void (*seekdir)(DIR *dirp, long loc);
     long (*telldir)(DIR *dirp);
     int (*stat)(const char *path, struct stat *buf);
+    int (*getErrno)();
 
     //filled in by game for Wii code to use.
     //these are functions that are part of the mod code and thus don't load
@@ -75,7 +76,9 @@ typedef struct {
     void (*drawBox)(float x, float y, int w, int h, u8 opacity, bool fill);
     int (*showPopupMessage)(const char *text, const char **options);
 
-    const char *gameRootDir;
+    const char *gameRootDir; //eg: sd:/apps/SFA
+    char *profileName; //eg: default
+    char *saveFilePath; //for current profile, eg: sd:/apps/SFA/profiles/default
     u8 language; //read from Wii config
 } GameWiiInterface;
 

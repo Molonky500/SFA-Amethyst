@@ -11,7 +11,6 @@ void menuWiimoteShakeSwing_draw(const MenuItem *self, int x, int y, bool selecte
 void menuWiimoteShakeSwing_select(const MenuItem *self, int amount) {
     wiimoteCfg[0].options ^= WII_SHAKE_TO_SWING;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 void menuWiimoteShakeRoll_draw(const MenuItem *self, int x, int y, bool selected) {
@@ -23,7 +22,6 @@ void menuWiimoteShakeRoll_draw(const MenuItem *self, int x, int y, bool selected
 void menuWiimoteShakeRoll_select(const MenuItem *self, int amount) {
     wiimoteCfg[0].options ^= WII_SHAKE_TO_ROLL;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 void menuWiimoteNunCam_draw(const MenuItem *self, int x, int y, bool selected) {
@@ -35,7 +33,6 @@ void menuWiimoteNunCam_draw(const MenuItem *self, int x, int y, bool selected) {
 void menuWiimoteNunCam_select(const MenuItem *self, int amount) {
     wiimoteCfg[0].options ^= WII_NUNCHUK_CAMERA;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 void menuWiimoteNunSteer_draw(const MenuItem *self, int x, int y, bool selected) {
@@ -47,7 +44,6 @@ void menuWiimoteNunSteer_draw(const MenuItem *self, int x, int y, bool selected)
 void menuWiimoteNunSteer_select(const MenuItem *self, int amount) {
     wiimoteCfg[0].options ^= WII_NUNCHUK_STEER;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 
@@ -59,7 +55,6 @@ void menuWiimoteCamScaleX_draw(const MenuItem *self, int x, int y, bool selected
 void menuWiimoteCamScaleX_select(const MenuItem *self, int amount) {
     nunchukXScale += (float)amount / 10.0f;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 void menuWiimoteCamScaleY_draw(const MenuItem *self, int x, int y, bool selected) {
@@ -70,7 +65,6 @@ void menuWiimoteCamScaleY_draw(const MenuItem *self, int x, int y, bool selected
 void menuWiimoteCamScaleY_select(const MenuItem *self, int amount) {
     nunchukYScale += (float)amount / 10.0f;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 
@@ -82,7 +76,6 @@ void menuWiimoteCamMinX_draw(const MenuItem *self, int x, int y, bool selected) 
 void menuWiimoteCamMinX_select(const MenuItem *self, int amount) {
     nunchukXMin += (float)amount / 10.0f;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 void menuWiimoteCamMinY_draw(const MenuItem *self, int x, int y, bool selected) {
@@ -93,7 +86,6 @@ void menuWiimoteCamMinY_draw(const MenuItem *self, int x, int y, bool selected) 
 void menuWiimoteCamMinY_select(const MenuItem *self, int amount) {
     nunchukYMin += (float)amount / 10.0f;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 
@@ -105,7 +97,6 @@ void menuWiimoteCamMaxX_draw(const MenuItem *self, int x, int y, bool selected) 
 void menuWiimoteCamMaxX_select(const MenuItem *self, int amount) {
     nunchukXMax += (float)amount / 10.0f;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 void menuWiimoteCamMaxY_draw(const MenuItem *self, int x, int y, bool selected) {
@@ -116,7 +107,6 @@ void menuWiimoteCamMaxY_draw(const MenuItem *self, int x, int y, bool selected) 
 void menuWiimoteCamMaxY_select(const MenuItem *self, int amount) {
     nunchukYMax += (float)amount / 10.0f;
     audioPlaySound(NULL, MENU_ADJUST_SOUND);
-    wiiSaveConfig();
 }
 
 void menuWiimoteCalibrate_select(const MenuItem *self, int amount) {
@@ -125,9 +115,15 @@ void menuWiimoteCalibrate_select(const MenuItem *self, int amount) {
     audioPlaySound(NULL, MENU_OPEN_SOUND);
 }
 
+void menuWiimote_close(const Menu *self) {
+    wiiSaveConfig();
+    curMenu = &menuControlSettings;
+    audioPlaySound(NULL, MENU_CLOSE_SOUND);
+}
+
 Menu menuWiimote = {
     "Wii Remote", 0,
-    genericMenu_run, genericMenu_draw, controlSubMenu_close,
+    genericMenu_run, genericMenu_draw, menuWiimote_close,
     "Shake Remote to Swing","%s: %s", menuWiimoteShakeSwing_draw, menuWiimoteShakeSwing_select,
     "Shake Nunchuk to Roll","%s: %s", menuWiimoteShakeRoll_draw, menuWiimoteShakeRoll_select,
     "Nunchuk Camera Control","%s: %s", menuWiimoteNunCam_draw, menuWiimoteNunCam_select,
