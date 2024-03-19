@@ -253,7 +253,7 @@ static void dll_SaveGame_initialise_hook(void *unused) {
 } */
 
 static inline void _initSaveHacks() {
-    if(IS_WII) return;
+    //if(IS_WII) return;
     hookBranch(0x800e7fb0, saveLoadHook, 1);
     hookBranch(0x80042ec4, saveMapLoadHook, 1);
     hookBranch(0x8007db50, saveShowMsgHook, 1);
