@@ -158,7 +158,7 @@ void playStream_hook() {
 	streamEndTime = OSMillisecondsToTicks((totalSamples*1000)/STREAM_SAMPLE_RATE);
 	streamTime = 0;
 	streamPrevTime = OSGetTime();
-	exiPrintf("Stream file size: %d bytes = %d samples = %d frames\r\n",
+	exiPrintf("Stream file size: %d bytes = %d samples = %d frames\n",
 		ftell(curStreamFile), totalSamples,
 		totalSamples / (STREAM_SAMPLE_RATE/60));
 	fseek(curStreamFile, 0, SEEK_SET);
