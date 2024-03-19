@@ -492,6 +492,15 @@ void cameraUpdateHook() {
             names[i], obj, name);
     }*/
 
+    switch(cameraMode) {
+        case 0x47: //Test of Strength
+        case 0x48: //Static
+        case 0x4E: //World Map
+            cameraUpdateViewMtx(pCamera);
+            updateViewMatrix();
+            return;
+    }
+
     if(debugCameraMode == CAM_MODE_NORMAL || bHeld & PAD_BUTTON_A) {
         //origFunc(pCamera);
         _camDoCStick();
@@ -515,12 +524,6 @@ void cameraUpdateHook() {
         case CAM_MODE_BIRD: _doBird(bHeld, bPressed); break;
         case CAM_MODE_FIRST_PERSON: _doFirstPerson(bHeld, bPressed); break;
         default: break;
-    }
-
-    switch(cameraMode) {
-        case 0x47: //Test of Strength
-        case 0x4E: //World Map
-            return;
     }
 
     //debugPrintf(DPRINT_FIXED "S %d %d C %d %d L %d R %d\n" DPRINT_NOFIXED,
