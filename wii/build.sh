@@ -85,7 +85,7 @@ elif [ "$TARGET" == "realsd" ]; then
     fi
     echo "Copying files..."
     cp -vru $DISCROOT/* $REAL_SD_PATH/apps/SFA/files/
-    cp -vrf ../patchfiles/* $REAL_SD_PATH/apps/SFA/files/
+    cp -vruf ../patchfiles/* $REAL_SD_PATH/apps/SFA/files/
     umount $REAL_SD_PATH
 
 elif [ "$TARGET" == "real" ]; then
