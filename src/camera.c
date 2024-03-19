@@ -517,6 +517,12 @@ void cameraUpdateHook() {
         default: break;
     }
 
+    switch(cameraMode) {
+        case 0x47: //Test of Strength
+        case 0x4E: //World Map
+            return;
+    }
+
     //debugPrintf(DPRINT_FIXED "S %d %d C %d %d L %d R %d\n" DPRINT_NOFIXED,
     //    controllerStates[3].stickX,      controllerStates[3].stickY,
     //    controllerStates[3].substickX,   controllerStates[3].substickY,
