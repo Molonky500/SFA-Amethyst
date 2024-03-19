@@ -10,7 +10,7 @@ typedef struct {
 } StreamsBinEntry;
 
 #define STREAM_THREAD_PRIO 2 //31=lowest 0=highest
-#define STREAM_THREAD_STACK_SIZE 8192
+#define STREAM_THREAD_STACK_SIZE 16384
 #define STREAM_ALARM_PERIOD_MSEC 5
 #define STREAM_ALARM_PERIOD OSMillisecondsToTicks(STREAM_ALARM_PERIOD_MSEC)
 #define STREAM_BUF_FRAMES 1 //frames of data to buffer.
