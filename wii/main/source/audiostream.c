@@ -20,6 +20,8 @@ static bool streamPaused = false;
 static DVDCBCallback stopAtEndCb = NULL;
 static DVDCommandBlock *stopAtEndCbParam = NULL;
 static bool callStopAtEndCb = false;
+static volatile bool shouldStopPlayback = false;
+static u32 streamBufNumSamples = 0;
 
 //tDelta is frames passed this tick
 volatile float *ptDelta = (volatile float*)0x803db414;
@@ -90,14 +92,8 @@ void initStreamThread() {
 }
 
 static void _finishStream() {
-	audioStopSound(STREAM_REPLACE_SFX_ID);
-	callStopAtEndCb = true;
-	if(curStreamFile) {
-		fclose(curStreamFile);
-		curStreamFile = NULL;
-		exiPrintf("Stream stopped! %d/%d\r\n",
-			(int)(*pStreamPos), (int)(*pStreamEndPos));
-	}
+	exiPuts("Signalling stream to stop\n");
+	shouldStopPlayback = true;
 }
 
 BOOL DVDPrepareStreamAsync_hook(DVDFileInfo *fInfo, u32 length,
@@ -115,11 +111,10 @@ DVDCBCallback callback) {
     exiPrintf("DVDCancelStreamAsync(%p, %p)\n",
         block, callback);
     OSYieldThread();
-    if(callback) callback(0, block);
-	_finishStream();
-	if(curStreamFile) fclose(curStreamFile);
-	curStreamFile = NULL;
-    return true;
+    _finishStream(); //tell stream thread to stop
+	while(curStreamFile) OSYieldThread(); //wait for it to stop
+	if(callback) callback(0, block);
+	return true;
 }
 
 BOOL DVDStopStreamAtEndAsync_hook(DVDCommandBlock *block,
@@ -141,7 +136,7 @@ void AISetStreamPlayState_hook(int param) {
 void playStream_hook() {
 	//replaces call to DVDPrepareStreamAsync in streamPlay
 	ADPInitFilter();
-	_finishStream();
+	shouldStopPlayback = false;
 
 	int streamNo = (*(int*)0x803dc870) - 1;
 	//streamNo = 0x1B; //test
@@ -177,11 +172,10 @@ void mainLoopUpdateStream_hook() {
 	//just updates streamPos
 	//void (*origFunc)() = 0x8000d55c;
 	//origFunc();
+	//handle any pending callbacks
 	dvdDoPendingStreamCallbacks();
 	if(callStopAtEndCb) {
-		if(stopAtEndCb) {
-			stopAtEndCb(0, stopAtEndCbParam);
-		}
+		if(stopAtEndCb) stopAtEndCb(0, stopAtEndCbParam);
 		stopAtEndCb = NULL;
 		callStopAtEndCb = false;
 	}
@@ -249,31 +243,49 @@ void checkStreamEnd() {
 	}
 }
 
-void* streamThreadMain(void *param) {
-	exiPrintf("Stream thread online; update rate %d\n",
-		(int)STREAM_UPDATE_RATE);
+void _setupDecodeBuf() {
 	u32 *aramUsed = 0x803de384;
 	void *aramBase = 0x90000000;
 
-	while(!curStreamFile) OSSleepThread(&streamThreadQueue);
-	MusyxSampleDirTblA *sfxEntry = findStreamSfxEntry();
+	//allocate the buffer for the decoded audio
 	exiPrintf("Alloc stream buffers (%d bytes) at 0x%X\n",
 		STREAM_DECODE_BUF_SIZE, *aramUsed);
 	streamDecodeBuf = aramBase + *aramUsed;
 	*aramUsed += STREAM_DECODE_BUF_SIZE;
 	exiPrintf("Free ARAM: %dK\n", *(u32*)0x800000D0 - *aramUsed);
+
+	//replace the sound effect's sample data with our buffer
+	MusyxSampleDirTblA *sfxEntry = findStreamSfxEntry();
 	sfxEntry->aramOffset = ((u32)streamDecodeBuf) & 0x7FFFFFFF;
-	u32 nSamples = sfxEntry->formatAndNumSamples & 0xFFFFFF;
+	streamBufNumSamples = sfxEntry->formatAndNumSamples & 0xFFFFFF;
 
 	exiPrintf("Decoding stream to 0x%08X, %d samples  \r\n",
-		streamDecodeBuf, nSamples);
+		streamDecodeBuf, streamBufNumSamples);
 	//avoid static at start of first stream
 	memset(streamDecodeBuf, 0, STREAM_DECODE_BUF_SIZE);
+}
 
-	//HACK to fix volume resetting to 0 on load
-	//void (*audioSetVolumes)(uint volume,uint scale,int bMusic,
-	//	int bSfx,int bCutscenes) = 0x80009a28;
-	//audioSetVolumes(100, 1000, 1, 1, 1); //no idea what scale is
+void _handleStreamEnd() {
+	//tell game to stop playing this sound (hopefully it obeys)
+	audioStopSound(STREAM_REPLACE_SFX_ID);
+	if(curStreamFile) {
+		fclose(curStreamFile);
+		curStreamFile = NULL;
+		exiPrintf("Stream stopped! %d/%d\r\n",
+			(int)(*pStreamPos), (int)(*pStreamEndPos));
+	}
+	callStopAtEndCb = true; //we reached the end
+	shouldStopPlayback = false; //don't immediately stop the next stream
+}
+
+void* streamThreadMain(void *param) {
+	exiPrintf("Stream thread online; update rate %d\n",
+		(int)STREAM_UPDATE_RATE);
+
+	//wait for a stream to play
+	while(!curStreamFile) OSSleepThread(&streamThreadQueue);
+	_setupDecodeBuf();
+	u32 nSamples = streamBufNumSamples;
 
 	bool restart = true;
 	bool justStarted = false;
@@ -281,7 +293,7 @@ void* streamThreadMain(void *param) {
 	static u64 prevTime = 0; //must be a constant
 	if(!prevTime) prevTime = OSGetTime(); //ugh
 
-	while(1) {
+	while(1) { //main loop
 		if(!curStreamFile) restart = true;
 		do { //always sleep at least once per iteration
 			OSSleepThread(&streamThreadQueue);
@@ -305,9 +317,6 @@ void* streamThreadMain(void *param) {
 		//I think that's meant to act as effectively no time limit, ie just
 		//play the stream until EOF.
 		//my Wii truncates that to a huge negative number, so we must use u32.
-		//exiPrintf("Stream pos %d / %d\n",
-		//	samplePos, sampleEnd);
-
 		s32 iStartBlock = (*pStreamPos) * STREAM_BLOCK_RATE;
 		iSample = (iStartBlock * STREAM_SAMPLES_PER_BLOCK) % nSamples;
 
@@ -326,39 +335,35 @@ void* streamThreadMain(void *param) {
 			SET_DISC_LED(1);
 			int r = fread(block, 1, STREAM_BLOCK_SIZE, curStreamFile);
 			SET_DISC_LED(0);
-			if(!r) { //reached end
-				exiPuts("Stream decode finished\n");
-				_finishStream();
-				break;
+			if(r < STREAM_BLOCK_SIZE) { //we're at EOF (or something broke)
+				if(r < 0) exiPrintf("Stream read error %d\n", errno);
+				memset(block, 0, sizeof(block)); //"read" silence from the file
+				remain = 0; //and stop trying to read
 			}
-			if(r < STREAM_BLOCK_SIZE) {
-				exiPrintf("Stream read %d but only got %d\r\n", STREAM_BLOCK_SIZE, r);
-			}
-			//ADPDecodeBlockMono(&streamDecodeBuf[iSample], block);
-			for(int ibs = 0; ibs < STREAM_SAMPLES_PER_BLOCK; ibs++) {
+			for(int ibs = 0; ibs < STREAM_SAMPLES_PER_BLOCK; ibs++) { //decode the samples we read
 				s32 a = ADPDecodeSample(block[ibs + (STREAM_BLOCK_SIZE - STREAM_SAMPLES_PER_BLOCK)] & 0xf, block[0], &histl1, &histl2);
 				s32 b = ADPDecodeSample(block[ibs + (STREAM_BLOCK_SIZE - STREAM_SAMPLES_PER_BLOCK)] >> 4,  block[1], &histr1, &histr2);
 				streamDecodeBuf[iSample] = (a+b)/2;
 				iSample++;
 				if(iSample >= nSamples) iSample = 0;
-				remain--;
+				if(remain) remain--;
 			}
 			DCFlushRange(&streamDecodeBuf[iSample],
 				STREAM_SAMPLES_PER_BLOCK * STREAM_SAMPLE_SIZE);
-			if(justStarted) {
+			if(justStarted) { //trigger the sound effect
 				audioPlaySound(NULL, STREAM_REPLACE_SFX_ID);
 				justStarted = false;
 			}
 		}
-
 		if(remain <= 0) {
 			exiPuts("Reached end of stream\n");
 			_finishStream();
 		}
+		//update playback position
 		u64 now = OSGetTime();
 		u64 dt  = OSTicksToMilliseconds(now - prevTime);
 		prevTime = now;
 		*pStreamPos += ((float)dt) * 0.001f * (physicsTimeScale/60.0f);
-		OSYieldThread();
+		if(shouldStopPlayback) _handleStreamEnd();
 	}
 }
