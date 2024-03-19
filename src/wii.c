@@ -36,8 +36,8 @@ void wiiLoadConfig() {
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!wii) return;
 
-    char path[4096];
-    sprintf(path, "%s/wiicfg.bin", wii->saveFilePath);
+    char path[1024];
+    sprintf(path, "%s/%s/wiicfg.bin", wii->saveFilePath, wii->profileName);
     FILE *file = wii->fopen(path, "rb");
     if(!file) {
         DPRINT("No wiicfg\r\n");
@@ -52,8 +52,11 @@ void wiiSaveConfig() {
     GameWiiInterface *wii = WII_IFACE_PTR;
     if(!wii) return;
 
-    char path[4096];
-    sprintf(path, "%s/wiicfg.bin", wii->saveFilePath);
+    char path[1024];
+    sprintf(path, "%s/%s/wiicfg.bin", wii->saveFilePath, wii->profileName);
+    OSReport("Save path: \"%s\"\r\n", wii->saveFilePath);
+    OSReport("Profile: \"%s\"\r\n", wii->profileName);
+    OSReport("wiicfg path: \"%s\"\r\n", path);
     FILE *file = wii->fopen(path, "wb");
     if(!file) {
         OSReport("Can't open wiicfg.bin, error %d\r\n", wii->getErrno());

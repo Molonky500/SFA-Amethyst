@@ -13,6 +13,9 @@ void initSaveHacks() {
     snprintf(saveFilePath, sizeof(saveFilePath), "%s/profiles",
         gameRootDir);
 
+    GameWiiInterface *wii = WII_IFACE_PTR;
+    wii->profileName = profileName;
+    wii->saveFilePath = saveFilePath;
     if(saveFilePath[0] != 0) {
         *(u32*)0x80311910 = saveGame_initialize_hook;
         hookBranch(0x8007db74, saveGameSave_hook, 1, 0);
