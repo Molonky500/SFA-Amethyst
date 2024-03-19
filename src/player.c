@@ -2,6 +2,7 @@
 
 PlayerStateFunc origClimbWallFn = NULL;
 
+
 void initPlayerStatesHook(void) {
     playerInitFuncPtrs();
     origClimbWallFn = playerStateFuncs[PlayerStateEnum_ClimbWall];

@@ -244,6 +244,7 @@ GLOBALFN void padUpdate(void);
 GLOBALFN void pauseMenuDraw(int,int,int); //XXX params
 GLOBALFN void pauseMenuDrawText(void);
 GLOBALFN void piRomLoadSection(int offset, MapId32 map, void *buffer);
+GLOBALFN void playerCalcWaterCurrent(float *outX,float *outZ,ObjInstance *this);
 GLOBALFN void playerDie(ObjInstance *player); //immediately kill player
 GLOBALFN ObjInstance* playerGetNearestObject(int idx,ObjInstance *obj,float *outDistance);
 GLOBALFN ObjInstance** playerGetObject(int idx, int *outIdx);

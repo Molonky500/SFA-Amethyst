@@ -317,6 +317,9 @@ static inline void _initCameraHacks() {
 
 static inline void _initPlayerHacks() {
     hookBranch(0x80021078, initPlayerStatesHook, 1);
+    //correct water current calculations
+    WRITE32(0x802aba6c, 0xd0380000);
+    WRITE32(0x802aba7c, 0xd0390000);
 }
 
 static inline void _initControllerHacks() {

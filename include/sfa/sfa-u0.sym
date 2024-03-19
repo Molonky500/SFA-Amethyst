@@ -492,6 +492,7 @@ padGetStickY = 0x80014c6c;
 pauseDisabled = 0x803dd789;
 pdaOn = 0x803dbbb0;
 physicsTimeScale = 0x803dea9c;
+playerCalcWaterCurrent = 0x802ab690;
 playerDie = 0x802aaa80;
 playerGetObject = 0x80036f50;
 playerId = 0x803a32c8;
