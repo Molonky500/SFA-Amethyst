@@ -34,7 +34,8 @@ void playerMainLoopHook() {
     //of course, it only happens on console...
     float shake = *(float*)0x803381fc; //viewport shake
     if(shake >= 1000.0f || shake <= -1000.0f) {
-        OSReport("Fixing bogus viewport shake value %f\r\n", shake);
+        OSReport("Fixing bogus viewport shake value %f (0x%08X)\r\n", shake,
+            *(u32*)0x803381fc);
         *(float*)0x803381fc = 10.0f;
     }
 
