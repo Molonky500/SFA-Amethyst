@@ -92,6 +92,10 @@ static inline void sanityCheck() {
     if(overridePlayerNo >= NUM_PLAYER_IDS) overridePlayerNo = 0;
     if(overrideMinimapSize >= NUM_MINIMAP_SIZES) overrideMinimapSize = 0;
     if(overrideFov == 0) overrideFov = 60;
+    if(timeDelta < 0.5 || timeDelta > 2.0) {
+        OSReport("timeDelta = %f\n", timeDelta);
+    }
+    if(timeDelta < 0.1) timeDelta = 0.1;
 }
 
 static inline void doFovOverride() {
