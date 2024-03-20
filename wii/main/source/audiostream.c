@@ -333,9 +333,9 @@ void* streamThreadMain(void *param) {
 		fseek(curStreamFile, iStartBlock * STREAM_BLOCK_SIZE, SEEK_SET);
 		for(int i=0; i<STREAM_BUF_FRAMES * STREAM_SAMPLE_RATE;
 		i += STREAM_SAMPLES_PER_BLOCK / 2) {
-			SET_DISC_LED(1);
+			//SET_DISC_LED(1);
 			int r = fread(block, 1, STREAM_BLOCK_SIZE, curStreamFile);
-			SET_DISC_LED(0);
+			//SET_DISC_LED(0);
 			if(r < STREAM_BLOCK_SIZE) { //we're at EOF (or something broke)
 				if(r < 0) exiPrintf("Stream read error %d\n", errno);
 				else {
