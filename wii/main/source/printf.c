@@ -426,7 +426,7 @@ static inline char* write_float(printf_context *ctxt) {
 		width--;
 	}
 
-	if(ctxt->useZeros) { //place prefix and sign
+	if(!ctxt->useZeros) { //place prefix and sign
 		//forceDecimal flag with base 16 == prepend 0x or 0X
 		if(ctxt->forceDecimal && base == 16) {
 			*(out--) = ctxt->uppercase ? 'X' : 'x';
@@ -444,6 +444,15 @@ static inline char* write_float(printf_context *ctxt) {
 		if(!ctxt->useZeros) pad = ' ';
 		out   = write_padding(out, pad, -width);
 		width = 0;
+	}
+
+	if(ctxt->useZeros) { //place prefix and sign
+		//forceDecimal flag with base 16 == prepend 0x or 0X
+		if(ctxt->forceDecimal && base == 16) {
+			*(out--) = ctxt->uppercase ? 'X' : 'x';
+			*(out--) = '0';
+		}
+		if(signChar) *(out--) = signChar;
 	}
 
 	ctxt->nChars += (bEnd - out) - 1; //add to character count.

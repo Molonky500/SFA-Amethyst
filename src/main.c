@@ -238,7 +238,7 @@ void mainLoopHook() {
     updateOsd();
 
     //static float test = 0;
-    //debugPrintf("float test [%f]\n", test);
+    //debugPrintf("float test [%f] [%f]\n", test, -test);
     //test += 1.0f / 60.0f;
 
     if(curMapId != 0x3F) {
