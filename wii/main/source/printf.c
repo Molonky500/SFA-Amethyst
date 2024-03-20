@@ -332,6 +332,124 @@ static inline char* write_int(printf_context *ctxt) {
 	return ++out; //return pointer to beginning of resulting string.
 }
 
+//Used by fprintf() to print floats.
+//TODO: scientific notation
+static inline char* write_float(printf_context *ctxt) {
+	//f F: float
+	//e E: float, scientific notation
+	//g G: whichever of e or f is shorter
+	//a A: hex float (eg "0x1.8p+0")
+	int base = 10;
+	ctxt->uppercase = 0;
+	switch(ctxt->spec) {
+		case 'A': base = 16; //fall thru
+		case 'E': case 'F': case 'G':
+			ctxt->uppercase = 1;
+			break;
+		case 'a': base = 16; break;
+	}
+
+	//write digits backward into buf
+	char *buf  = ctxt->buf;
+	char *bEnd = &ctxt->buf[ctxt->bufLen - 1];
+	char *out  = bEnd;
+	*(out--)   = '\0';
+
+	if(ctxt->precision < 0) ctxt->precision = 6; //standard default
+	//float gets promoted to double, so there's no case where
+	//we'd do _printf_next_arg(float) here.
+	double val = _printf_next_arg(double);
+	if(isnan(val) || isinf(val)) {
+		ctxt->useZeros     = 0;
+		ctxt->forceDecimal = 0;
+		ctxt->precision    = 0;
+		const char *result = "nan";
+		if(!isnan(val)) result = (val < 0) ? "-inf" : "inf";
+		int len = strlen(result);
+		strncpy(&buf[-(len-1)], result, len);
+		return len;
+	}
+
+	ctxt->sign = (val>0) ? 1 : ((val<0) ? -1 : 0);
+	double ipart = 0;
+	double fpart = modf(val, &ipart);
+	ipart = fabs(ipart);
+	fpart = fabs(fpart) * pow(10, ctxt->precision);
+	const char *digits = ctxt->uppercase ? digitsUpper : digitsLower;
+
+	//write fractional part
+	for(int i=0; i<ctxt->precision; i++) {
+		if(out == buf) return out;
+		*(out--) = digits[((unsigned long long int)fpart) % base];
+		fpart /= base;
+	}
+	int count = ctxt->precision;
+
+	//write decimal point
+	if(ctxt->precision || ctxt->forceDecimal) {
+		if(out == buf) return out;
+		*(out--) = '.';
+		count++;
+	}
+
+	//write integer part
+	do {
+		if(out == buf) return out;
+		*(out--) = digits[((unsigned long long int)ipart) % base];
+		ipart /= base;
+		count++;
+	} while(ipart >= 1.0);
+
+	//precision n = minimum n digits (pad with zeros)
+	//precision 0 = don't write anything if val == 0
+	int width     = ctxt->width     - count;
+	int precision = ctxt->precision - count;
+	if(ctxt->forceDecimal) width -= (base > 10) ? 2 : 1; //for prefix/decimal
+
+	//sign character
+	//XXX should a + be added when val == 0?
+	char signChar = 0;
+	if     (ctxt->sign <  0)                     signChar = '-';
+	else if(ctxt->sign >  0 && ctxt->forcePlus ) signChar = '+';
+	else if(ctxt->sign == 0 && ctxt->forceSpace) signChar = ' ';
+
+	//if #digits < precision, pad with zeros.
+	//if negative and base > 10, pad with the highest digit instead.
+	//(so eg -1 as %04X = FFFF, not 000F; but -1 as %04d = -0001, not -9991)
+	char pad;
+	if(base > 10 && ctxt->sign < 0) {
+		pad = (ctxt->uppercase ? digitsUpper : digitsLower)[base-1];
+	}
+	else pad = '0';
+	while(precision --> 0) {
+		*(out--) = pad;
+		width--;
+	}
+
+	if(ctxt->useZeros) { //place prefix and sign
+		//forceDecimal flag with base 16 == prepend 0x or 0X
+		if(ctxt->forceDecimal && base == 16) {
+			*(out--) = ctxt->uppercase ? 'X' : 'x';
+			*(out--) = '0';
+		}
+		if(signChar) {
+			*(out--) = signChar;
+			width--;
+		}
+	}
+
+	//if #digits < width, pad.
+	//if left-justified, we pad after returning from this.
+	if(width > 0 && !ctxt->leftJustify) {
+		if(!ctxt->useZeros) pad = ' ';
+		out   = write_padding(out, pad, -width);
+		width = 0;
+	}
+
+	ctxt->nChars += (bEnd - out) - 1; //add to character count.
+	return ++out; //return pointer to beginning of resulting string.
+}
+
 
 int _printf_internal(printf_context *ctxt) {
 	char c;
@@ -395,16 +513,15 @@ int _printf_internal(printf_context *ctxt) {
 
 			case 'f': //lowercase float
 			case 'F': //uppercase float
-
 			case 'e': //lowercase float, scientific notation
 			case 'E': //uppercase float, scientific notation
-
 			case 'g': //whichever of e or f is shorter
 			case 'G': //whichever of E or F is shorter
-
 			case 'a': //lowercase hex float
 			case 'A': //uppercase hex float
-				//XXX TODO implement these
+				char *res = write_float(ctxt);
+				ctxt->write(ctxt, res, ctxt->nChars - curnChars);
+				break;
 
 			default:
 				//invalid/unsupported format

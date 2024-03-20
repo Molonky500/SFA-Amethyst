@@ -233,6 +233,10 @@ void mainLoopHook() {
     raceTimerUpdate();
     updateOsd();
 
+    //static float test = 0;
+    //debugPrintf("float test [%f]\n", test);
+    //test += 1.0f / 60.0f;
+
     if(curMapId != 0x3F) {
         //if not on title screen, reset this flag, so we can
         //load args again on next reset.
