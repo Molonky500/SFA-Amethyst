@@ -344,6 +344,20 @@ int sinTest() {
     return 0;
 }
 
+int floatCastTest() {
+    volatile float foo = 9000000000.0f;
+    volatile int bar = 0;
+    volatile int *ptr = &bar;
+    __asm__ volatile(
+        "lfs    0, 0(%1) \n"
+        "fctiwz 0, 0     \n"
+        "stfiwx 0, 0, %0 \n"
+    : : "r" (ptr), "r" (&foo)
+    : "memory");
+    printf(" => %d (0x%08X)\r\n", bar, bar);
+    return (bar == 0x7FFFFFFF) ? 0 : 1;
+}
+
 #define TEST_BUF1_SIZE (16*1024*1024)
 static u32 testBuf1[TEST_BUF1_SIZE/4];
 
@@ -358,22 +372,29 @@ int memTest0() {
 }
 
 int doTest() {
+    static const char *spinner = "/-\\|";
     static u32 step = 0;
-    printf("Test %4d: ", step+1);
-    switch((step++) >> 8) {
+    step++;
+    printf("%c Test %d/5 step %3d/256: ", spinner[step & 3], (step>>8)+1,
+        (step & 0xFF)+1);
+    switch(step >> 8) {
         case 0:
+            printf("Float cast");
+            return floatCastTest();
+        case 1:
             printf("Prime Numbers");
             return primeTest();
-        case 1:
+        case 2:
             printf("FPU Ops");
             return sinTest();
-        case 2:
+        case 3:
             printf("Memory");
             return memTest0();
-        case 3:
+        case 4:
             printf("Sequential");
             if(primeTest()) return 1;
             if(sinTest()) return 1;
+            if(floatCastTest()) return 1;
             return memTest0();
         default:
             SET_DISC_LED(1);
@@ -439,7 +460,7 @@ int main(int argc, char **argv) {
         VIDEO_WaitVSync();
         //PAD_ScanPads();
         //goto 4,4, clear line
-        printf("\x1B[4;4H\x1B[2K%s\n                                  \r",
+        printf("\x1B[4;4H\x1B[2K%s\n                                                  \r",
             statusMsg);
 
         if(doTest()) {
