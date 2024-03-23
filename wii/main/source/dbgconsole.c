@@ -1,6 +1,6 @@
 #include "main.h"
 
-#define CMDBUF_SIZE 1024
+#define CMDBUF_SIZE 512
 bool gDebugConsoleActive = false;
 static char *cmdBuf = NULL;
 static bool redraw, quit;
@@ -21,6 +21,24 @@ u32 readHex(char *in, char **out) {
         s8 v = chrToHex(*in);
         if(v < 0) break;
         result = (result << 4) | (u32)(v & 0xFF);
+        in++;
+    }
+    *out = in;
+    return result;
+}
+
+u32 readInt(char *in, char **out) {
+    u32 result = 0;
+    while(*in == ' ') in++; //skip spaces
+    while(*in == '0') in++; //skip leading zeros
+    if(*in == 'x') {
+        in++; //skip "0x"
+        return readHex(in, out);
+    }
+    while(*in) {
+        char c = *in;
+        if(c < '0' || c > '9') break;
+        result = (result * 10) + (u32)(c - '0');
         in++;
     }
     *out = in;
@@ -171,6 +189,36 @@ void cmd_shutdown(char *param) {
     STM_ShutdownToStandby();
 }
 
+void cmd_getspr(char *param) {
+    static u32 _getspr[] = {
+        0x7c6002a6, //mfspr r3, 0
+        0x4e800020  //blr
+    };
+    u32 spr = readInt(param, &param);
+    spr = ((spr & 0x1F) << 5) | (spr >> 5); //weird instruction encoding
+    _getspr[0] = 0x7c6002a6 | (spr << 11);
+    DCFlushRange(_getspr, 8);
+    ICInvalidateRange(_getspr, 8);
+    u32 (*getspr)(void) = _getspr;
+    u32 result = getspr();
+    exiPrintf("0x%08X\r\n", result);
+}
+
+void cmd_setspr(char *param) {
+    static u32 _setspr[] = {
+        0x7c6003a6, //mtspr 0, r3
+        0x4e800020  //blr
+    };
+    u32 spr = readInt(param, &param);
+    u32 val = readInt(param, &param);
+    spr = ((spr & 0x1F) << 5) | (spr >> 5); //weird instruction encoding
+    _setspr[0] = 0x7c6003a6 | (spr << 11);
+    DCFlushRange(_setspr, 8);
+    ICInvalidateRange(_setspr, 8);
+    void (*setspr)(u32) = _setspr;
+    setspr(val);
+}
+
 DebugConsoleCommand debugConsoleCmds[] = {
     {"?",       "", "Show help", cmd_help},
     {"q",       "", "Exit debugger", cmd_quit},
@@ -183,6 +231,8 @@ DebugConsoleCommand debugConsoleCmds[] = {
     {"dumpdvd", "", "Display DVD state", cmd_dumpdvd},
     {"dumpmem", "", "Write memdump file", cmd_dumpmem},
     {"bt",      "", "Display backtrace", cmd_dumpstack},
+    {"getspr",  "spr", "Read SPR (decimal)", cmd_getspr},
+    {"setspr",  "spr val", "Set SPR (decimal) to val (decimal)", cmd_setspr},
     {"bp",      "addr", "Set instr breakpoint", cmd_break},
     {"irq",     "", "Show IRQ status", cmd_irq},
     {"rst",     "", "Reboot system", cmd_reset},
@@ -250,9 +300,12 @@ void interactiveDebugger(int excCode) {
     memset(_buf, 0, sizeof(_buf));
     redraw = true;
     quit = false;
+    int led = 1;
 
     while(!quit) {
         if(redraw) {
+            SET_DISC_LED(led);
+            led ^= 1;
             exiPrintf("\r> %s\x1B[K", cmdBuf); //clear from cursor to EOL
             redraw = false;
         }
