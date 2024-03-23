@@ -79,6 +79,91 @@ void menuDebugFpTest_select(const MenuItem *self, int amount) {
     }
     OSReport("FPU test OK\n");
 }
+void menuDebugFprTest_select(const MenuItem *self, int amount) {
+    if(amount) return;
+    OSReport("menuDebugFprTest_select = %08X\n", menuDebugFprTest_select);
+    volatile float foo = 1234567.89f;
+    volatile float out[32];
+    for(int i=0; i<10000; i++) {
+        __asm__ volatile(
+            "lfs    0, 0(%1) \n"
+            "lfs    1, 0(%1) \n"
+            "lfs    2, 0(%1) \n"
+            "lfs    3, 0(%1) \n"
+            "lfs    4, 0(%1) \n"
+            "lfs    5, 0(%1) \n"
+            "lfs    6, 0(%1) \n"
+            "lfs    7, 0(%1) \n"
+            "lfs    8, 0(%1) \n"
+            "lfs    9, 0(%1) \n"
+            "lfs   10, 0(%1) \n"
+            "lfs   11, 0(%1) \n"
+            "lfs   12, 0(%1) \n"
+            "lfs   13, 0(%1) \n"
+            "lfs   14, 0(%1) \n"
+            "lfs   15, 0(%1) \n"
+            "lfs   16, 0(%1) \n"
+            "lfs   17, 0(%1) \n"
+            "lfs   18, 0(%1) \n"
+            "lfs   19, 0(%1) \n"
+            "lfs   20, 0(%1) \n"
+            "lfs   21, 0(%1) \n"
+            "lfs   22, 0(%1) \n"
+            "lfs   23, 0(%1) \n"
+            "lfs   24, 0(%1) \n"
+            "lfs   25, 0(%1) \n"
+            "lfs   26, 0(%1) \n"
+            "lfs   27, 0(%1) \n"
+            "lfs   28, 0(%1) \n"
+            "lfs   29, 0(%1) \n"
+            "lfs   30, 0(%1) \n"
+            "lfs   31, 0(%1) \n"
+            "mtctr %0        \n"
+            "bctrl           \n"
+            "stfs   0, 0x00(%2)\n"
+            "stfs   1, 0x04(%2)\n"
+            "stfs   2, 0x08(%2)\n"
+            "stfs   3, 0x0C(%2)\n"
+            "stfs   4, 0x10(%2)\n"
+            "stfs   5, 0x14(%2)\n"
+            "stfs   6, 0x18(%2)\n"
+            "stfs   7, 0x1C(%2)\n"
+            "stfs   8, 0x20(%2)\n"
+            "stfs   9, 0x24(%2)\n"
+            "stfs  10, 0x28(%2)\n"
+            "stfs  11, 0x2C(%2)\n"
+            "stfs  12, 0x30(%2)\n"
+            "stfs  13, 0x34(%2)\n"
+            "stfs  14, 0x38(%2)\n"
+            "stfs  15, 0x3C(%2)\n"
+            "stfs  16, 0x40(%2)\n"
+            "stfs  17, 0x44(%2)\n"
+            "stfs  18, 0x48(%2)\n"
+            "stfs  19, 0x4C(%2)\n"
+            "stfs  20, 0x50(%2)\n"
+            "stfs  21, 0x54(%2)\n"
+            "stfs  22, 0x58(%2)\n"
+            "stfs  23, 0x5C(%2)\n"
+            "stfs  24, 0x60(%2)\n"
+            "stfs  25, 0x64(%2)\n"
+            "stfs  26, 0x68(%2)\n"
+            "stfs  27, 0x6C(%2)\n"
+            "stfs  28, 0x70(%2)\n"
+            "stfs  29, 0x74(%2)\n"
+            "stfs  30, 0x78(%2)\n"
+            "stfs  31, 0x7C(%2)\n"
+        : : "r" (OSYieldThread), "r" (&foo), "r" (out)
+        : "memory");
+        for(int n=0; n<32; n++) {
+            if(out[n] != foo) {
+                OSReport("FPR FAIL %d (0x%08X => 0x%08X)\r\n", n,
+                    *(u32*)&foo, *(u32*)&out[n]);
+            }
+        }
+        waitNextFrame();
+    }
+    OSReport("FPR test OK\n");
+}
 void menuDebugCopyTest_select(const MenuItem *self, int amount) {
     if(amount) return;
 
@@ -354,6 +439,7 @@ Menu menuDebugMisc = {
     "Crash Game",  "%s", genericMenuItem_draw,  menuDebugMiscCrash_select,
     //"ARAM Test", "%s: %08X %08X",   menuDebugMiscAramTest_draw,  menuDebugMiscAramTest_select,
     "FPU Test",  "%s",   genericMenuItem_draw,  menuDebugFpTest_select,
+    "FPR Test",  "%s",   genericMenuItem_draw,  menuDebugFprTest_select,
     "Copy Test",  "%s",  genericMenuItem_draw,  menuDebugCopyTest_select,
     "Heap Test",  "%s",  genericMenuItem_draw,  menuDebugHeapTest_select,
     "File Test",  "%s",  genericMenuItem_draw,  menuDebugFileTest_select,
