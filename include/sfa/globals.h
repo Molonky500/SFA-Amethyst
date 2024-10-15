@@ -16,6 +16,7 @@ extern vec3f blurFilterArea; //blur filter area
 extern OSContext *bsodCtx;
 extern u16 bsodErrorCode;
 extern int bSubtitlesEnabled;
+extern u32 buttonEnableMask;
 extern u32 buttonsJustPressed;
 extern DLL_ID cameraMode;
 extern bool cMenuEnabled;

@@ -41,7 +41,7 @@ static void drawTimer() {
     vec3f vel;
     if(pPlayer) vel = pPlayer->vel;
     vec3f zero = {0, 0, 0};
-    float vxz = vec3f_xzDistance(&vel, &zero) * bikeMoveScale * SPEED_SCALE;
+    float vxz = Vec_xzDistance(&vel, &zero) * bikeMoveScale * SPEED_SCALE;
 
     sprintf(str, "\eF%02d:%02d:%02d\n%3d km/h",
         ((int)secs) / 60, // minutes
@@ -104,7 +104,7 @@ void raceTimerUpdate() {
         vec3f vel;
         if(pPlayer) vel = pPlayer->vel;
         vec3f zero = {0, 0, 0};
-        float vxz = (vec3f_xzDistance(&vel, &zero) * bikeMoveScale * 12) + 70;
+        float vxz = (Vec_xzDistance(&vel, &zero) * bikeMoveScale * 12) + 70;
         //average to avoid big jumps when hitting walls
         float vOld = READFLOAT(0x803e1784);
         WRITEFLOAT(0x803e1784, MIN(130.0, (vxz + vOld) / 2.0));

@@ -161,7 +161,7 @@ static void printCoords() {
         float mz = (vel.z * fwdZ ) + (vel.x * sideZ);
         vel.x = mx; vel.z = mz; */
         vec3f zero = {0, 0, 0};
-        vel.z = vec3f_xzDistance(&vel, &zero);
+        vel.z = Vec_xzDistance(&vel, &zero);
 
         s16 rxAdj = 0x8000 - player->pos.rotation.x; //for consistency with viewfinder
         float rx = ((float)rxAdj)                   * (360.0 / 65536.0);
@@ -351,8 +351,8 @@ static void printTarget() {
         char name[16];
         getObjName(name, pCamera->target);
         debugPrintf("%s; d=%f (%f, %f)\n", name,
-            vec3f_distance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
-            vec3f_xzDistance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
+            Vec_distance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
+            Vec_xzDistance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
             ABS(pCamera->target->pos.pos.y - pCamera->focus->pos.pos.y));
 
         switch(pCamera->target->catId) {
@@ -372,8 +372,8 @@ static void printHeldObj() {
         char name[16];
         getObjName(name, pCamera->target);
         debugPrintf("%s; d=%f (%f, %f)\n", name,
-            vec3f_distance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
-            vec3f_xzDistance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
+            Vec_distance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
+            Vec_xzDistance(&pCamera->target->pos.pos, &pCamera->focus->pos.pos),
             ABS(pCamera->target->pos.pos.y - pCamera->focus->pos.pos.y));
 
         switch(pCamera->target->catId) {
@@ -636,6 +636,34 @@ static void printPlayerState() {
     if(player->heldBy) {
         printPlayerObj("HeldBy", player->heldBy);
     }
+
+    /*0x6d0	0x4	uint	uint	stickX
+    0x6d4	0x4	uint	uint	stickY
+    0x6d8	0x4	float	float	stickYfloat
+    0x6dc	0x4	float	float	stickXfloat
+    0x6e0	0x2	GamepadButton	GamepadButton	btnsHeld
+    0x6e2	0x2	GamepadButton	GamepadButton	btnsPressed	0x800 = can't cast magic?
+    0x6e4	0x2	GamepadButton	GamepadButton	btnsPressedNotBusy	*/
+    bool inputBlocked = joypadDisable
+        || ((player->flags_0xb0 & ObjInstance_FlagsB0_DontUpdate) != 0)
+        || (((*(u32*)(pState+0x360)) & 0x200000) != 0)
+        || (*(s16*)(pState+0x81A) == -1)
+        || (*(u8*)(pState+0x8C8) == 0x44)
+        || (*(u8*)(pState+0x8C8) == 0x4E);
+    debugPrintf("In " DPRINT_FIXED "%04X %04X %04X %3d,%3d %d"
+        DPRINT_NOFIXED,
+        *(u16*)(pState+0x6E0), //btnsHeld
+        *(u16*)(pState+0x6E2), //btnsPressed
+        *(u16*)(pState+0x6E4), //btnsPressedNotBusy
+        *(int*)(pState+0x6D0), //stickX
+        *(int*)(pState+0x6D4), //stickY
+        inputBlocked ? 1 : 0);
+    //XXX something else is STILL blocking the inputs.
+    //the player isn't in the object update list?
+    //debugPrintf(" BtnEnable=%08X", buttonEnableMask);
+
+    debugPrintf("\nCS Timer %f %d\n", *(float*)(pState+0x820),
+        *(u8*)(pState+0x8CF));
 }
 
 static u32 ticksToUsec(u64 ticks) {
@@ -819,17 +847,17 @@ static void printObjSeq() {
     ObjInstance **objPairs = (ObjInstance**)0x8039a664; //2 per seq
 
     debugPrintf(DPRINT_FIXED
-        "SIdx Obj# S# BGCmds Actions  # Time S Flags  xRot TNxt TNxtF TCurF Frm ?      SNSCP");
+        "S Idx Obj# S# BGCmds Actions  # Time S Flags  xRot  TNxt  TNxtF   TCurF Frm SnScP");
     for(int i=0; i<26; i++) {
         s16 idx = seqIdxs[i];
         if(idx || seqActions[i].nextTime) {
             s32 objId = seqObjIds[i];
             char floats[128];
-            sprintf(floats, "%5.1f %5.1f",
+            sprintf(floats, "%7.1f %7.1f",
                 timeNextF[i], timeCurF[i]);
 
             debugPrintf(
-                "\n%c%3d %4X %2d %3X%3X",
+                "\n%c%4d %4X %2d %3X%3X",
                 i+'A', idx, objId & 0xFFFF,
                 seqBgCmdParams[i*3],
                 seqBgCmdParams[(i*3)+1],
@@ -841,8 +869,8 @@ static void printObjSeq() {
                 flags1[i], flags2[i], flags3[i]);
             debugPrintf(" %4X %4X %s %3d",
                 xRot[i] & 0xFFFF, timeNext[i], floats, frame[i]);
-            debugPrintf(" %02X%02X%02X",
-                unk358[i], unk4B4[i], seqVarC4C[i]);
+            //debugPrintf(" %02X%02X%02X",
+            //    unk358[i], unk4B4[i], seqVarC4C[i]);
             debugPrintf(" %02X%02X%X",
                 nextState[i], curState[i], isPaused[i]);
             //debugPrintf("%8X %s\n",

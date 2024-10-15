@@ -19,6 +19,24 @@ void menuDebugRenderEffects_select(const MenuItem *self, int amount) {
 }
 
 
+static u32 ScreenTransition_screenFade_firstOp = 0;
+void menuDebugRenderScreenFades_draw(const MenuItem *self, int x, int y, bool selected) {
+    if(!ScreenTransition_screenFade_firstOp) {
+        ScreenTransition_screenFade_firstOp = *(u32*)ScreenTransition_screenFade;
+    }
+    char str[256];
+    sprintf(str, self->fmt, T(self->name),
+        *(u32*)ScreenTransition_screenFade == ScreenTransition_screenFade_firstOp
+        ? T("On") : T("Off"));
+    menuDrawText(str, x, y, selected);
+}
+void menuDebugRenderScreenFades_select(const MenuItem *self, int amount) {
+    *(u32*)ScreenTransition_screenFade ^= (0x4E800020 ^ ScreenTransition_screenFade_firstOp);
+    ICInvalidateRange((void*)ScreenTransition_screenFade, 4);
+    audioPlaySound(NULL, MENU_ADJUST_SOUND);
+}
+
+
 void menuDebugRenderMapGrid_draw(const MenuItem *self, int x, int y, bool selected) {
     char str[256];
     sprintf(str, self->fmt, T(self->name), (debugRenderFlags & DEBUGRENDER_WORLD_MAP) ?
@@ -168,6 +186,7 @@ Menu menuDebugRender = {
     genericMenu_run, genericMenu_draw, debugSubMenu_close,
     "Effects",            "%s", genericMenuItem_draw,             menuDebugRenderEffects_select,
     "View Textures",      "%s", genericMenuItem_draw,             menuDebugRenderTextures_select,
+    "Screen Fades",       _FMT, menuDebugRenderScreenFades_draw,  menuDebugRenderScreenFades_select,
     "Map Grid",           _FMT, menuDebugRenderMapGrid_draw,      menuDebugRenderMapGrid_select,
     "Perf Meters",        _FMT, menuDebugRenderPerf_draw,         menuDebugRenderPerf_select,
     "RNG",                _FMT, menuDebugRenderRNG_draw,          menuDebugRenderRNG_select,

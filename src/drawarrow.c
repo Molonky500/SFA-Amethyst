@@ -19,11 +19,11 @@ void drawArrow(vec3f pos, vec3s rot, float scale, Color4b color) {
     Mtx44 m;
     PSMTXIdentiy(&m);
     mtxRotateByVec3s(&m, &rot);
-    vec3f_multByMtx2(&m, &a, &a);
-    vec3f_multByMtx2(&m, &b, &b);
-    vec3f_multByMtx2(&m, &c, &c);
-    vec3f_multByMtx2(&m, &d, &d);
-    vec3f_multByMtx2(&m, &e, &e);
+    Vec_multByMtx2(&m, &a, &a);
+    Vec_multByMtx2(&m, &b, &b);
+    Vec_multByMtx2(&m, &c, &c);
+    Vec_multByMtx2(&m, &d, &d);
+    Vec_multByMtx2(&m, &e, &e);
 
     a.x += pos.x;  a.y += pos.y;  a.z += pos.z;
     b.x += pos.x;  b.y += pos.y;  b.z += pos.z;

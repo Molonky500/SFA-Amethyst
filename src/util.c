@@ -161,8 +161,8 @@ int compareObjsByDistance(const void *objA, const void *objB) {
 
     ObjInstance *A = ((ObjInstance*)objA);
     ObjInstance *B = ((ObjInstance*)objB);
-    float dA = A ? vec3f_distance(&A->pos.pos, fp) : 0;
-    float dB = B ? vec3f_distance(&B->pos.pos, fp) : 0;
+    float dA = A ? Vec_distance(&A->pos.pos, fp) : 0;
+    float dB = B ? Vec_distance(&B->pos.pos, fp) : 0;
     if(dA < dB) return -1;
     if(dA > dB) return  1;
     return 0;
