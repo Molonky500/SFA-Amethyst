@@ -40,6 +40,7 @@ void initGameHooks() {
     exiPuts("Game init hook OK!\n");
     __UnmaskIrq(IM_PI_ACR); //enable IOS IPC
     _initIos();
+    //L2Enhance();
 
     //if we init Wiimote after FAT, it likes to fail.
     exiPuts("About to init Wiimote\n");

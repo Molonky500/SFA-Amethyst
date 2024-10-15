@@ -580,6 +580,33 @@ __InitSystem:
 	mtspr   954, r3
 	mtspr   957, r3
 	mtspr   958, r3
+
+	mtspr   912, r3 # GQR0
+	mtspr   913, r3 # GQR1
+
+	lis     r3,  0x0004
+	ori     r3,  r3,  0x0004
+	mtspr   914, r3 # GQR2
+
+	lis     r3,  0x0005
+	ori     r3,  r3,  0x0005
+	mtspr   915, r3 # GQR3
+
+	lis     r3,  0x0006
+	ori     r3,  r3,  0x0006
+	mtspr   916, r3 # GQR4
+
+	lis     r3,  0x0007
+	ori     r3,  r3,  0x0007
+	mtspr   917, r3 # GQR5
+
+	lis     r3,  0x0507
+	ori     r3,  r3,  0x0507
+	mtspr   918, r3 # GQR6
+
+	lis     r3,  0x0807
+	ori     r3,  r3,  0x0807
+	mtspr   919, r3 # GQR7
 	isync
 
 #if defined(HW_RVL)

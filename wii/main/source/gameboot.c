@@ -32,7 +32,7 @@ void bootGame() {
     L2GlobalInvalidate();
     L2Disable();
     //ICDisable();
-    //DCDisable();
+    //DCDisable(); //crash
     iguanaSetBlueLed(false);
 
     //set up some bootinfo fields.

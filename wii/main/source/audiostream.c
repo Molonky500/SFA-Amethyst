@@ -271,8 +271,10 @@ void _handleStreamEnd() {
 	if(curStreamFile) {
 		fclose(curStreamFile);
 		curStreamFile = NULL;
-		exiPrintf("Stream stopped! %d/%d\r\n",
-			(int)(*pStreamPos), (int)(*pStreamEndPos));
+		exiPrintf("Stream stopped! %d/%d (0x%X, 0x%X, %f) MSR=0x%08X HID=0x%08X,0x%08X,0x%08X,0x%08X\r\n",
+			(int)(*pStreamPos), (int)(*pStreamEndPos),
+			(int)(*pStreamEndPos), *(u32*)pStreamEndPos, *pStreamEndPos,
+			mfmsr(), mfhid0(), mfhid1(), mfhid2(), mfhid4());
 	}
 	callStopAtEndCb = true; //we reached the end
 	shouldStopPlayback = false; //don't immediately stop the next stream

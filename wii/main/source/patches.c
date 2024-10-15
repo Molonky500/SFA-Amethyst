@@ -147,6 +147,9 @@ void _init_hook(u32 x,u32 y) { //for testing; not used
 
 void doPatches() {
     //remap some HW regs
+    //apparently we could just:
+    // static volatile u32 *const aipprot = (u32 *)0xcd800070;
+    // *aipprot &= ~0x1;
     u32 regRemap[] = {
         //EXI
         0x802439ac, 0x802439e8, 0x80243a4c, 0x80243d84,
