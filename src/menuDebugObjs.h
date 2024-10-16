@@ -12,5 +12,6 @@
 
 //menuDebugObjs.c
 extern ObjInstance *objMenuSelected;
+extern s8 debugObjList_whichList;
 void objListSubmenu_close(const Menu *self);
 void objMenu_drawObjInfo(ObjInstance *obj);

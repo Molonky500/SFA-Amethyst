@@ -5,6 +5,7 @@ const char *strings_Japanese[] = {
     "住所", //memory address
     "センター復帰を目指す", //whether staff crosshair should move back on its own
     "感度を目指す", //how fast staff crosshair moves
+    "全て", //all, everything
     "アーウィン：常に10リング", //cheat
     "アーウィン：無限爆弾", //cheat
     "アタッチポイント", //show attachment points
@@ -150,6 +151,7 @@ const char *strings_Japanese[] = {
     "N/A", //not applicable
     "なし", //none
     "NO OBJDEF", //no object definition data
+    "オブジェクトなし", //there are no objects
     "正常", //normal setting
     "OBJDEF", //object definition
     "オブジェクト", //game object
@@ -226,6 +228,7 @@ const char *strings_Japanese[] = {
     "時間", //time of day
     "追跡します", //follow something
     "トリッキー", //the character named Tricky
+    "種類", //which type of thing
     "一意のID", //unique ID
     "わからない07", //unknown field 7
     "不明なポイント", //show ??? points

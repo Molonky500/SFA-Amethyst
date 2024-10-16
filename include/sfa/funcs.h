@@ -190,6 +190,7 @@ GLOBALFN void objFree(ObjInstance*);
 GLOBALFN void objFreeAll(void);
 GLOBALFN void objGetAttachPointWorldPos(ObjInstance * obj, int idx, float * outX, float * outY, float * outZ, int noRotate);
 GLOBALFN Model* objGetCurModelPtr(ObjInstance *obj);
+GLOBALFN ObjInstance** objGetObjsType(int idx, int *outIdx);
 GLOBALFN short objGetXZAngleDistance(ObjInstance *oThis, ObjInstance *oThat, float *outDist); //returns angle diff
 GLOBALFN ObjInstance* objInstantiateCharacter(ObjDef*, u32 flags, int mapId, int objNo, float *matrix);
 GLOBALFN void objLoadPlayerFromSave(); //XXX verify types
@@ -247,7 +248,6 @@ GLOBALFN void piRomLoadSection(int offset, MapId32 map, void *buffer);
 GLOBALFN void playerCalcWaterCurrent(float *outX,float *outZ,ObjInstance *this);
 GLOBALFN void playerDie(ObjInstance *player); //immediately kill player
 GLOBALFN ObjInstance* playerGetNearestObject(int idx,ObjInstance *obj,float *outDistance);
-GLOBALFN ObjInstance** playerGetObject(int idx, int *outIdx);
 GLOBALFN void playerInitFuncPtrs(void);
 GLOBALFN void playerLock(ObjInstance *obj, BOOL lock);
 GLOBALFN void playerRender(ObjInstance *self, int param_2, int param_3, int param_4, int param_5, bool shouldRender);

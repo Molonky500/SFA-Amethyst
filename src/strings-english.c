@@ -17,6 +17,7 @@ const char *strings_English[] = {
     "ADDR", //memory address
     "Aim Snapback", //whether staff crosshair should move back on its own
     "Aim Sensitivity", //how fast staff crosshair moves
+    "All", //all, everything
     "Arwing: Always 10 Rings", //cheat
     "Arwing: Infinite Bombs", //cheat
     "Attach Points", //show attachment points
@@ -162,6 +163,7 @@ const char *strings_English[] = {
     "N/A", //not applicable
     "None", //none
     "NO OBJDEF", //no object definition data
+    "No objects", //there are no objects
     "Normal", //normal setting
     "OBJDEF", //object definition
     "Object", //game object
@@ -238,6 +240,7 @@ const char *strings_English[] = {
     "Time", //time of day
     "Track", //follow something
     "Tricky", //the character named Tricky
+    "Type", //which type of thing
     "UniqueID", //unique ID
     "Unk07", //unknown field 7
     "Unknown Points", //show ??? points

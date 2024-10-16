@@ -7,6 +7,8 @@
 static ObjInstance **objList = NULL;
 ObjInstance *objMenuSelected = NULL;
 
+extern Menu menuDebugObjType; //menuDebugObjsType.c
+
 enum {
     ObjListSortNone,
     ObjListSortId,
@@ -21,36 +23,54 @@ static const char *sortModeNames[] = {
 };
 
 static u8 sortMode = ObjListSortNone;
+s8 debugObjList_whichList = -1; //ObjTypeId, -1 = all
+
+static int getObjs(ObjInstance **outObjs) {
+    if(debugObjList_whichList < 0) {
+        if(outObjs) *outObjs = loadedObjects;
+        return numLoadedObjs;
+    }
+    int nObjs = 0;
+    ObjInstance *objs = objGetObjsType(debugObjList_whichList, &nObjs);
+    if(outObjs) *outObjs = objs;
+    return nObjs;
+}
 
 static void sortObjs(int method) {
-    u32 size = sizeof(ObjInstance*) * numLoadedObjs;
+    ObjInstance *objs = NULL;
+    int nObjs = getObjs(&objs);
+    u32 size = sizeof(ObjInstance*) * nObjs;
     if(objList) free(objList);
+    if(!size) return;
+    OSReport("sortObjs: %d objs @ %p\n", nObjs, objs);
     objList = allocTagged(size, ALLOC_TAG_LISTS_COL, "debug:objList");
     if(!objList) return;
-    memcpy(objList, loadedObjects, size);
+    memcpy(objList, objs, size);
 
     switch(method) {
         case ObjListSortId:
-            quicksort((const void**)objList, 0, numLoadedObjs-1,
+            quicksort((const void**)objList, 0, nObjs-1,
                 compareObjsById);
             break;
 
         case ObjListSortType:
-            quicksort((const void**)objList, 0, numLoadedObjs-1,
+            quicksort((const void**)objList, 0, nObjs-1,
                 compareObjsByType);
             break;
 
         case ObjListSortName:
-            quicksort((const void**)objList, 0, numLoadedObjs-1,
+            quicksort((const void**)objList, 0, nObjs-1,
                 compareObjsByName);
             break;
 
         case ObjListSortDistance:
-            quicksort((const void**)objList, 0, numLoadedObjs-1, compareObjsByDistance);
+            quicksort((const void**)objList, 0, nObjs-1,
+                compareObjsByDistance);
             break;
 
         case ObjListSortAddr:
-            quicksort((const void**)objList, 0, numLoadedObjs-1, compareObjsByAddr);
+            quicksort((const void**)objList, 0, nObjs-1,
+                compareObjsByAddr);
             break;
 
         default: break;
@@ -188,15 +208,18 @@ void objMenu_draw(Menu *self) {
     int x = OBJ_MENU_XPOS + MENU_PADDING, y = OBJ_MENU_YPOS + MENU_PADDING;
     int start = MAX(0, self->selected - (OBJ_MENU_NUM_LINES-1));
 
+    int nObjs = getObjs(NULL);
     if(!objList) {
-        gameTextShowStr(T("Sorting..."), MENU_TEXTBOX_ID, x, y);
+        gameTextShowStr(
+            nObjs ? T("Sorting...") : T("No objects"),
+            MENU_TEXTBOX_ID, x, y);
         return;
     }
 
     char str[256];
     for(int i=0; i < OBJ_MENU_NUM_LINES; i++) {
         int objIdx = i + start;
-        if(objIdx >= numLoadedObjs) break;
+        if(objIdx >= nObjs) break;
 
         ObjInstance *obj = objList[objIdx];
         if(!PTR_VALID(obj)) break;
@@ -224,10 +247,14 @@ void objMenu_draw(Menu *self) {
 
     //draw instructions in right pane
     //done here so they don't stay when submenu is open
-    sprintf(str, "S:%s  Y:%s\nZ:%s: %s", T("Player"), T("Show"), T("Sort"), sortModeNames[sortMode]);
+    sprintf(str, "S:%s  Y:%s\nZ:%s: %s\nX: %s: %s",
+        T("Player"), T("Show"), T("Sort"), sortModeNames[sortMode],
+        T("Type"),
+        debugObjList_whichList < 0 ? T("All") :
+        objTypeNames[debugObjList_whichList]);
     drawSimpleText(str,
         OBJ_INFO_XPOS + MENU_PADDING,
-        OBJ_INFO_YPOS + OBJ_INFO_HEIGHT - (LINE_HEIGHT*2) - MENU_PADDING);
+        OBJ_INFO_YPOS + OBJ_INFO_HEIGHT - (LINE_HEIGHT*3) - MENU_PADDING);
 }
 
 static bool objMenuCheckClose(Menu *self) {
@@ -243,7 +270,9 @@ static bool objMenuCheckClose(Menu *self) {
 
 static void objMenuSelectPlayer(Menu *self) {
     menuInputDelayTimer = MENU_INPUT_DELAY_SELECT;
-    for(int i=0; i<numLoadedObjs; i++) {
+    int nObjs = getObjs(NULL);
+    if(nObjs < 1) return;
+    for(int i=0; i<nObjs; i++) {
         if(objList[i] == pPlayer) {
             self->selected = i;
             break;
@@ -295,9 +324,11 @@ static void objMenuChangeSort(Menu *self) {
     sortMode++;
     if(sortMode >= NumObjListSortMethods) sortMode = 0;
     sortObjs(sortMode);
+    int nObjs = getObjs(NULL);
+    if(nObjs < 1) return;
     //re-select previously selected obj
     if(objList) {
-        for(int i=0; i<numLoadedObjs; i++) {
+        for(int i=0; i<nObjs; i++) {
             if(objList[i] == obj) {
                 self->selected = i;
                 break;
@@ -306,20 +337,23 @@ static void objMenuChangeSort(Menu *self) {
     }
 }
 
-
 void objMenu_run(Menu *self) {
     //Run function for Object List menu
     int sel = self->selected;
 
     objMenuSelected = NULL;
     if(!objList) sortObjs(sortMode);
-    if(!objList) { //out of memory
+    /*if(!objList) { //out of memory
         objMenuCheckClose(self);
         return;
-    }
+    }*/
 
-    ObjInstance *obj = objList[sel];
-    objMenuSelected = obj;
+    ObjInstance *obj = NULL;
+    if(objList) {
+        ObjInstance *obj = objList[sel];
+        objMenuSelected = obj;
+    }
+    int nObjs = getObjs(NULL);
 
     if(objMenuCheckClose(self)) {
         //nothing to do
@@ -337,40 +371,57 @@ void objMenu_run(Menu *self) {
     else if(buttonsJustPressed == PAD_BUTTON_Y) { //view object
         objMenuShow(self);
     }
+    else if(buttonsJustPressed == PAD_BUTTON_X) { //select type
+        curMenu = &menuDebugObjType;
+        audioPlaySound(NULL, MENU_OPEN_SOUND);
+        //ensure the list is refreshed when we return
+        if(objList) free(objList);
+        objList = NULL;
+    }
     else if(buttonsJustPressed == PAD_BUTTON_MENU) { //jump to player in list
-        objMenuSelectPlayer(self);
+        if(objList) objMenuSelectPlayer(self);
     }
     else if(controllerStates[0].stickY > MENU_ANALOG_STICK_THRESHOLD
     ||      controllerStates[0].substickY > MENU_CSTICK_THRESHOLD) { //up
-        menuInputDelayTimer =
-            (controllerStates[0].stickY > MENU_ANALOG_STICK_THRESHOLD)
-            ? MENU_INPUT_DELAY_MOVE : MENU_INPUT_DELAY_MOVE_FAST;
-        if(sel == 0) sel = numLoadedObjs;
-        self->selected = sel - 1;
+        if(objList) {
+            menuInputDelayTimer =
+                (controllerStates[0].stickY > MENU_ANALOG_STICK_THRESHOLD)
+                ? MENU_INPUT_DELAY_MOVE : MENU_INPUT_DELAY_MOVE_FAST;
+            if(sel == 0) sel = nObjs;
+            self->selected = sel - 1;
+        }
     }
     else if(controllerStates[0].stickY < -MENU_ANALOG_STICK_THRESHOLD
     ||      controllerStates[0].substickY < -MENU_CSTICK_THRESHOLD) { //down
-        menuInputDelayTimer = (controllerStates[0].stickY < -MENU_ANALOG_STICK_THRESHOLD)
-            ? MENU_INPUT_DELAY_MOVE : MENU_INPUT_DELAY_MOVE_FAST;
-        sel++;
-        if(sel >= numLoadedObjs) sel = 0;
-        self->selected = sel;
+        if(objList) {
+            menuInputDelayTimer = (controllerStates[0].stickY < -MENU_ANALOG_STICK_THRESHOLD)
+                ? MENU_INPUT_DELAY_MOVE : MENU_INPUT_DELAY_MOVE_FAST;
+            sel++;
+            if(sel >= nObjs) sel = 0;
+            self->selected = sel;
+        }
     }
     else if(controllerStates[0].triggerLeft > MENU_TRIGGER_THRESHOLD) { //L
-        sel -= OBJ_MENU_NUM_LINES;
-        if(sel <= 0) sel = numLoadedObjs;
-        self->selected = sel - 1;
-        menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
+        if(objList) {
+            sel -= OBJ_MENU_NUM_LINES;
+            if(sel <= 0) sel = nObjs;
+            self->selected = sel - 1;
+            menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
+        }
     }
     else if(controllerStates[0].triggerRight > MENU_TRIGGER_THRESHOLD) { //R
-        sel += OBJ_MENU_NUM_LINES;
-        if(sel >= numLoadedObjs) sel = 0;
-        self->selected = sel;
-        menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
+        if(objList) {
+            sel += OBJ_MENU_NUM_LINES;
+            if(sel >= nObjs) sel = 0;
+            self->selected = sel;
+            menuInputDelayTimer = MENU_INPUT_DELAY_MOVE;
+        }
     }
 
     //object list can change while we're looking at it.
-    if(self->selected >= numLoadedObjs) self->selected = numLoadedObjs - 1;
+    if(objList) {
+        if(self->selected >= nObjs) self->selected = nObjs - 1;
+    }
 }
 
 Menu menuDebugObjList = {
