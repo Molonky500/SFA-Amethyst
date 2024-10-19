@@ -23,14 +23,15 @@ void objTypeMenu_draw(Menu *self) {
     for(int i=0; i < OBJTYPE_MENU_NUM_LINES; i++) {
         int idx = i + start;
         if(idx >= MAX_OBJTYPES + 1) break;
-        if(idx == 0) sprintf(str, "\eF%s (%d)", T("All"), numLoadedObjs);
-        else {
-            const char *name = objTypeNames[idx-1];
-            int nObjs = 0;
+        const char *name = T("All");
+        int nObjs = numLoadedObjs;
+
+        if(idx > 0) {
+            name = objTypeNames[idx-1];
             objGetObjsType(idx-1, &nObjs);
             if(!name) name = "?";
-            sprintf(str, "\eF%02X %-30s (%d)", idx-1, name, nObjs);
         }
+        sprintf(str, "\eF%02X %-30s (%d)", (idx-1) & 0xFF, name, nObjs);
 
         Color4b color = {.r=192, .g=192, .b=192, .a=255};
         if(idx == self->selected) {

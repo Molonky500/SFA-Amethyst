@@ -254,7 +254,7 @@ void objMenu_draw(Menu *self) {
         objTypeNames[debugObjList_whichList]);
     drawSimpleText(str,
         OBJ_INFO_XPOS + MENU_PADDING,
-        OBJ_INFO_YPOS + OBJ_INFO_HEIGHT - (LINE_HEIGHT*3) - MENU_PADDING);
+        OBJ_INFO_YPOS + OBJ_INFO_HEIGHT - (LINE_HEIGHT*4) - MENU_PADDING);
 }
 
 static bool objMenuCheckClose(Menu *self) {
