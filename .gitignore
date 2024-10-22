@@ -1,18 +1,19 @@
 # misc/temp files
 **/~*
-*.log
 *.bin
+*.dol
 *.gci
 *.img
 *.iso
-*.dol
+*.log
+*.n64
 *.old
 *.rom
-*.n64
-*.v64
-*.z64
 *.state
 *.tmp
+*.v64
+*.z64
+*.zip
 *.lock*
 __pycache__
 **/build/*
