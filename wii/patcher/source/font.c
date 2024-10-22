@@ -16,8 +16,8 @@ inline void fontSetSize(int size) {
     text_size = size;
 }
 
-inline void fontSetColor(u32 color) {
-    text_color = color;
+inline void fontSetColor(Color4b color) {
+    text_color = color.value;
 }
 
 static void activate_font_texture() {

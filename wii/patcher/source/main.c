@@ -10,7 +10,7 @@ vu32* const _aiReg  = (u32*)0xCD006C00;
 
 uint32_t crc32b(const void *data_, uint32_t len) {
     const uint8_t *data = (const uint8_t*)data_;
-    unsigned int byte, crc, mask;
+    unsigned int crc, mask;
 
     crc = 0xFFFFFFFF;
     for(uint32_t i=0; i<len; i++) {
@@ -42,17 +42,18 @@ int init() {
 }
 
 static AppVtx vtxsTest[] = {
+    //gcc insists the color be wrapped in THREE sets of braces
     //x, y, r, g, b, a, s, t
-    {100,  10, 0xFF, 0x00, 0x00, 0xFF, 0x0080, 0x0000}, //top
-    { 10, 100, 0x00, 0xFF, 0x00, 0xFF, 0x0000, 0x0100}, //left
-    {200, 100, 0x00, 0x00, 0xFF, 0xFF, 0x0100, 0x0100}, //right
+    {100,  10, {{{0xFF, 0x00, 0x00, 0xFF}}}, 0x0080, 0x0000}, //top
+    { 10, 100, {{{0x00, 0xFF, 0x00, 0xFF}}}, 0x0000, 0x0100}, //left
+    {200, 100, {{{0x00, 0x00, 0xFF, 0xFF}}}, 0x0100, 0x0100}, //right
 };
 static void drawTestTriangle() {
     GX_Begin(GX_TRIANGLES, GX_VTXFMT0, 3);
     for(int i=0; i<3; i++) {
         AppVtx *vtx = &vtxsTest[i];
         GX_Position2s16(vtx->x, vtx->y);
-        GX_Color4u8(vtx->r, vtx->g, vtx->b, vtx->a);
+        GX_Color4u8(vtx->c.r, vtx->c.g, vtx->c.b, vtx->c.a);
         GX_TexCoord2s16(vtx->s, vtx->t);
     }
     GX_End();
@@ -70,6 +71,7 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
+    int tick = 0;
     while(1) {
         appGxFrameBegin();
         PAD_ScanPads();
@@ -78,10 +80,11 @@ int main(int argc, char **argv) {
 
         fontSetSize(16);
         fontSetPos(20, 260);
-        fontSetColor(0x009DF3FF);
+        fontSetColor(hsv2rgb(tick, 128, 128, 255));
         fontDrawString("Howdy doody\r\nbeans!");
 
         appGxFrameEnd();
+        tick++;
     }
 	return 0;
 }
