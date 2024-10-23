@@ -1,4 +1,5 @@
 #include "main.h"
+extern "C" {
 
 sys_fontheader *fontdata;
 GXTexObj fonttex;
@@ -7,16 +8,16 @@ int text_y;
 int text_size;
 u32 text_color = 0xffffffff;
 
-inline void fontSetPos(int x, int y) {
+void fontSetPos(int x, int y) {
     text_x = x;
     text_y = y;
 }
 
-inline void fontSetSize(int size) {
+void fontSetSize(int size) {
     text_size = size;
 }
 
-inline void fontSetColor(Color4b color) {
+void fontSetColor(Color4b color) {
     text_color = color.value;
 }
 
@@ -42,9 +43,9 @@ static void activate_font_texture() {
 
 void appFontInit() {
     if (SYS_GetFontEncoding() == 0) {
-        fontdata = memalign(32, SYS_FONTSIZE_ANSI);
+        fontdata = (sys_fontheader*)memalign(32, SYS_FONTSIZE_ANSI);
     } else {
-        fontdata = memalign(32, SYS_FONTSIZE_SJIS);
+        fontdata = (sys_fontheader*)memalign(32, SYS_FONTSIZE_SJIS);
     }
 
     SYS_InitFont(fontdata);
@@ -85,6 +86,12 @@ static int process_string(const char *text, bool should_draw, int *outY) {
                 y += text_size;
                 break;
 
+            case ' ':
+                //do not draw, because there's some crap on it
+                SYS_GetFontTexture(c, &image, &xpos, &ypos, &width);
+                x += width * text_size / fontdata->cell_height;
+                break;
+
             default: {
                 if (c < fontdata->first_char) {
                     continue;
@@ -110,3 +117,5 @@ void fontMeasureString(const char *text, int *outX, int *outY) {
     int r = process_string(text, false, outY);
     if(outX) *outX = r;
 }
+
+}; //extern "C"

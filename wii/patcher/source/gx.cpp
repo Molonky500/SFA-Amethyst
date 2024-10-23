@@ -9,7 +9,7 @@ u32 xfbHeight;
 Mtx gMtxView;
 Mtx44 gMtxPerspective;
 Mtx44 gMtxProjOrtho;
-GXColor bgColor = {0x3F, 0, 0x3F, 0xff};
+GXColor bgColor = {0x00, 0, 0x3F, 0xff};
 
 int appGxInit() {
 	VIDEO_Init();

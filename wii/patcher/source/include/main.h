@@ -1,3 +1,5 @@
+#pragma once
+extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <gccore.h>
@@ -32,13 +34,7 @@ typedef struct {
     s16 s, t;
 } AppVtx;
 
-//font.c
-void appFontInit();
-void fontSetPos(int x, int y);
-void fontSetSize(int size);
-void fontSetColor(Color4b color);
-int fontDrawString(const char *text);
-void fontMeasureString(const char *text, int *outX, int *outY);
+#include "font.h"
 
 //gx.c
 extern Mtx gMtxView;
@@ -50,4 +46,8 @@ void appGxGetScreenSize(u16 *width, u16 *height);
 Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a);
 
 //main.c
+extern u32 gFrameCount;
 uint32_t crc32b(const void *data_, uint32_t len);
+
+}; //extern "C"
+
