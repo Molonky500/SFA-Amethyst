@@ -7,7 +7,7 @@ import math
 import enum
 import struct
 import numpy as np
-from .texture import ImageFormat, BITS_PER_PIXEL, decode_image, encode_image
+from texture import ImageFormat, BITS_PER_PIXEL, decode_image, encode_image
 from PIL import Image
 
 # XXX move this
