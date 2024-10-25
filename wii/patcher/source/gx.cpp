@@ -118,6 +118,30 @@ void appGxGetScreenSize(u16 *width, u16 *height) {
     if(height) *height = rmode->efbHeight;
 }
 
+void appDrawSprite(GX::Texture *tex, s16 x, s16 y) {
+    static AppVtx vtxs[] = {
+        //x, y, r, g, b, a, s, t
+        {0, 0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0000}, //UL
+        {1, 0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0000}, //UR
+        {1, 1, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0100}, //BR
+        {0, 1, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0100}, //BL
+    };
+    u16 texW, texH;
+    tex->getSize(&texW, &texH);
+    tex->select();
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+    for(int i=0; i<4; i++) {
+        AppVtx *vtx = &vtxs[i];
+        GX_Position2s16((vtx->x * texW)+x, (vtx->y * texH)+y);
+        GX_Color4u8(vtx->c.r, vtx->c.g, vtx->c.b, vtx->c.a);
+
+        float s = vtx->s / 256.0f;
+        float t = vtx->t / 256.0f;
+        GX_TexCoord2s16(s * texW, t * texH);
+    }
+    GX_End();
+}
+
 /** Convert HSV color to RGB.
  *  @param h Hue (0..255 = 0..359 degrees)
  *  @param s Saturation (0..255 = 0..100%)

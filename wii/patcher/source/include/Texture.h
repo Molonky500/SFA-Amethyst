@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <filesystem>
+#include <new>
 
 namespace GX {
     class Texture {
@@ -8,36 +9,38 @@ namespace GX {
             typedef struct {
                 //for simplicity's sake, we'll just use the same
                 //file format as the game uses.
-                void *next; //zero in file
-                u32 flags; //zero in file
-                s16 offset; //zero in file
-                u16 width;
-                u16 height;
-                s16 usage; //reference count (1 in file)
-                s16 frameVal10; //Low byte always 0 in file; overridden(?) on load; relates to number of frames
-                s16 pad12;
-                u16 framesPerTick; //how many frames to advance each tick
-                u8 format; //GXTexFmt
-                u8 wrapS;
-                u8 wrapT;
-                u8 minFilter;
-                u8 magFilter; //Always 1, but doesn't necessarily have to be
-                u8 pad1B;
-                u8 minLod; //Minimum LOD value; bias is fixed at -2
-                u8 maxLod; //Maximum LOD value; LOD is not used if maxLod <= minLod
-                u8 unk1E; //Always 0 or 255, never accessed
-                u8 pad1F;
-                GXTexObj texObj; //GXTexObj; zero in file
-                void *texRegion; //GXTexRegion*; zero in file
-                s32 bufSize; //raw image data size
-                u8 bNoTexRegionCallback; //use gxSetTexImage0 instead of gxCallTexRegionCallback
-                u8 bDoNotFree; //maybe u8 memory region (N64 had multiple regions)
-                s8 unk4A;
-                s8 unk4B; //set to 10 when freeing, otherwise never accessed (memory region?)
-                u32 bufSize2; //same as bufSize; seems to be "allocated size"; set but never read?
-                u32 tevVal50; //0:use 1 TEV stage, not 2 (maybe bHasTwoTevStages?)
-                u32 pad54[3];
+                /* 0x00 */ void *next; //zero in file
+                /* 0x04 */ u32 flags; //zero in file
+                /* 0x08 */ s16 offset; //zero in file
+                /* 0x0A */ u16 width;
+                /* 0x0C */ u16 height;
+                /* 0x0E */ s16 usage; //reference count (1 in file)
+                /* 0x10 */ s16 frameVal10; //Low byte always 0 in file; overridden(?) on load; relates to number of frames
+                /* 0x12 */ s16 pad12;
+                /* 0x14 */ u16 framesPerTick; //how many frames to advance each tick
+                /* 0x16 */ u8 format; //GXTexFmt
+                /* 0x17 */ u8 wrapS;
+                /* 0x18 */ u8 wrapT;
+                /* 0x19 */ u8 minFilter;
+                /* 0x1A */ u8 magFilter; //Always 1, but doesn't necessarily have to be
+                /* 0x1B */ u8 pad1B;
+                /* 0x1C */ u8 minLod; //Minimum LOD value; bias is fixed at -2
+                /* 0x1D */ u8 maxLod; //Maximum LOD value; LOD is not used if maxLod <= minLod
+                /* 0x1E */ u8 unk1E; //Always 0 or 255, never accessed
+                /* 0x1F */ u8 pad1F;
+                /* 0x20 */ GXTexObj texObj; //GXTexObj; zero in file
+                /* 0x40 */ void *texRegion; //GXTexRegion*; zero in file
+                /* 0x44 */ s32 bufSize; //raw image data size
+                /* 0x48 */ u8 bNoTexRegionCallback; //use gxSetTexImage0 instead of gxCallTexRegionCallback
+                /* 0x49 */ u8 bDoNotFree; //maybe u8 memory region (N64 had multiple regions)
+                /* 0x4A */ s8 unk4A;
+                /* 0x4B */ s8 unk4B; //set to 10 when freeing, otherwise never accessed (memory region?)
+                /* 0x4C */ u32 bufSize2; //same as bufSize; seems to be "allocated size"; set but never read?
+                /* 0x50 */ u32 tevVal50; //0:use 1 TEV stage, not 2 (maybe bHasTwoTevStages?)
+                /* 0x54 */ u32 pad54[3];
+                /* 0x60 end */
             } FileHeader;
+            static_assert(sizeof(FileHeader) == 0x60);
 
             Texture() {
                 this->data = nullptr;
@@ -55,12 +58,20 @@ namespace GX {
                 }
                 file.read(reinterpret_cast<char*>(&header),
                     sizeof(header));
-                this->data = new u8[header.bufSize];
+                this->data = new (std::align_val_t(32)) u8[header.bufSize];
+                memset(this->data, 0, header.bufSize);
                 file.read(reinterpret_cast<char*>(this->data),
                     header.bufSize);
                 file.close();
                 DCStoreRange(this->data, header.bufSize);
                 GX_InvalidateTexAll();
+
+                printf("Texture dims=%dx%d fmt=0x%X wrap=%d,%d filt=%d,%d "
+                    "lod=%d,%d size=%d\r\n",
+                    header.width, header.height, header.format,
+                    header.wrapS, header.wrapT,
+                    header.minFilter, header.magFilter,
+                    header.minLod, header.maxLod, header.bufSize);
 
                 this->width     = header.width;
                 this->height    = header.height;

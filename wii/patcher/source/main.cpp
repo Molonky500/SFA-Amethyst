@@ -85,24 +85,10 @@ static void drawCursor(int x, int y) {
 }
 
 static void drawBackground(GX::Texture *tex) {
-    static AppVtx vtxs[] = {
-        //x, y, r, g, b, a, s, t
-        {0, 0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0000}, //UL
-        {1, 0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0000}, //UR
-        {1, 1, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0100}, //BR
-        {0, 1, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0100}, //BL
-    };
-    u16 screenW, screenH;
+    u16 screenW, screenH, texW, texH;
     appGxGetScreenSize(&screenW, &screenH);
-    tex->select();
-    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
-    for(int i=0; i<4; i++) {
-        AppVtx *vtx = &vtxs[i];
-        GX_Position2s16(vtx->x * screenW, vtx->y * screenH);
-        GX_Color4u8(vtx->c.r, vtx->c.g, vtx->c.b, vtx->c.a);
-        GX_TexCoord2s16(vtx->s, vtx->t);
-    }
-    GX_End();
+    tex->getSize(&texW, &texH);
+    appDrawSprite(tex, (screenW/2)-(texW/2), (screenH/2)-(texH/2));
 }
 
 u32 updateWpad(int *outIrX, int *outIrY) {

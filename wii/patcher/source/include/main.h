@@ -16,12 +16,15 @@ extern "C" {
 #include <debug.h>
 #include <sys/iosupport.h>
 #include <wiiuse/wpad.h>
+};
+
+#include "Texture.h"
 
 //#define _ipcReg ((vu32*)0xCD800000)
 #define SET_DEBUG_PORT(val) _ipcReg[0xC0>>2] = (_ipcReg[0xC0>>2] & ~0xFF0000) | ((val) << 16);
 #define SET_DISC_LED(on) _ipcReg[0xC0>>2] = ((on) ? (_ipcReg[0xC0>>2] | 0x20) : (_ipcReg[0xC0>>2] & ~0x20))
 
-void* memalign(u32 align, size_t size);
+extern "C" void* memalign(u32 align, size_t size);
 
 typedef struct {
     union {
@@ -49,11 +52,9 @@ int appGxInit();
 void appGxFrameBegin();
 void appGxFrameEnd();
 void appGxGetScreenSize(u16 *width, u16 *height);
+void appDrawSprite(GX::Texture *tex, s16 x, s16 y);
 Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a);
 
 //main.c
 extern u32 gFrameCount;
 uint32_t crc32b(const void *data_, uint32_t len);
-
-}; //extern "C"
-
