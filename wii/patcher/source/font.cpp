@@ -110,6 +110,7 @@ static int process_string(const char *text, bool should_draw, int *outY) {
 }
 
 int fontDrawString(const char *text) {
+    activate_font_texture();
     return process_string(text, true, NULL);
 }
 

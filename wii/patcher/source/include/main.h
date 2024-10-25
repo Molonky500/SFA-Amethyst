@@ -1,4 +1,5 @@
 #pragma once
+
 extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,8 @@ extern "C" {
 #include <errno.h>
 #include <stdarg.h>
 #include <math.h>
+#include <debug.h>
+#include <sys/iosupport.h>
 #include <wiiuse/wpad.h>
 
 //#define _ipcReg ((vu32*)0xCD800000)
@@ -35,6 +38,9 @@ typedef struct {
 } AppVtx;
 
 #include "font.h"
+
+//dprint.c
+void initDebugPrint();
 
 //gx.c
 extern Mtx gMtxView;
