@@ -115,31 +115,29 @@ class SfaTexture:
         return self
 
 
-    def _makeHeader(self) -> bytearray:
+    def _makeHeader(self, imageData) -> bytearray:
         """Build the SFA texture file header for this texture."""
         header = bytearray(0x60)
         struct.pack_into('>HH', header, 0x0A, self.width, self.height)
-        header[0x0F] = 1 # unknown
+        header[0x0F] = 1 # usage
         header[0x10] = 1 # unknown
         header[0x16] = int(self.format)
-        header[0x17] = 1 # unknown
-        header[0x18] = 1 # unknown
-        header[0x19] = self.numMipMaps
-        header[0x1A] = 1 # unknown
-        header[0x1D] = 6 # unknown
+        header[0x17] = 1 # wrapS
+        header[0x18] = 1 # wrapT
+        header[0x19] = 1 # minFilter
+        header[0x1A] = 1 # magFilter
+        header[0x1C] = 0 # min LOD
+        header[0x1D] = 6 # max LOD
+        struct.pack_into('>I', header, 0x44, len(imageData.getbuffer()))
         return header
 
 
     def writeToFile(self, file:io.RawIOBase) -> None:
         """Write this texture to SFA-format file."""
-        header = self._makeHeader()
-        file.write(header)
-        self._writeData(file)
-
-    def _writeData(self, file:io.RawIOBase) -> None:
         fmt = self.format
         if isinstance(fmt, enum.Enum): fmt = fmt.value
         imageData, paletteData, colors = encode_image(
             self.image, fmt, None, mipmap_count=self.numMipMaps)
-        #print("tex size =", hex(len(imageData.getbuffer())))
+        header = self._makeHeader(imageData)
+        file.write(header)
         file.write(imageData.getbuffer())
