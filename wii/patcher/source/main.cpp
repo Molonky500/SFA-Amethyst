@@ -30,12 +30,17 @@ uint32_t crc32b(const void *data_, uint32_t len) {
 void MyStmHandler(u32 event) {
     switch(event) {
         case STM_EVENT_POWER:
+            printf("STM power off\r\n");
             STM_ShutdownToStandby();
             break;
 
         case STM_EVENT_RESET:
+            printf("STM reboot\r\n");
             STM_RebootSystem();
             break;
+
+        default:
+            printf("STM unknown event %d\r\n", event);
     }
 }
 
@@ -136,6 +141,7 @@ int main(int argc, char **argv) {
     mainMenu.addItem(new UI::MenuItem("here's three!", nullptr));
 
     try {
+        GX::Texture texCursor(root / "res/generic_point.tex");
         GX::Texture texTest(root / "res/test.tex");
         u16 texW=0, texH=0;
         texTest.getSize(&texW, &texH);
@@ -153,10 +159,11 @@ int main(int argc, char **argv) {
             if(wpadButtonsDown & WPAD_BUTTON_UP)   mainMenu.move(-1);
             if(wpadButtonsDown & WPAD_BUTTON_A)    mainMenu.select();
 
-            drawCursor(irX, irY);
+            //drawCursor(irX, irY);
+            appDrawSprite(&texCursor, irX, irY);
 
             char msg[256];
-            sprintf(msg, "root=%s", root.c_str());
+            sprintf(msg, "cursor %d %d", irX, irY);
             fontSetSize(16);
             fontSetPos(20, 260);
             fontSetColor(hsv2rgb(gFrameCount, 255, 255, 255));
