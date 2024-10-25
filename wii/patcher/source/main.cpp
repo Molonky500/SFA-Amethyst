@@ -48,13 +48,9 @@ int init() {
     err = appGxInit();
     if(err) return err;
 
-    //debug print must init after font because it
-    //somehow interferes with EXI access to load fonts
-    //but this way breaks debug output :|
-    appFontInit();
     initDebugPrint();
     fprintf(stderr, " *** debug print online ***\r\n");
-
+    appFontInit();
     WPAD_Init();
     PAD_Init();
     STM_RegisterEventHandler(MyStmHandler);

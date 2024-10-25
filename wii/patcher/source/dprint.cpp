@@ -22,53 +22,38 @@ const char *ptr, size_t len) {
 	return len;
 }
 
-void waitTransaction() {
-    volatile u32 *exi = (volatile u32*)(0xCD006800 + (chan * 0x14));
-    while(exi[3] & 1); //wait for any previous transfer
-}
-
-volatile u32* beginTransaction() {
-    waitTransaction();
-    volatile u32 *exi = (volatile u32*)(0xCD006800 + (chan * 0x14));
-    exi[0] =
-        //(1 <<  0) | //enable interrupt
-        //(1 << 10) | //enable interrupt
-        (1 << 13) | //ROMDIS
-        (3 << 4) | //8MHz
-        //(0 << 4) | //1MHz
-        //(1 << 7); //device 0 (Gecko)
-        (2 << 7); //device 1 (UART)
-    return exi;
-}
-
 static ssize_t __uart_write(struct _reent *r, void* fd,
 const char *ptr, size_t len) {
-	u32 level;
-	LWP_MutexLock(gecko_mutex);
-	level = IRQ_Disable();
+	DCFlushRange((void*)ptr,len);
 
-	volatile u32 *exi = beginTransaction();
-	//for UART we need to send address first.
-	//0x800400 is address for UART.
-	//high bit indicates write.
-	static u32 addr = (0x800400 << 6) | 0x80000000;
-	exi[4] = addr;
-	exi[3] = (1 << 2) | //write
-		(3 << 4) | //4 bytes
-		(1 << 0); //start now
-	waitTransaction();
-
-	//then send message
-	for(size_t i=0; i<len; i++) {
-		exi[4] = ptr[i] << 24;
-		exi[3] = (1 << 2) | //write
-			(0 << 4) | //1 byte
-			(1 << 0); //start now
-		waitTransaction();
+	if(EXI_Lock(EXI_CHANNEL_0,EXI_DEVICE_1,NULL)==0) return 0;
+	if(EXI_Select(EXI_CHANNEL_0,EXI_DEVICE_1,EXI_SPEED8MHZ)==0) {
+		EXI_Unlock(EXI_CHANNEL_0);
+		return 0;
 	}
 
-	IRQ_Restore(level);
-	LWP_MutexUnlock(gecko_mutex);
+	static u32 addr = (0x800400 << 6) | 0x80000000;
+	EXI_Imm     (EXI_CHANNEL_0, &addr, 4, EXI_WRITE, NULL);
+	EXI_Sync    (EXI_CHANNEL_0);
+	//DMA requires 32-byte alignment
+	//EXI_Dma     (EXI_CHANNEL_0, (void*)ptr, len, EXI_WRITE, NULL);
+	char prev = 0;
+	for(size_t i=0; i<len; i++) {
+		char c = ptr[i];
+		//this uart is weird, uses \r as "actually write"
+		if(c == '\n') {
+			if(prev == '\r') continue;
+			c = '\r';
+		}
+		u32 data = (u32)c << 24;
+		EXI_Imm(EXI_CHANNEL_0, &data, 1, EXI_WRITE, NULL);
+		EXI_Sync(EXI_CHANNEL_0);
+		prev = c;
+	}
+	EXI_Sync    (EXI_CHANNEL_0);
+	EXI_Deselect(EXI_CHANNEL_0);
+	EXI_Unlock  (EXI_CHANNEL_0);
+
 	return len;
 }
 
@@ -123,8 +108,12 @@ const devoptab_t uart_out = {
 void initDebugPrint() {
 	//on emulator, always use uart
 	u32 sysType = *(u32*)0x8000002c;
-	if(sysType & 0xF0000000) gecko = false;
+	if((sysType & 0xF0000000) //emulator/dev HW
+	|| (sysType == 0x23)) { //???
+		gecko = false;
+	}
 	else gecko = usb_isgeckoalive(1);
+	//gecko = false; //lol
 	LWP_MutexInit(&gecko_mutex, false);
 
 	if(gecko) {
