@@ -1,23 +1,24 @@
 #pragma once
 
 extern "C" {
-#include <stdio.h>
-#include <stdlib.h>
-#include <gccore.h>
-#include <fat.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <math.h>
-#include <debug.h>
-#include <sys/iosupport.h>
-#include <wiiuse/wpad.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <gccore.h>
+    #include <fat.h>
+    #include <string.h>
+    #include <dirent.h>
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <stdarg.h>
+    #include <math.h>
+    #include <debug.h>
+    #include <sys/iosupport.h>
+    #include <wiiuse/wpad.h>
 };
 
+#include "Gx.h"
 #include "Texture.h"
 
 //#define _ipcReg ((vu32*)0xCD800000)
@@ -26,21 +27,7 @@ extern "C" {
 
 extern "C" void* memalign(u32 align, size_t size);
 
-typedef struct {
-    union {
-        struct { u8 r; u8 g; u8 b; u8 a; };
-        u32 value;
-    };
-} Color4b;
-
-//vertex format we use
-typedef struct {
-    s16 x, y;
-    Color4b c;
-    s16 s, t;
-} AppVtx;
-
-#include "font.h"
+#include "Font.h"
 
 //dprint.c
 void initDebugPrint();
@@ -48,14 +35,9 @@ void initDebugPrint();
 //gx.c
 extern Mtx gMtxView;
 extern Mtx44 gMtxPerspective;
-int appGxInit();
-void appGxFrameBegin();
-void appGxFrameEnd();
-void appGxGetScreenSize(u16 *width, u16 *height);
-void appDrawSprite(GX::Texture *tex, s16 x, s16 y, float alpha);
-void appDrawSpriteTinted(GX::Texture *tex, s16 x, s16 y, float alpha, Color4b color);
-Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a);
 
 //main.c
+extern std::filesystem::path gRootDir;
 extern u32 gFrameCount;
+extern GX::Font *gSystemFont;
 uint32_t crc32b(const void *data_, uint32_t len);

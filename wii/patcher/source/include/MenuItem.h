@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "main.h"
+#include "Sprite.h"
 extern u32 gFrameCount;
 
 namespace UI {
@@ -12,11 +13,10 @@ namespace UI {
     /**
      * @brief Base class for menu items.
      */
-    class MenuItem {
+    class MenuItem: public GX::Sprite {
         public:
-            MenuItem(const char *text, MenuItemActivateFunc activate) {
-                this->posX = 0.0f;
-                this->posY = 0.0f;
+            MenuItem(const char *text, MenuItemActivateFunc activate):
+            Sprite(nullptr) {
                 this->text = text;
                 this->enabled = true;
                 this->activateFunc = activate;
@@ -25,13 +25,7 @@ namespace UI {
             virtual ~MenuItem() {
             }
 
-            virtual MenuItem* setBgTexture(GX::Texture *tex) {
-                this->texBg.reset(tex);
-                return this;
-            }
-
             virtual void draw(bool selected);
-            virtual void measure(int *outX, int *outY);
             virtual void activate() {
                 if(this->activateFunc) (*this->activateFunc)(this);
             }
@@ -42,10 +36,8 @@ namespace UI {
 
         protected:
             friend class Menu;
-            float posX, posY, sizeX, sizeY;
             std::string text;
             bool enabled;
             MenuItemActivateFunc activateFunc;
-            std::shared_ptr<GX::Texture> texBg;
     };
 };

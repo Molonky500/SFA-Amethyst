@@ -22,14 +22,13 @@ namespace UI {
             void draw() {
                 int posX = 20, posY = 40;
                 u16 screenW, screenH;
-                appGxGetScreenSize(&screenW, &screenH);
+                GX::getScreenSize(screenW, screenH);
 
                 int iItem=0;
                 for(MenuItem *item : this->items) {
                     int sizeX=0, sizeY=0;
-                    item->posX = posX;
-                    item->posY = posY;
-                    item->measure(&sizeX, &sizeY);
+                    item->setPos(posX, posY)
+                        ->getSize(sizeX, sizeY);
                     item->draw(iItem == this->iSelected);
                     posY += sizeY;
                     if(posY >= screenH) break;

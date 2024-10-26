@@ -1,6 +1,9 @@
 #include "main.h"
+#include "Font.h"
+#include "Gx.h"
 #include "Menu.h"
 #include "Texture.h"
+#include "PointerCursor.h"
 
 vu16* const _viReg  = (u16*)0xCC002000;
 vu32* const _piReg  = (u32*)0xCC003000;
@@ -10,8 +13,13 @@ vu32* const _ipcReg = (u32*)0xCD800000;
 vu32* const _exiReg = (u32*)0xCD006800;
 vu32* const _aiReg  = (u32*)0xCD006C00;
 
+std::filesystem::path gRootDir;
 u32 gFrameCount = 0;
+GX::Font *gSystemFont = nullptr;
+
 static bool bExit = false;
+static bool bShutDown = false;
+static bool bReboot = false;
 
 uint32_t crc32b(const void *data_, uint32_t len) {
     const uint8_t *data = (const uint8_t*)data_;
@@ -32,12 +40,12 @@ void MyStmHandler(u32 event) {
     switch(event) {
         case STM_EVENT_POWER:
             printf("STM power off\r\n");
-            STM_ShutdownToStandby();
+            bShutDown = true;
             break;
 
         case STM_EVENT_RESET:
             printf("STM reboot\r\n");
-            STM_RebootSystem();
+            bReboot = true;
             break;
 
         default:
@@ -56,12 +64,12 @@ int init() {
      */
     SET_DISC_LED(1);
     int err = 0;
-    err = appGxInit();
+    err = GX::init();
     if(err) return err;
 
     initDebugPrint();
     fprintf(stderr, " *** debug print online ***\r\n");
-    appFontInit();
+    gSystemFont = new GX::Font();
     WPAD_Init();
     PAD_Init();
     STM_RegisterEventHandler(MyStmHandler);
@@ -73,13 +81,6 @@ int init() {
     printf("Startup OK\r\n");
     SET_DISC_LED(0);
     return 0;
-}
-
-static void drawBackground(GX::Texture *tex) {
-    u16 screenW, screenH, texW, texH;
-    appGxGetScreenSize(&screenW, &screenH);
-    tex->getSize(&texW, &texH);
-    appDrawSprite(tex, (screenW/2)-(texW/2), (screenH/2)-(texH/2), 1.0f);
 }
 
 u32 updateWpad(int *outIrX, int *outIrY) {
@@ -101,6 +102,16 @@ u32 updateWpad(int *outIrX, int *outIrY) {
     return WPAD_ButtonsDown(0);
 }
 
+GX::Sprite* loadBackground() {
+    auto tex = new GX::Texture(gRootDir / "res/test.tex");
+    auto sprBg = new GX::Sprite(tex);
+
+    u16 screenW, screenH, texW, texH;
+    GX::getScreenSize(screenW, screenH);
+    tex->getSize(&texW, &texH);
+    return sprBg->setPos((screenW/2)-(texW/2), (screenH/2)-(texH/2));
+}
+
 void MenuItemOneActivate(UI::MenuItem *item) {
     printf("This is item one\r\n");
 }
@@ -117,57 +128,61 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    std::filesystem::path root;
-    if(argv) root = argv[0];
-    else root = "sd:/apps/patcher/";
+    if(argv) gRootDir = argv[0];
+    else gRootDir = "sd:/apps/patcher/";
 
     UI::Menu mainMenu;
     try {
-        GX::Texture texTest(root / "res/test.tex");
-        GX::Texture texCursor(root / "res/generic_point.tex");
-        auto *texButton = new GX::Texture(root / "res/button.tex");
+        UI::PointerCursor cursor;
+        auto *texButton = new GX::Texture(gRootDir / "res/button.tex");
+        auto sprBg = loadBackground();
 
         auto item = new UI::MenuItem("First Item", MenuItemOneActivate);
-        item->setBgTexture(texButton);
+        item->setTexture(texButton);
         mainMenu.addItem(item);
 
         item = new UI::MenuItem("Item the Second", nullptr);
-        item->setBgTexture(texButton);
+        item->setTexture(texButton);
         mainMenu.addItem(item);
 
         item = new UI::MenuItem("here's three!", nullptr);
-        item->setBgTexture(texButton)->setEnabled(false);
+        item->setEnabled(false)->setTexture(texButton);
         mainMenu.addItem(item);
 
         item = new UI::MenuItem("This item's text is way too long what the hell kind of menu item even is this supposed to be", nullptr);
-        item->setBgTexture(texButton);
+        item->setTexture(texButton);
         mainMenu.addItem(item);
 
         int irX=0, irY=0;
         while(!bExit) {
-            appGxFrameBegin();
-            drawBackground(&texTest);
+            GX::frameBegin();
+            sprBg->draw();
 
             PAD_ScanPads();
             u32 wpadButtonsDown = updateWpad(&irX, &irY);
-            if(wpadButtonsDown & WPAD_BUTTON_HOME) exit(0);
+            if(wpadButtonsDown & WPAD_BUTTON_HOME) {
+                printf("Home pressed!\r\n");
+                exit(0);
+            }
             if(wpadButtonsDown & WPAD_BUTTON_DOWN) mainMenu.move( 1);
             if(wpadButtonsDown & WPAD_BUTTON_UP)   mainMenu.move(-1);
             if(wpadButtonsDown & WPAD_BUTTON_A)    mainMenu.select();
 
-            //cursor is offset
-            appDrawSprite(&texCursor, irX-48, irY-48, 1.0f);
-
             char msg[256];
             sprintf(msg, "cursor %d %d", irX, irY);
-            fontSetSize(16);
-            fontSetPos(0, 16);
-            fontSetColor({255, 255, 255, 255});
-            fontDrawString(msg);
+            gSystemFont
+                ->setSize(16)
+                ->setPos(0, 16)
+                ->setColor({255, 255, 255, 255})
+                ->drawString(msg);
 
             mainMenu.draw();
 
-            appGxFrameEnd();
+            //draw cursor above everything else.
+            cursor.setPos(irX, irY);
+            cursor.draw();
+
+            GX::frameEnd();
             gFrameCount++;
         }
     }
@@ -179,5 +194,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "SOFTWARE FAILURE: %s\r\n", ex->what());
         exit(1);
     }
+    if(bShutDown) STM_ShutdownToStandby();
+    if(bReboot) STM_RebootSystem();
 	return 0;
 }

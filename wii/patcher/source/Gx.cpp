@@ -11,7 +11,7 @@ Mtx44 gMtxPerspective;
 Mtx44 gMtxProjOrtho;
 GXColor bgColor = {0x00, 0x00, 0x00, 0xFF};
 
-int appGxInit() {
+int GX::init() {
 	VIDEO_Init();
 
 	rmode = VIDEO_GetPreferredMode(NULL);
@@ -91,16 +91,15 @@ int appGxInit() {
 
     // matrix, t, b, l, r, n, f
     guOrtho(gMtxProjOrtho, 0, rmode->efbHeight, 0, rmode->fbWidth, 0, 1);
-
 	return 0;
 }
 
-void appGxFrameBegin() {
+void GX::frameBegin() {
     GX_LoadProjectionMtx(gMtxProjOrtho, GX_ORTHOGRAPHIC);
     GX_SetViewport(0, 0, rmode->fbWidth, rmode->efbHeight, 0, 1);
 }
 
-void appGxFrameEnd() {
+void GX::frameEnd() {
     GX_DrawDone();
 
     curFbIdx ^= 1;
@@ -113,38 +112,9 @@ void appGxFrameEnd() {
     VIDEO_WaitVSync();
 }
 
-void appGxGetScreenSize(u16 *width, u16 *height) {
-    if(width)  *width  = rmode->fbWidth;
-    if(height) *height = rmode->efbHeight;
-}
-
-void appDrawSprite(GX::Texture *tex, s16 x, s16 y, float alpha) {
-    appDrawSpriteTinted(tex, x, y, alpha, {0xFF, 0xFF, 0xFF, 0xFF});
-}
-
-void appDrawSpriteTinted(GX::Texture *tex, s16 x, s16 y, float alpha,
-Color4b color) {
-    AppVtx vtxs[] = {
-        //x, y, r, g, b, a, s, t
-        {0, 0, color, 0x0000, 0x0000}, //UL
-        {1, 0, color, 0x0100, 0x0000}, //UR
-        {1, 1, color, 0x0100, 0x0100}, //BR
-        {0, 1, color, 0x0000, 0x0100}, //BL
-    };
-    u16 texW, texH;
-    tex->getSize(&texW, &texH);
-    tex->select();
-    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
-    for(int i=0; i<4; i++) {
-        AppVtx *vtx = &vtxs[i];
-        GX_Position2s16((vtx->x * texW)+x, (vtx->y * texH)+y);
-        GX_Color4u8(vtx->c.r, vtx->c.g, vtx->c.b, (u8)(vtx->c.a * alpha));
-
-        float s = vtx->s / 256.0f;
-        float t = vtx->t / 256.0f;
-        GX_TexCoord2s16(s * texW, t * texH);
-    }
-    GX_End();
+void GX::getScreenSize(u16 &width, u16 &height) {
+    width  = rmode->fbWidth;
+    height = rmode->efbHeight;
 }
 
 /** Convert HSV color to RGB.
@@ -152,9 +122,9 @@ Color4b color) {
  *  @param s Saturation (0..255 = 0..100%)
  *  @param v Value (0..255 = 0..100%)
  *  @param a Alpha (0..255 = 0..100%)
- *  @return a Color4b with the corresponding RGBA values.
+ *  @return a GX::Color with the corresponding RGBA values.
  */
-Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a) {
+GX::Color GX::hsv2rgb(u8 h, u8 s, u8 v, u8 a) {
     float sf = s / 255.0;
     float vf = v / 255.0;
     float c = vf * sf;
@@ -172,6 +142,6 @@ Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a) {
         case 5: r=c; g=0; b=x; break;
     }
     float m = vf - c;
-    Color4b res = {.r = (r+m)*255, .g = (g+m)*255, .b = (b+m)*255, .a = a};
+    GX::Color res = {.r = (r+m)*255, .g = (g+m)*255, .b = (b+m)*255, .a = a};
     return res;
 }
