@@ -11,6 +11,7 @@ vu32* const _exiReg = (u32*)0xCD006800;
 vu32* const _aiReg  = (u32*)0xCD006C00;
 
 u32 gFrameCount = 0;
+static bool bExit = false;
 
 uint32_t crc32b(const void *data_, uint32_t len) {
     const uint8_t *data = (const uint8_t*)data_;
@@ -41,7 +42,12 @@ void MyStmHandler(u32 event) {
 
         default:
             printf("STM unknown event %d\r\n", event);
+            return;
     }
+
+    //fatUnmount("sd");
+    //we're jumping to null sometime after this function (Dolphin bug?)
+    bExit = true;
 }
 
 int init() {
@@ -69,31 +75,11 @@ int init() {
     return 0;
 }
 
-static AppVtx vtxsCursor[] = {
-    //gcc insists the color be wrapped in THREE sets of braces
-    //x, y, r, g, b, a, s, t
-    { 0,  0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0000}, //UL
-    {16,  0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0000}, //UR
-    {16, 16, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0100}, //BR
-    { 0, 16, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0100}, //BL
-};
-static void drawCursor(int x, int y) {
-    //TODO: texture
-    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
-    for(int i=0; i<4; i++) {
-        AppVtx *vtx = &vtxsCursor[i];
-        GX_Position2s16(vtx->x + x, vtx->y + y);
-        GX_Color4u8(vtx->c.r, vtx->c.g, vtx->c.b, vtx->c.a);
-        GX_TexCoord2s16(vtx->s, vtx->t);
-    }
-    GX_End();
-}
-
 static void drawBackground(GX::Texture *tex) {
     u16 screenW, screenH, texW, texH;
     appGxGetScreenSize(&screenW, &screenH);
     tex->getSize(&texW, &texH);
-    appDrawSprite(tex, (screenW/2)-(texW/2), (screenH/2)-(texH/2));
+    appDrawSprite(tex, (screenW/2)-(texW/2), (screenH/2)-(texH/2), 1.0f);
 }
 
 u32 updateWpad(int *outIrX, int *outIrY) {
@@ -116,7 +102,7 @@ u32 updateWpad(int *outIrX, int *outIrY) {
 }
 
 void MenuItemOneActivate(UI::MenuItem *item) {
-    exit(0);
+    printf("This is item one\r\n");
 }
 
 int main(int argc, char **argv) {
@@ -136,19 +122,29 @@ int main(int argc, char **argv) {
     else root = "sd:/apps/patcher/";
 
     UI::Menu mainMenu;
-    mainMenu.addItem(new UI::MenuItem("First Item", MenuItemOneActivate));
-    mainMenu.addItem(new UI::MenuItem("Item the Second", nullptr));
-    mainMenu.addItem(new UI::MenuItem("here's three!", nullptr));
-
     try {
-        GX::Texture texCursor(root / "res/generic_point.tex");
         GX::Texture texTest(root / "res/test.tex");
-        u16 texW=0, texH=0;
-        texTest.getSize(&texW, &texH);
-        fprintf(stderr, "Texture size %dx%d\r\n", texW, texH);
+        GX::Texture texCursor(root / "res/generic_point.tex");
+        auto *texButton = new GX::Texture(root / "res/button.tex");
+
+        auto item = new UI::MenuItem("First Item", MenuItemOneActivate);
+        item->setBgTexture(texButton);
+        mainMenu.addItem(item);
+
+        item = new UI::MenuItem("Item the Second", nullptr);
+        item->setBgTexture(texButton);
+        mainMenu.addItem(item);
+
+        item = new UI::MenuItem("here's three!", nullptr);
+        item->setBgTexture(texButton)->setEnabled(false);
+        mainMenu.addItem(item);
+
+        item = new UI::MenuItem("This item's text is way too long what the hell kind of menu item even is this supposed to be", nullptr);
+        item->setBgTexture(texButton);
+        mainMenu.addItem(item);
 
         int irX=0, irY=0;
-        while(1) {
+        while(!bExit) {
             appGxFrameBegin();
             drawBackground(&texTest);
 
@@ -159,14 +155,14 @@ int main(int argc, char **argv) {
             if(wpadButtonsDown & WPAD_BUTTON_UP)   mainMenu.move(-1);
             if(wpadButtonsDown & WPAD_BUTTON_A)    mainMenu.select();
 
-            //drawCursor(irX, irY);
-            appDrawSprite(&texCursor, irX, irY);
+            //cursor is offset
+            appDrawSprite(&texCursor, irX-48, irY-48, 1.0f);
 
             char msg[256];
             sprintf(msg, "cursor %d %d", irX, irY);
             fontSetSize(16);
-            fontSetPos(20, 260);
-            fontSetColor(hsv2rgb(gFrameCount, 255, 255, 255));
+            fontSetPos(0, 16);
+            fontSetColor({255, 255, 255, 255});
             fontDrawString(msg);
 
             mainMenu.draw();

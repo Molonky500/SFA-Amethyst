@@ -31,7 +31,7 @@ namespace UI {
                     item->posY = posY;
                     item->measure(&sizeX, &sizeY);
                     item->draw(iItem == this->iSelected);
-                    posY += sizeY + 32;
+                    posY += sizeY;
                     if(posY >= screenH) break;
                     iItem++;
                 }
@@ -42,11 +42,24 @@ namespace UI {
             }
 
             void move(int amount) {
+                if(!amount) return;
                 u32 nItems = this->items.size();
                 if(!nItems) return;
+
                 this->iSelected += amount;
                 if(this->iSelected < 0) this->iSelected += nItems;
                 this->iSelected %= nItems;
+
+                //if this item is disabled, move on to another.
+                //but don't get stuck if they're all disabled.
+                int skip = (amount < 0) ? -1 : 1;
+                u32 tries=0;
+                while(++tries < nItems
+                && !this->items[this->iSelected]->enabled) {
+                    this->iSelected += skip;
+                    if(this->iSelected < 0) this->iSelected += nItems;
+                    this->iSelected %= nItems;
+                }
             }
 
             void select() {

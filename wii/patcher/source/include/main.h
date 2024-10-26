@@ -52,7 +52,8 @@ int appGxInit();
 void appGxFrameBegin();
 void appGxFrameEnd();
 void appGxGetScreenSize(u16 *width, u16 *height);
-void appDrawSprite(GX::Texture *tex, s16 x, s16 y);
+void appDrawSprite(GX::Texture *tex, s16 x, s16 y, float alpha);
+void appDrawSpriteTinted(GX::Texture *tex, s16 x, s16 y, float alpha, Color4b color);
 Color4b hsv2rgb(u8 h, u8 s, u8 v, u8 a);
 
 //main.c

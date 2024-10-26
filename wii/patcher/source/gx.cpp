@@ -9,7 +9,7 @@ u32 xfbHeight;
 Mtx gMtxView;
 Mtx44 gMtxPerspective;
 Mtx44 gMtxProjOrtho;
-GXColor bgColor = {0x00, 0, 0x3F, 0xff};
+GXColor bgColor = {0x00, 0x00, 0x00, 0xFF};
 
 int appGxInit() {
 	VIDEO_Init();
@@ -63,7 +63,7 @@ int appGxInit() {
     GX_SetTexCoordScaleManually(GX_TEXCOORD0, GX_TRUE, 1, 1);
 
     GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
-    GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
+    GX_SetPixelFmt(GX_PF_RGBA6_Z24, GX_ZC_LINEAR);
     GX_SetCopyClear(bgColor, GX_MAX_Z24);
 
 	GX_SetNumChans(1);
@@ -118,13 +118,18 @@ void appGxGetScreenSize(u16 *width, u16 *height) {
     if(height) *height = rmode->efbHeight;
 }
 
-void appDrawSprite(GX::Texture *tex, s16 x, s16 y) {
-    static AppVtx vtxs[] = {
+void appDrawSprite(GX::Texture *tex, s16 x, s16 y, float alpha) {
+    appDrawSpriteTinted(tex, x, y, alpha, {0xFF, 0xFF, 0xFF, 0xFF});
+}
+
+void appDrawSpriteTinted(GX::Texture *tex, s16 x, s16 y, float alpha,
+Color4b color) {
+    AppVtx vtxs[] = {
         //x, y, r, g, b, a, s, t
-        {0, 0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0000}, //UL
-        {1, 0, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0000}, //UR
-        {1, 1, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0100, 0x0100}, //BR
-        {0, 1, {{{0xFF, 0xFF, 0xFF, 0xFF}}}, 0x0000, 0x0100}, //BL
+        {0, 0, color, 0x0000, 0x0000}, //UL
+        {1, 0, color, 0x0100, 0x0000}, //UR
+        {1, 1, color, 0x0100, 0x0100}, //BR
+        {0, 1, color, 0x0000, 0x0100}, //BL
     };
     u16 texW, texH;
     tex->getSize(&texW, &texH);
@@ -133,7 +138,7 @@ void appDrawSprite(GX::Texture *tex, s16 x, s16 y) {
     for(int i=0; i<4; i++) {
         AppVtx *vtx = &vtxs[i];
         GX_Position2s16((vtx->x * texW)+x, (vtx->y * texH)+y);
-        GX_Color4u8(vtx->c.r, vtx->c.g, vtx->c.b, vtx->c.a);
+        GX_Color4u8(vtx->c.r, vtx->c.g, vtx->c.b, (u8)(vtx->c.a * alpha));
 
         float s = vtx->s / 256.0f;
         float t = vtx->t / 256.0f;

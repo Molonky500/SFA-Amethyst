@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="599.9136"
+   height="63.98389"
+   viewBox="0 0 158.7272 16.92907"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   sodipodi:docname="button.svg"
+   inkscape:export-filename="button.png"
+   inkscape:export-xdpi="96.01383"
+   inkscape:export-ydpi="96.01383"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#3c3c3c"
+     inkscape:document-units="px"
+     inkscape:zoom="4.136858"
+     inkscape:cx="71.5519"
+     inkscape:cy="68.04682"
+     inkscape:current-layer="layer1"
+     showguides="true" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient1"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#48beff;stop-opacity:0.5"
+         offset="0"
+         id="stop1" />
+      <stop
+         style="stop-color:#0076b6;stop-opacity:0.5"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient2"
+       x1="38.26859"
+       y1="89.17184"
+       x2="540.757"
+       y2="134.3119"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.3061127,0,0,0.2315105,-5.629504,-19.90908)" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-5.291666)">
+    <rect
+       style="fill:url(#linearGradient2);stroke:#000000;stroke-width:1.05833"
+       id="rect1"
+       width="157.6688"
+       height="15.87074"
+       x="5.820831"
+       y="0.5291651"
+       rx="2.186389"
+       ry="1.653548" />
+  </g>
+</svg>

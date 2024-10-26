@@ -25,10 +25,19 @@ namespace UI {
             virtual ~MenuItem() {
             }
 
+            virtual MenuItem* setBgTexture(GX::Texture *tex) {
+                this->texBg.reset(tex);
+                return this;
+            }
+
             virtual void draw(bool selected);
             virtual void measure(int *outX, int *outY);
             virtual void activate() {
                 if(this->activateFunc) (*this->activateFunc)(this);
+            }
+            virtual MenuItem* setEnabled(bool enabled) {
+                this->enabled = enabled;
+                return this;
             }
 
         protected:
@@ -37,5 +46,6 @@ namespace UI {
             std::string text;
             bool enabled;
             MenuItemActivateFunc activateFunc;
+            std::shared_ptr<GX::Texture> texBg;
     };
 };

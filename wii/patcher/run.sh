@@ -5,7 +5,7 @@ mv patcher.dol patcher/boot.dol
 
 # convert resources.
 # XXX this shouldn't be here...
-find res -name \*.png -exec sh -c '../../tools/texconv/__main__.py pack RGB5A3 1 "{}" "patcher/${1%.*}.tex"' sh {} \;
+find res -name \*.png -exec sh -c '../../tools/texconv/__main__.py pack RGBA32 1 "{}" "patcher/${1%.*}.tex"' sh {} \;
 
 if [ "$1" == "dolphin" ]; then
     cp -r patcher $DOLPHIN_SD_PATH
