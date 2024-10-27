@@ -179,20 +179,15 @@ void App::_handleControllers() {
 
 void App::_drawScreenFadeOverlay() {
     if(this->screenFadeOpacity <= 0) return;
-    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
     u16 screenW, screenH;
     GX::getScreenSize(screenW, screenH);
-    GX::Color color = {0x00, 0x00, 0x00, 0xFF * screenFadeOpacity};
+    GX::Color color = {0x00, 0x00, 0x00, 0xFF * this->screenFadeOpacity};
 
     //since the quad is black we don't care about what
     //texture is mapped, but we still need to supply
     //texture coords.
-    //XXX this doesn't work, it uses whatever texture was
-    //loaded before, and if that has a transparent pixel at
-    //0,0 it doesn't do anything here.
-    //not sure how to disable texturing, maybe should make up
-    //a blank texture?
+    GX::gBlankTexture.select();
     GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
     //top left
@@ -235,8 +230,9 @@ App::ExitMode App::run() {
         this->frameCount++;
     }
     //when exiting, fade out
-    for(int i=0; i<60; i++) {
-        this->screenFadeOpacity += 1.0f / 60.0f;
+    for(int i=0; i<30; i++) {
+        this->screenFadeOpacity += 1.0f / 30.0f;
+        if(this->screenFadeOpacity > 1.0f) this->screenFadeOpacity = 1.0f;
         GX::frameBegin();
         this->_draw();
         GX::frameEnd();

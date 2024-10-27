@@ -6,6 +6,22 @@
 namespace GX {
     class Texture {
         public:
+            static constexpr const u32 fmtBitsPerPixel(int fmt) {
+                switch(fmt) {
+                    case GX_TF_I4:     return  4;
+                    case GX_TF_I8:     return  8;
+                    case GX_TF_IA4:    return  8;
+                    case GX_TF_IA8:    return 16;
+                    case GX_TF_RGB565: return 16;
+                    case GX_TF_RGB5A3: return 16;
+                    case GX_TF_RGBA8:  return 32; //aka RGBA32, RGBA8888
+                    case GX_TF_CI4:    return  4; //aka C4
+                    case GX_TF_CI8:    return  8; //aka C8
+                    case GX_TF_CI14:   return 16; //aka C14X2
+                    case GX_TF_CMPR:   return  4; //aka BC1
+                    default:           return  0;
+                }
+            }
             typedef struct {
                 //for simplicity's sake, we'll just use the same
                 //file format as the game uses.
@@ -48,6 +64,21 @@ namespace GX {
                 this->height = 0;
             }
 
+            Texture(u16 width, u16 height, u8 fmt, void *data) {
+                this->data   = (u8*)data;
+                this->width  = width;
+                this->height = height;
+                this->format = fmt;
+                this->wrapS  = GX_REPEAT;
+                this->wrapT  = GX_REPEAT;
+                this->minFilter = 1;
+                this->magFilter = 1;
+                this->minLod = GX_NEAR;
+                this->maxLod = GX_NEAR;
+                this->dataLen = width * height * fmtBitsPerPixel(fmt);
+                this->createTexObj();
+            }
+
             Texture(std::filesystem::path path) {
                 FileHeader header;
                 std::ifstream file(path, std::ios::binary);
@@ -83,13 +114,7 @@ namespace GX {
                 this->minLod    = header.minLod;
                 this->maxLod    = header.maxLod;
                 this->dataLen   = header.bufSize;
-
-                GX_InitTexObj(&this->texObj, this->data,
-                    this->width, this->height, this->format,
-                    this->wrapS, this->wrapT, GX_FALSE);
-                GX_InitTexObjLOD(&this->texObj, this->minFilter,
-                    this->magFilter, this->minLod, this->maxLod, -2.0f,
-                    GX_TRUE, GX_TRUE, GX_ANISO_1);
+                this->createTexObj();
             }
 
             ~Texture() {
@@ -115,5 +140,16 @@ namespace GX {
             u8 minFilter, magFilter;
             float minLod, maxLod;
             GXTexObj texObj;
+
+            void createTexObj() {
+                GX_InitTexObj(&this->texObj, this->data,
+                    this->width, this->height, this->format,
+                    this->wrapS, this->wrapT, GX_FALSE);
+                GX_InitTexObjLOD(&this->texObj, this->minFilter,
+                    this->magFilter, this->minLod, this->maxLod, -2.0f,
+                    GX_TRUE, GX_TRUE, GX_ANISO_1);
+            }
     };
+
+    extern Texture gBlankTexture;
 };
