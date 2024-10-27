@@ -16,18 +16,16 @@ extern "C" {
     #include <debug.h>
     #include <sys/iosupport.h>
     #include <wiiuse/wpad.h>
+    void* memalign(u32 align, size_t size);
 };
-
-#include "Gx.h"
-#include "Texture.h"
 
 //#define _ipcReg ((vu32*)0xCD800000)
 #define SET_DEBUG_PORT(val) _ipcReg[0xC0>>2] = (_ipcReg[0xC0>>2] & ~0xFF0000) | ((val) << 16);
 #define SET_DISC_LED(on) _ipcReg[0xC0>>2] = ((on) ? (_ipcReg[0xC0>>2] | 0x20) : (_ipcReg[0xC0>>2] & ~0x20))
 
-extern "C" void* memalign(u32 align, size_t size);
-
-#include "Font.h"
+class App;
+extern App *gApp;
+#include "App.h"
 
 //dprint.c
 void initDebugPrint();
@@ -35,9 +33,3 @@ void initDebugPrint();
 //gx.c
 extern Mtx gMtxView;
 extern Mtx44 gMtxPerspective;
-
-//main.c
-extern std::filesystem::path gRootDir;
-extern u32 gFrameCount;
-extern GX::Font *gSystemFont;
-uint32_t crc32b(const void *data_, uint32_t len);

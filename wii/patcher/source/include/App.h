@@ -1,0 +1,59 @@
+#pragma once
+#include <filesystem>
+extern "C" {
+    #include <stdlib.h>
+    #include <gccore.h>
+    #include <sys/types.h>
+    #include <math.h>
+};
+#include "Gx.h"
+#include "Font.h"
+#include "Texture.h"
+#include "Sprite.h"
+#include "Menu.h"
+#include "PointerCursor.h"
+
+/**
+ * @brief The main application logic.
+ */
+class App {
+    public:
+        typedef enum {
+            KEEP_GOING = -1, //don't exit yet (not valid return code)
+            QUIT = 0, //return to loader/menu
+            REBOOT, //reboot the system
+            POWEROFF //power off the system
+        } ExitMode;
+
+        App(int argc, char **argv);
+        ~App();
+        ExitMode run();
+
+        std::filesystem::path getRootDir() {
+            return this->rootDir;
+        }
+        u32 getFrameCount() {
+            return this->frameCount;
+        }
+        GX::Font* getSystemFont() {
+            return this->systemFont;
+        }
+
+        GX::Texture* loadTexture(std::string name);
+
+    protected:
+        int argc;
+        char **argv;
+        std::filesystem::path rootDir;
+        u32 frameCount;
+        GX::Font *systemFont;
+        GX::Sprite *sprBg;
+        UI::Menu *mainMenu;
+        UI::PointerCursor *cursor;
+
+        void _init();
+        void _initBackground();
+        void _initMainMenu();
+        u32 _updateWpad(int &outIrX, int &outIrY);
+};
+

@@ -8,14 +8,7 @@ namespace UI {
      */
     class PointerCursor: public GX::Sprite {
         public:
-            PointerCursor():
-            Sprite(nullptr) {
-                this->texBg = new GX::Texture(
-                    gRootDir / "res/shadow_point.tex");
-                this->texFg = new GX::Texture(
-                    gRootDir / "res/generic_point.tex");
-                this->texFg->getSize(&this->sizeX, &this->sizeY);
-            }
+            PointerCursor();
 
             virtual ~PointerCursor() {
                 if(this->texBg) delete this->texBg;
