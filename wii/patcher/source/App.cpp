@@ -103,7 +103,7 @@ void App::_initGraphics() {
 }
 
 void App::_initBackground() {
-    auto tex = new GX::Texture(this->rootDir / "res/test.tex");
+    auto tex = this->loadTexture("bg");
     this->sprBg = new GX::Sprite(tex);
 
     u16 screenW, screenH, texW, texH;
@@ -193,15 +193,6 @@ void App::_handleControllers() {
     if(buttons & WPAD_BUTTON_DOWN) this->curMenu->move( 1);
     if(buttons & WPAD_BUTTON_UP)   this->curMenu->move(-1);
     if(buttons & WPAD_BUTTON_A)    this->curMenu->select();
-
-    char msg[256];
-    sprintf(msg, "cursor %d %d", this->cursorX, this->cursorY);
-    this->systemFont
-        ->setSize(16)
-        ->setPos(0, 16)
-        ->setColor({255, 255, 255, 255})
-        ->drawString(msg);
-
 }
 
 void App::_drawScreenFadeOverlay() {
@@ -240,6 +231,15 @@ void App::_drawScreenFadeOverlay() {
 void App::_draw() {
     GX::frameBegin();
     if(this->sprBg) this->sprBg->draw();
+
+    char msg[256];
+    sprintf(msg, "cursor %d %d", this->cursorX, this->cursorY);
+    this->systemFont
+        ->setSize(16)
+        ->setPos(0, 16)
+        ->setColor({255, 255, 255, 255})
+        ->drawString(msg);
+
     this->mainMenu->draw();
     this->sprCursor->draw();
     this->_drawScreenFadeOverlay();
