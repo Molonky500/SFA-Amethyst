@@ -6,21 +6,9 @@ static void MenuItemOneActivate(UI::MenuItem *item) {
 }
 
 UI::MainMenu::MainMenu(): UI::MainMenu::Menu() {
-    auto *texButton = gApp->loadTexture("button");
-
-    auto item = new UI::MenuItem("First Item", MenuItemOneActivate);
-    item->setTexture(texButton);
-    this->addItem(item);
-
-    item = new UI::MenuItem("Item the Second", nullptr);
-    item->setTexture(texButton);
-    this->addItem(item);
-
-    item = new UI::MenuItem("here's three!", nullptr);
-    item->setEnabled(false)->setTexture(texButton);
-    this->addItem(item);
-
-    item = new UI::MenuItem("This item's text is way too long what the hell kind of menu item even is this supposed to be", nullptr);
-    item->setTexture(texButton);
-    this->addItem(item);
+    this->addItem(new UI::MenuItem("First Item", MenuItemOneActivate));
+    this->addItem(new UI::MenuItem("Item the Second", nullptr));
+    this->addItem((new UI::MenuItem("here's three!", nullptr))
+        ->setEnabled(false));
+    this->addItem(new UI::MenuItem("This item's text is way too long what the hell kind of menu item even is this supposed to be", nullptr));
 }

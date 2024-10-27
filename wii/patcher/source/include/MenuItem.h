@@ -15,13 +15,7 @@ namespace UI {
      */
     class MenuItem: public GX::Sprite {
         public:
-            MenuItem(const char *text, MenuItemActivateFunc activate):
-            Sprite(nullptr) {
-                this->text = text;
-                this->enabled = true;
-                this->activateFunc = activate;
-            }
-
+            MenuItem(const char *text, MenuItemActivateFunc activate);
             virtual ~MenuItem() {
             }
 

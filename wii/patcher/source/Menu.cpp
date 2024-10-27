@@ -1,5 +1,15 @@
 #include "main.h"
 
+GX::Texture *UI::Menu::texButton = nullptr;
+
+UI::Menu::Menu() {
+    this->iSelected = 0;
+    this->iFirstDisplayed = 0;
+    if(!texButton) {
+        texButton = gApp->loadTexture("button");
+    }
+}
+
 void UI::Menu::handlePointer(int x, int y) {
     int iItem=0;
     for(MenuItem *item : this->items) {

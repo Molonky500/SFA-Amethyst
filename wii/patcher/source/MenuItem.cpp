@@ -1,5 +1,13 @@
 #include "main.h"
 
+UI::MenuItem::MenuItem(const char *text, MenuItemActivateFunc activate):
+GX::Sprite(nullptr) {
+    this->text = text;
+    this->enabled = true;
+    this->activateFunc = activate;
+    this->setTexture(UI::Menu::texButton);
+}
+
 void UI::MenuItem::draw(bool selected) {
     float alpha = 1.0f;
     if(!this->enabled) alpha = 0.25f;

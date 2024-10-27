@@ -8,11 +8,9 @@ namespace UI {
      */
     class Menu {
         public:
-            Menu() {
-                this->iSelected = 0;
-                this->iFirstDisplayed = 0;
-            }
+            static GX::Texture *texButton;
 
+            Menu();
             ~Menu() {
                 for(const MenuItem *item : this->items) {
                     delete item;
