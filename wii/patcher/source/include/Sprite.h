@@ -53,6 +53,11 @@ namespace GX {
                 this->_drawTexture(&*this->texture, 0, 0);
             }
 
+            bool hitTest(int x, int y) {
+                return x >= this->posX && x < this->posX + this->sizeX
+                    && y >= this->posY && y < this->posY + this->sizeY;
+            }
+
         protected:
             std::shared_ptr<GX::Texture> texture;
             int posX, posY;

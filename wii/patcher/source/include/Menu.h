@@ -65,6 +65,8 @@ namespace UI {
                 this->items[this->iSelected]->activate();
             }
 
+            void handlePointer(int x, int y);
+
         protected:
             std::vector<MenuItem*> items;
             int iSelected, iFirstDisplayed;

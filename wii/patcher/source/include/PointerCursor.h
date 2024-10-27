@@ -18,8 +18,8 @@ namespace UI {
             virtual void draw() {
                 //cursor is offset so that the actual "pointer" part
                 //is in the middle.
-                this->_drawTexture(this->texBg, 50, 50);
-                this->_drawTexture(this->texFg, 48, 48);
+                this->_drawTexture(this->texBg, -48, -48);
+                this->_drawTexture(this->texFg, -50, -50);
             }
 
         protected:

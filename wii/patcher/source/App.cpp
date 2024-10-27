@@ -114,6 +114,7 @@ static void MenuItemOneActivate(UI::MenuItem *item) {
 
 void App::_initMainMenu() {
     this->mainMenu = new UI::Menu();
+    this->curMenu = this->mainMenu;
 
     auto *texButton = new GX::Texture(this->rootDir / "res/button.tex");
 
@@ -156,6 +157,8 @@ u32 App::_updateWpad(int &outIrX, int &outIrY) {
 void App::_handleControllers() {
     PAD_ScanPads();
     u32 wpadButtonsDown = this->_updateWpad(this->cursorX, this->cursorY);
+    this->cursorX -= 200; //XXX why is this needed?
+    this->cursorY -= 200;
     this->cursor->setPos(this->cursorX, this->cursorY);
 
     if(wpadButtonsDown & WPAD_BUTTON_HOME) {
@@ -163,9 +166,10 @@ void App::_handleControllers() {
         _exitMode = App::ExitMode::QUIT;
         return;
     }
-    if(wpadButtonsDown & WPAD_BUTTON_DOWN) this->mainMenu->move( 1);
-    if(wpadButtonsDown & WPAD_BUTTON_UP)   this->mainMenu->move(-1);
-    if(wpadButtonsDown & WPAD_BUTTON_A)    this->mainMenu->select();
+    this->curMenu->handlePointer(this->cursorX, this->cursorY);
+    if(wpadButtonsDown & WPAD_BUTTON_DOWN) this->curMenu->move( 1);
+    if(wpadButtonsDown & WPAD_BUTTON_UP)   this->curMenu->move(-1);
+    if(wpadButtonsDown & WPAD_BUTTON_A)    this->curMenu->select();
 
     char msg[256];
     sprintf(msg, "cursor %d %d", this->cursorX, this->cursorY);

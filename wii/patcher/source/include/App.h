@@ -48,7 +48,7 @@ class App {
         u32 frameCount;
         GX::Font *systemFont;
         GX::Sprite *sprBg;
-        UI::Menu *mainMenu;
+        UI::Menu *curMenu, *mainMenu;
         UI::PointerCursor *cursor;
         int cursorX, cursorY;
         float screenFadeOpacity;
