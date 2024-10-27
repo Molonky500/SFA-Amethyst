@@ -2,8 +2,8 @@
 #include "Menu.h"
 
 namespace UI {
-    class MainMenu: public Menu {
+    class MenuStartGame: public Menu {
         public:
-            MainMenu();
+            MenuStartGame();
     };
 };

@@ -118,6 +118,7 @@ namespace GX {
             }
 
             ~Texture() {
+                printf("~Texture(%p) data %p\r\n", this, this->data);
                 if(this->data) delete[] this->data;
             }
 

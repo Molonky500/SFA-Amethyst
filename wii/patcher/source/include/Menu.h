@@ -8,13 +8,19 @@ namespace UI {
      */
     class Menu {
         public:
-            static GX::Texture *texButton;
+            static std::shared_ptr<GX::Texture> texButton;
 
             Menu();
             ~Menu() {
-                for(const MenuItem *item : this->items) {
+                printf("~Menu(%p)\r\n", this);
+                while(!this->items.empty()) {
+                    MenuItem *item = this->items.back();
+                    printf("delete MenuItem %p\r\n", item);
                     delete item;
+                    printf("delete MenuItem %p OK\r\n", item);
+                    this->items.pop_back();
                 }
+                printf("~Menu(%p) OK\r\n", this);
             }
 
             void draw() {
@@ -35,6 +41,7 @@ namespace UI {
             }
 
             void addItem(MenuItem *item) {
+                printf("Menu %p add item %p\r\n", this, item);
                 this->items.push_back(item);
             }
 

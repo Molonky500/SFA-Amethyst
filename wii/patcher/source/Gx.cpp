@@ -11,8 +11,6 @@ Mtx44 gMtxPerspective;
 Mtx44 gMtxProjOrtho;
 GXColor bgColor = {0x00, 0x00, 0x00, 0xFF};
 
-static const u16 _blankTextureData = 0;
-
 int GX::init() {
 	VIDEO_Init();
 
@@ -94,8 +92,10 @@ int GX::init() {
     // matrix, t, b, l, r, n, f
     guOrtho(gMtxProjOrtho, 0, rmode->efbHeight, 0, rmode->fbWidth, 0, 1);
 
+    u16 *blankTexData = new u16[1];
+    blankTexData[0] = 0;
     GX::gBlankTexture = new GX::Texture(1, 1, GX_TF_RGB565,
-     (void*)&_blankTextureData);
+        (void*)blankTexData);
 	return 0;
 }
 

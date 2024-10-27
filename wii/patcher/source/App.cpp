@@ -1,5 +1,5 @@
 #include "main.h"
-#include "MainMenu.h"
+#include "MenuMain.h"
 
 static App::ExitMode _exitMode = App::ExitMode::KEEP_GOING;
 
@@ -35,24 +35,38 @@ App::App(int argc, char **argv) {
     this->frameCount = 0;
     this->systemFont = nullptr;
     this->sprBg = nullptr;
-    this->mainMenu = nullptr;
     this->sprCursor = nullptr;
     this->cursorOffsetX = -200; //XXX why is this needed?
     this->cursorOffsetY = -200;
     this->screenFadeOpacity = 0;
     this->gcStickDeadZone = 8;
+    this->_exitMenuCount = 0;
 }
 
 App::~App() {
     if(this->systemFont) delete this->systemFont;
     if(this->sprBg) delete this->sprBg;
-    if(this->mainMenu) delete this->mainMenu;
+    while(!this->menuStack.empty()) {
+        delete this->menuStack.back();
+        this->menuStack.pop_back();
+    }
     if(this->sprCursor) delete this->sprCursor;
 }
 
-GX::Texture* App::loadTexture(std::string name) {
+std::shared_ptr<GX::Texture> App::loadTexture(std::string name) {
     //TODO: texture cache
-    return new GX::Texture(this->rootDir / ("res/" + name + ".tex"));
+    return std::shared_ptr<GX::Texture>(
+        new GX::Texture(this->rootDir / ("res/" + name + ".tex")));
+}
+
+void App::enterMenu(UI::Menu *menu) {
+    printf("Enter menu %p\r\n", menu);
+    this->menuStack.push_back(menu);
+}
+
+void App::exitMenu() {
+    this->_exitMenuCount++;
+    printf("exitMenuCount=%d\r\n", this->_exitMenuCount);
 }
 
 void App::_init() {
@@ -74,7 +88,7 @@ void App::_init() {
 
     this->_initFilesystem();
     this->_initGraphics();
-    this->_initMainMenu();
+    this->enterMenu(new UI::MenuMain());
 
     printf("Startup OK\r\n");
     SET_DISC_LED(0);
@@ -110,12 +124,6 @@ void App::_initBackground() {
     GX::getScreenSize(screenW, screenH);
     tex->getSize(&texW, &texH);
     this->sprBg->setPos((screenW/2)-(texW/2), (screenH/2)-(texH/2));
-}
-
-
-void App::_initMainMenu() {
-    this->mainMenu = new UI::MainMenu();
-    this->curMenu = this->mainMenu;
 }
 
 void App::_updateWpads() {
@@ -189,10 +197,13 @@ void App::_handleControllers() {
         _exitMode = App::ExitMode::QUIT;
         return;
     }
-    this->curMenu->handlePointer(this->cursorX, this->cursorY);
-    if(buttons & WPAD_BUTTON_DOWN) this->curMenu->move( 1);
-    if(buttons & WPAD_BUTTON_UP)   this->curMenu->move(-1);
-    if(buttons & WPAD_BUTTON_A)    this->curMenu->select();
+
+    auto curMenu = this->menuStack.back();
+    curMenu->handlePointer(this->cursorX, this->cursorY);
+    if(buttons & WPAD_BUTTON_DOWN) curMenu->move( 1);
+    if(buttons & WPAD_BUTTON_UP)   curMenu->move(-1);
+    if(buttons & WPAD_BUTTON_A)    curMenu->select();
+    if(buttons & WPAD_BUTTON_2)    this->exitMenu();
 }
 
 void App::_drawScreenFadeOverlay() {
@@ -240,7 +251,7 @@ void App::_draw() {
         ->setColor({255, 255, 255, 255})
         ->drawString(msg);
 
-    this->mainMenu->draw();
+    this->menuStack.back()->draw();
     this->sprCursor->draw();
     this->_drawScreenFadeOverlay();
     GX::frameEnd();
@@ -258,11 +269,23 @@ void App::_fadeOut() {
     this->_draw();
 }
 
+void App::_endFrame() {
+    //do this here so we aren't still trying to use the menu
+    while(this->_exitMenuCount && this->menuStack.size() > 1) {
+        printf("delete menu %p\r\n", this->menuStack.back());
+        delete this->menuStack.back();
+        this->menuStack.pop_back();
+        this->_exitMenuCount--;
+    }
+    this->_exitMenuCount = 0;
+}
+
 App::ExitMode App::run() {
     this->_init();
     while(_exitMode == App::ExitMode::KEEP_GOING) {
         this->_handleControllers();
         this->_draw();
+        this->_endFrame();
     }
     this->_fadeOut();
     return _exitMode;

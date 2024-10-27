@@ -1,6 +1,6 @@
 #include "main.h"
 
-GX::Texture *UI::Menu::texButton = nullptr;
+std::shared_ptr<GX::Texture> UI::Menu::texButton;
 
 UI::Menu::Menu() {
     this->iSelected = 0;

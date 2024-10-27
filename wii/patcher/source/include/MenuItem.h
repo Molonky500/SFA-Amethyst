@@ -17,6 +17,7 @@ namespace UI {
         public:
             MenuItem(const char *text, MenuItemActivateFunc activate);
             virtual ~MenuItem() {
+                printf("~MenuItem(%p)\r\n", this);
             }
 
             virtual void draw(bool selected);

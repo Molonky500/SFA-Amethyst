@@ -4,7 +4,7 @@
 namespace GX {
     class Sprite {
         public:
-            Sprite(Texture *tex) {
+            Sprite(std::shared_ptr<Texture> tex) {
                 this->setTexture(tex);
                 this->posX = 0;
                 this->posY = 0;
@@ -12,11 +12,11 @@ namespace GX {
                 this->color = {0xFF, 0xFF, 0xFF, 0xFF};
             }
 
-            Texture* getTexture() {
-                return &*this->texture;
+            std::shared_ptr<Texture> getTexture() {
+                return this->texture;
             }
-            Sprite* setTexture(Texture *tex) {
-                this->texture.reset(tex);
+            Sprite* setTexture(std::shared_ptr<Texture> tex) {
+                this->texture = tex;
                 if(tex) {
                     tex->getSize(&this->sizeX, &this->sizeY);
                 }

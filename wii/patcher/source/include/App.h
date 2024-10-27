@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <vector>
 extern "C" {
     #include <stdlib.h>
     #include <gccore.h>
@@ -39,7 +40,9 @@ class App {
             return this->systemFont;
         }
 
-        GX::Texture* loadTexture(std::string name);
+        std::shared_ptr<GX::Texture> loadTexture(std::string name);
+        void enterMenu(UI::Menu *menu);
+        void exitMenu();
 
     protected:
         int argc;
@@ -48,18 +51,18 @@ class App {
         u32 frameCount;
         GX::Font *systemFont;
         GX::Sprite *sprBg;
-        UI::Menu *curMenu, *mainMenu;
+        std::vector<UI::Menu*> menuStack;
         UI::PointerCursor *sprCursor;
         int cursorX, cursorY;
         s32 cursorOffsetX, cursorOffsetY;
         float screenFadeOpacity;
         s8 gcStickDeadZone;
+        u32 _exitMenuCount;
 
         void _init();
         void _initFilesystem();
         void _initGraphics();
         void _initBackground();
-        void _initMainMenu();
         void _updateWpads();
         void _updateGpads();
         void _clampCursor();
@@ -68,4 +71,5 @@ class App {
         void _drawScreenFadeOverlay();
         void _draw();
         void _fadeOut();
+        void _endFrame();
 };
