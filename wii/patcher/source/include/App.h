@@ -50,10 +50,17 @@ class App {
         GX::Sprite *sprBg;
         UI::Menu *mainMenu;
         UI::PointerCursor *cursor;
+        int cursorX, cursorY;
+        float screenFadeOpacity;
 
         void _init();
+        void _initFilesystem();
+        void _initGraphics();
         void _initBackground();
         void _initMainMenu();
         u32 _updateWpad(int &outIrX, int &outIrY);
+        void _handleControllers();
+        void _drawScreenFadeOverlay();
+        void _draw();
 };
 

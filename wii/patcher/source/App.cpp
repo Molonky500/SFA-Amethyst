@@ -36,6 +36,7 @@ App::App(int argc, char **argv) {
     this->sprBg = nullptr;
     this->mainMenu = nullptr;
     this->cursor = nullptr;
+    this->screenFadeOpacity = 0;
 }
 
 App::~App() {
@@ -62,9 +63,20 @@ void App::_init() {
     initDebugPrint();
     fprintf(stderr, " *** debug print online ***\r\n");
     this->systemFont = new GX::Font();
+
     WPAD_Init();
     PAD_Init();
     STM_RegisterEventHandler(MyStmHandler);
+
+    this->_initFilesystem();
+    this->_initGraphics();
+    this->_initMainMenu();
+
+    printf("Startup OK\r\n");
+    SET_DISC_LED(0);
+}
+
+void App::_initFilesystem() {
     if(!fatInitDefault()) {
         throw new std::runtime_error("FAT init failed");
     }
@@ -72,10 +84,9 @@ void App::_init() {
     //argv is null if we were booted directly into Dolphin
     if(this->argv) this->rootDir = this->argv[0];
     else this->rootDir = "sd:/apps/patcher/";
+}
 
-    printf("Startup OK\r\n");
-    SET_DISC_LED(0);
-
+void App::_initGraphics() {
     this->cursor = new UI::PointerCursor();
     try {
         this->_initBackground();
@@ -85,7 +96,6 @@ void App::_init() {
         if(this->sprBg) delete this->sprBg;
         this->sprBg = nullptr;
     }
-    this->_initMainMenu();
 }
 
 void App::_initBackground() {
@@ -143,38 +153,92 @@ u32 App::_updateWpad(int &outIrX, int &outIrY) {
     return WPAD_ButtonsDown(0);
 }
 
+void App::_handleControllers() {
+    PAD_ScanPads();
+    u32 wpadButtonsDown = this->_updateWpad(this->cursorX, this->cursorY);
+    this->cursor->setPos(this->cursorX, this->cursorY);
+
+    if(wpadButtonsDown & WPAD_BUTTON_HOME) {
+        printf("Home pressed!\r\n");
+        _exitMode = App::ExitMode::QUIT;
+        return;
+    }
+    if(wpadButtonsDown & WPAD_BUTTON_DOWN) this->mainMenu->move( 1);
+    if(wpadButtonsDown & WPAD_BUTTON_UP)   this->mainMenu->move(-1);
+    if(wpadButtonsDown & WPAD_BUTTON_A)    this->mainMenu->select();
+
+    char msg[256];
+    sprintf(msg, "cursor %d %d", this->cursorX, this->cursorY);
+    this->systemFont
+        ->setSize(16)
+        ->setPos(0, 16)
+        ->setColor({255, 255, 255, 255})
+        ->drawString(msg);
+
+}
+
+void App::_drawScreenFadeOverlay() {
+    if(this->screenFadeOpacity <= 0) return;
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+    u16 screenW, screenH;
+    GX::getScreenSize(screenW, screenH);
+    GX::Color color = {0x00, 0x00, 0x00, 0xFF * screenFadeOpacity};
+
+    //since the quad is black we don't care about what
+    //texture is mapped, but we still need to supply
+    //texture coords.
+    //XXX this doesn't work, it uses whatever texture was
+    //loaded before, and if that has a transparent pixel at
+    //0,0 it doesn't do anything here.
+    //not sure how to disable texturing, maybe should make up
+    //a blank texture?
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+    //top left
+    GX_Position2s16(0, 0);
+    GX_Color1u32(color.value);
+    GX_TexCoord2s16(0, 0);
+
+    //top right
+    GX_Position2s16(screenW, 0);
+    GX_Color1u32(color.value);
+    GX_TexCoord2s16(0, 0);
+
+    //bottom right
+    GX_Position2s16(screenW, screenH);
+    GX_Color1u32(color.value);
+    GX_TexCoord2s16(0, 0);
+
+    //bottom left
+    GX_Position2s16(0, screenH);
+    GX_Color1u32(color.value);
+    GX_TexCoord2s16(0, 0);
+
+    GX_End();
+}
+
+void App::_draw() {
+    if(this->sprBg) this->sprBg->draw();
+    this->mainMenu->draw();
+    this->cursor->draw();
+    this->_drawScreenFadeOverlay();
+}
+
 App::ExitMode App::run() {
     this->_init();
     while(_exitMode == App::ExitMode::KEEP_GOING) {
         GX::frameBegin();
-
-        if(this->sprBg) this->sprBg->draw();
-
-        int irX, irY;
-        PAD_ScanPads();
-        u32 wpadButtonsDown = this->_updateWpad(irX, irY);
-        if(wpadButtonsDown & WPAD_BUTTON_HOME) {
-            printf("Home pressed!\r\n");
-            return App::ExitMode::QUIT;
-        }
-        if(wpadButtonsDown & WPAD_BUTTON_DOWN) this->mainMenu->move( 1);
-        if(wpadButtonsDown & WPAD_BUTTON_UP)   this->mainMenu->move(-1);
-        if(wpadButtonsDown & WPAD_BUTTON_A)    this->mainMenu->select();
-
-        char msg[256];
-        sprintf(msg, "cursor %d %d", irX, irY);
-        this->systemFont
-            ->setSize(16)
-            ->setPos(0, 16)
-            ->setColor({255, 255, 255, 255})
-            ->drawString(msg);
-
-        this->mainMenu->draw();
-
-        //draw cursor above everything else.
-        this->cursor->setPos(irX, irY);
-        this->cursor->draw();
-
+        this->_handleControllers();
+        this->_draw();
+        GX::frameEnd();
+        this->frameCount++;
+    }
+    //when exiting, fade out
+    for(int i=0; i<60; i++) {
+        this->screenFadeOpacity += 1.0f / 60.0f;
+        GX::frameBegin();
+        this->_draw();
         GX::frameEnd();
         this->frameCount++;
     }
