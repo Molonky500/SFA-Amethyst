@@ -211,31 +211,31 @@ void App::_drawScreenFadeOverlay() {
 }
 
 void App::_draw() {
+    GX::frameBegin();
     if(this->sprBg) this->sprBg->draw();
     this->mainMenu->draw();
     this->cursor->draw();
     this->_drawScreenFadeOverlay();
+    GX::frameEnd();
+    this->frameCount++;
 }
 
 void App::_fadeOut() {
     for(int i=0; i<30; i++) {
         this->screenFadeOpacity += 1.0f / 30.0f;
         if(this->screenFadeOpacity > 1.0f) this->screenFadeOpacity = 1.0f;
-        GX::frameBegin();
         this->_draw();
-        GX::frameEnd();
-        this->frameCount++;
     }
+    //ensure we're entirely faded out
+    this->screenFadeOpacity = 1.0f;
+    this->_draw();
 }
 
 App::ExitMode App::run() {
     this->_init();
     while(_exitMode == App::ExitMode::KEEP_GOING) {
-        GX::frameBegin();
         this->_handleControllers();
         this->_draw();
-        GX::frameEnd();
-        this->frameCount++;
     }
     this->_fadeOut();
     return _exitMode;
