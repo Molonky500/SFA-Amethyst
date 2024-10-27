@@ -151,5 +151,5 @@ namespace GX {
             }
     };
 
-    extern Texture gBlankTexture;
+    extern Texture *gBlankTexture;
 };

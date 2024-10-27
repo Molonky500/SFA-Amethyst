@@ -184,10 +184,7 @@ void App::_drawScreenFadeOverlay() {
     GX::getScreenSize(screenW, screenH);
     GX::Color color = {0x00, 0x00, 0x00, 0xFF * this->screenFadeOpacity};
 
-    //since the quad is black we don't care about what
-    //texture is mapped, but we still need to supply
-    //texture coords.
-    GX::gBlankTexture.select();
+    GX::gBlankTexture->select();
     GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 
     //top left
@@ -220,6 +217,17 @@ void App::_draw() {
     this->_drawScreenFadeOverlay();
 }
 
+void App::_fadeOut() {
+    for(int i=0; i<30; i++) {
+        this->screenFadeOpacity += 1.0f / 30.0f;
+        if(this->screenFadeOpacity > 1.0f) this->screenFadeOpacity = 1.0f;
+        GX::frameBegin();
+        this->_draw();
+        GX::frameEnd();
+        this->frameCount++;
+    }
+}
+
 App::ExitMode App::run() {
     this->_init();
     while(_exitMode == App::ExitMode::KEEP_GOING) {
@@ -229,14 +237,6 @@ App::ExitMode App::run() {
         GX::frameEnd();
         this->frameCount++;
     }
-    //when exiting, fade out
-    for(int i=0; i<30; i++) {
-        this->screenFadeOpacity += 1.0f / 30.0f;
-        if(this->screenFadeOpacity > 1.0f) this->screenFadeOpacity = 1.0f;
-        GX::frameBegin();
-        this->_draw();
-        GX::frameEnd();
-        this->frameCount++;
-    }
+    this->_fadeOut();
     return _exitMode;
 }

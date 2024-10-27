@@ -62,5 +62,5 @@ class App {
         void _handleControllers();
         void _drawScreenFadeOverlay();
         void _draw();
+        void _fadeOut();
 };
-
