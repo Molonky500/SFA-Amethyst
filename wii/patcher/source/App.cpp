@@ -1,4 +1,5 @@
 #include "main.h"
+#include "MainMenu.h"
 
 static App::ExitMode _exitMode = App::ExitMode::KEEP_GOING;
 
@@ -35,15 +36,18 @@ App::App(int argc, char **argv) {
     this->systemFont = nullptr;
     this->sprBg = nullptr;
     this->mainMenu = nullptr;
-    this->cursor = nullptr;
+    this->sprCursor = nullptr;
+    this->cursorOffsetX = -200; //XXX why is this needed?
+    this->cursorOffsetY = -200;
     this->screenFadeOpacity = 0;
+    this->gcStickDeadZone = 8;
 }
 
 App::~App() {
     if(this->systemFont) delete this->systemFont;
     if(this->sprBg) delete this->sprBg;
     if(this->mainMenu) delete this->mainMenu;
-    if(this->cursor) delete this->cursor;
+    if(this->sprCursor) delete this->sprCursor;
 }
 
 GX::Texture* App::loadTexture(std::string name) {
@@ -87,7 +91,7 @@ void App::_initFilesystem() {
 }
 
 void App::_initGraphics() {
-    this->cursor = new UI::PointerCursor();
+    this->sprCursor = new UI::PointerCursor();
     try {
         this->_initBackground();
     }
@@ -108,34 +112,13 @@ void App::_initBackground() {
     this->sprBg->setPos((screenW/2)-(texW/2), (screenH/2)-(texH/2));
 }
 
-static void MenuItemOneActivate(UI::MenuItem *item) {
-    printf("This is item one\r\n");
-}
 
 void App::_initMainMenu() {
-    this->mainMenu = new UI::Menu();
+    this->mainMenu = new UI::MainMenu();
     this->curMenu = this->mainMenu;
-
-    auto *texButton = new GX::Texture(this->rootDir / "res/button.tex");
-
-    auto item = new UI::MenuItem("First Item", MenuItemOneActivate);
-    item->setTexture(texButton);
-    this->mainMenu->addItem(item);
-
-    item = new UI::MenuItem("Item the Second", nullptr);
-    item->setTexture(texButton);
-    this->mainMenu->addItem(item);
-
-    item = new UI::MenuItem("here's three!", nullptr);
-    item->setEnabled(false)->setTexture(texButton);
-    this->mainMenu->addItem(item);
-
-    item = new UI::MenuItem("This item's text is way too long what the hell kind of menu item even is this supposed to be", nullptr);
-    item->setTexture(texButton);
-    this->mainMenu->addItem(item);
 }
 
-u32 App::_updateWpad(int &outIrX, int &outIrY) {
+void App::_updateWpads() {
     WPADData *wpad;
     WPAD_SetDataFormat(0, WPAD_FMT_BTNS_ACC_IR);
     WPAD_SetVRes(0, 640 + 128, 480 + 128);
@@ -143,33 +126,73 @@ u32 App::_updateWpad(int &outIrX, int &outIrY) {
     wpad = WPAD_Data(0);
 
     if(wpad->ir.smooth_valid) {
-        outIrX = wpad->ir.sx;
-        outIrY = wpad->ir.sy;
+        this->cursorX = wpad->ir.sx + this->cursorOffsetX;
+        this->cursorY = wpad->ir.sy + this->cursorOffsetY;
     }
     else if(wpad->ir.raw_valid) {
-        outIrX = wpad->ir.ax;
-        outIrY = wpad->ir.ay;
+        this->cursorX = wpad->ir.ax + this->cursorOffsetX;
+        this->cursorY = wpad->ir.ay + this->cursorOffsetY;
     }
+}
 
-    return WPAD_ButtonsDown(0);
+void App::_updateGpads() {
+    PAD_ScanPads();
+    s32 stickX = PAD_StickX(0);
+    s32 stickY = PAD_StickY(0);
+    if(stickX < this->gcStickDeadZone && stickX > -this->gcStickDeadZone) stickX = 0;
+    if(stickY < this->gcStickDeadZone && stickY > -this->gcStickDeadZone) stickY = 0;
+    if(PAD_ButtonsHeld(0) & PAD_TRIGGER_Z) {
+        stickX *= 4;
+        stickY *= 4;
+    }
+    this->cursorX += stickX / 4;
+    this->cursorY -= stickY / 4;
+}
+
+void App::_clampCursor() {
+    u16 screenW, screenH;
+    GX::getScreenSize(screenW, screenH);
+    if(this->cursorX < 0) this->cursorX = 0;
+    if(this->cursorX >= screenW) this->cursorX = screenW-1;
+    if(this->cursorY < 0) this->cursorY = 0;
+    if(this->cursorY >= screenH) this->cursorY = screenH-1;
+}
+
+u32 App::_getButtonsDown() {
+    u32 wb = WPAD_ButtonsDown(0);
+    u32 gb = PAD_ButtonsDown(0);
+
+    //map GC buttons to Wii buttons
+    if(gb & PAD_BUTTON_A)     wb |= WPAD_BUTTON_A;
+    if(gb & PAD_BUTTON_B)     wb |= WPAD_BUTTON_B;
+    if(gb & PAD_BUTTON_UP)    wb |= WPAD_BUTTON_UP;
+    if(gb & PAD_BUTTON_DOWN)  wb |= WPAD_BUTTON_DOWN;
+    if(gb & PAD_BUTTON_LEFT)  wb |= WPAD_BUTTON_LEFT;
+    if(gb & PAD_BUTTON_RIGHT) wb |= WPAD_BUTTON_RIGHT;
+    if(gb & PAD_BUTTON_START) wb |= WPAD_BUTTON_HOME;
+    if(gb & PAD_BUTTON_X)     wb |= WPAD_BUTTON_2;
+    if(gb & PAD_BUTTON_Y)     wb |= WPAD_BUTTON_1;
+    if(gb & PAD_TRIGGER_L)    wb |= WPAD_BUTTON_MINUS;
+    if(gb & PAD_TRIGGER_R)    wb |= WPAD_BUTTON_PLUS;
+    return wb;
 }
 
 void App::_handleControllers() {
-    PAD_ScanPads();
-    u32 wpadButtonsDown = this->_updateWpad(this->cursorX, this->cursorY);
-    this->cursorX -= 200; //XXX why is this needed?
-    this->cursorY -= 200;
-    this->cursor->setPos(this->cursorX, this->cursorY);
+    this->_updateWpads();
+    this->_updateGpads();
+    this->_clampCursor();
+    this->sprCursor->setPos(this->cursorX, this->cursorY);
 
-    if(wpadButtonsDown & WPAD_BUTTON_HOME) {
+    u32 buttons = this->_getButtonsDown();
+    if(buttons & WPAD_BUTTON_HOME) {
         printf("Home pressed!\r\n");
         _exitMode = App::ExitMode::QUIT;
         return;
     }
     this->curMenu->handlePointer(this->cursorX, this->cursorY);
-    if(wpadButtonsDown & WPAD_BUTTON_DOWN) this->curMenu->move( 1);
-    if(wpadButtonsDown & WPAD_BUTTON_UP)   this->curMenu->move(-1);
-    if(wpadButtonsDown & WPAD_BUTTON_A)    this->curMenu->select();
+    if(buttons & WPAD_BUTTON_DOWN) this->curMenu->move( 1);
+    if(buttons & WPAD_BUTTON_UP)   this->curMenu->move(-1);
+    if(buttons & WPAD_BUTTON_A)    this->curMenu->select();
 
     char msg[256];
     sprintf(msg, "cursor %d %d", this->cursorX, this->cursorY);
@@ -218,7 +241,7 @@ void App::_draw() {
     GX::frameBegin();
     if(this->sprBg) this->sprBg->draw();
     this->mainMenu->draw();
-    this->cursor->draw();
+    this->sprCursor->draw();
     this->_drawScreenFadeOverlay();
     GX::frameEnd();
     this->frameCount++;

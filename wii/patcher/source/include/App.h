@@ -49,16 +49,21 @@ class App {
         GX::Font *systemFont;
         GX::Sprite *sprBg;
         UI::Menu *curMenu, *mainMenu;
-        UI::PointerCursor *cursor;
+        UI::PointerCursor *sprCursor;
         int cursorX, cursorY;
+        s32 cursorOffsetX, cursorOffsetY;
         float screenFadeOpacity;
+        s8 gcStickDeadZone;
 
         void _init();
         void _initFilesystem();
         void _initGraphics();
         void _initBackground();
         void _initMainMenu();
-        u32 _updateWpad(int &outIrX, int &outIrY);
+        void _updateWpads();
+        void _updateGpads();
+        void _clampCursor();
+        u32 _getButtonsDown();
         void _handleControllers();
         void _drawScreenFadeOverlay();
         void _draw();
