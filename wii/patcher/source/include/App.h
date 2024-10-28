@@ -59,7 +59,6 @@ class App {
         float screenFadeOpacity;
         s8 gcStickDeadZone;
         u32 _exitMenuCount;
-        Sys::DiscDrive *dvd;
 
         void _init();
         void _initFilesystem();
