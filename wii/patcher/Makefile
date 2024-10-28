@@ -31,7 +31,7 @@ LDFLAGS	 = -g $(MACHDEP) \
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS := -lfat -lwiiuse -lbte -logc -lm
+LIBS := -lfat -lwiiuse -lbte -logc -lm -ldi
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

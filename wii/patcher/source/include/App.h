@@ -13,6 +13,7 @@ extern "C" {
 #include "Sprite.h"
 #include "Menu.h"
 #include "PointerCursor.h"
+#include "DiscDrive.h"
 
 /**
  * @brief The main application logic.
@@ -58,6 +59,7 @@ class App {
         float screenFadeOpacity;
         s8 gcStickDeadZone;
         u32 _exitMenuCount;
+        Sys::DiscDrive *dvd;
 
         void _init();
         void _initFilesystem();

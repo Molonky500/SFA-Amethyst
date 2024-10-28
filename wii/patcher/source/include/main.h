@@ -5,6 +5,7 @@ extern "C" {
     #include <stdlib.h>
     #include <gccore.h>
     #include <fat.h>
+    #include <di/di.h>
     #include <string.h>
     #include <dirent.h>
     #include <sys/types.h>

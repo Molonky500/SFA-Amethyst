@@ -86,6 +86,8 @@ void App::_init() {
     PAD_Init();
     STM_RegisterEventHandler(MyStmHandler);
 
+    this->dvd = new Sys::DiscDrive();
+
     this->_initFilesystem();
     this->_initGraphics();
     this->enterMenu(new UI::MenuMain());
@@ -244,7 +246,12 @@ void App::_draw() {
     if(this->sprBg) this->sprBg->draw();
 
     char msg[256];
-    sprintf(msg, "cursor %d %d", this->cursorX, this->cursorY);
+    //sprintf(msg, "cursor %d %d", this->cursorX, this->cursorY);
+
+    u64 discId;
+    int err = this->dvd->getDiscId(discId);
+    if(err) sprintf(msg, "DVD err %d", err);
+    else sprintf(msg, "Disc ID 0x%llX", discId);
     this->systemFont
         ->setSize(16)
         ->setPos(0, 16)
