@@ -1,16 +1,9 @@
 #include "main.h"
 #include "MenuManageInstall.h"
+#include "MenuInstallFromDisc.h"
 
 static void onInstallFromDisc(UI::MenuItem *item) {
-    //this should be a submenu that shows the status and so on
-    Sys::DiscDrive dvd;
-    u64 discId = 0;
-    int err;
-    do {
-        sleep(1);
-        err = dvd.getDiscId(discId);
-    } while(err == -EAGAIN);
-    printf("Disc ID = 0x%llX err %d\r\n", discId, err);
+    gApp->enterMenu(new UI::MenuInstallFromDisc());
 }
 
 static void onBack(UI::MenuItem *item) {

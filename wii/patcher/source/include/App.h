@@ -26,6 +26,7 @@ class App {
             REBOOT, //reboot the system
             POWEROFF //power off the system
         } ExitMode;
+        Sys::DiscDrive *dvd;
 
         App(int argc, char **argv);
         ~App();

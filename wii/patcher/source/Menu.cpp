@@ -3,6 +3,8 @@
 std::shared_ptr<GX::Texture> UI::Menu::texButton;
 
 UI::Menu::Menu() {
+    this->posX = 20;
+    this->posY = 40;
     this->iSelected = 0;
     this->iFirstDisplayed = 0;
     if(!texButton) {

@@ -41,6 +41,7 @@ App::App(int argc, char **argv) {
     this->screenFadeOpacity = 0;
     this->gcStickDeadZone = 8;
     this->_exitMenuCount = 0;
+    this->dvd = nullptr;
 }
 
 App::~App() {
@@ -51,6 +52,7 @@ App::~App() {
         this->menuStack.pop_back();
     }
     if(this->sprCursor) delete this->sprCursor;
+    if(this->dvd) delete this->dvd;
 }
 
 std::shared_ptr<GX::Texture> App::loadTexture(std::string name) {
@@ -88,6 +90,7 @@ void App::_init() {
 
     this->_initFilesystem();
     this->_initGraphics();
+    this->dvd = new Sys::DiscDrive();
     this->enterMenu(new UI::MenuMain());
 
     printf("Startup OK\r\n");

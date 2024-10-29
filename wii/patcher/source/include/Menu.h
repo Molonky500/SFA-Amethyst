@@ -11,7 +11,7 @@ namespace UI {
             static std::shared_ptr<GX::Texture> texButton;
 
             Menu();
-            ~Menu() {
+            virtual ~Menu() {
                 while(!this->items.empty()) {
                     MenuItem *item = this->items.back();
                     delete item;
@@ -19,10 +19,11 @@ namespace UI {
                 }
             }
 
-            void draw() {
-                int posX = 20, posY = 40;
+            virtual void draw() {
                 u16 screenW, screenH;
                 GX::getScreenSize(screenW, screenH);
+                int posX = this->posX;
+                int posY = this->posY;
 
                 int iItem=0;
                 for(MenuItem *item : this->items) {
@@ -68,6 +69,7 @@ namespace UI {
             void handlePointer(int x, int y);
 
         protected:
+            int posX, posY;
             std::vector<MenuItem*> items;
             int iSelected, iFirstDisplayed;
     };
