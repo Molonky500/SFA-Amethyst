@@ -109,7 +109,7 @@ void initDebugPrint() {
 	//on emulator, always use uart
 	u32 sysType = *(u32*)0x8000002c;
 	if((sysType & 0xF0000000) //emulator/dev HW
-	|| (sysType == 0x23)) { //???
+	|| (sysType == 0x23)) { //??? Dolphin?
 		gecko = false;
 	}
 	else gecko = usb_isgeckoalive(1);
