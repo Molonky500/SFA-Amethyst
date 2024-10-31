@@ -13,9 +13,19 @@ Sys::Dvd::File::File(const char *path, int flags, int mode) {
     this->mode  = mode;
     this->offset = 0;
     this->len = 0;
-    //TODO: find this file on the disc
-    this->sector = 0;
-    this->isDir = false;
+    if(!strcmp(path, "/")) {
+        //open the disc itself
+        this->isDir = false;
+        this->sector = 0;
+        //XXX don't hardcode
+        //this won't work for Wii, but this app doesn't care
+        this->size = 1'459'978'240;
+    }
+    else {
+        //TODO: find this file on the disc
+        this->sector = 0;
+        this->isDir = false;
+    }
 }
 
 static int __dvd_open(struct _reent *r, void *fileStruct,

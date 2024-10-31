@@ -29,9 +29,9 @@ namespace Sys { namespace Dvd {
             int flags; //from open()
             int mode; //from open()
             bool isDir;
-            off_t offset;
+            off_t offset; //current read/write position
             off_t size;
-            u32 sector;
+            u32 sector; //start sector
 
             static void _initIoWrapper();
             int _getMode();
