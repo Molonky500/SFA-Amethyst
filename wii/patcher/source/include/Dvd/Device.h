@@ -5,6 +5,7 @@ extern "C" {
 #include <stdlib.h>
 #include <gccore.h>
 };
+#include "GcIso/Iso.h"
 
 //g0, g1, g2, g3: game ID
 //c0, c1: company ID
@@ -21,27 +22,31 @@ extern "C" {
     (u64)v)
 
 namespace Sys { namespace Dvd {
+    constexpr const int SECTOR_SIZE = 2048; //bytes per sector
+    //US versions
+    constexpr const u64 DISC_ID_SFA_U0 = MAKE_DISC_ID('G', 'S', 'A', 'E', '0', '1', 0, 0);
+    constexpr const u64 DISC_ID_SFA_U1 = MAKE_DISC_ID('G', 'S', 'A', 'E', '0', '1', 0, 1);
+    //JP versions
+    constexpr const u64 DISC_ID_SFA_J0 = MAKE_DISC_ID('G', 'S', 'A', 'J', '0', '1', 0, 0);
+    constexpr const u64 DISC_ID_SFA_J1 = MAKE_DISC_ID('G', 'S', 'A', 'J', '0', '1', 0, 1);
+    //EU versions
+    constexpr const u64 DISC_ID_SFA_E0 = MAKE_DISC_ID('G', 'S', 'A', 'P', '0', '1', 0, 0);
+    constexpr const u64 DISC_ID_SFA_E1 = MAKE_DISC_ID('G', 'S', 'A', 'P', '0', '1', 0, 1);
+
     /**
      * @brief Handles disc drive I/O.
      */
     class Device {
         public:
-            //US versions
-            static constexpr const u64 DISC_ID_SFA_U0 = MAKE_DISC_ID('G', 'S', 'A', 'E', '0', '1', 0, 0);
-            static constexpr const u64 DISC_ID_SFA_U1 = MAKE_DISC_ID('G', 'S', 'A', 'E', '0', '1', 0, 1);
-            //JP versions
-            static constexpr const u64 DISC_ID_SFA_J0 = MAKE_DISC_ID('G', 'S', 'A', 'J', '0', '1', 0, 0);
-            static constexpr const u64 DISC_ID_SFA_J1 = MAKE_DISC_ID('G', 'S', 'A', 'J', '0', '1', 0, 1);
-            //EU versions
-            static constexpr const u64 DISC_ID_SFA_E0 = MAKE_DISC_ID('G', 'S', 'A', 'P', '0', '1', 0, 0);
-            static constexpr const u64 DISC_ID_SFA_E1 = MAKE_DISC_ID('G', 'S', 'A', 'P', '0', '1', 0, 1);
-
             Device();
+            ~Device();
             int getStatus();
+            u32 getError();
             int getDiscId(u64 &id);
             int read(void *buf, uint32_t size, uint32_t offset);
 
         protected:
             std::string cwd;
+            GcIso::Iso *iso;
     };
 }};

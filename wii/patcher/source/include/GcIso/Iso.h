@@ -4,13 +4,20 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <gccore.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/iosupport.h>
 };
 
 #include <filesystem>
 #include <string>
-#include "Gciso/Appldr.h"
-#include "Gciso/Bi2Bin.h"
-#include "Gciso/BootBin.h"
+#include "GcIso/Appldr.h"
+#include "GcIso/Bi2Bin.h"
+#include "GcIso/BootBin.h"
+#include "GcIso/Fst.h"
+
+const char* removeDeviceFromPath(const char *path);
 
 namespace GcIso {
     class Iso {
@@ -18,7 +25,7 @@ namespace GcIso {
             typedef struct {
                 BootBin::Struct bootBin;
                 Bi2Bin::Struct bi2bin;
-                AppldrHeader::Header appldrHeader;
+                Appldr::Header appldrHeader;
                 //appldr
                 //fst
                 //main.dol
@@ -32,7 +39,13 @@ namespace GcIso {
 
         protected:
             friend class Fst;
+            friend class File;
+            Fst *fst;
             FILE *file;
             Header header;
-    }
+            devoptab_t devoptab;
+            std::string mountName; //need to keep around
+
+            void _readHeader();
+    };
 };

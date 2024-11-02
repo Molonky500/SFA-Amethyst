@@ -10,15 +10,17 @@ extern "C" {
 #include <sys/iosupport.h>
 };
 
-namespace Sys { namespace Dvd {
+namespace GcIso {
     /**
-     * @brief FILE object for raw DVD I/O.
-     * @details This is instantiated by open("dvdraw:").
+     * @brief FILE object for ISO.
+     * @details This is instantiated by open("iso:/...").
+     *  (assuming an ISO is mounted as "iso".)
      *  You should not instantiate/use it directly.
      */
     class File {
         public:
-            File(int flags, int mode);
+            static constexpr const int MAX_PATH = 256;
+            File(GcIso::Iso *iso, const char *path, int flags, int mode);
             ~File() { }
 
             ssize_t read(struct _reent *r, char *ptr, size_t len);
@@ -27,13 +29,16 @@ namespace Sys { namespace Dvd {
             int stat(struct _reent *r, struct stat *st);
 
         protected:
-            friend class Device;
+            char path[MAX_PATH];
+            GcIso::Iso *iso;
             int flags; //from open()
             int mode; //from open()
+            bool isDir;
             off_t offset; //current read/write position
             off_t size;
+            u32 sector; //start sector
 
             static void _initIoWrapper();
             int _getMode();
     };
-}};
+};

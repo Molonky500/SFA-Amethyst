@@ -13,7 +13,7 @@ extern "C" {
 #include "Sprite.h"
 #include "Menu.h"
 #include "PointerCursor.h"
-#include "DiscDrive.h"
+#include "Dvd/Device.h"
 
 /**
  * @brief The main application logic.
@@ -26,7 +26,7 @@ class App {
             REBOOT, //reboot the system
             POWEROFF //power off the system
         } ExitMode;
-        Sys::DiscDrive *dvd;
+        Sys::Dvd::Device *dvd;
 
         App(int argc, char **argv);
         ~App();

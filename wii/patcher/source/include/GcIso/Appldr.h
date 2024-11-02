@@ -25,7 +25,7 @@ namespace GcIso {
 
             u32 getTotalSize() {
                 return this->header.dataSize +
-                    this->header.trackSize +
+                    this->header.trailerSize +
                     sizeof(Header);
             }
     };

@@ -1,21 +1,23 @@
 #include "main.h"
+#include "GcIso/Iso.h"
+#include "GcIso/Fst.h"
 
 GcIso::Fst::Fst(GcIso::Iso *iso) {
     this->root = nullptr;
-    fseek(iso->file, iso->header->bootBin.fstOffs, SEEK_SET);
+    fseek(iso->file, iso->header.bootBin.fstOffs, SEEK_SET);
 
     auto nEntries = this->_readRoot(iso->file);
     off_t strTabOffs = (nEntries * sizeof(EntryStruct)) +
-        iso->header->bootBin.fstOffs;
+        iso->header.bootBin.fstOffs;
 
     //read entries
-    fseek(iso->file, iso->header->bootBin.fstOffs + s
-        izeof(EntryStruct), SEEK_SET);
+    fseek(iso->file, iso->header.bootBin.fstOffs +
+        sizeof(EntryStruct), SEEK_SET);
     EntryStruct entries[nEntries-1];
     fread(entries, sizeof(EntryStruct), nEntries-1, iso->file);
 
     //read string table and construct entries
-    for(int i=1; i<nEntries; i++) {
+    for(unsigned int i=1; i<nEntries; i++) {
         Entry *ent;
         if(entries[i].nameOffs & 0xFF000000) ent = new DirEntry();
         else ent = new FileEntry();
@@ -60,10 +62,10 @@ std::string GcIso::Fst::_readString(FILE *file, off_t offset) {
 }
 
 void GcIso::Fst::_assignChildren() {
-    auto nEntries = this->entriesByIndex.length();
-    for(int i=1; i<nEntries; i++) {
+    auto nEntries = this->entriesByIndex.size();
+    for(unsigned int i=1; i<nEntries; i++) {
         auto ent = this->entriesByIndex[i];
-        this->entriesByIndex[i]->children[ent->name] = ent;
+        ((DirEntry*)this->entriesByIndex[i])->children[ent->name] = ent;
     }
 }
 

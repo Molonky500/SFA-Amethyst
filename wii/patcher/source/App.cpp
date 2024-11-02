@@ -90,7 +90,7 @@ void App::_init() {
 
     this->_initFilesystem();
     this->_initGraphics();
-    this->dvd = new Sys::DiscDrive();
+    this->dvd = new Sys::Dvd::Device();
     this->enterMenu(new UI::MenuMain());
 
     printf("Startup OK\r\n");

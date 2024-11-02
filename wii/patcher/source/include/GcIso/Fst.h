@@ -22,7 +22,7 @@ namespace GcIso {
                 } file;
                 struct {
                     u32 parentIdx;
-                    u32 netIdx; //next idx which is NOT in this dir
+                    u32 nextIdx; //next idx which is NOT in this dir
                 } dir;
             };
         } EntryStruct;
@@ -35,14 +35,16 @@ namespace GcIso {
         };
 
         class FileEntry: public Entry {
-            off_t offset, size;
-            FileEntry: Entry() { this->isDir = false; }
-        }
+            public:
+                off_t offset, size;
+                FileEntry(): Entry() { this->isDir = false; }
+        };
         class DirEntry: public Entry {
-            int parentIdx, nextIdx;
-            std::map<std::string, Entry*> children;
-            DirEntry: Entry() { this->isDir = true; }
-        }
+            public:
+                int parentIdx, nextIdx;
+                std::map<std::string, Entry*> children;
+                DirEntry(): Entry() { this->isDir = true; }
+        };
 
         public:
             DirEntry *root;
@@ -52,7 +54,7 @@ namespace GcIso {
             Entry* find(std::filesystem::path path);
 
         protected:
-            std::vector<Entry> entriesByIndex;
+            std::vector<Entry*> entriesByIndex;
 
             u32 _readRoot(FILE *file);
             std::string _readString(FILE *file, off_t offset);
