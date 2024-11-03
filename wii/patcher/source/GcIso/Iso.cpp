@@ -2,9 +2,6 @@
 #include "GcIso/Iso.h"
 #include "GcIso/File.h"
 
-//XXX better place for this
-#define MAX_DEV_NAME_LEN 20
-
 const char* removeDeviceFromPath(const char *path) {
     for(int i=0; i<MAX_DEV_NAME_LEN; i++) {
         if(path[i] == ':') {
@@ -38,6 +35,7 @@ static GcIso::Iso* getMountedIso(const char *path) {
 
 GcIso::Iso::Iso(std::filesystem::path path, std::string mode) {
     this->fst = nullptr;
+    this->devName[0] = '\0';
     this->file = fopen(path.c_str(), mode.c_str());
     if(!this->file) {
         int err = errno;
@@ -125,12 +123,15 @@ static int __iso_chdir(struct _reent *r, const char *path) {
 }
 
 bool GcIso::Iso::mount(std::string name) {
-    if(this->mountName != "") {
-        if(this->mountName == name) return true;
+    if(this->devName[0] != '\0') {
+        if(!strncmp(this->devName, name.c_str(), MAX_DEV_NAME_LEN)) {
+            return true;
+        }
         throw new std::runtime_error("Already mounted");
     }
-    this->mountName             = mountName;
-    this->devoptab.name         = this->mountName.c_str();
+    strncpy(this->devName, name.c_str(), MAX_DEV_NAME_LEN);
+    this->devoptab.name         = this->devName;
+    printf("Mount ISO at \"%s\"\r\n", this->devName);
 	this->devoptab.structSize   = sizeof(GcIso::File);
 	this->devoptab.open_r       = __iso_open;
 	this->devoptab.close_r      = __iso_close;
@@ -155,13 +156,18 @@ bool GcIso::Iso::mount(std::string name) {
 	this->devoptab.deviceData   = NULL;
 	this->devoptab.chmod_r      = NULL;
 	this->devoptab.fchmod_r     = NULL;
-    AddDevice(&this->devoptab);
-    mountedIsos[this->mountName] = this;
+    int r = AddDevice(&this->devoptab);
+    printf("AddDevice => %d, %d\r\n", r, errno);
+    if(r < 0) {
+        fprintf(stderr, "AddDevice error %d\r\n", errno);
+    }
+    mountedIsos[name] = this;
     return true;
 }
 
 void GcIso::Iso::unmount() {
-    RemoveDevice(this->mountName.c_str());
-    mountedIsos[this->mountName] = nullptr;
+    printf("Unmount ISO from \"%s\"\r\n", this->devName);
+    RemoveDevice(this->devName);
+    mountedIsos[std::string(this->devName)] = nullptr;
+    this->devName[0] = '\0';
 }
-

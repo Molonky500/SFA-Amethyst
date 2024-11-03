@@ -133,5 +133,6 @@ static devoptab_t devDvd = {
 	NULL,        //fchmod_r
 };
 void Sys::Dvd::File::_initIoWrapper() {
-	AddDevice(&devDvd);
+	int r = AddDevice(&devDvd);
+    printf("AddDevice => %d, %d\r\n", r, errno);
 }

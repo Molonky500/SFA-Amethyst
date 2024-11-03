@@ -49,8 +49,8 @@ Sys::Dvd::Device::Device() {
     printf("DVD init %d, ID = 0x%llX\r\n", r, id);
 
     Sys::Dvd::File::_initIoWrapper();
-    //this->iso = new GcIso::Iso("dvdraw:");
-    //this->iso->mount("dvd");
+    this->iso = new GcIso::Iso("dvdraw:");
+    this->iso->mount("dvd");
 }
 
 Sys::Dvd::Device::~Device() {

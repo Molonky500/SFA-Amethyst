@@ -13,8 +13,8 @@ extern "C" {
 namespace GcIso {
     /**
      * @brief FILE object for ISO.
-     * @details This is instantiated by open("iso:/...").
-     *  (assuming an ISO is mounted as "iso".)
+     * @details This is instantiated by open("dvd:/...").
+     *  (assuming an ISO is mounted as "dvd".)
      *  You should not instantiate/use it directly.
      */
     class File {

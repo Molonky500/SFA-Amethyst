@@ -20,6 +20,9 @@ extern "C" {
     void* memalign(u32 align, size_t size);
 };
 
+//XXX better place for this
+#define MAX_DEV_NAME_LEN 20
+
 //#define _ipcReg ((vu32*)0xCD800000)
 #define SET_DEBUG_PORT(val) _ipcReg[0xC0>>2] = (_ipcReg[0xC0>>2] & ~0xFF0000) | ((val) << 16);
 #define SET_DISC_LED(on) _ipcReg[0xC0>>2] = ((on) ? (_ipcReg[0xC0>>2] | 0x20) : (_ipcReg[0xC0>>2] & ~0x20))

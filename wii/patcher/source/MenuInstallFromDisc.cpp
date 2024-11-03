@@ -2,13 +2,14 @@
 #include "MenuInstallFromDisc.h"
 
 static void onInstall(UI::MenuItem *item) {
-    //FILE *file = fopen("dvd:/OBJECTS.bin", "rb");
-    FILE *file = fopen("dvdraw:", "rb");
-    printf("opened file: %p\r\n", file);
+    errno = 0;
+    FILE *file = fopen("dvd:/OBJECTS.bin", "rb");
+    //FILE *file = fopen("dvdraw:", "rb");
+    printf("opened file: %p, %d\r\n", file, errno);
     if(!file) return;
 
     u8 data[256];
-    fseek(file, 1, SEEK_SET);
+    fseek(file, 0, SEEK_SET);
     int r = fread(data, 1, 256, file);
     printf("read data, %d bytes\r\n", r);
 

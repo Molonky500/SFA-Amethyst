@@ -44,7 +44,9 @@ namespace GcIso {
             FILE *file;
             Header header;
             devoptab_t devoptab;
-            std::string mountName; //need to keep around
+            //std::string c_str() does not return a string that
+            //remains valid later, so copy it here
+            char devName[MAX_DEV_NAME_LEN];
 
             void _readHeader();
     };

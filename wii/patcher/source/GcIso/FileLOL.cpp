@@ -11,7 +11,7 @@ GcIso::File::File(GcIso::Iso *iso, const char *path, int flags, int mode) {
     this->flags  = flags;
     this->mode   = mode;
     this->offset = 0;
-    this->size   = 0;
+    this->size   = 65536;
     this->sector = 0;
     this->isDir  = false;
 }
