@@ -8,6 +8,7 @@ static void onInstall(UI::MenuItem *item) {
     if(!file) return;
 
     u8 data[256];
+    fseek(file, 1, SEEK_SET);
     int r = fread(data, 1, 256, file);
     printf("read data, %d bytes\r\n", r);
 
