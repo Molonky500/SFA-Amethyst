@@ -135,6 +135,7 @@ bool isDvdVideo) {
 int Sys::Dvd::Device::read(void *dst, uint32_t size, uint32_t offset) {
     u8 buf[Sys::Dvd::SECTOR_SIZE] __attribute__((aligned(32)));
     static bool isDvdVideo = false;
+    printf("DVD read offs 0x%X size 0x%X dst %p\r\n", offset, size, dst);
 
     //abstract away the minimum size/offset requirements.
 
@@ -143,11 +144,10 @@ int Sys::Dvd::Device::read(void *dst, uint32_t size, uint32_t offset) {
     uint32_t offsAlign = offset & offsMask;
     offsMask = ~offsMask;
     if(offsAlign) { //offset is partway through a block
-        DCInvalidateRange(buf, blockSize);
         int rLen = this->_read(buf, Sys::Dvd::SECTOR_SIZE,
             offset & offsMask, isDvdVideo);
-        printf("Read partial block 0x%X (0x%X) len %d => %d\r\n", offset,
-            offset & offsMask, blockSize, rLen);
+        //printf("Read partial block 0x%X (0x%X) len %d => %d\r\n", offset,
+        //    offset & offsMask, blockSize, rLen);
         if(rLen <= 0) return rLen;
         memcpy(dst, &buf[offsAlign], rLen - offsAlign);
         offset += rLen - offsAlign;
@@ -157,24 +157,25 @@ int Sys::Dvd::Device::read(void *dst, uint32_t size, uint32_t offset) {
     if((!(((u32)dst) & ~31)) //destination is aligned
     && !(size & (Sys::Dvd::SECTOR_SIZE-1))) { //size is aligned
         int rLen = this->_read(dst, size, offset, isDvdVideo);
-        printf("Read aligned 0x%X len %d => %d\r\n", offset, size, rLen);
+        //printf("Read aligned 0x%X len %d => %d\r\n", offset, size, rLen);
         return rLen;
     }
 
-    //destination isn't aligned, so do it the slow way
+    //not aligned, so do it the slow way
     uint32_t nRead = 0;
     while(size > 0) {
         uint32_t xferLen = MIN(size, Sys::Dvd::SECTOR_SIZE);
-        DCInvalidateRange(buf, xferLen);
         int rLen = this->_read(buf, Sys::Dvd::SECTOR_SIZE,
             offset, isDvdVideo);
-        printf("Read unaligned 0x%X size %d => %d\r\n",
-            offset, xferLen, rLen);
+        //printf("Read unaligned 0x%X to %p size %d => %d, remain %d\r\n",
+        //    offset, dst, xferLen, rLen, size);
         if(rLen <= 0) return rLen;
+        if(rLen > size) rLen = size;
+        offset += rLen;
         nRead += rLen;
-        memcpy(dst, buf, rLen);
+        memcpy(dst, buf, xferLen);
         dst += rLen;
         size -= rLen;
     }
-	return nRead;
+    return nRead;
 }

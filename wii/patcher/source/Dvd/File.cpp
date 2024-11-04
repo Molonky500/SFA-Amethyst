@@ -17,6 +17,7 @@ ssize_t Sys::Dvd::File::read(struct _reent *r,  char *ptr, size_t len) {
         len -= (offEnd - this->size)+1;
         printf("length truncated to %zd\r\n", len);
     }
+    //printf("DVD::File::read(%p, %p, %zd)\r\n", r, ptr, len);
     ssize_t res = gApp->dvd->read(ptr, len, this->offset);
     if(res >= 0) {
         this->offset += res;
@@ -42,6 +43,7 @@ off_t Sys::Dvd::File::seek(struct _reent *r, off_t pos, int dir) {
             return -1;
 	}
     if(this->offset >= this->size) this->offset = this->size - 1;
+    //printf("DVD::File::seek to 0x%X\r\n", (u32)this->offset);
     return 0;
 }
 
@@ -52,6 +54,7 @@ int Sys::Dvd::File::fstat(struct _reent *r, struct stat *st) {
 }
 
 int Sys::Dvd::File::stat(struct _reent *r, struct stat *st) {
+    printf("Dvd::File::stat(%p)\r\n", st);
     st->st_dev = 0; //TODO what goes here?
     st->st_ino = 0; //TODO: inode number
     st->st_mode = this->_getMode();
@@ -89,7 +92,7 @@ static int __dvd_close(struct _reent *r, void *fd) {
 
 static ssize_t __dvd_read(struct _reent *r, void *fd,
 char *ptr, size_t len) {
-    printf("__dvd_read(%p, %d)\r\n", ptr, len);
+    //printf("__dvd_read(%p, %d)\r\n", ptr, len);
     return ((Sys::Dvd::File*)fd)->read(r, ptr, len);
 }
 

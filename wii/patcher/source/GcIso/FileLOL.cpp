@@ -3,17 +3,31 @@
 #include "GcIso/Fst.h"
 
 GcIso::File::File(GcIso::Iso *iso, const char *path, int flags, int mode) {
+    printf("File(%p, %p, %d, %d)\r\n", iso, path, flags, mode);
     if(strlen(path) >= GcIso::File::MAX_PATH) {
         throw new std::runtime_error("Path too long");
     }
     strncpy(this->path, path, GcIso::File::MAX_PATH);
-    this->iso    = iso;
-    this->flags  = flags;
-    this->mode   = mode;
-    this->offset = 0;
-    this->size   = 65536;
-    this->sector = 0;
-    this->isDir  = false;
+    this->iso       = iso;
+    this->flags     = flags;
+    this->mode      = mode;
+    this->offset    = 0; //current read position
+    this->size      = 0; //file size
+    this->offsStart = 0; //start offset in ISO file
+    this->isDir     = false;
+
+    //find this entry
+    if(!this->iso->fst) throw new std::runtime_error("ISO has no FST");
+    auto fp = std::filesystem::path(path);
+    auto entry = this->iso->fst->find(fp);
+    printf("FST entry is %p\r\n", entry);
+    if(!entry) throw std::filesystem::filesystem_error(
+        strerror(ENOENT), fp, std::error_code(ENOENT, std::system_category()));
+    if(entry->isDir) throw std::filesystem::filesystem_error(
+        strerror(EISDIR), fp, std::error_code(EISDIR, std::system_category()));
+    auto fEnt = (GcIso::Fst::FileEntry*)entry;
+    this->offsStart = fEnt->offset;
+    this->size = fEnt->size;
 }
 
 ssize_t GcIso::File::read(struct _reent *r,  char *ptr, size_t len) {
@@ -21,8 +35,7 @@ ssize_t GcIso::File::read(struct _reent *r,  char *ptr, size_t len) {
     if(offEnd >= this->size) {
         len -= (offEnd - this->size)+1;
     }
-    fseek(this->iso->file, this->offset +
-        (this->sector * Sys::Dvd::SECTOR_SIZE), SEEK_SET);
+    fseek(this->iso->file, this->offset + this->offsStart, SEEK_SET);
     ssize_t res = fread(ptr, 1, len, this->iso->file);
     if(res >= 0) this->offset += res;
     return res;

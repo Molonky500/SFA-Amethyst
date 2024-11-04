@@ -36,7 +36,7 @@ namespace GcIso {
             bool isDir;
             off_t offset; //current read/write position
             off_t size;
-            u32 sector; //start sector
+            off_t offsStart;
 
             static void _initIoWrapper();
             int _getMode();

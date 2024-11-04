@@ -44,7 +44,8 @@ GcIso::Iso::Iso(std::filesystem::path path, std::string mode) {
             std::error_code(err, std::system_category()));
     }
 
-    if(mode.find("r")) this->_readHeader();
+    if(mode.find("r") != std::string::npos) this->_readHeader();
+    else printf("Mode is \"%s\", not reading header\r\n", mode.c_str());
 }
 
 GcIso::Iso::~Iso() {
@@ -52,12 +53,14 @@ GcIso::Iso::~Iso() {
 }
 
 void GcIso::Iso::_readHeader() {
+    fseek(this->file, 0, SEEK_SET);
     auto r = fread(&this->header,
-        sizeof(GcIso::Iso::Header), 1, this->file);
+        1, sizeof(GcIso::Iso::Header), this->file);
     if(r < sizeof(GcIso::Iso::Header)
     || this->header.bootBin.magic != GcIso::BootBin::MAGIC) {
-        fprintf(stderr, "ISO header: read %d, magic 0x%08X\r\n",
-            r, this->header.bootBin.magic);
+        fprintf(stderr, "ISO header: read %d/%d, magic 0x%08X/0x%08X\r\n",
+            r, sizeof(GcIso::Iso::Header),
+            this->header.bootBin.magic, GcIso::BootBin::MAGIC);
         throw new std::runtime_error("Malformed ISO file");
     }
 
@@ -68,11 +71,18 @@ static int __iso_open(struct _reent *r, void *fileStruct,
 const char *path, int flags, int mode) {
     printf("__iso_open(%s)\r\n", path);
     const char *filePath = removeDeviceFromPath(path);
-    printf("__iso_open path=\"%s\"\r\n", filePath);
 
-    auto iso = getMountedIso(path);
-    new(fileStruct) GcIso::File(iso, filePath, flags, mode);
-    return 0;
+    try {
+        auto iso = getMountedIso(path);
+        new(fileStruct) GcIso::File(iso, filePath, flags, mode);
+        return 0;
+    }
+    catch(std::filesystem::filesystem_error &err) {
+        fprintf(stderr, "__iso_open(%s): %d %s\r\n", path,
+            err.code().value(), err.what());
+        r->_errno = err.code().value();
+        return -1;
+    }
 }
 
 static int __iso_close(struct _reent *r, void *fd) {
