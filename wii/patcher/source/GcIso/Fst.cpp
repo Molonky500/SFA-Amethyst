@@ -35,8 +35,8 @@ GcIso::Fst::Fst(GcIso::Iso *iso) {
     //read string table and construct entries
     for(unsigned int i=0; i<nEntries-1; i++) {
         Entry *ent;
-        if(entries[i].nameOffs & 0xFF000000) ent = new DirEntry();
-        else ent = new FileEntry();
+        if(entries[i].nameOffs & 0xFF000000) ent = new DirEntry(entries[i]);
+        else ent = new FileEntry(entries[i]);
         ent->name = std::string(&strTab[entries[i].nameOffs & 0xFFFFFF]);
         ent->idx = i;
         //printf("name %d is \"%s\"\r\n", i, ent->name.c_str());
@@ -47,11 +47,11 @@ GcIso::Fst::Fst(GcIso::Iso *iso) {
     this->_assignChildren(0, this->root, 0);
     printf("FST read OK\r\n");
 
-    printf("Files in root:\r\n");
+    /*printf("Files in root:\r\n");
     for(const auto& [key, value] : this->root->children) {
         printf("%s %p\r\n", key.c_str(), value);
     }
-    printf("end\r\n");
+    printf("end\r\n");*/
 }
 
 GcIso::Fst::~Fst() {
@@ -86,7 +86,7 @@ std::string GcIso::Fst::_readString(FILE *file, off_t offset) {
     return str;
 }
 
-int GcIso::Fst::_assignChildren(int idx, GcIso::Fst::Entry *ent, int depth) {
+int GcIso::Fst::_assignChildren(int idx, GcIso::Fst::DirEntry *ent, int depth) {
     if(depth >= 10) {
         throw new std::runtime_error("Directory nesting too deep");
     }
@@ -95,15 +95,16 @@ int GcIso::Fst::_assignChildren(int idx, GcIso::Fst::Entry *ent, int depth) {
             ent->name.c_str());
         return 0x7FFFFFFF;
     }
-    auto dir = (DirEntry*)ent;
     idx++;
     int nEntries = this->entriesByIndex.size();
-    printf("%*schild[%d] (%s) next %d\r\n", depth+1, "-",
-        idx, dir->name.c_str(), dir->nextIdx);
-    while(idx < dir->nextIdx && idx < nEntries) {
+    //printf("%*schild[%d] (%s) next %d parent %d\r\n", depth+1, "-",
+    //    idx, ent->name.c_str(), ent->nextIdx, ent->parentIdx);
+    while(idx < ent->nextIdx && idx < nEntries) {
         auto f = this->entriesByIndex[idx];
-        dir->children[f->name] = f;
-        if(f->isDir) idx = this->_assignChildren(idx, f, depth+1);
+        //printf("%*s[%c %s]\r\n", depth+2, "-",
+        //    f->isDir ? 'D' : 'F', f->name.c_str());
+        ent->children[f->name] = f;
+        if(f->isDir) idx = this->_assignChildren(idx, (DirEntry*)f, depth+1);
         else idx++;
     }
     return idx;

@@ -39,12 +39,22 @@ namespace GcIso {
                 public:
                     off_t offset, size;
                     FileEntry(): Entry() { this->isDir = false; }
+                    FileEntry(EntryStruct &ent): Entry() {
+                        this->isDir  = false;
+                        this->offset = ent.file.fileOffs;
+                        this->size   = ent.file.size;
+                    }
             };
             class DirEntry: public Entry {
                 public:
                     int parentIdx, nextIdx;
                     std::map<std::string, Entry*> children;
                     DirEntry(): Entry() { this->isDir = true; }
+                    DirEntry(EntryStruct &ent): Entry() {
+                        this->isDir     = true;
+                        this->parentIdx = ent.dir.parentIdx;
+                        this->nextIdx   = ent.dir.nextIdx;
+                    }
             };
 
             DirEntry *root;
@@ -58,6 +68,6 @@ namespace GcIso {
 
             u32 _readRoot(FILE *file);
             std::string _readString(FILE *file, off_t offset);
-            int _assignChildren(int idx, Entry *ent, int depth);
+            int _assignChildren(int idx, DirEntry *ent, int depth);
     };
 };
