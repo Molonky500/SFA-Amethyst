@@ -1,10 +1,12 @@
 #include "main.h"
 
-UI::MenuItem::MenuItem(const char *text, MenuItemActivateFunc activate):
+UI::MenuItem::MenuItem(const char *text, MenuItemActivateFunc activate,
+void *activateParam):
 GX::Sprite(nullptr) {
     this->text = text;
     this->enabled = true;
     this->activateFunc = activate;
+    this->activateParam = activateParam;
     this->setTexture(UI::Menu::texButton);
 }
 

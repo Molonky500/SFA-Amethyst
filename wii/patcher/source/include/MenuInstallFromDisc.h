@@ -1,5 +1,6 @@
 #pragma once
 #include "Menu.h"
+#include "GcIso/Iso.h"
 
 namespace UI {
     class MenuInstallFromDisc: public Menu {
@@ -10,10 +11,12 @@ namespace UI {
             }
 
             virtual void draw();
+            void _doInstall();
 
         protected:
             GX::Sprite *sprStatusBg;
             bool isDiscReady;
             UI::MenuItem *itemInstall;
+            GcIso::Iso *iso;
     };
 };

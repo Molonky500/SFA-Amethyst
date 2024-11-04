@@ -97,7 +97,6 @@ namespace Sys { namespace Dvd {
 
         protected:
             std::string cwd;
-            GcIso::Iso *iso;
 
             void _reset();
             void _writeCmd(u32 cmd0, u32 cmd1, u32 cmd2);

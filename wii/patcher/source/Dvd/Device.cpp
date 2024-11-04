@@ -1,7 +1,6 @@
 #include "main.h"
 #include "Dvd/Device.h"
 #include "Dvd/File.h"
-#include "GcIso/Iso.h"
 
 DI_Struct *DI = (DI_Struct*)0xCD806000;
 
@@ -35,7 +34,6 @@ void Sys::Dvd::Device::_identify() {
 }
 
 Sys::Dvd::Device::Device() {
-    this->iso = nullptr;
     this->_reset();
     this->_identify();
     u32 err = this->getError();
@@ -49,15 +47,9 @@ Sys::Dvd::Device::Device() {
     printf("DVD init %d, ID = 0x%llX\r\n", r, id);
 
     Sys::Dvd::File::_initIoWrapper();
-    this->iso = new GcIso::Iso("dvdraw:");
-    this->iso->mount("dvd");
 }
 
 Sys::Dvd::Device::~Device() {
-    if(this->iso) {
-        this->iso->unmount();
-        delete this->iso;
-    }
 }
 
 u32 Sys::Dvd::Device::getError() {

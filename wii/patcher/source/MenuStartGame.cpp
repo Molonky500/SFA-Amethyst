@@ -1,11 +1,11 @@
 #include "main.h"
 #include "MenuStartGame.h"
 
-static void onStartGame(UI::MenuItem *item) {
+static void onStartGame(UI::MenuItem *item, void *param) {
     printf("GEEMU STAATO\r\n");
 }
 
-static void onBack(UI::MenuItem *item) {
+static void onBack(UI::MenuItem *item, void *param) {
     gApp->exitMenu();
 }
 

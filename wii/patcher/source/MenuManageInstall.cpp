@@ -2,11 +2,11 @@
 #include "MenuManageInstall.h"
 #include "MenuInstallFromDisc.h"
 
-static void onInstallFromDisc(UI::MenuItem *item) {
+static void onInstallFromDisc(UI::MenuItem *item, void *param) {
     gApp->enterMenu(new UI::MenuInstallFromDisc());
 }
 
-static void onBack(UI::MenuItem *item) {
+static void onBack(UI::MenuItem *item, void *param) {
     gApp->exitMenu();
 }
 

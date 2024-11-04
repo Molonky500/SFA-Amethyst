@@ -1,8 +1,16 @@
 #include "main.h"
 #include "MenuInstallFromDisc.h"
 
-static void onInstall(UI::MenuItem *item) {
+
+void UI::MenuInstallFromDisc::_doInstall() {
     errno = 0;
+
+    printf("Open ISO\r\n");
+    this->iso = new GcIso::Iso("dvdraw:");
+    printf("Mount ISO\r\n");
+    this->iso->mount("dvd");
+
+    printf("Read file\r\n");
     FILE *file = fopen("dvd:/OBJECTS.bin", "rb");
     //FILE *file = fopen("dvdraw:", "rb");
     printf("opened file: %p, %d\r\n", file, errno);
@@ -29,9 +37,15 @@ static void onInstall(UI::MenuItem *item) {
 
     fclose(file);
     printf("Done reading.\r\n");
+
+    delete this->iso;
+    this->iso = nullptr;
 }
 
-static void onBack(UI::MenuItem *item) {
+static void onInstall(UI::MenuItem *item, void *param) {
+    ((UI::MenuInstallFromDisc*)param)->_doInstall();
+}
+static void onBack(UI::MenuItem *item, void *param) {
     gApp->exitMenu();
 }
 
@@ -106,7 +120,7 @@ UI::MenuInstallFromDisc::MenuInstallFromDisc(): UI::MenuInstallFromDisc::Menu() 
     this->sprStatusBg = new GX::Sprite(gApp->loadTexture("button"));
     this->sprStatusBg->setPos(20, 40);
     this->posY = 300;
-    this->itemInstall = new UI::MenuItem("Install", onInstall);
+    this->itemInstall = new UI::MenuItem("Install", onInstall, this);
     this->addItem(this->itemInstall);
-    this->addItem(new UI::MenuItem("Back", onBack));
+    this->addItem(new UI::MenuItem("Back", onBack, this));
 }

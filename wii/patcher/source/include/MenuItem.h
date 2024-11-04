@@ -8,20 +8,23 @@ namespace UI {
     class Menu;
     class MenuItem;
 
-    typedef void (*MenuItemActivateFunc)(MenuItem*);
+    typedef void (*MenuItemActivateFunc)(MenuItem*, void*);
 
     /**
      * @brief Base class for menu items.
      */
     class MenuItem: public GX::Sprite {
         public:
-            MenuItem(const char *text, MenuItemActivateFunc activate);
+            MenuItem(const char *text, MenuItemActivateFunc activate,
+            void *activateParam=nullptr);
             virtual ~MenuItem() {
             }
 
             virtual void draw(bool selected);
             virtual void activate() {
-                if(this->activateFunc) (*this->activateFunc)(this);
+                if(this->activateFunc) {
+                    (*this->activateFunc)(this, this->activateParam);
+                }
             }
             virtual MenuItem* setEnabled(bool enabled) {
                 this->enabled = enabled;
@@ -33,5 +36,6 @@ namespace UI {
             std::string text;
             bool enabled;
             MenuItemActivateFunc activateFunc;
+            void *activateParam;
     };
 };

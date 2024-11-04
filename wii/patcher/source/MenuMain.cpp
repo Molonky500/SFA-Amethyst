@@ -3,11 +3,11 @@
 #include "MenuStartGame.h"
 #include "MenuManageInstall.h"
 
-static void onStartGame(UI::MenuItem *item) {
+static void onStartGame(UI::MenuItem *item, void *param) {
     gApp->enterMenu(new UI::MenuStartGame());
 }
 
-static void onManageInstall(UI::MenuItem *item) {
+static void onManageInstall(UI::MenuItem *item, void *param) {
     gApp->enterMenu(new UI::MenuManageInstall());
 }
 
