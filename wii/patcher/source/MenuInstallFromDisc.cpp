@@ -1,7 +1,6 @@
 #include "main.h"
 #include "MenuInstallFromDisc.h"
 
-
 void UI::MenuInstallFromDisc::_doInstall() {
     errno = 0;
 

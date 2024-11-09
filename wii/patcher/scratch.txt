@@ -1,0 +1,36 @@
+how do we handle the installation?
+we want to extract the files from an ISO to the SD card
+each mod will need its own copy unless we set up the game to load overrides from another directory
+we should do that to save space
+
+we want to be able to install multiple mods
+eg Amethyst + some custom character
+so we'd want to have a base directory with the unmodified game files, and then one override directory for each installation
+so you can have multiple installations that each have different mod sets
+
+so what's the UX flow from first time?
+
+you start the app
+it sees that the game files aren't present
+it pops up some first-time welcome message and asks where you want to copy them from (DVD, or a file on SD)
+you copy them, then it goes to the usual menu, which is also the first screen when you start the app if the files are present
+
+then you'd go to Start Game but there are no installs
+we should get rid of Manage installations button
+instead when you go to this menu, it lists the installations (and you can press some button to delete/edit)
+at the end would be a New Install button (the only button since there's no installs yet)
+you select the mods to use and give it a name
+
+do we need profiles? or just each install has its own save dir?
+
+the main question is how to actually boot the game
+HBC and such don't seem to have any mechanism for launching an app directly
+we can try to manually load it but we had issues before with things not resetting correctly, which is why our loader doesn't use any video/etc
+
+worst case I guess we have this app only be an install manager, and make an HBC "app" for each install, so you start the game from HBC
+or we modify HBC to be able to accept args and have people install that
+
+
+also we don't really need to make this app to release the mod
+mostly we just need to play through it on console
+I think the only big remaining issue was the camera with the DIM barrel

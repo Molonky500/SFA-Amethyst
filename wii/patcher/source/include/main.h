@@ -30,6 +30,7 @@ extern "C" {
 class App;
 extern App *gApp;
 #include "App.h"
+#include "dol.h"
 
 //dprint.c
 void initDebugPrint();

@@ -26,7 +26,9 @@ INCLUDES	:=  source/include source/include/Dvd source/include/GcIso
 CFLAGS   = -g -O2 -Wall -fPIC $(MACHDEP) $(INCLUDE)
 CXXFLAGS = $(CFLAGS)
 LDFLAGS	 = -g $(MACHDEP) \
-	-Wl,-Map,$(notdir $@).map
+	-Wl,-Map,$(notdir $@).map \
+	-Wl,--section-start,.dolLoader=0x91000000
+	-Wl,--section-start,.dolBuf=0x92000000
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
