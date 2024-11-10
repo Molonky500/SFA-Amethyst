@@ -6,6 +6,10 @@ static u8 _loaderBuf[1 * 1024 * 1024] __attribute__((section(".dolLoader")));
 vu16* const _viReg  = (u16*)0xCC002000;
 vu32* const _ipcReg = (u32*)0xCD800000;
 
+//we're successfully getting into the game code
+//but it ends up at 80000308 after writing a bunch
+//of bogus PI_RESET values
+
 static void _loader(u8 *buffer) {
     DolHeader *header = (DolHeader*)buffer;
     for(int i=0; i<DOL_NUM_TEXT_SECTIONS; i++) {
@@ -27,13 +31,16 @@ static void _loader(u8 *buffer) {
     u32 *d = (u32*)header->bssAddr;
     for(int i=0; i<header->bssSize; i += 4) *(d++) = 0;
 
-    //XXX flush caches without calling functions
-
     __asm__ __volatile__ (
+        "sync\n"
+        "isync\n"
         "mtctr %0\n"
         "bctr\n"
         ".int 0xDEADFACE" //marker to find end of function
     : : "r" (header->entryPoint));
+
+    //tell the compiler we're not coming back from this one.
+    __builtin_unreachable();
 }
 
 int bootDol(const char *path) {
