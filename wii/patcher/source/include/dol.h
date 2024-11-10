@@ -14,6 +14,6 @@ typedef struct {
     u32 bssAddr, bssSize, entryPoint;
 } DolHeader;
 
-int bootDol(const char *path) __attribute__((section(".dolLoader")));
+int bootDol(const char *path);
 
 #endif //__DOL_H__

@@ -4,7 +4,9 @@
 #include "MenuManageInstall.h"
 
 static void onStartGame(UI::MenuItem *item, void *param) {
-    gApp->enterMenu(new UI::MenuStartGame());
+    //gApp->enterMenu(new UI::MenuStartGame());
+    int r = bootDol("sd:/apps/SFA/boot.dol");
+    printf("bootDol: %d\r\n", r);
 }
 
 static void onManageInstall(UI::MenuItem *item, void *param) {

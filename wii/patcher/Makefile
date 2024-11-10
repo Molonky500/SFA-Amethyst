@@ -23,11 +23,11 @@ INCLUDES	:=  source/include source/include/Dvd source/include/GcIso
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS   = -g -O2 -Wall -fPIC $(MACHDEP) $(INCLUDE)
+CFLAGS   = -g -O2 -Wall -fpic -fPIC $(MACHDEP) $(INCLUDE)
 CXXFLAGS = $(CFLAGS)
 LDFLAGS	 = -g $(MACHDEP) \
 	-Wl,-Map,$(notdir $@).map \
-	-Wl,--section-start,.dolLoader=0x91000000
+	-Wl,--section-start,.dolLoader=0x91000000 \
 	-Wl,--section-start,.dolBuf=0x92000000
 
 #---------------------------------------------------------------------------------
