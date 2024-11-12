@@ -82,6 +82,10 @@ void App::_init() {
 
     initDebugPrint();
     fprintf(stderr, " *** debug print online ***\r\n");
+    SET_DEBUG_PORT(0x00);
+    SET_DEBUG_PORT(0xFF);
+    printf("debug port write OK\r\n");
+
     this->systemFont = new GX::Font();
 
     WPAD_Init();

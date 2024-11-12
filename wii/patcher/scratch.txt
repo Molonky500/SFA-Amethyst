@@ -29,6 +29,7 @@ we can try to manually load it but we had issues before with things not resettin
 
 worst case I guess we have this app only be an install manager, and make an HBC "app" for each install, so you start the game from HBC
 or we modify HBC to be able to accept args and have people install that
+or we make it a mod manager for now and work on direct launching later
 
 
 also we don't really need to make this app to release the mod
