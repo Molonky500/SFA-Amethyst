@@ -8,6 +8,8 @@ void runLoadingScreens_hook() {
      */
     runLoadingScreens_replaced();
 
+    //this flickers and is ugly, let's move it
+    #if 0
     if(initFrameCount < 3) {
         //if we crashed while a stream was playing and hit Start to reset,
         //the stream might still be playing. we don't stop it there because
@@ -18,6 +20,7 @@ void runLoadingScreens_hook() {
     if(initFrameCount < 200) {
         enableDebugText = 1;
         debugPrintfxy(200, 420, "Amethyst Edition v" MOD_VERSION_STR);
+        debugPrintfxy(200, 435, "Built " __DATE__ " " __TIME__);
     }
     else if(initFrameCount < 400) {
         debugPrintfxy(250, 420, "segment6.net");
@@ -39,6 +42,7 @@ void runLoadingScreens_hook() {
     debugPrintfxy(30, 54, "SYS: %s %s",
         OSGetFontEncode() ? "JP" : "US",
         (tvMode < 6) ? tvModes[tvMode] : "UNKNOWN");
+    #endif
 }
 
 
@@ -61,7 +65,10 @@ void startMsg_initDoneHook() {
         enableDebugText = 0;
         //DPRINT("Turning debug text off");
     }
-    //else DPRINT("Leaving debug text on");
+    else {
+        //DPRINT("Leaving debug text on");
+        enableDebugText = 1;
+    }
 
     if((buttons &
     (PAD_BUTTON_Y|PAD_BUTTON_B|PAD_BUTTON_X|PAD_BUTTON_A|PAD_BUTTON_MENU))

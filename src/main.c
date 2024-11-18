@@ -180,6 +180,32 @@ static inline void doCheats() {
     }
 }
 
+static u16 titleTextFrameCount = 0;
+void drawTitleText() {
+    static const char *lines[] = {
+        "Amethyst Edition v" MOD_VERSION_STR,
+        "Built " __DATE__ " " __TIME__, NULL};
+
+    float alpha = (300 - titleTextFrameCount) / 300.0f;
+    if(alpha <= 0.0f) return;
+    titleTextFrameCount++;
+
+    Color4b color = {0x9D, 0x00, 0xF3, (u8)(alpha * 255.0f)};
+    int y=380;
+    for(int i=0; lines[i]; i++) {
+        //measure the line
+        int width=0;
+        drawText(lines[i], 0, 0, &width, NULL,
+            TEXT_COLORED | TEXT_MEASURE,
+            color, 1.0);
+        //draw the line
+        drawText(lines[i], (SCREEN_WIDTH / 2) - (width / 2),
+            y, NULL, NULL, TEXT_COLORED,
+            color, 1.0);
+        y += 15;
+    }
+}
+
 void mainLoopHook() {
     //replaces a bl to a do-nothing subroutine
 
@@ -251,7 +277,10 @@ void mainLoopHook() {
         #if LOG_OBJS
             objLogWrite();
         #endif
+        //reset text so it will appear again next time
+        titleTextFrameCount = 0;
     }
+    else drawTitleText();
 }
 
 /* static u32 oldSaveGameInitialise = 0;
