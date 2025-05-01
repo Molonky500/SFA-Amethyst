@@ -35,7 +35,7 @@ compile_commands.json
 **/.vscode/*
 **/.cache/*
 scratchpad.txt
-include/gc/sdk/**
+include/gc/**
 files/**
 
 # auto generated files
