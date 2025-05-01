@@ -932,6 +932,96 @@ static void printTrickyInfo() {
         *(u8*)(state + 0x3A8), objName);
 }
 
+#if 0
+void _debugPrintAndross() {
+    for(int iObj=0; iObj<numLoadedObjs; iObj++) {
+        ObjInstance *obj = loadedObjects[iObj];
+        if(!obj) continue;
+        if(obj->defNo == 0x76A) {
+            void *state = obj->state;
+            if(!state) continue;
+            ObjInstance *lHand = *(ObjInstance**)(state+0x4);
+            ObjInstance *rHand = *(ObjInstance**)(state+0x8);
+            ObjInstance *brain = *(ObjInstance**)(state+0xC);
+
+            debugPrintf("Andross[%08X] act=%02X flag=%02X %f LH:%02X RH:%02X B:%02X\n",
+                state, *(u32*)(state+0x88),
+                *(u8*)(state+0xAD),
+                *(float*)(state+0x9C),
+                (lHand && PTR_VALID(lHand->state)) ? *(u8*)(lHand->state + 0x23) : 0xFF,
+                (rHand && PTR_VALID(rHand->state)) ? *(u8*)(rHand->state + 0x23) : 0xFF,
+                (brain && PTR_VALID(brain->state)) ? *(u8*)(brain->state + 0x1C) : 0xFF);
+        }
+    }
+}
+#endif
+
+#if 0
+void _debugPrintGunPowderBarrels() {
+    static const char *gpbStates[] = {
+        "Idle", "Explode", NULL, NULL,
+        "ThrownWhileArmed", NULL, NULL, NULL,
+        NULL, NULL, "Respawn",
+    };
+    static const char *gpbFlags[] = {
+        //0x4A
+        NULL, //01
+        "Metal", //02
+        NULL, //04
+        NULL, //08
+        "CanSavePos", //10
+        "Exploded", //20
+        "Interacted", //40
+        "NoGrav", //80
+
+        //0x49
+        "Dropped", //01
+        "Thrown", //02
+        NULL, //04
+        NULL, //08
+        NULL, //10
+        NULL, //20
+        NULL, //40
+        NULL, //80
+
+        //0x48
+        NULL, //01
+        NULL, //02
+        NULL, //04
+        NULL, //08
+        NULL, //10
+        NULL, //20
+        "SavePos", //40
+        "CanRespawn", //80
+    };
+    //0x16: ? GunPowderBarrel but not while being held, others
+    //0x19: GunPowderBarrel
+    int nObjs = 0;
+    ObjInstance **objs = objGetObjsType(0x19, &nObjs);
+    for(int i=0; i<nObjs; i++) {
+        void *state = (void*)objs[i]->state;
+        debugPrintf("GPB %08X %08X S%d %02X %02X", objs[i], state,
+            *(uint8_t*)(state + 0x16),
+            *(uint8_t*)(state + 0x06),
+            *(uint8_t*)(state + 0x09)
+        );
+        if(state) {
+            uint32_t flags = *(uint32_t*)(state + 0x48) >> 8;
+            for(int b=0; b<24; b++) {
+                if(!(b & 7)) debugPrintf("\n\t%02X ", 0x4A-(b/8));
+                if(flags & (1 << b)) {
+                    debugPrintf(DPRINT_COLOR "\x01\xFF\x01\xFF");
+                }
+                else debugPrintf(DPRINT_COLOR "\xFF\xFF\xFF\xFF");
+                if(gpbFlags[b]) debugPrintf("%s ", gpbFlags[b]);
+                else debugPrintf("%02X ", 1 << (b & 7));
+            }
+            debugPrintf(DPRINT_COLOR "\xFF\xFF\xFF\xFF\n");
+        }
+    }
+}
+#endif
+
 void mainLoopDebugPrint() {
     static bool didInit = false;
     if(!didInit) {
@@ -972,7 +1062,6 @@ void mainLoopDebugPrint() {
     if(debugTextFlags & DEBUGTEXT_OBJSEQ)            printObjSeq();
     if(debugTextFlags & DEBUGTEXT_TRICKY)            printTrickyInfo();
     //printPlayerFlags();
-
     //not sure what these are, seem to never be used?
     /* extern ObjInstance *objVar_802cada0[5];
     for(int i=0; i<5; i++) {
@@ -983,28 +1072,8 @@ void mainLoopDebugPrint() {
         }
     } */
 
-    //temporary
-    #if 0
-    for(int iObj=0; iObj<numLoadedObjs; iObj++) {
-        ObjInstance *obj = loadedObjects[iObj];
-        if(!obj) continue;
-        if(obj->defNo == 0x76A) {
-            void *state = obj->state;
-            if(!state) continue;
-            ObjInstance *lHand = *(ObjInstance**)(state+0x4);
-            ObjInstance *rHand = *(ObjInstance**)(state+0x8);
-            ObjInstance *brain = *(ObjInstance**)(state+0xC);
-
-            debugPrintf("Andross[%08X] act=%02X flag=%02X %f LH:%02X RH:%02X B:%02X\n",
-                state, *(u32*)(state+0x88),
-                *(u8*)(state+0xAD),
-                *(float*)(state+0x9C),
-                (lHand && PTR_VALID(lHand->state)) ? *(u8*)(lHand->state + 0x23) : 0xFF,
-                (rHand && PTR_VALID(rHand->state)) ? *(u8*)(rHand->state + 0x23) : 0xFF,
-                (brain && PTR_VALID(brain->state)) ? *(u8*)(brain->state + 0x1C) : 0xFF);
-        }
-    }
-    #endif
+    //_debugPrintAndross();
+    //_debugPrintGunPowderBarrels();
 
     rngCalls = 0; //reset logging
     rngReseeds = 0;

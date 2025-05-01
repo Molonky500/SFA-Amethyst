@@ -6,8 +6,8 @@ include $(PWD)/config.mk
 ORIGISO ?= original.iso
 PATCHISO ?= patched.iso
 DATA ?= ../browser/data
-ORIGDOL = $(DISCROOT)/../sys/main.dol.orig
-NEWDOL = $(DISCROOT)/../sys/main.dol
+ORIGDOL = $(DISCROOT)/sys/main.dol.orig
+NEWDOL = $(DISCROOT)/sys/main.dol
 
 all: $(BUILDDIR) $(BUILDDIR)/bootstrap.bin $(patsubst %,$(BUILDDIR)/%.elf,$(PATCHES))
 	@echo "[*] Done."
@@ -47,6 +47,7 @@ install: all
 	@echo "[*] Installing to $(DISCROOT)..."
 	@./tools/elf2patch.py $(BUILDDIR)/src.elf $(BUILDDIR)/bootstrap.bin $(BUILDDIR)/patch.bin
 	@./tools/patchdol.py $(ORIGDOL) $(BUILDDIR)/patch.bin $(NEWDOL)
+	@echo "[*] Generating $(NEWDOL)..."
 	@./tools/makebitnames.py $(DATA)/U0/gamebits.xml $(DISCROOT)/bitnames.dat
 #	@./tools/mkwiifiles.py $(DISCROOT)/../
 

@@ -182,11 +182,12 @@ uint cause, void *addr, u32 msr) {
 
 void gameExceptionHook(int exceptionCode, OSContext *ctx,
 uint cause, void *addr) {
+    SET_DISC_LED(1);
     if(debugDeviceType) {
-        //exiPrintf(" *** ERROR %d cause=0x%x addr=0x%x ctx=0x%x\r\n", exceptionCode,
-        //    cause, addr, ctx);
-        //static void (*_OSDumpContext)(OSContext*) = 0x80242554;
-        //_OSDumpContext(ctx);
+        exiPrintf(" *** ERROR %d cause=0x%x addr=0x%x ctx=0x%x\r\n", exceptionCode,
+            cause, addr, ctx);
+        static void (*_OSDumpContext)(OSContext*) = 0x80242554;
+        _OSDumpContext(ctx);
         iguanaSetRedLed(true);
         interactiveDebugger(exceptionCode);
     }
@@ -203,7 +204,7 @@ uint cause, void *addr) {
     exiPuts(msg);
     exiPuts(excNames[exceptionCode & 0xF]);
 
-    strcpy(msg, "\nCAUSE=........ ADDR=........ DAR=........ MSR=........\n");
+    strcpy(msg, "\nCAUSE=........ ADDR=........ DAR=........ MSR=........\r\n");
     putHex(&msg[ 7], cause);
     putHex(&msg[21], (u32)addr);
     putHex(&msg[34], get_dar());
@@ -211,7 +212,7 @@ uint cause, void *addr) {
     exiPuts(msg);
 
     if(PTR_VALID(ctx)) {
-        strcpy(msg, "XER=........ SRR0=........ [........] SRR1=........ LR=........\n");
+        strcpy(msg, "XER=........ SRR0=........ [........] SRR1=........ LR=........\r\n");
         putHex(&msg[ 4], ctx->xer);
         putHex(&msg[18], ctx->srr0);
         if(PTR_VALID(ctx->srr0)) putHex(&msg[28], *(u32*)ctx->srr0);
@@ -219,9 +220,9 @@ uint cause, void *addr) {
         putHex(&msg[55], ctx->lr);
         exiPuts(msg);
     }
-    else exiPuts("NO CTX\n");
+    else exiPuts("NO CTX\r\n");
 
-    strcpy(msg, "IRQ=........ #........ Cause ........ ........\n");
+    strcpy(msg, "IRQ=........ #........ Cause ........ ........\r\n");
     putHex(&msg[ 4], irqHandlerDepth);
     putHex(&msg[14], curIrqHandler);
     putHex(&msg[29], lastIrqCause);
@@ -229,10 +230,10 @@ uint cause, void *addr) {
     exiPuts(msg);
 
     if(PTR_VALID(ctx)) {
-        exiPuts("GPRs:\n");
+        exiPuts("GPRs:\r\n");
         u32 *gpr = (u32*)&ctx->gpr;
         for(int i=0; i<32; i += 4) {
-            strcpy(msg, "........ ........ ........ ........\n");
+            strcpy(msg, "........ ........ ........ ........\r\n");
             putHex(&msg[ 0], gpr[i]);
             putHex(&msg[ 9], gpr[i+1]);
             putHex(&msg[18], gpr[i+2]);
@@ -241,7 +242,7 @@ uint cause, void *addr) {
         }
 
         u32 *sp = (u32*)gpr[1];
-        strcpy(msg, "-> ........\n");
+        strcpy(msg, "-> ........\r\n");
         while(PTR_VALID(sp)) {
             putHex(&msg[3], sp[1]);
             exiPuts(msg);
@@ -255,10 +256,10 @@ uint cause, void *addr) {
 
     u32 srr0 = ctx->srr0 - 128;
     if(PTR_VALID(srr0)) {
-        strcpy(msg, "SRR0=........\n");
+        strcpy(msg, "SRR0=........\r\n");
         putHex(&msg[5], srr0+128);
         exiPuts(msg);
-        strcpy(msg, "........: ........ ........ ........ ........\n");
+        strcpy(msg, "........: ........ ........ ........ ........\r\n");
         for(int i=0; i<32; i++) {
             putHex(&msg[ 0], srr0);
             putHex(&msg[10], *(u32*)srr0);

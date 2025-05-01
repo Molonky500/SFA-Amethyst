@@ -1,9 +1,16 @@
 #!/bin/sh
 # build script for my own system
 # just moves some directories off a network mount for performance
-DISCROOT=/home/rena/projects/sfa/DATA/files
-ORIGISO=~/projects/sfa/original.iso
-PATCHISO=~/projects/sfa/patched.iso
+HOSTNAME=$(hostname)
+if [ "$HOSTNAME" == "guilmon" ]; then
+	DISCROOT=./discroot
+	ORIGISO=./original.iso
+	PATCHISO=./patched.iso
+else
+	DISCROOT=/home/rena/projects/sfa/DATA/
+	ORIGISO=~/projects/sfa/original.iso
+	PATCHISO=~/projects/sfa/patched.iso
+fi
 [ -f amethyst.arg ] && mv amethyst.arg $DISCROOT
 DISCROOT=$DISCROOT ORIGISO=$ORIGISO PATCHISO=$PATCHISO make $*
 ok=$?

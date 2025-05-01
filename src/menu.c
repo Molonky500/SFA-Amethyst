@@ -209,6 +209,8 @@ void genericMenuItem_draw(const MenuItem *self, int x, int y, bool selected) {
 
 static void drawMenu() {
     //ensure this remains set after a warp
+    //XXX this prevents disabling timestop with menu open,
+    //which is sometimes desirable for debugging
     timeStop = 1;
     pauseDisabled = 1;
     activeTimerFlags = 0;

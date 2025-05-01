@@ -53,6 +53,7 @@ typedef s32 PlayerStateEnum32;
 #include "objects/light.h"
 #include "assets/texture.h"
 #include "assets/model.h"
+#include "objects/objmsg.h"
 #include "objects/objdef.h"
 #include "objects/objinstance.h"
 #include "objects/camera.h"

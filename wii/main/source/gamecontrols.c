@@ -95,8 +95,70 @@ int initWiimote() {
     return 0;
 }
 
+void debug_getHIDs(u32*);
+__asm__(
+    "debug_getHIDs:\n"
+    "addi   3,  3,  -4\n"
+    "mfspr 31, 1008   \n" //HID0
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 1009   \n" //HID1
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 920    \n" //HID2
+    "stwu  31, 0x04(3)\n"
+    //there is no HID3
+    "mfspr 31, 1011   \n" //HID4
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 912    \n" //GQR0
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 913    \n" //GQR1
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 914    \n" //GQR2
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 915    \n" //GQR3
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 916    \n" //GQR4
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 917    \n" //GQR5
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 918    \n" //GQR6
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 919    \n" //GQR7
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 1017   \n" //L2CR
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 936    \n" //MMCR0
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 940    \n" //MMCR1
+    "stwu  31, 0x04(3)\n"
+    "mfspr 31, 1019   \n" //ICTC
+    "stwu  31, 0x04(3)\n"
+    "blr"
+);
+
 static int prevState = -1;
 static bool checkWpads() {
+    //debug
+    static int count = 0;
+    static u8 port = 1;
+    count++;
+    if(count >= 60) {
+        SET_DEBUG_PORT(port);
+        port <<= 1;
+        if(!port) port = 1;
+        count = 0;
+
+        u32 reg[16];
+        debug_getHIDs(reg);
+        exiPrintf("HID0=0x%08X HID1=0x%08X  HID2=0x%08X  HID4=0x%08X\r\n",
+            reg[0], reg[1], reg[2], reg[3]);
+        exiPrintf("GQR0=0x%08X GQR1=0x%08X  GQR2=0x%08X  GQR3=0x%08X\r\n",
+            reg[4], reg[5], reg[6], reg[7]);
+        exiPrintf("GQR4=0x%08X GQR5=0x%08X  GQR6=0x%08X  GQR7=0x%08X\r\n",
+            reg[8], reg[9], reg[10], reg[11]);
+        exiPrintf("L2CR=0x%08X MMCR0=0x%08X MMCR1=0x%08X ICTC=0x%08X\r\n",
+            reg[12], reg[13], reg[14], reg[15]);
+    }
+
     //initWiimote();
     if(!isWiimoteInit) return false;
 

@@ -173,17 +173,17 @@ static void drawPageBits2() { //too big for other page
 
 static void outputToConsole() {
     const char *errMsg = getErrMsg(bsodErrorCode);
-    OSReport("  *** OH NO ***  PC %08X ERR %X %s\n", bsodCtx->srr0,
+    OSReport("  *** OH NO ***  PC %08X ERR %X %s\r\n", bsodCtx->srr0,
         bsodErrorCode, errMsg);
 
     if(PTR_VALID(pPlayer)) {
-        OSReport("P %08X %08X %08X %08X", pPlayer,
+        OSReport("P %08X %08X %08X %08X\r\n", pPlayer,
             (int)pPlayer->pos.pos.x, (int)pPlayer->pos.pos.y,
             (int)pPlayer->pos.pos.z);
     }
 
     //show map and camera info
-    OSReport("CM %02X ACT %02X OBJ %04X MAPS %02X %02X %02X %02X",
+    OSReport("CM %02X ACT %02X OBJ %04X MAPS %02X %02X %02X %02X\r\n",
         cameraMode, curMapAct, numLoadedObjs,
         loadedFileMapIds[FILE_MODELS_BIN]  & 0xFF,
         loadedFileMapIds[FILE_MODELS_BIN2] & 0xFF,
@@ -193,17 +193,17 @@ static void outputToConsole() {
     //show GPRs
     OSReport((const char*)0x8031d270); //"General purpose registers"
     for(int i=0; i<32; i += 4) {
-        OSReport("  %08X %08X %08X %08X",
+        OSReport("  %08X %08X %08X %08X\r\n",
             bsodCtx->gpr[i  ], bsodCtx->gpr[i+1],
             bsodCtx->gpr[i+2], bsodCtx->gpr[i+3]);
     }
 
     //show stack dump
-    OSReport("STACK DUMP");
+    OSReport("STACK DUMP\r\n");
     u32 *sp = (u32*)bsodCtx->gpr[1];
     for(int i=0; i<16; i++) {
         if(!PTR_VALID(sp)) break;
-        OSReport("  %08X %08X %08X %08X", sp[0], sp[-1], sp[-2], sp[-3]);
+        OSReport("  %08X %08X %08X %08X\r\n", sp[0], sp[-1], sp[-2], sp[-3]);
         sp = &sp[-4];
     }
 
@@ -211,7 +211,7 @@ static void outputToConsole() {
     OSReport((const char*)0x8031d24A); //"trace"
     sp = (u32*)bsodCtx->gpr[1];
     while(PTR_VALID(sp)) {
-        OSReport("  %08X", sp[1]);
+        OSReport("  %08X\r\n", sp[1]);
         sp = (u32*)*sp;
     }
 }
@@ -224,6 +224,7 @@ u16 _getButtons() {
 void bsodHook(void) {
     //replace BSOD thread main function.
     //this thread only runs when the game crashes.
+    //this is bypassed on Wii.
 
     OSInterruptMask msr = OSDisableInterrupts();
     outputToConsole();

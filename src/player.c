@@ -2,13 +2,6 @@
 
 PlayerStateFunc origClimbWallFn = NULL;
 
-
-void initPlayerStatesHook(void) {
-    playerInitFuncPtrs();
-    origClimbWallFn = playerStateFuncs[PlayerStateEnum_ClimbWall];
-    playerStateFuncs[PlayerStateEnum_ClimbWall] = playerStateClimbWallHook;
-}
-
 PlayerStateEnum playerStateClimbWallHook(double dT, ObjInstance *player, void *state) {
     //replaces the function pointer for the "climbing wall" player state.
     PlayerStateEnum result = origClimbWallFn(dT, player, state);
@@ -83,4 +76,19 @@ void playerMainLoopHook() {
 void firstPersonHook(void *param1, void *param2) {
     //replaces a call to cameraCheckEnterFirstPerson()
     if(!bFreeMove) cameraCheckEnterFirstPerson(param1, param2);
+}
+
+void initPlayerStatesHook(void) {
+    playerInitFuncPtrs();
+    origClimbWallFn = playerStateFuncs[PlayerStateEnum_ClimbWall];
+    playerStateFuncs[PlayerStateEnum_ClimbWall] = playerStateClimbWallHook;
+}
+
+void _initPlayerHacks() {
+    hookBranch(0x80021078, initPlayerStatesHook, 1);
+    hookBranch(0x80105df8, firstPersonHook, 1);
+
+    //correct water current calculations
+    WRITE32(0x802aba6c, 0xd0380000);
+    WRITE32(0x802aba7c, 0xd0390000);
 }

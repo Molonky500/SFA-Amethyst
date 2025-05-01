@@ -167,9 +167,9 @@ void objMenu_drawObjInfo(ObjInstance *obj) {
     drawSimpleText(str, x, y);
     y += LINE_HEIGHT;
 
-    sprintf(str, "\eF%s   %08X %X/%X", T("MSGS"), obj->seqMsgs,
-        obj->seqMsgs ? obj->seqMsgs->nMsgs : 0,
-        obj->seqMsgs ? obj->seqMsgs->length : 0);
+    sprintf(str, "\eF%s   %08X %X/%X", T("MSGS"), obj->msgQueue,
+        obj->msgQueue ? obj->msgQueue->count : 0,
+        obj->msgQueue ? obj->msgQueue->size : 0);
     drawSimpleText(str, x, y);
     y += LINE_HEIGHT;
 

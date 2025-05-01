@@ -147,9 +147,11 @@ void _init_hook(u32 x,u32 y) { //for testing; not used
 
 void doPatches() {
     //remap some HW regs
-    //apparently we could just:
-    // static volatile u32 *const aipprot = (u32 *)0xcd800070;
-    // *aipprot &= ~0x1;
+#if 0
+    //this works, but breaks something
+    static volatile u32 *const aipprot = (u32 *)0xcd800070;
+    *aipprot &= ~0x1;
+#else
     u32 regRemap[] = {
         //EXI
         0x802439ac, 0x802439e8, 0x80243a4c, 0x80243d84,
@@ -197,6 +199,7 @@ void doPatches() {
         DCStoreRange((void*)regRemap[i], 32);
         ICInvalidateRange((void*)regRemap[i], 32);
     }
+#endif
 
     hookBranch(0x8025fe1c, cardUnlock_hook, 1, 0);
     hookBranch(0x80246b64, OSWakeupThread_hook, 1, 0);

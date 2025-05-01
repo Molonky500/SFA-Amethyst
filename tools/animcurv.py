@@ -378,7 +378,7 @@ class AnimCurvXmlReader:
         """Read XML seq element."""
         curve = AnimCurv()
         curve.signature = eSeq.get('signature', None)
-        curve.id = int(eSeq.get('id'))
+        curve.id = int(eSeq.get('id'), 0)
         for eAction in eSeq.findall('./action'):
             curve.actions.append(self._readActionElem(eAction))
         for eCurve in eSeq.findall('./curve'):
@@ -391,8 +391,8 @@ class AnimCurvXmlReader:
         """Read XML action element."""
         act = AnimCurvAction(
             command=AnimCurvCommand[eAction.get('cmd')],
-            time=int(eAction.get('time')),
-            param=int(eAction.get('param'))
+            time=int(eAction.get('time'), 0),
+            param=int(eAction.get('param'), 0)
         )
         for eSubCmd in eAction.findall('./subcmd'):
             act.subCommands.append(self._readSubCmdElem(eSubCmd, act))
@@ -402,8 +402,8 @@ class AnimCurvXmlReader:
         """Read XML subcmd element."""
         if action.command == AnimCurvCommand.BGCMD:
             return AnimCurvSubCmd0B(
-                param = int(eSubCmd.get('param')),
-                index = int(eSubCmd.get('idx')),
+                param = int(eSubCmd.get('param'), 0),
+                index = int(eSubCmd.get('idx'), 0),
                 op    = AnimCurvBgCmd[eSubCmd.get('op')],
             )
         else:
@@ -416,9 +416,9 @@ class AnimCurvXmlReader:
             scale = int(float(ePoint.get('scale')) * 16)
             point = AnimCurvPoint(
                 y            = float(ePoint.get('y')),
-                typeAndScale = int(ePoint.get('type')) | (scale << 2),
+                typeAndScale = int(ePoint.get('type'), 0) | (scale << 2),
                 field        = field,
-                x            = int(ePoint.get('x')), # x is int, y is float
+                x            = int(ePoint.get('x'), 0), # x is int, y is float
             )
             points.append(point)
         return points

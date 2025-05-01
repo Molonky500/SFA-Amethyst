@@ -58,7 +58,8 @@ static inline void doPadMainLoop() {
     prevBtn4 = bHeld4;
 
     //Pad 3 start: toggle time stop
-    if(bPressed3 & PAD_BUTTON_START) timeStop = !timeStop;
+    //if(bPressed3 & PAD_BUTTON_START) timeStop = !timeStop;
+    if(bPressed3 & PAD_BUTTON_START) gPlayerMoveWhileTimeStopped = !gPlayerMoveWhileTimeStopped;
 
     //while time stopped, pad 3 Y to advance one tick
     static bool isStep = false;
@@ -186,11 +187,13 @@ void drawTitleText() {
         "Amethyst Edition v" MOD_VERSION_STR,
         "Built " __DATE__ " " __TIME__, NULL};
 
-    float alpha = (300 - titleTextFrameCount) / 300.0f;
+    //some TVs take a second to adjust to video mode change
+    float alpha = (600 - titleTextFrameCount) / 300.0f;
     if(alpha <= 0.0f) return;
+    if(alpha >= 1.0f) alpha = 1.0f;
     titleTextFrameCount++;
 
-    Color4b color = {0x9D, 0x00, 0xF3, (u8)(alpha * 255.0f)};
+    Color4b color = {0xCC, 0xCC, 0xCC, (u8)(alpha * 255.0f)};
     int y=380;
     for(int i=0; lines[i]; i++) {
         //measure the line
@@ -352,13 +355,6 @@ static inline void _initCameraHacks() {
     //WRITE16(0x80049526, -32);
 }
 
-static inline void _initPlayerHacks() {
-    hookBranch(0x80021078, initPlayerStatesHook, 1);
-    //correct water current calculations
-    WRITE32(0x802aba6c, 0xd0380000);
-    WRITE32(0x802aba7c, 0xd0390000);
-}
-
 static inline void _initControllerHacks() {
     //enable all four controllers, which enables at least one debug function
     //(plus several more we added)
@@ -431,7 +427,6 @@ void _start(void) {
     allocInit();
     perfMonInit();
     rngHooksInit();
-    hookBranch(0x80105df8, firstPersonHook, 1);
     hookBranch(0x80133A54, _pdaHook, 0);
     hookBranch(0x8020d31c, worldMapHook, 1);
 

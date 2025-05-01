@@ -168,8 +168,12 @@ u32 mapWiimoteButtons(int iPad, GameWiimoteState *wp, u32 btns) {
     return result;
 }
 
-static float prevAimX = SCREEN_WIDTH  / 2.0f;
-static float prevAimY = SCREEN_HEIGHT / 2.0f;
+static struct {
+    float dummy1;
+    float prevAimX;
+    float prevAimY;
+    float dummy2;
+} lol = {1.0f, SCREEN_WIDTH  / 2.0f, SCREEN_HEIGHT / 2.0f, -1.0f};
 bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     if(!pPlayer) return false;
     //don't apply to title screen Fox, Arwing, etc
@@ -181,7 +185,7 @@ bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
     float y = wp->ir[1] - (float)(SCREEN_HEIGHT / 2);
     if(debugTextFlags & DEBUGTEXT_WIIMOTE) {
         debugPrintf("IR AIM: %4d, %4d (prev %4d, %4d) d=%d f=%04X\n",
-            (int)x, (int)y, (int)prevAimX, (int)prevAimY,
+            (int)x, (int)y, (int)lol.prevAimX, (int)lol.prevAimY,
             wp->irNumDots, wp->flags);
     }
     //XXX apparently this flag isn't set when aiming
@@ -195,18 +199,41 @@ bool applyAimToStaff(int iPad, GameWiimoteState *wp, PADStatus *pad) {
             y = (y + 0.5) * (float)(SCREEN_HEIGHT / 2);
         }
         else {
-            x = prevAimX;
-            y = prevAimY;
+            x = lol.prevAimX;
+            y = lol.prevAimY;
         }
     }
     if(x < 0) x = 0;
     if(y < 0) y = 0;
     if(x > SCREEN_WIDTH) x = SCREEN_WIDTH;
     if(y > SCREEN_HEIGHT) y = SCREEN_HEIGHT;
-    x = (x + prevAimX) / 2.0f; //smoothing
-    y = (y + prevAimY) / 2.0f;
-    prevAimX = x;
-    prevAimY = y;
+    float lolX=x, lolY=y;
+    x = (x + lol.prevAimX) / 2.0f; //smoothing
+    y = (y + lol.prevAimY) / 2.0f;
+    lol.prevAimX = x;
+    lol.prevAimY = y;
+
+    if(lol.prevAimX > 10000.0f || lol.prevAimX < -10000.0f
+    || lol.prevAimY > 10000.0f || lol.prevAimY < -10000.0f) {
+        //__asm__ __volatile__ (".int -1"); //I think this is an invalid opcode
+        //__builtin_trap();
+        u32 *iX = (u32*)&lol.prevAimX;
+        u32 *iY = (u32*)&lol.prevAimY;
+        u64 ticks = __OSGetSystemTime();
+        u32 tHi = ticks >> 32;
+        u32 tLo = ticks & 0xFFFFFFFF;
+        OSReport("Bogus IR aim values 0x%08X, 0x%08X (from %f, %f) on frame %6d (%08X %08X) dT=%f\r\n",
+            *iX, *iY, lolX, lolY, frameCount, tHi, tLo, timeDelta);
+        OSReport("X=0x%08X Y=0x%08X\r\n", &lol.prevAimX, &lol.prevAimY);
+        u32 *data = (u32*)&lol.dummy1;
+        data = &data[-8];
+        OSReport("Dump 0x%08X:", (u32)data);
+        for(int i=0; i<16; i++) OSReport(" %08X", data[i]);
+        OSReport(", dummy = %08X %08X (%08X %08X)\r\n", *(u32*)&lol.dummy1, *(u32*)&lol.dummy2,
+            &lol.dummy1, &lol.dummy2);
+        lol.prevAimX = 0.0f;
+        lol.prevAimY = 0.0f;
+    }
 
     s16 stateNo = *(s16*)(state+0x274);
     switch(stateNo) {
@@ -518,6 +545,35 @@ void applyWiimoteInputs(int iPad, PADStatus *pad) {
 u32 padUpdate_hook(PADStatus *state) {
     //replaces call to padReadControllers()
 
+    //test, to be removed
+#if 0
+    static float f = 1.0f;
+    //exiPrintf("Entering test mode\r\n");
+    //SET_DISC_LED(0);
+    //while(1) {
+        //f = f * 2.0f;
+        f += 3.14159f;
+        if(f >= 2147483648.0f) {
+            f = 1.0f;
+            OSReport(".");
+        }
+        int n = (int)(f / -2.0f);
+        if(n > 0) {
+            OSReport("FAIL 0x%08X => 0x%08X\r\n",
+                *(u32*)&f, n);
+            //SET_DISC_LED(1);
+        }
+        //SET_DEBUG_PORT(n & 0xFF);
+        //udelay(50000);
+    //}
+#endif
+    /* other tests:
+    - trim down the game loop to just a dummy
+    - idle on the title screen, disable video player
+        - it still loads saves after the video finishes
+    - overwrite all game's memory with floats, do math on them
+    */
+
     //HACK: restore aiming calculations.
     //will be NOP'd if we're using Wiimote aiming.
     WRITE32(0x8029b1fc, 0xd01f0788);
@@ -525,7 +581,7 @@ u32 padUpdate_hook(PADStatus *state) {
     WRITE32(0x8029b238, 0xd01f078c);
 
     //call original method
-    u32 (*padReadControllers)(PADStatus*) = 0x8024e864;
+    //u32 (*padReadControllers)(PADStatus*) = 0x8024e864;
     u32 result = padReadControllers(state);
     if(!IS_WII) return result;
 

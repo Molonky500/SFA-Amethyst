@@ -79,6 +79,9 @@ int main(int argc, char **argv) {
     WII_IFACE_PTR = &wiiIface;
     SET_DEBUG_PORT(0x15);
 
+    //exiPuts("L2Enhance\r\n");
+    //L2Enhance();
+
     exiPuts("boot game\r\n");
     SET_DEBUG_PORT(0x16);
     bootGame(); //doesn't return

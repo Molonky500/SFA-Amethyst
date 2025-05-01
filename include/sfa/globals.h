@@ -138,7 +138,8 @@ extern u8 soundMode; //Stereo, Surround, Mono, Headphones
 extern u64 systemBootTime;
 extern u8 tempGameBits[128];
 extern float timeDelta;
-extern bool timeStop;
+extern u8 timeStop;
+extern u32 timeStoppedThisFrame;
 extern int titleScreen_panAwayFromMovieTimer;
 extern bool titleScreenActive;
 extern float viewportAspect;

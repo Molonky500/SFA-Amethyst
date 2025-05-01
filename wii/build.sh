@@ -1,7 +1,12 @@
 #!/bin/sh
 
 BUILD_PATH=./build
-DISCROOT=/home/rena/projects/sfa/DATA/
+HOSTNAME=$(hostname)
+if [ "$HOSTNAME" == "guilmon" ]; then
+	DISCROOT=../discroot
+else
+	DISCROOT=/home/rena/projects/sfa/DATA/
+fi
 NEWDOL=$DISCROOT/sys/main.dol
 INSTALL_PATH=$BUILD_PATH/SFA
 REAL_SD_PATH=/run/media/rena/WII
@@ -63,13 +68,16 @@ elif [ "$TARGET" == "dolphin" ]; then
     # Build and run in Dolphin
 
     if [ -e $SD_MOUNT_PATH/apps ]
-    then cp -r app/* $SD_MOUNT_PATH/apps/SFA/
+    then
+        mkdir -p $SD_MOUNT_PATH/apps/SFA/files
+        mkdir -p $SD_MOUNT_PATH/apps/SFA/sys
+        cp -r app/* $SD_MOUNT_PATH/apps/SFA/
     else
         echo "SD not mounted!"
         exit 1
     fi
     cp -ru $DISCROOT/* $SD_MOUNT_PATH/apps/SFA/files/
-    cp -vrf ../patchfiles/* $SD_MOUNT_PATH/apps/SFA/files/
+    cp -vrf ../patchfiles/* $SD_MOUNT_PATH/apps/SFA/
     # this variable runs Dolphin on the primary AMD GPU,
     # instead of the weaker embedded one.
     DRI_PRIME=1 dolphin-emu -d ./app/boot.dol
@@ -84,8 +92,8 @@ elif [ "$TARGET" == "realsd" ]; then
         exit 1
     fi
     echo "Copying files..."
-    cp -vru $DISCROOT/* $REAL_SD_PATH/apps/SFA/files/
-    cp -vruf ../patchfiles/* $REAL_SD_PATH/apps/SFA/files/
+    cp -vru $DISCROOT/* $REAL_SD_PATH/apps/SFA/
+    cp -vruf ../patchfiles/* $REAL_SD_PATH/apps/SFA/
     umount $REAL_SD_PATH
 
 elif [ "$TARGET" == "real" ]; then

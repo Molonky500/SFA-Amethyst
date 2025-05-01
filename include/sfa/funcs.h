@@ -170,7 +170,7 @@ GLOBALFN void mapReload(void);
 GLOBALFN void mapScreenDrawHud(void);
 GLOBALFN void mapUnload(MapDirIdx32 map, uint flags);
 GLOBALFN void* memcpy(void *dest, void *src, int len); // clobbers: r0, r4, r5, r6
-GLOBALFN void* memset(void *dest, u8 val, int len); // clobbers: r0, r6, r7
+GLOBALFN void* memset(void *dest, int val, unsigned int len); // clobbers: r0, r6, r7
 GLOBALFN void mm_free(void*); // wrapper for free()
 GLOBALFN void mmFreeTick(void);
 GLOBALFN Mtx44 * modelGetBoneMatrix (Model * model, int iBone);
@@ -198,9 +198,13 @@ GLOBALFN void objMtxFn_8002b47c (ObjInstance * obj, Mtx44 * mtx, bool useScale);
 GLOBALFN void objRenderFn_80041018(ObjInstance *obj);
 GLOBALFN void objRenderModel(ObjInstance *obj);
 GLOBALFN void objRunSeq(uint seqIdx, ObjInstance *obj, u32 flags);
+GLOBALFN uint objSendMsg(ObjInstance *target,uint msgId,ObjInstance *sender,uint param);
+GLOBALFN void objSendMsgAll(int objId,uint flags,ObjInstance *sender,uint msg,uint param);
+GLOBALFN void objSendMsgNear(u16 defNo,uint flags,ObjInstance *sender,uint msg,uint param,float maxDistance);
 GLOBALFN void objSetModel(ObjInstance *obj, int modelIdx);
 GLOBALFN void objSeq_onMapSetup(void);
 GLOBALFN void objStopSound_(ObjInstance *obj, int id);
+GLOBALFN void objUpdate(ObjInstance *obj);
 GLOBALFN bool objUpdateOpacity(ObjInstance *obj);
 GLOBALFN BOOL OSDisableInterrupts(void);
 GLOBALFN BOOL OSEnableInterrupts(void);
@@ -240,18 +244,21 @@ GLOBALFN s8 padGetCX(int pad);
 GLOBALFN s8 padGetCY(int pad);
 GLOBALFN s8 padGetStickX(int pad);
 GLOBALFN s8 padGetStickY(int pad);
-GLOBALFN void padReadControllers(PADStatus*);
+GLOBALFN u32 padReadControllers(PADStatus*);
 GLOBALFN void padUpdate(void);
 GLOBALFN void pauseMenuDraw(int,int,int); //XXX params
 GLOBALFN void pauseMenuDrawText(void);
 GLOBALFN void piRomLoadSection(int offset, MapId32 map, void *buffer);
 GLOBALFN void playerCalcWaterCurrent(float *outX,float *outZ,ObjInstance *this);
 GLOBALFN void playerDie(ObjInstance *player); //immediately kill player
+GLOBALFN void playerDoHitDetection(ObjInstance *player);
 GLOBALFN ObjInstance* playerGetNearestObject(int idx,ObjInstance *obj,float *outDistance);
 GLOBALFN void playerInitFuncPtrs(void);
 GLOBALFN void playerLock(ObjInstance *obj, BOOL lock);
 GLOBALFN void playerRender(ObjInstance *self, int param_2, int param_3, int param_4, int param_5, bool shouldRender);
 GLOBALFN BOOL playerSetHeldObject(ObjInstance *player, ObjInstance *obj);
+GLOBALFN void playerUpdate(ObjInstance *self);
+GLOBALFN void playerUpdateWhileTimeStopped(ObjInstance *obj);
 GLOBALFN void PSMTXConcat(Mtx * Ma, Mtx * Mb, Mtx * out);
 GLOBALFN void PSMTXIdentiy(Mtx *M);
 GLOBALFN u32 randomGetNext(void);

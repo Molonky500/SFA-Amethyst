@@ -36,6 +36,7 @@ compile_commands.json
 **/.cache/*
 scratchpad.txt
 include/gc/sdk/**
+files/**
 
 # auto generated files
 patchfiles/files/bitnames.dat

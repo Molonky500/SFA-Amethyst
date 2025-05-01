@@ -12963,20 +12963,20 @@
             <point x="0" y="130.9003143310547" type="0" scale="0.0" unk05="0" />
             <!-- <point x="175" y="192.16558837890625" type="0" scale="0.0" unk05="0" />
             <point x="276" y="242.2137451171875" type="0" scale="3.375" unk05="0" /> -->
-            <point x="400" y="127.28521728515625" type="0" scale="0.0" unk05="0" />
+            <point x="400" y="27.28521728515625" type="0" scale="0.0" unk05="0" />
         </curve>
         <curve field="OBJ_POS_Y">
             <point x="0" y="48.0" type="0" scale="0.0" unk05="0" />
             <!-- <point x="89" y="33.25107955932617" type="0" scale="3.5" unk05="0" />
             <point x="175" y="-13.01848316192627" type="0" scale="3.5625" unk05="0" />
             <point x="276" y="-207.7720947265625" type="0" scale="3.3125" unk05="0" /> -->
-            <point x="400" y="-482.0" type="0" scale="0.0" unk05="0" />
+            <point x="400" y="-582.0" type="0" scale="0.0" unk05="0" />
         </curve>
         <curve field="OBJ_POS_X">
             <point x="0" y="31.88549041748047" type="0" scale="0.0" unk05="0" />
             <!-- <point x="175" y="88.08525848388672" type="0" scale="0.0" unk05="0" /> -->
-            <point x="276" y="180" type="0" scale="3.3125" unk05="0" />
-            <point x="400" y="220" type="0" scale="0.0" unk05="0" />
+            <!-- <point x="276" y="180" type="0" scale="3.3125" unk05="0" /> -->
+            <point x="400" y="210" type="0" scale="0.0" unk05="0" />
         </curve>
         <curve field="CAMERA_FOV">
             <point x="238" y="64.54620361328125" type="0" scale="0.0" unk05="0" />

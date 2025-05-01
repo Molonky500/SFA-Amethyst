@@ -105,7 +105,7 @@ typedef struct ObjInstance {
 	ObjInstance        *child[3];           //0xC8
 	byte               *unkD4;              //0xD4
 	u32                 unkD8;              //0xD8
-	ObjSeqMsgQueue     *seqMsgs;            //0xDC
+	ObjMsgQueue        *msgQueue;           //0xDC
     byte                unkE0;              //0xE0
     byte                unkE1;              //0xE1
     byte                unkE2;              //0xE2

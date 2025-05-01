@@ -245,6 +245,10 @@ extern u8 overrideMinimapAlpha;
 void minimapMainLoopHook();
 
 //objects.c
+extern bool gPlayerMoveWhileTimeStopped;
+extern float gPlayerTimeScale;
+extern float gBaddieTimeScale;
+extern float gBikeTimeScale;
 #if LOG_OBJS
 void objLogWrite();
 #endif
@@ -276,6 +280,7 @@ void initPlayerStatesHook(void);
 PlayerStateEnum playerStateClimbWallHook(double dT, ObjInstance *player, void *state);
 void playerMainLoopHook();
 void firstPersonHook(void *param1, void *param2);
+void _initPlayerHacks();
 
 //race.c
 void raceTimerToggle(bool start);
